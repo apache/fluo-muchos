@@ -1,0 +1,63 @@
+#! /usr/bin/env bash
+
+# Copyright 2014 Fluo authors (see AUTHORS)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific 
+
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+   bin="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+   SOURCE="$(readlink "$SOURCE")"
+   [[ $SOURCE != /* ]] && SOURCE="$bin/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+bin="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+
+. "$bin"/../conf/env.sh
+
+case "$1" in 
+setup)
+  "$bin"/impl/setup.sh ${*:2}
+  ;;
+configure)
+  "$bin"/impl/configure.sh ${*:2}
+  ;;
+configure-local)
+  "$bin"/impl/configure-local.sh ${*:2}
+  ;;
+install)
+  "$bin"/impl/install.sh ${*:2}
+  ;;
+init)
+  "$bin"/impl/init.sh ${*:2}
+  ;;
+start)
+  "$bin"/impl/start.sh ${*:2}
+  ;;
+kill)
+  "$bin"/impl/kill.sh ${*:2}
+  ;;
+ready)
+  "$bin"/impl/ready.sh ${*:2}
+  ;;
+*)
+  echo -e "Usage: fluo-cluster command (<argument>)\n"
+  echo -e "Possible commands:\n"
+  echo "  setup        Setup, initialize, and start cluster"
+  echo "  init         Initialize and start cluster"
+  echo "  configure    Configure SSH, /etc/hosts, bashrc on cluster"
+  echo "  install      Install services on this node"
+  echo "  start        Start all services on cluster"
+  echo "  kill         Kill cluster processes"
+  echo "  ready        Checks if cluster is running and ready"
+  echo " " 
+  exit 1
+esac

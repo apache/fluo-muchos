@@ -1,0 +1,6 @@
+export PATH=$BASE_DIR/install/bin:$BASE_DIR/install/fluo-$FLUO_VERSION/bin:$HADOOP_PREFIX/bin:$$PATH
+
+alias cdh='cd $HADOOP_PREFIX'
+alias cdz='cd $BASE_DIR/install/zookeeper-$ZOOKEEPER_VERSION'
+alias cda='cd $BASE_DIR/install/accumulo-$ACCUMULO_VERSION'
+alias cdf='cd $BASE_DIR/install/fluo-$FLUO_VERSION'

@@ -1,0 +1,391 @@
+#!/usr/bin/env python
+
+# Copyright 2014 Fluo authors (see AUTHORS)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""
+Script to help deploy Fluo cluster (optionally to AWS EC2)
+"""
+
+import os
+from config import DeployConfig
+from util import get_image_id, setup_boto, parse_args, exit
+from os.path import isfile, join
+from string import Template
+import random
+import time
+import urllib
+import subprocess
+
+FLUO_DEPLOY = os.environ.get('FLUO_DEPLOY')
+if FLUO_DEPLOY is None:
+  exit('ERROR - The env var FLUO_DEPLOY must be set!')
+setup_boto(join(FLUO_DEPLOY, "bin/impl/lib"))
+
+import boto
+from boto.ec2.blockdevicemapping import BlockDeviceMapping, BlockDeviceType, EBSBlockDeviceType
+from boto import ec2
+
+def get_or_make_group(conn, name, vpc_id):
+  groups = conn.get_all_security_groups()
+  group = [g for g in groups if g.name == name]
+  if len(group) > 0:
+    return group[0]
+  else:
+    print "Creating security group " + name
+    return conn.create_security_group(name, "Security group created by fluo-deploy script", vpc_id)
+
+def get_instance(instances, instance_id):
+  for instance in instances:
+    if instance.id == instance_id:
+      return instance
+
+def launch_cluster(conn, config):
+  if not config.key_name():
+    exit('ERROR - key.name is not set fluo-deploy.props')
+
+  cur_nodes = get_active_cluster(conn, config)
+  if cur_nodes:
+    exit('ERROR - There are already instances running for {0} cluster'.format(config.cluster_name))
+
+  if isfile(config.hosts_path):
+    exit("ERROR - A hosts file already exists at {0}.  Please delete before running launch again".format(config.hosts_path))
+
+  if not config.leader_hostname():
+    exit("ERROR - leader.node.id must specified in properties file")
+
+  print "Launching {0} cluster".format(config.cluster_name)
+
+  security_group = get_or_make_group(conn, config.cluster_name + "-group", config.vpc_id())
+  if security_group.rules == []: # Group was just now created
+    if config.vpc_id() is None:
+      security_group.authorize(src_group=security_group)
+    else:
+      security_group.authorize(ip_protocol='icmp', from_port=-1, to_port=-1, src_group=security_group)
+      security_group.authorize(ip_protocol='tcp', from_port=0, to_port=65535, src_group=security_group)
+      security_group.authorize(ip_protocol='udp', from_port=0, to_port=65535, src_group=security_group)
+    security_group.authorize('tcp', 22, 22, '0.0.0.0/0')
+
+  instance_d = {}
+  for (hostname, (instance_type, services)) in config.nodes().items():
+    if instance_type == 'default':
+      instance_type = config.default_instance_type()
+
+    host_ami = get_image_id(instance_type)
+    if not host_ami:
+      exit('ERROR - Image not found for instance type: '+instance_type)
+
+    resv = conn.run_instances(key_name=config.key_name(),
+                              image_id=host_ami,
+                              security_group_ids=[security_group.id],
+                              instance_type=instance_type,
+                              subnet_id=config.subnet_id(),
+                              min_count=1,
+                              max_count=1)
+  
+    if len(resv.instances) != 1:
+      exit('ERROR - Failed to start {0} node'.format(hostname))
+
+    instance = resv.instances[0]
+
+    instance_d[hostname] = instance.id
+    print 'Launching {0} node'.format(hostname)
+
+  while True:
+    time.sleep(5)
+
+    nodes = get_cluster(conn, config, ['running'])
+    num_actual = len(nodes)
+    num_expected = len(config.nodes())
+
+    if num_actual == num_expected:
+      # Associate Public IP if 
+      if config.subnet_id():
+        leader_instance = get_instance(nodes, instance_d[config.leader_hostname()])
+        address = conn.allocate_address("vpc")
+        address.associate(instance_id=leader_instance.id)
+        print "Assigned public IP {0} to {1} node".format(address.public_ip, config.leader_hostname())
+        time.sleep(5)
+        nodes = get_cluster(conn, config, ['running'])
+
+      # Tag instances and create hosts file
+      with open(config.hosts_path, 'w') as hosts_file:
+        for (hostname, (instance_type, services)) in config.nodes().items():
+          instance = get_instance(nodes, instance_d[hostname])
+
+          instance.add_tag(key='Name', value='{cn}-{id}'.format(cn=config.cluster_name, id=hostname))
+          for tkey, tval in config.instance_tags().iteritems():
+            instance.add_tag(key=tkey, value=tval)
+          public_ip = ''
+          if instance.ip_address:
+            public_ip = instance.ip_address
+          private_ip = instance.private_ip_address
+          print >>hosts_file, hostname, private_ip, public_ip
+      print "All {0} nodes have started.  Created hosts file at {1}".format(num_actual, config.hosts_path)
+      break
+    else:
+      print "{0} of {1} nodes have started.  Waiting another 5 sec..".format(num_actual, num_expected)
+
+def get_cluster(conn, config, states):
+  reservations = conn.get_all_reservations()
+  nodes = []
+  for res in reservations:
+    active = [i for i in res.instances if i.state in states]
+    for inst in active:
+      group_names = [g.name for g in inst.groups]
+      if (config.cluster_name + "-group") in group_names:
+        nodes.append(inst)
+  return nodes
+
+def get_active_cluster(conn, config):
+  return get_cluster(conn, config, ['pending', 'running', 'stopping', 'stopped'])
+
+def check_code(retcode, command):
+  if retcode != 0:
+    exit("ERROR - Command failed with return code of {0}: {1}".format(retcode, command))
+
+def ssh_leader(config, command, opts=''):
+  ssh_command = "ssh -A -o 'StrictHostKeyChecking no' {opts} {usr}@{ldr} '{cmd}'".format(usr=config.cluster_username(),
+    ldr=config.leader_public_ip(), cmd=command, opts=opts)
+  return (subprocess.call(ssh_command, shell=True), ssh_command)
+
+def exec_leader(config, command, opts=''):
+  (retcode, ssh_command) = ssh_leader(config, command, opts)
+  check_code(retcode, ssh_command)
+
+def wait_until_leader_ready(config):
+  while True:
+    (retcode, ssh_command) = ssh_leader(config, 'pwd > /dev/null')
+    if retcode == 0:
+      print "Leader is ready!"
+      time.sleep(1)
+      break;
+    print "Leader is not ready yet.  Will retry in 5 sec..."
+    time.sleep(5)  
+
+def wait_until_cluster_ready(config):
+  wait_until_leader_ready(config)
+  exec_leader_script(config, "fluo-cluster ready")
+ 
+def exec_leader_script(config, script):
+  exec_leader(config, "bash {base}/install/bin/{script}".format(base=config.cluster_base_dir(), script=script))
+
+def send_leader(config, path, target, skipIfExists=True): 
+  print "Copying to leader: ",path
+  cmd = "scp -o 'StrictHostKeyChecking no'"
+  if skipIfExists:
+    cmd = "rsync --ignore-existing --progress -e \"ssh -o 'StrictHostKeyChecking no'\""
+  subprocess.call("{cmd} {src} {usr}@{ldr}:{tdir}".format(cmd=cmd, src=path, 
+          usr=config.cluster_username(), ldr=config.leader_public_ip(), tdir=target), shell=True)
+
+def get_ec2_conn(config):
+  conn = ec2.connect_to_region(config.region())
+  if not conn:
+    exit('ERROR - Failed to connect to region ' + config.region())
+  return conn
+
+def setup_cluster(config):
+
+  fluo_tarball = join(config.local_tarballs_dir(), "fluo-{0}-bin.tar.gz".format(config.fluo_version()))
+  if not isfile(fluo_tarball):
+    exit("Please create a Fluo tarball and copy it to "+fluo_tarball)
+
+  print 'Setting up {0} cluster'.format(config.cluster_name)
+  conf_templates = join(config.deploy_path, "cluster/templates/conf")
+  conf_install = join(config.deploy_path, "cluster/install/conf")
+
+  sub_d = {}
+  sub_d["BASE_DIR"] = config.cluster_base_dir()
+  sub_d["CLUSTER_USERNAME"] = config.cluster_username()
+  sub_d["CONFIGURE_CLUSTER"] = config.configure_cluster()
+  sub_d["APACHE_MIRROR"] = config.apache_mirror()
+  sub_d["ACCUMULO_VERSION"] = config.accumulo_version()
+  sub_d["FLUO_VERSION"] = config.fluo_version()
+  sub_d["HADOOP_VERSION"] = config.hadoop_version()
+  sub_d["ZOOKEEPER_VERSION"] = config.zookeeper_version()
+  sub_d["DATA_DIR"] = config.data_dir()
+  sub_d["HADOOP_PREFIX"] = config.hadoop_prefix()
+  sub_d["ZOOKEEPER_HOME"] = config.zookeeper_home()
+  sub_d["ZOOKEEPERS"] = config.zookeeper_connect()
+  sub_d["NAMENODE_HOST"] = config.get_service_hostnames("namenode")[0]
+  sub_d["RESOURCEMANAGER_HOST"] = config.get_service_hostnames("resourcemanager")[0]
+  sub_d["NUM_WORKERS"] = len(config.get_service_hostnames("worker"))
+  sub_d["LEADER_HOST"] = config.leader_hostname()
+  sub_d["ACCUMULO_INSTANCE"] = config.accumulo_instance()
+  sub_d["ACCUMULO_PASSWORD"] = config.accumulo_password()
+  
+  for fn in os.listdir(conf_templates):
+    template_path = join(conf_templates, fn)
+    install_path = join(conf_install, fn)
+    if isfile(install_path):
+      os.remove(install_path)
+    if isfile(template_path) and not template_path.startswith('.'):
+      with open(template_path, "r") as template_file:
+        template_data = template_file.read()
+        template = Template(template_data)
+        sub_data = template.substitute(sub_d)
+        with open(install_path, "w") as install_file:
+          install_file.write(sub_data)
+
+  ael_path = join(conf_install, "hosts/all_except_leader")
+  with open(ael_path, 'w') as ael_file:
+    for (private_ip, hostname) in config.get_non_leaders():
+      print >>ael_file, private_ip
+
+  llast_path = join(conf_install, "hosts/all_leader_last")
+  with open(llast_path, 'w') as llast_file:
+    for (private_ip, hostname) in config.get_non_leaders():
+      print >>llast_file, private_ip, hostname
+    leader_host = config.leader_hostname()
+    print >>llast_file, config.get_private_ip(leader_host), leader_host
+
+  services_path = join(conf_install, "hosts/all_with_services")
+  with open(services_path, 'w') as services_file:
+    for (host_ip, services) in config.get_host_services():
+      print >>services_file, host_ip, services
+
+  all_path = join(conf_install, "hosts/all")
+  with open(all_path, 'w') as all_file:
+    for (host_ip, services) in config.get_host_services():
+      print >>all_file, host_ip
+
+  workers_path = join(conf_install, "hosts/workers")
+  with open(workers_path, 'w') as workers_file:
+    for worker_host in config.get_service_hostnames("worker"):
+      print >>workers_file, worker_host
+
+  zk_path = join(conf_install, "hosts/zookeepers")
+  with open(zk_path, 'w') as zk_file:
+    for host_ip in config.get_service_hostnames("zookeeper"):
+      print >>zk_file, host_ip
+
+  with open(join(conf_install, "hosts/namenode"), 'w') as nn_file:
+    print >>nn_file, config.get_service_hostnames("namenode")[0]
+
+  with open(join(conf_install, "hosts/accumulomaster"), 'w') as am_file:
+    print >>am_file, config.get_service_hostnames("accumulomaster")[0]
+
+  with open(join(conf_install, "hosts/fluo"), 'w') as fluo_file:
+    print >>fluo_file, config.get_service_hostnames("fluo")[0]
+
+  with open(join(conf_install, "hosts/append_to_hosts"), 'w') as ath_file:
+    for (hostname, (private_ip, public_ip)) in config.get_hosts().items():
+      print >>ath_file, private_ip, hostname
+
+  install_tarball = join(config.local_tarballs_dir(), "install.tar.gz")
+  if isfile(install_tarball):
+    os.remove(install_tarball)
+
+  retcode = subprocess.call("cd {0}; tar czf tarballs/install.tar.gz install".format(join(config.deploy_path, "cluster")), shell=True)
+  if retcode != 0:
+    error("Failed to create install tarball")
+
+  wait_until_leader_ready(config)
+
+  exec_leader(config, "mkdir -p {0}".format(config.cluster_tarballs_dir()))
+  send_leader(config, install_tarball, config.cluster_tarballs_dir(), skipIfExists=False)
+  send_leader(config, fluo_tarball, config.cluster_tarballs_dir())
+  exec_leader(config, "rm -rf {base}/install; tar -C {base} -xzf {base}/tarballs/install.tar.gz".format(base=config.cluster_base_dir()))
+
+  exec_leader_script(config, "fluo-cluster setup")
+
+  wait_until_cluster_ready(config)
+ 
+  exec_leader_script(config, "fluo-cluster init")
+      
+def main():
+
+  # parse command line args
+  (opts, action, cluster_name) = parse_args()
+
+  deploy_path = os.environ.get('FLUO_DEPLOY')
+  if not deploy_path:
+    exit('ERROR - The FLUO_DEPLOY env variable must be set!')
+  if not os.path.isdir(deploy_path):
+    exit('ERROR - Directory set by FLUO_DEPLOY does not exist: '+deploy_path)
+
+  config_path = join(deploy_path, "conf/fluo-deploy.props")
+  if not isfile(config_path):
+    exit('ERROR - A config file does not exist at '+config_path)  
+
+  hosts_path = join(deploy_path, "conf/hosts/"+cluster_name)
+
+  config = DeployConfig(deploy_path, config_path, hosts_path, cluster_name)
+
+  if action == 'launch':
+    conn = get_ec2_conn(config)
+    launch_cluster(conn, config)
+  elif action == 'status':
+    conn = get_ec2_conn(config)
+    nodes = get_cluster(conn, config, ['running'])
+    print "Found {0} nodes in {1} cluster".format(len(nodes), config.cluster_name)
+    for node in nodes:
+      print "  ", node.tags.get('Name', 'UNKNOWN_NAME'), node.id, node.private_ip_address, node.ip_address
+  elif action == 'setup':
+    setup_cluster(config)
+  elif action == 'ssh':
+    print "Connecting to leader", config.leader_public_ip()
+    wait_until_leader_ready(config)
+    fwd = ''
+    if config.leader_socks_proxy():
+      fwd = "-D "+config.leader_socks_proxy()
+    ssh_command = "ssh -A -o 'StrictHostKeyChecking no' {fwd} {usr}@{ldr}".format(usr=config.cluster_username(),
+      ldr=config.leader_public_ip(), fwd=fwd)
+    retcode = subprocess.call(ssh_command, shell=True)
+    check_code(retcode, ssh_command)
+  elif action == 'kill':
+    if not isfile(hosts_path):
+      exit("Hosts file does not exist for cluster: "+hosts_path)
+    print "Killing {0} cluster".format(config.cluster_name)
+    exec_leader_script(config, "fluo-cluster kill")
+  elif action == 'terminate':
+    conn = get_ec2_conn(config)
+    nodes = get_active_cluster(conn, config)
+
+    if len(nodes) == 0:
+      exit("No nodes running in {0} cluster to terminate".format(config.cluster_name))
+
+    print "The following {0} nodes in {1} cluster will be terminated:".format(len(nodes), config.cluster_name)
+    for node in nodes:
+      print "  ", node.tags.get('Name', 'UNKNOWN_NAME'), node.id, node.private_ip_address, node.ip_address
+
+    response = raw_input("Do you want to continue? (y/n) ")
+    if response == "y":
+      if config.subnet_id():
+        public_ip = config.leader_public_ip()
+        if public_ip:
+          addrs = conn.get_all_addresses(addresses=[public_ip])
+          if len(addrs) == 1:
+            leader_addr = addrs[0]
+            leader_addr.disassociate()
+            leader_addr.release()
+            print "Released public IP ",public_ip
+          else:
+            print "Failed to release Public IP ",public_ip
+        else:
+          print "No public IP found to release"
+
+      for node in nodes:
+        node.terminate()
+      print "Terminated instances"
+
+      if isfile(hosts_path):
+        os.remove(hosts_path)
+        print "Removed hosts file at ",hosts_path
+    else:
+      print "Aborted termination"
+  else:
+    print 'ERROR - Unknown action:', action
+
+main()

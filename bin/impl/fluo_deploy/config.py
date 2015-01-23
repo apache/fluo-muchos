@@ -1,0 +1,238 @@
+# Copyright 2014 Fluo authors (see AUTHORS)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+from ConfigParser import ConfigParser
+from util import exit
+import os
+from os.path import join
+
+SERVICES = ['zookeeper', 'namenode', 'resourcemanager', 'accumulomaster', 'worker', 'fluo']
+
+class DeployConfig(ConfigParser):
+
+  def __init__(self, deploy_path, config_path, hosts_path, cluster_name):
+    ConfigParser.__init__(self)
+    self.deploy_path = deploy_path
+    self.read(config_path)
+    self.hosts_path = hosts_path
+    self.cluster_name = cluster_name
+    self.node_d = None
+    self.hosts = None
+    self.init_nodes()
+
+  def init_nodes(self):
+    self.node_d = {}
+    for (hostname, value) in self.items('nodes'):
+      if hostname in self.node_d:
+        exit('Hostname {0} already exists twice in nodes'.format(hostname))
+      (instance_type, services) = value.split(':')
+      service_list = []
+      for service in services.split(','):
+        if service in SERVICES:
+          service_list.append(service)
+        else:
+          exit('Unknown service "%s" declared for node %s' % (service, hostname))
+      self.node_d[hostname] = (instance_type, service_list)
+
+  def cluster_username(self):
+    return self.get('general', 'cluster.username')
+
+  def cluster_base_dir(self):
+    return self.get('general', 'cluster.base.dir')
+
+  def accumulo_instance(self):
+    return self.get('general', 'accumulo.instance')
+
+  def accumulo_password(self):
+    return self.get('general', 'accumulo.password')
+
+  def leader_hostname(self):
+    return self.get('general', 'leader.hostname')
+
+  def leader_socks_proxy(self):
+    if self.has_option('general', 'leader.socks.proxy'):
+      return self.get('general', 'leader.socks.proxy')
+
+  def configure_cluster(self):
+    if self.has_option('general', 'configure.cluster'):
+      return self.get('general', 'configure.cluster')
+
+  def cluster_install_dir(self):
+    return join(self.cluster_base_dir(), "install")
+
+  def local_install_dir(self):
+    return join(self.deploy_path, "cluster/install")
+
+  def data_dir(self):
+    return join(self.cluster_install_dir(), "data")
+
+  def hadoop_prefix(self):
+    return join(self.cluster_install_dir(), "hadoop-"+self.hadoop_version())
+
+  def zookeeper_home(self):
+    return join(self.cluster_install_dir(), 'zookeeper-'+self.zookeeper_version())
+
+  def cluster_tarballs_dir(self):
+    return join(self.cluster_base_dir(), "tarballs")
+
+  def local_tarballs_dir(self):
+    return join(self.deploy_path, "cluster/tarballs")
+
+  def apache_mirror(self):
+    return self.get('general', 'apache.mirror')
+
+  def accumulo_version(self):
+    return self.get('general', 'accumulo.version')
+
+  def fluo_version(self):
+    return self.get('general', 'fluo.version')
+
+  def hadoop_version(self):
+    return self.get('general', 'hadoop.version')
+
+  def zookeeper_version(self):
+    return self.get('general', 'zookeeper.version')
+
+  def accumulo_tarball(self):
+    return 'accumulo-%s-bin.tar.gz' % self.accumulo_version()
+
+  def hadoop_tarball(self):
+    return 'hadoop-%s.tar.gz' % self.hadoop_version()
+
+  def zookeeper_tarball(self): 
+    return 'zookeeper-%s.tar.gz' % self.zookeeper_version()
+ 
+  def accumulo_url(self):
+    return '%s/accumulo/%s/%s' % (self.apache_mirror(), self.accumulo_version(), self.accumulo_tarball())
+
+  def hadoop_url(self):
+    return '%s/hadoop/common/hadoop-%s/%s' % (self.apache_mirror(), self.hadoop_version(), self.hadoop_tarball())
+
+  def zookeeper_url(self): 
+    return '%s/zookeeper/zookeeper-%s/%s' % (self.apache_mirror(), self.zookeeper_version(), self.zookeeper_tarball())
+
+  def accumulo_path(self): 
+    return join(self.deploy_path, "cluster/tarballs/"+self.accumulo_tarball())
+
+  def hadoop_path(self): 
+    return join(self.deploy_path, "cluster/tarballs/"+self.hadoop_tarball())
+
+  def zookeeper_path(self): 
+    return join(self.deploy_path, "cluster/tarballs/"+self.zookeeper_tarball())
+
+  def default_instance_type(self):
+    return self.get('ec2', 'default.instance.type')
+
+  def region(self):
+    return self.get('ec2', 'region')
+
+  def vpc_id(self):
+    if self.has_option('ec2', 'vpc.id'):
+      return self.get('ec2', 'vpc.id')
+
+  def subnet_id(self):
+    if self.has_option('ec2', 'subnet.id'):
+      return self.get('ec2', 'subnet.id')
+
+  def key_name(self):
+    if self.has_option('ec2', 'key.name'):
+      val = self.get('ec2', 'key.name')
+      if val:
+        return val
+
+  def instance_tags(self):
+    retd = {}
+    if self.has_option('ec2', 'instance.tags'):
+      value = self.get('ec2', 'instance.tags')
+      if value:
+        for kv in value.split(','):
+          (key, val) = kv.split(':')
+          retd[key] = val
+    return retd
+
+  def nodes(self):
+    return self.node_d
+
+  def get_node(self, hostname):
+    return self.node_d[hostname]
+
+  def get_host_services(self):
+    retval = []
+    for (hostname, (instance_type, service_list)) in self.node_d.items():
+      retval.append((self.get_private_ip(hostname), ' '.join(service_list)))
+    retval.sort()
+    return retval
+
+  def get_service_private_ips(self, service):
+    retval = []
+    for (hostname, (instance_type, service_list)) in self.node_d.items():
+      if service in service_list:
+        retval.append(self.get_private_ip(hostname))
+    retval.sort()
+    return retval
+
+  def get_service_hostnames(self, service):
+    retval = []
+    for (hostname, (instance_type, service_list)) in self.node_d.items():
+      if service in service_list:
+        retval.append(hostname)
+    retval.sort()
+    return retval
+
+  def get_non_leaders(self):
+    retval = []
+    leader_ip = self.get_private_ip(self.leader_hostname())
+    for (hostname, (private_ip, public_ip)) in self.hosts.items():
+      if private_ip != leader_ip:
+        retval.append((private_ip, hostname))
+    retval.sort()
+    return retval
+
+  def parse_hosts(self):
+    if not os.path.isfile(self.hosts_path):
+      exit('ERROR - A hosts file does not exist at %s' % self.hosts_path)  
+
+    self.hosts = {} 
+    with open(self.hosts_path) as f:
+      for line in f:
+        line = line.strip()
+        if line.startswith("#") or not line:
+          continue
+        args = line.split(' ')
+        if len(args) == 2:
+          self.hosts[args[0]] = (args[1], None)
+        elif len(args) == 3:
+          self.hosts[args[0]] = (args[1], args[2])
+        else:
+          exit('ERROR - Bad line %s in hosts %s' % (line, self.hosts_path))
+        
+  def get_hosts(self):
+    if self.hosts is None:
+      self.parse_hosts()
+    return self.hosts
+
+  def get_private_ip(self, hostname):
+    return self.get_hosts()[hostname][0]
+
+  def get_public_ip(self, hostname):
+    return self.get_hosts()[hostname][1]
+
+  def leader_public_ip(self):
+    return self.get_public_ip(self.leader_hostname())
+
+  def leader_private_ip(self):
+    return self.get_private_ip(self.leader_hostname())
+
+  def zookeeper_connect(self):
+    return ",".join(["{0}:2181".format(v) for v in self.get_service_private_ips("zookeeper")])
