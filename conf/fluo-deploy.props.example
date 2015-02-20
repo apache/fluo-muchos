@@ -22,7 +22,7 @@ cluster.base.dir = /home/ec2-user
 # Hostname of node that must direct installation of cluster.  Will be given Public IP if launching in EC2.
 # If not launching in EC2, node must have Public IP that can be reached from your machine.
 # Hostname can be chosen from "nodes" section below.
-leader.hostname = leader
+leader.hostname = leader1
 # If set, a SOCKS proxy will be created on the specified port when connecting to leader using 'fluo-deploy ssh <cluster>'
 #leader.socks.proxy = 38585
 # Specifies if SSH, Hosts, and .bashrc should be configured on cluster
@@ -62,7 +62,9 @@ key.name = my_aws_key
 #   Hostname = Must be unique.  Will be used for hostname in EC2 or should match hostname on your own cluster
 #   Instance Type = EC2 instance type.  Ignored if not launching cluster.  Set to 'default' to use value set by 'default.instance.type'
 #   Service = Service to run on node (possible values: zookeeper, namenode, resourcemanager, accumulomaster, worker, fluo)
-leader = default:namenode,resourcemanager,accumulomaster,zookeeper,fluo
+leader1 = default:namenode,zookeeper,fluo
+leader2 = default:resourcemanager,zookeeper
+leader3 = default:accumulomaster,zookeeper
 worker1 = default:worker
 worker2 = default:worker
 worker3 = default:worker

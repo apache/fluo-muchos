@@ -1,10 +1,10 @@
-all_with_services
+hosts_with_services
 all_except_leader
 all_leader_last
 workers
-namenode
 accumulomaster
-fluo
 append_to_hosts
 zookeepers
-all
+zookeeper_ids
+all_hosts
+all_ips

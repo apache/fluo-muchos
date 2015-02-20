@@ -19,10 +19,11 @@ SSH_OPTS=(-o 'StrictHostKeyChecking no' -A)
 wget -nc -nv -P $TARBALLS_DIR $APACHE_MIRROR/zookeeper/zookeeper-$ZOOKEEPER_VERSION/$ZOOKEEPER_TARBALL
 wget -nc -nv -P $TARBALLS_DIR $APACHE_MIRROR/accumulo/$ACCUMULO_VERSION/$ACCUMULO_TARBALL
 wget -nc -nv -P $TARBALLS_DIR $APACHE_MIRROR/hadoop/common/hadoop-$HADOOP_VERSION/$HADOOP_TARBALL
+wget -nc -nv -P $TARBALLS_DIR --no-check-certificate --no-cookies --header "Cookie: oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/7u75-b13/jdk-7u75-linux-x64.tar.gz
 
 # Push install directory to all hosts
 for host in `cat $CONF_DIR/hosts/all_except_leader`; do
-  echo "`hostname` - Copying scripts to $host"
+  echo "`hostname`: Copying scripts to $host"
   ssh "${SSH_OPTS[@]}" $CLUSTER_USERNAME@$host mkdir -p $TARBALLS_DIR
   scp $TARBALLS_DIR/install.tar.gz $CLUSTER_USERNAME@$host:$TARBALLS_DIR
   ssh $CLUSTER_USERNAME@$host "rm -rf $INSTALL_DIR; tar -C $BASE_DIR -xzf $TARBALLS_DIR/install.tar.gz"

@@ -17,20 +17,28 @@ SSH_OPTS=(-o 'StrictHostKeyChecking no' -A)
 
 $BIN_DIR/fluo-cluster kill &> /dev/null
 
+for host in `cat $CONF_DIR/hosts/all_hosts`; do
+  ssh "${SSH_OPTS[@]}" $CLUSTER_USERNAME@$host rm -rf $INSTALL_DIR/data
+done
+
 while read line; do
   IFS=' ' read -ra ARR <<< "$line"
   HOST=${ARR[0]}
   SERVICES=${ARR[@]:1}
-  echo "`hostname` - Installing services on $HOST: $SERVICES"
+  echo "`hostname`: Installing services on $HOST: $SERVICES"
   ssh "${SSH_OPTS[@]}" $CLUSTER_USERNAME@$HOST $INSTALL_DIR/bin/fluo-cluster install $SERVICES < /dev/null
-done < $CONF_DIR/hosts/all_with_services
+done < $CONF_DIR/hosts/hosts_with_services
 
-for host in `cat $CONF_DIR/hosts/all`; do
-  ssh "${SSH_OPTS[@]}" $CLUSTER_USERNAME@$host rm -rf $INSTALL_DIR/data
-done
+# Setup myid file on each zookeeper server
+while read line; do
+  IFS=' ' read -ra ARR <<< "$line"
+  HOST=${ARR[0]}
+  ID=${ARR[1]}
+  echo "`hostname`: Setting zookeeper myid to $ID on $HOST"
+  ssh "${SSH_OPTS[@]}" $CLUSTER_USERNAME@$HOST "mkdir -p $INSTALL_DIR/data/zookeeper; echo $ID > $INSTALL_DIR/data/zookeeper/myid" < /dev/null
+done < $CONF_DIR/hosts/zookeeper_ids
 
 # Setup & Start Hadoop
-NAMENODE_HOST=`cat $INSTALL_DIR/conf/hosts/namenode`
 ssh "${SSH_OPTS[@]}" $CLUSTER_USERNAME@$NAMENODE_HOST $HADOOP_PREFIX/bin/hdfs namenode -format
 $BIN_DIR/fluo-cluster start hadoop
 
@@ -38,6 +46,5 @@ $BIN_DIR/fluo-cluster start hadoop
 $BIN_DIR/fluo-cluster start zookeeper
 
 # Setup & Start Accumulo
-ACCUMULO_HOST=`cat $INSTALL_DIR/conf/hosts/accumulomaster`
-ssh "${SSH_OPTS[@]}" $CLUSTER_USERNAME@$ACCUMULO_HOST "source $CONF_DIR/env.sh; $ACCUMULO_HOME/bin/accumulo init --clear-instance-name --instance-name $ACCUMULO_INSTANCE --password $ACCUMULO_PASSWORD"
+ssh "${SSH_OPTS[@]}" $CLUSTER_USERNAME@$ACCUMULOMASTER_HOST "source $CONF_DIR/env.sh; $ACCUMULO_HOME/bin/accumulo init --clear-instance-name --instance-name $ACCUMULO_INSTANCE --password $ACCUMULO_PASSWORD"
 $BIN_DIR/fluo-cluster start accumulo

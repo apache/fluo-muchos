@@ -63,30 +63,44 @@ function install_fluo() {
   fi
 }
 
+function install_java() {
+  if [ ! -d "$JAVA_INSTALL" ]; then
+    rsync "${RSYNC_OPTS[@]}" $CLUSTER_USERNAME@$LEADER_HOST:$TARBALLS_DIR/$JAVA_TARBALL $TARBALLS_DIR
+    tar -C $INSTALL_DIR -xzf $TARBALLS_DIR/$JAVA_TARBALL
+    echo "`hostname`: Java installed"
+  fi
+}
+
 for service in "$@"; do
-  echo "`hostname`: Installing $service node"
+  echo "`hostname`: Installing $service service"
 
   case "$service" in
     accumulomaster)
+      install_java
       install_accumulo
       install_hadoop
       install_zookeeper
       ;;
     namenode)
+      install_java
       install_hadoop
       ;;
     resourcemanager)
+      install_java
       install_hadoop
       ;;
     zookeeper)
+      install_java
       install_zookeeper
       ;;
     worker)
+      install_java
       install_accumulo
       install_hadoop
       install_zookeeper
       ;;
     fluo)
+      install_java
       install_fluo
       ;;
     *)

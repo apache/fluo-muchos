@@ -30,6 +30,15 @@ class DeployConfig(ConfigParser):
     self.node_d = None
     self.hosts = None
     self.init_nodes()
+    self.verify_config()
+
+  def verify_config(self):
+    leader = self.leader_hostname()
+    if not leader:
+      exit("ERROR - leader.hostname must be set in fluo-deploy.props")
+
+    if leader not in self.node_d:
+      exit("ERROR - The leader (set by property leader.hostname={0}) cannot be found in 'nodes' section of fluo-deploy.props".format(leader))
 
   def init_nodes(self):
     self.node_d = {}
@@ -131,6 +140,12 @@ class DeployConfig(ConfigParser):
   def zookeeper_path(self): 
     return join(self.deploy_path, "cluster/tarballs/"+self.zookeeper_tarball())
 
+  def zookeeper_connect(self):
+    return ",".join(self.get_service_hostnames("zookeeper"))
+
+  def zookeeper_server_config(self):
+    return "\n".join(["server.{0}={1}:2888:3888".format(index, server) for (index, server) in enumerate(self.get_service_hostnames("zookeeper"), start=1)])
+
   def default_instance_type(self):
     return self.get('ec2', 'default.instance.type')
 
@@ -170,7 +185,7 @@ class DeployConfig(ConfigParser):
   def get_host_services(self):
     retval = []
     for (hostname, (instance_type, service_list)) in self.node_d.items():
-      retval.append((self.get_private_ip(hostname), ' '.join(service_list)))
+      retval.append((hostname, ' '.join(service_list)))
     retval.sort()
     return retval
 
@@ -234,5 +249,3 @@ class DeployConfig(ConfigParser):
   def leader_private_ip(self):
     return self.get_private_ip(self.leader_hostname())
 
-  def zookeeper_connect(self):
-    return ",".join(["{0}:2181".format(v) for v in self.get_service_private_ips("zookeeper")])
