@@ -1,0 +1,68 @@
+# Copyright 2014 Fluo authors (see AUTHORS)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+[general]
+# Cluster user name (install command will SSH to cluster using this user)
+# Leave default below if launching cluster in AWS
+cluster.username = ec2-user
+# Cluster base directory where install/ & tarballs/ directories are created
+# Leave default below if launching cluster in AWS
+cluster.base.dir = /home/ec2-user
+# Hostname of node that must direct installation of cluster.  Will be given Public IP if launching in EC2.
+# If not launching in EC2, node must have Public IP that can be reached from your machine.
+# Hostname can be chosen from "nodes" section below.
+leader.hostname = leader
+# If set, a SOCKS proxy will be created on the specified port when connecting to leader using 'fluo-deploy ssh <cluster>'
+#leader.socks.proxy = 38585
+# Specifies if SSH, Hosts, and .bashrc should be configured on cluster
+configure.cluster = true
+# Apache mirror to download Hadoop, Zookeeper, Accumulo
+apache.mirror = http://www.gtlib.gatech.edu/pub/apache
+# Accumulo Instance name
+accumulo.instance = instance16
+# Accumluo Password
+accumulo.password = secret
+# Software versions
+fluo.version = 1.0.0-beta-1-SNAPSHOT
+hadoop.version = 2.6.0
+zookeeper.version = 3.4.6
+accumulo.version = 1.6.1
+
+[ec2]
+# EC2 region to connect to
+region = us-east-1
+# Type of AWS instance to launch by default
+default.instance.type = m3.large
+# VPC to launch instances in (optional)
+#vpc.id = vpc-xxxxx
+# VPC Subnet to launch instances in (optional)
+#subnet.id = subnet-xxxxxx
+# Name of public key that will be loaded by Amazon on to your EC2 instances.
+# You can upload and name your public key using the EC2 Management Console.
+# Only the user with this key will be able to SSH to the cluster.
+key.name = my_aws_key
+# Tags to add instances
+#instance.tags = key1:value1,key2:value2
+
+[nodes]
+# Describes nodes in cluster in the following format: 
+# <Hostname> = <Instance Type>:<Service1>[,<Service2>,<Service3>]
+# Where: 
+#   Hostname = Must be unique.  Will be used for hostname in EC2 or should match hostname on your own cluster
+#   Instance Type = EC2 instance type.  Ignored if not launching cluster.  Set to 'default' to use value set by 'default.instance.type'
+#   Service = Service to run on node (possible values: zookeeper, namenode, resourcemanager, accumulomaster, worker, fluo)
+leader = default:namenode,resourcemanager,accumulomaster,zookeeper,fluo
+worker1 = default:worker
+worker2 = default:worker
+worker3 = default:worker
