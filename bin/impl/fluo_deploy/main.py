@@ -218,8 +218,10 @@ def setup_cluster(config):
   sub_d["HADOOP_PREFIX"] = config.hadoop_prefix()
   sub_d["ZOOKEEPER_HOME"] = config.zookeeper_home()
   sub_d["ZOOKEEPERS"] = config.zookeeper_connect()
-  sub_d["NAMENODE_HOST"] = config.get_service_hostnames("namenode")[0]
-  sub_d["RESOURCEMANAGER_HOST"] = config.get_service_hostnames("resourcemanager")[0]
+  sub_d["ZOOKEEPER_SERVER_CONFIG"] = config.zookeeper_server_config()
+  sub_d["NAMENODE_HOST"] = config.get_service_private_ips("namenode")[0]
+  sub_d["RESOURCEMANAGER_HOST"] = config.get_service_private_ips("resourcemanager")[0]
+  sub_d["ACCUMULOMASTER_HOST"] = config.get_service_hostnames("accumulomaster")[0]
   sub_d["NUM_WORKERS"] = len(config.get_service_hostnames("worker"))
   sub_d["LEADER_HOST"] = config.leader_hostname()
   sub_d["ACCUMULO_INSTANCE"] = config.accumulo_instance()
@@ -250,15 +252,20 @@ def setup_cluster(config):
     leader_host = config.leader_hostname()
     print >>llast_file, config.get_private_ip(leader_host), leader_host
 
-  services_path = join(conf_install, "hosts/all_with_services")
+  services_path = join(conf_install, "hosts/hosts_with_services")
   with open(services_path, 'w') as services_file:
-    for (host_ip, services) in config.get_host_services():
-      print >>services_file, host_ip, services
+    for (host, services) in config.get_host_services():
+      print >>services_file, host, services
 
-  all_path = join(conf_install, "hosts/all")
-  with open(all_path, 'w') as all_file:
-    for (host_ip, services) in config.get_host_services():
-      print >>all_file, host_ip
+  aht_path = join(conf_install, "hosts/all_hosts")
+  with open(aht_path, 'w') as aht_file:
+    for (host, services) in config.get_host_services():
+      print >>aht_file, host
+
+  aip_path = join(conf_install, "hosts/all_ips")
+  with open(aip_path, 'w') as aip_file:
+    for (host, services) in config.get_host_services():
+      print >>aip_file, config.get_private_ip(host)
 
   workers_path = join(conf_install, "hosts/workers")
   with open(workers_path, 'w') as workers_file:
@@ -267,17 +274,16 @@ def setup_cluster(config):
 
   zk_path = join(conf_install, "hosts/zookeepers")
   with open(zk_path, 'w') as zk_file:
-    for host_ip in config.get_service_hostnames("zookeeper"):
-      print >>zk_file, host_ip
+    for zk_host in config.get_service_hostnames("zookeeper"):
+      print >>zk_file, zk_host
 
-  with open(join(conf_install, "hosts/namenode"), 'w') as nn_file:
-    print >>nn_file, config.get_service_hostnames("namenode")[0]
+  zkid_path = join(conf_install, "hosts/zookeeper_ids")
+  with open(zkid_path, 'w') as zkid_file:
+    for (index, zk_host) in enumerate(config.get_service_hostnames("zookeeper"), start=1):
+      print >>zkid_file, zk_host, index
 
   with open(join(conf_install, "hosts/accumulomaster"), 'w') as am_file:
     print >>am_file, config.get_service_hostnames("accumulomaster")[0]
-
-  with open(join(conf_install, "hosts/fluo"), 'w') as fluo_file:
-    print >>fluo_file, config.get_service_hostnames("fluo")[0]
 
   with open(join(conf_install, "hosts/append_to_hosts"), 'w') as ath_file:
     for (hostname, (private_ip, public_ip)) in config.get_hosts().items():

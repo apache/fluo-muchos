@@ -17,10 +17,10 @@ SSH_OPTS=(-o 'StrictHostKeyChecking no' -A)
 
 case "$1" in
 hadoop)
-  NAMENODE_HOST=`cat $INSTALL_DIR/conf/hosts/namenode`
   ssh "${SSH_OPTS[@]}" $CLUSTER_USERNAME@$NAMENODE_HOST $HADOOP_PREFIX/sbin/start-dfs.sh
-  ssh "${SSH_OPTS[@]}" $CLUSTER_USERNAME@$NAMENODE_HOST $HADOOP_PREFIX/sbin/start-yarn.sh
-  echo "$NAMENODE_HOST: Hadoop started"
+  echo "$NAMENODE_HOST: HDFS started"
+  ssh "${SSH_OPTS[@]}" $CLUSTER_USERNAME@$RESOURCEMANAGER_HOST $HADOOP_PREFIX/sbin/start-yarn.sh
+  echo "$RESOURCEMANAGER_HOST: YARN started"
   ;;
 zookeeper)
   for host in `cat $CONF_DIR/hosts/zookeepers`; do
@@ -29,9 +29,8 @@ zookeeper)
   done
   ;;
 accumulo)
-  ACCUMULO_HOST=`cat $INSTALL_DIR/conf/hosts/accumulomaster`
-  ssh "${SSH_OPTS[@]}" $CLUSTER_USERNAME@$ACCUMULO_HOST $ACCUMULO_HOME/bin/start-all.sh
-  echo "$ACCUMULO_HOST: Accumulo started"
+  ssh "${SSH_OPTS[@]}" $CLUSTER_USERNAME@$ACCUMULOMASTER_HOST $ACCUMULO_HOME/bin/start-all.sh
+  echo "$ACCUMULOMASTER_HOST: Accumulo started"
   ;;
 *)
   echo -e "Usage: fluo-cluster start <argument>\n"

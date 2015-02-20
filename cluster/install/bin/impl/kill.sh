@@ -16,6 +16,6 @@
 SSH_OPTS=(-o 'StrictHostKeyChecking no' -A)
 
 echo "Killing cluster"
-for host in `cat $CONF_DIR/hosts/all`; do
+for host in `cat $CONF_DIR/hosts/all_ips`; do
   ssh "${SSH_OPTS[@]}" $CLUSTER_USERNAME@$host $BIN_DIR/impl/kill-local.sh
 done

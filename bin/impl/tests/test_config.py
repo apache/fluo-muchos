@@ -22,17 +22,17 @@ def test_defaults():
   assert c.subnet_id() == None
   assert c.key_name() == 'my_aws_key'
   assert c.instance_tags() == {}
-  assert len(c.nodes()) == 4
-  assert c.get_node('leader') == ('default', ['namenode', 'resourcemanager', 'accumulomaster', 'zookeeper', 'fluo'])
+  assert len(c.nodes()) == 6
+  assert c.get_node('leader1') == ('default', ['namenode', 'zookeeper', 'fluo'])
   assert c.get_node('worker1') == ('default', ['worker'])
   assert c.get_node('worker2') == ('default', ['worker'])
   assert c.get_node('worker3') == ('default', ['worker'])
   assert c.get_service_hostnames('worker') == ['worker1', 'worker2', 'worker3']
-  assert c.get_service_hostnames('zookeeper') == ['leader']
-  assert c.get_hosts() == {'worker1': ('10.0.0.1', '23.0.0.1'), 'worker3': ('10.0.0.3', None),
-          'worker2': ('10.0.0.2', None), 'leader': ('10.0.0.0', '23.0.0.0')}
-  assert c.get_public_ip('leader') == '23.0.0.0'
-  assert c.get_private_ip('leader') == '10.0.0.0'
+  assert c.get_service_hostnames('zookeeper') == ['leader1', 'leader2', 'leader3']
+  assert c.get_hosts() == {'leader2': ('10.0.0.1', None), 'leader3': ('10.0.0.2', None), 'leader1': ('10.0.0.0', '23.0.0.0'),
+                           'worker1': ('10.0.0.3', None), 'worker3': ('10.0.0.5', None), 'worker2': ('10.0.0.4', None)}
+  assert c.get_public_ip('leader1') == '23.0.0.0'
+  assert c.get_private_ip('leader1') == '10.0.0.0'
   assert c.cluster_name == 'mycluster'
   assert c.apache_mirror() == 'http://www.gtlib.gatech.edu/pub/apache'
   assert c.accumulo_version() == '1.6.1'
@@ -45,13 +45,16 @@ def test_defaults():
   assert c.accumulo_tarball() == "accumulo-1.6.1-bin.tar.gz"
   assert c.accumulo_path() == "fluo-deploy/cluster/tarballs/accumulo-1.6.1-bin.tar.gz"
   assert c.accumulo_url() == "http://www.gtlib.gatech.edu/pub/apache/accumulo/1.6.1/accumulo-1.6.1-bin.tar.gz"
-  assert c.get_service_private_ips("worker") == ['10.0.0.1', '10.0.0.2', '10.0.0.3']
-  assert c.zookeeper_connect() == "10.0.0.0:2181"
-  assert c.leader_hostname() == "leader"
+  assert c.get_service_private_ips("worker") == ['10.0.0.3', '10.0.0.4', '10.0.0.5']
+  assert c.zookeeper_connect() == "leader1,leader2,leader3"
+  assert c.leader_hostname() == "leader1"
   assert c.leader_public_ip() == "23.0.0.0"
   assert c.leader_private_ip() == "10.0.0.0"
   assert c.cluster_base_dir() == "/home/ec2-user"
   assert c.cluster_username() == "ec2-user"
   assert c.configure_cluster() == "true"
-  assert c.get_non_leaders() == [('10.0.0.1','worker1'), ('10.0.0.2','worker2'), ('10.0.0.3','worker3')]
-  assert c.get_host_services() == [('10.0.0.0', 'namenode resourcemanager accumulomaster zookeeper fluo'), ('10.0.0.1', 'worker'), ('10.0.0.2', 'worker'), ('10.0.0.3', 'worker')]
+  assert c.get_non_leaders() == [('10.0.0.1', 'leader2'), ('10.0.0.2', 'leader3'), ('10.0.0.3', 'worker1'), ('10.0.0.4', 'worker2'), ('10.0.0.5', 'worker3')]
+  assert c.get_host_services() == [('leader1', 'namenode zookeeper fluo'), ('leader2', 'resourcemanager zookeeper'), ('leader3', 'accumulomaster zookeeper'),
+                                   ('worker1', 'worker'), ('worker2', 'worker'), ('worker3', 'worker')]
+  assert c.zookeeper_server_config() == "server.1=leader1:2888:3888\nserver.2=leader2:2888:3888\nserver.3=leader3:2888:3888"
+

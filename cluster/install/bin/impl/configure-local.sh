@@ -23,8 +23,8 @@ if [ ! -f /home/$CLUSTER_USERNAME/.fluo-cluster/configured ]; then
   sudo sed -i "s/localhost.localdomain/$1/g" /etc/sysconfig/network
   mkdir /home/$CLUSTER_USERNAME/.fluo-cluster
   touch /home/$CLUSTER_USERNAME/.fluo-cluster/configured
-  echo "`hostname` - Configured $1.  Rebooting..."
+  echo "`hostname`: Configured $1.  Rebooting..."
   sudo reboot
 else
-  echo "`hostname` - Already configured $1"
+  echo "`hostname`: Already configured $1"
 fi
