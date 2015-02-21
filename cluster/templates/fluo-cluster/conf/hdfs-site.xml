@@ -31,7 +31,7 @@
   </property>
   <property>
     <name>dfs.datanode.data.dir</name>
-    <value>$DATA_DIR/hadoop/data</value>
+    <value>$DATANODE_DIRS</value>
   </property>
   <property>
     <name>dfs.namenode.secondary.http-address</name>

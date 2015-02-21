@@ -21,6 +21,23 @@ if [ ! -f /home/$CLUSTER_USERNAME/.fluo-cluster/configured ]; then
   sudo bash -c "echo 'vm.swappiness = 0' >> /etc/sysctl.conf"
   sudo bash -c "cat $CONF_DIR/limits.conf >> /etc/security/limits.conf"
   sudo sed -i "s/localhost.localdomain/$1/g" /etc/sysconfig/network
+
+  #mount ephermal devices... 
+  c="c"
+  for i in $(seq 1 $((NUM_EPHEMERAL-1)))
+  do
+    sudo mkdir /media/ephemeral$i
+    sudo bash -c "echo '/dev/xvd$c  /media/ephemeral$i  auto  defaults,nofail,comment=cloudconfig  0  2' >> /etc/fstab"
+    c=$(echo $c | tr 'a-z' 'b-z')
+    sudo mount /media/ephemeral$i
+  done
+
+  #make ephemeral drives writable
+  for i in $(seq 0 $((NUM_EPHEMERAL-1)))
+  do
+    sudo chown $CLUSTER_USERNAME /media/ephemeral$i
+  done
+
   mkdir /home/$CLUSTER_USERNAME/.fluo-cluster
   touch /home/$CLUSTER_USERNAME/.fluo-cluster/configured
   echo "`hostname`: Configured $1.  Rebooting..."

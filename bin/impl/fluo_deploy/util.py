@@ -24,48 +24,51 @@ import tarfile
 import urllib2
 from optparse import OptionParser
 
+class EC2Type:
+   def __init__(self, arch, ephemeral=1):
+     self.arch = arch
+     self.ephemeral = ephemeral
+
 instance_types = {
-  "c1.medium": "pvm",
-  "c1.xlarge": "pvm",
-  "c3.2xlarge": "pvm",
-  "c3.4xlarge": "pvm",
-  "c3.8xlarge": "pvm",
-  "c3.large": "pvm",
-  "c3.xlarge": "pvm",
-  "cc1.4xlarge": "hvm",
-  "cc2.8xlarge": "hvm",
-  "cg1.4xlarge": "hvm",
-  "cr1.8xlarge": "hvm",
-  "hi1.4xlarge": "pvm",
-  "hs1.8xlarge": "pvm",
-  "i2.2xlarge": "hvm",
-  "i2.4xlarge": "hvm",
-  "i2.8xlarge": "hvm",
-  "i2.xlarge": "hvm",
-  "m1.large": "pvm",
-  "m1.medium": "pvm",
-  "m1.small": "pvm",
-  "m1.xlarge": "pvm",
-  "m2.2xlarge": "pvm",
-  "m2.4xlarge": "pvm",
-  "m2.xlarge": "pvm",
-  "m3.2xlarge": "hvm",
-  "m3.large": "hvm",
-  "m3.medium": "hvm",
-  "m3.xlarge": "hvm",
-  "r3.2xlarge": "hvm",
-  "r3.4xlarge": "hvm",
-  "r3.8xlarge": "hvm",
-  "r3.large": "hvm",
-  "r3.xlarge": "hvm",
-  "t1.micro": "pvm",
-  "t2.medium": "hvm",
-  "t2.micro": "hvm",
-  "t2.small": "hvm",
+  "c1.medium": EC2Type("pvm"),
+  "c1.xlarge": EC2Type("pvm", 4),
+  "c3.2xlarge": EC2Type("pvm", 2),
+  "c3.4xlarge": EC2Type("pvm", 2),
+  "c3.8xlarge": EC2Type("pvm", 2),
+  "c3.large": EC2Type("pvm", 2),
+  "c3.xlarge": EC2Type("pvm", 2),
+  "cc2.8xlarge": EC2Type("hvm", 4),
+  "cg1.4xlarge": EC2Type("hvm", 2),
+  "cr1.8xlarge": EC2Type("hvm", 2),
+  "hi1.4xlarge": EC2Type("pvm", 2),
+  "hs1.8xlarge": EC2Type("pvm", 24),
+  "i2.2xlarge": EC2Type("hvm", 2),
+  "i2.4xlarge": EC2Type("hvm", 4),
+  "i2.8xlarge": EC2Type("hvm", 8),
+  "i2.xlarge": EC2Type("hvm"),
+  "m1.large": EC2Type("pvm", 2),
+  "m1.medium": EC2Type("pvm"),
+  "m1.small": EC2Type("pvm"),
+  "m1.xlarge": EC2Type("pvm", 4),
+  "m2.2xlarge": EC2Type("pvm", 1),
+  "m2.4xlarge": EC2Type("pvm", 2),
+  "m2.xlarge": EC2Type("pvm"),
+  "m3.2xlarge": EC2Type("hvm", 2),
+  "m3.large": EC2Type("hvm"),
+  "m3.medium": EC2Type("hvm"),
+  "m3.xlarge": EC2Type("hvm", 2),
+  "r3.2xlarge": EC2Type("hvm", 1),
+  "r3.4xlarge": EC2Type("hvm", 1),
+  "r3.8xlarge": EC2Type("hvm", 2),
+  "r3.large": EC2Type("hvm", 1),
+  "r3.xlarge": EC2Type("hvm", 1),
 }
 
 def get_arch(instance_type):
-  return instance_types.get(instance_type)
+  return instance_types.get(instance_type).arch
+
+def get_num_ephemeral(instance_type):
+  return instance_types.get(instance_type).ephemeral
 
 def get_image_id(instance_type):
   arch = get_arch(instance_type)
@@ -82,8 +85,8 @@ def exit(msg):
 
 def setup_boto(lib_dir):
   # Download Boto if it's not already present in lib_dir
-  version = "boto-2.35.2"
-  md5 = "3a421325aa2751ca8f5ab90eb9d24da9"
+  version = "boto-2.34.0"
+  md5 = "5556223d2d0cc4d06dd4829e671dcecd"
   url = "https://pypi.python.org/packages/source/b/boto/%s.tar.gz" % version
   if not os.path.exists(lib_dir):
     os.mkdir(lib_dir)

@@ -86,13 +86,20 @@ def launch_cluster(conn, config):
     if not host_ami:
       exit('ERROR - Image not found for instance type: '+instance_type)
 
+    bdm = BlockDeviceMapping()
+    for i in range(0, config.num_ephemeral()):
+      bdt = BlockDeviceType()
+      bdt.ephemeral_name='ephemeral' + str(i)
+      bdm['/dev/xvd' + chr(ord('b') + i)] = bdt
+
     resv = conn.run_instances(key_name=config.key_name(),
                               image_id=host_ami,
                               security_group_ids=[security_group.id],
                               instance_type=instance_type,
                               subnet_id=config.subnet_id(),
                               min_count=1,
-                              max_count=1)
+                              max_count=1,
+                              block_device_map=bdm)
   
     if len(resv.instances) != 1:
       exit('ERROR - Failed to start {0} node'.format(hostname))
@@ -229,6 +236,8 @@ def setup_cluster(config):
   sub_d["LEADER_HOST"] = config.leader_hostname()
   sub_d["ACCUMULO_INSTANCE"] = config.accumulo_instance()
   sub_d["ACCUMULO_PASSWORD"] = config.accumulo_password()
+  sub_d["NUM_EPHEMERAL"] = config.num_ephemeral()
+  sub_d["DATANODE_DIRS"] = config.datanode_dirs()
   
   for fn in os.listdir(conf_templates):
     template_path = join(conf_templates, fn)

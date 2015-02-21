@@ -18,7 +18,7 @@ SSH_OPTS=(-o 'StrictHostKeyChecking no' -A)
 $BIN_DIR/fluo-cluster kill &> /dev/null
 
 for host in `cat $CONF_DIR/hosts/all_hosts`; do
-  ssh "${SSH_OPTS[@]}" $CLUSTER_USERNAME@$host rm -rf $INSTALL_DIR/data
+  ssh "${SSH_OPTS[@]}" $CLUSTER_USERNAME@$host rm -rf /media/ephemeral*/*
 done
 
 while read line; do
