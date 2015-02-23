@@ -37,7 +37,11 @@ accumulo.password = secret
 fluo.version = 1.0.0-beta-1-SNAPSHOT
 hadoop.version = 2.6.0
 zookeeper.version = 3.4.6
-accumulo.version = 1.6.1
+accumulo.version = 1.6.2
+# Software md5 checksums
+hadoop.md5.hash = 37f371faab033bb8c2cb50100c5774dc
+zookeeper.md5.hash = 971c379ba65714fd25dc5fe8f14e9ad1
+accumulo.md5.hash = bbc6f15907330f5f292bae7ed0f02b2f
 
 [ec2]
 # EC2 region to connect to

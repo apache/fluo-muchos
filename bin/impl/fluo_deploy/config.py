@@ -104,14 +104,23 @@ class DeployConfig(ConfigParser):
   def accumulo_version(self):
     return self.get('general', 'accumulo.version')
 
+  def accumulo_md5(self):
+    return self.get('general', 'accumulo.md5.hash')
+
   def fluo_version(self):
     return self.get('general', 'fluo.version')
 
   def hadoop_version(self):
     return self.get('general', 'hadoop.version')
 
+  def hadoop_md5(self):
+    return self.get('general', 'hadoop.md5.hash')
+
   def zookeeper_version(self):
     return self.get('general', 'zookeeper.version')
+
+  def zookeeper_md5(self):
+    return self.get('general', 'zookeeper.md5.hash')
 
   def accumulo_tarball(self):
     return 'accumulo-%s-bin.tar.gz' % self.accumulo_version()
