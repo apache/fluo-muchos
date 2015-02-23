@@ -15,11 +15,30 @@
 
 SSH_OPTS=(-o 'StrictHostKeyChecking no' -A)
 
+function verify_checksum() {
+  tarball=$1
+  expected_md5=$2
+  actual_md5=`md5sum $TARBALLS_DIR/$tarball | awk '{print $1}'`
+
+  if [[ "$actual_md5" != "$expected_md5" ]]; then
+    echo "The MD5 checksum ($actual_md5) of $tarball does not match the expected checksum ($expected_md5)"
+    exit 1
+  fi
+}
+
 # Download required tarballs
 wget -nc -nv -P $TARBALLS_DIR $APACHE_MIRROR/zookeeper/zookeeper-$ZOOKEEPER_VERSION/$ZOOKEEPER_TARBALL
+verify_checksum $ZOOKEEPER_TARBALL $ZOOKEEPER_MD5
+
 wget -nc -nv -P $TARBALLS_DIR $APACHE_MIRROR/accumulo/$ACCUMULO_VERSION/$ACCUMULO_TARBALL
+verify_checksum $ACCUMULO_TARBALL $ACCUMULO_MD5
+
 wget -nc -nv -P $TARBALLS_DIR $APACHE_MIRROR/hadoop/common/hadoop-$HADOOP_VERSION/$HADOOP_TARBALL
-wget -nc -nv -P $TARBALLS_DIR --no-check-certificate --no-cookies --header "Cookie: oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/7u75-b13/jdk-7u75-linux-x64.tar.gz
+verify_checksum $HADOOP_TARBALL $HADOOP_MD5
+
+JAVA_TARBALL=jdk-7u75-linux-x64.tar.gz
+wget -nc -nv -P $TARBALLS_DIR --no-check-certificate --no-cookies --header "Cookie: oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/7u75-b13/$JAVA_TARBALL
+verify_checksum $JAVA_TARBALL 6f1f81030a34f7a9c987f8b68a24d139
 
 # Push install directory to all hosts
 for host in `cat $CONF_DIR/hosts/all_except_leader`; do
