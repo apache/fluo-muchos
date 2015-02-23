@@ -26,7 +26,7 @@ while read line; do
   HOST=${ARR[0]}
   SERVICES=${ARR[@]:1}
   echo "`hostname`: Installing services on $HOST: $SERVICES"
-  ssh "${SSH_OPTS[@]}" $CLUSTER_USERNAME@$HOST $INSTALL_DIR/bin/fluo-cluster install $SERVICES < /dev/null
+  ssh "${SSH_OPTS[@]}" $CLUSTER_USERNAME@$HOST $BIN_DIR/fluo-cluster install $SERVICES < /dev/null
 done < $CONF_DIR/hosts/hosts_with_services
 
 # Setup myid file on each zookeeper server
