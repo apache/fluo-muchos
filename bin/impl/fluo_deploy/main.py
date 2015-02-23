@@ -176,10 +176,10 @@ def wait_until_leader_ready(config):
 
 def wait_until_cluster_ready(config):
   wait_until_leader_ready(config)
-  exec_leader_script(config, "fluo-cluster ready")
+  exec_fluo_cluster_command(config, "ready")
  
-def exec_leader_script(config, script):
-  exec_leader(config, "bash {base}/install/bin/{script}".format(base=config.cluster_base_dir(), script=script))
+def exec_fluo_cluster_command(config, command):
+  exec_leader(config, "bash {base}/install/fluo-cluster/bin/fluo-cluster {command}".format(base=config.cluster_base_dir(), command=command))
 
 def send_leader(config, path, target, skipIfExists=True): 
   print "Copying to leader: ",path
@@ -202,8 +202,8 @@ def setup_cluster(config):
     exit("Please create a Fluo tarball and copy it to "+fluo_tarball)
 
   print 'Setting up {0} cluster'.format(config.cluster_name)
-  conf_templates = join(config.deploy_path, "cluster/templates/conf")
-  conf_install = join(config.deploy_path, "cluster/install/conf")
+  conf_templates = join(config.deploy_path, "cluster/templates/fluo-cluster/conf")
+  conf_install = join(config.deploy_path, "cluster/install/fluo-cluster/conf")
 
   sub_d = {}
   sub_d["BASE_DIR"] = config.cluster_base_dir()
@@ -304,11 +304,11 @@ def setup_cluster(config):
   send_leader(config, fluo_tarball, config.cluster_tarballs_dir())
   exec_leader(config, "rm -rf {base}/install; tar -C {base} -xzf {base}/tarballs/install.tar.gz".format(base=config.cluster_base_dir()))
 
-  exec_leader_script(config, "fluo-cluster setup")
+  exec_fluo_cluster_command(config, "setup")
 
   wait_until_cluster_ready(config)
  
-  exec_leader_script(config, "fluo-cluster init")
+  exec_fluo_cluster_command(config, "init")
       
 def main():
 
@@ -354,7 +354,7 @@ def main():
     if not isfile(hosts_path):
       exit("Hosts file does not exist for cluster: "+hosts_path)
     print "Killing {0} cluster".format(config.cluster_name)
-    exec_leader_script(config, "fluo-cluster kill")
+    exec_fluo_cluster_command(config, "kill")
   elif action == 'terminate':
     conn = get_ec2_conn(config)
     nodes = get_active_cluster(conn, config)
