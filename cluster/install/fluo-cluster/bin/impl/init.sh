@@ -35,7 +35,7 @@ while read line; do
   HOST=${ARR[0]}
   ID=${ARR[1]}
   echo "`hostname`: Setting zookeeper myid to $ID on $HOST"
-  ssh "${SSH_OPTS[@]}" $CLUSTER_USERNAME@$HOST "mkdir -p $INSTALL_DIR/data/zookeeper; echo $ID > $INSTALL_DIR/data/zookeeper/myid" < /dev/null
+  ssh "${SSH_OPTS[@]}" $CLUSTER_USERNAME@$HOST "mkdir -p $DATA_DIR/zookeeper; echo $ID > $DATA_DIR/zookeeper/myid" < /dev/null
 done < $CONF_DIR/hosts/zookeeper_ids
 
 # Setup & Start Hadoop
