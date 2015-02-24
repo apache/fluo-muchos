@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from ConfigParser import ConfigParser
-from util import exit
+from util import get_num_ephemeral, exit
 import os
 from os.path import join
 
@@ -83,8 +83,24 @@ class DeployConfig(ConfigParser):
   def local_install_dir(self):
     return join(self.deploy_path, "cluster/install")
 
+  def num_ephemeral(self):
+    #TODO support two instance types see fluo-deploy-17
+    instance_type = self.get('ec2', 'default.instance.type')
+    return get_num_ephemeral(instance_type)
+
   def data_dir(self):
-    return join(self.cluster_install_dir(), "data")
+    return "/media/ephemeral0"
+
+  def ephemeral_dirs(self, suffix):
+    dirs = ""
+    sep = ""
+    for i in range(0, self.num_ephemeral()):
+      dirs = dirs + sep + "/media/ephemeral"+str(i)+suffix
+      sep = ","
+    return dirs
+
+  def datanode_dirs(self):
+    return self.ephemeral_dirs("/hadoop/data")
 
   def hadoop_prefix(self):
     return join(self.cluster_install_dir(), "hadoop-"+self.hadoop_version())
