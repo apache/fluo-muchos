@@ -15,7 +15,7 @@
 from fluo_deploy.config import DeployConfig
 
 def test_defaults():
-  c = DeployConfig("fluo-deploy", '../../conf/fluo-deploy.props.example', '../../conf/hosts/example_cluster', 'mycluster')
+  c = DeployConfig("fluo-deploy", '../../conf/fluo-deploy.props.example', '../../conf/hosts/example/example_cluster', 'mycluster')
   assert c.default_instance_type() == 'm3.large'
   assert c.region() == 'us-east-1'
   assert c.vpc_id() == None
@@ -35,16 +35,16 @@ def test_defaults():
   assert c.get_private_ip('leader1') == '10.0.0.0'
   assert c.cluster_name == 'mycluster'
   assert c.apache_mirror() == 'http://www.gtlib.gatech.edu/pub/apache'
-  assert c.accumulo_version() == '1.6.1'
+  assert c.accumulo_version() == '1.6.2'
   assert c.fluo_version() == '1.0.0-beta-1-SNAPSHOT'
   assert c.hadoop_version() == '2.6.0'
   assert c.zookeeper_version() == '3.4.6'
   assert c.hadoop_prefix() == "/home/ec2-user/install/hadoop-2.6.0"
-  assert c.data_dir() == "/home/ec2-user/install/data"
+  assert c.data_dir() == "/media/ephemeral0"
   assert c.cluster_tarballs_dir() == "/home/ec2-user/tarballs"
-  assert c.accumulo_tarball() == "accumulo-1.6.1-bin.tar.gz"
-  assert c.accumulo_path() == "fluo-deploy/cluster/tarballs/accumulo-1.6.1-bin.tar.gz"
-  assert c.accumulo_url() == "http://www.gtlib.gatech.edu/pub/apache/accumulo/1.6.1/accumulo-1.6.1-bin.tar.gz"
+  assert c.accumulo_tarball() == "accumulo-1.6.2-bin.tar.gz"
+  assert c.accumulo_path() == "fluo-deploy/cluster/tarballs/accumulo-1.6.2-bin.tar.gz"
+  assert c.accumulo_url() == "http://www.gtlib.gatech.edu/pub/apache/accumulo/1.6.2/accumulo-1.6.2-bin.tar.gz"
   assert c.get_service_private_ips("worker") == ['10.0.0.3', '10.0.0.4', '10.0.0.5']
   assert c.zookeeper_connect() == "leader1,leader2,leader3"
   assert c.leader_hostname() == "leader1"
@@ -57,4 +57,3 @@ def test_defaults():
   assert c.get_host_services() == [('leader1', 'namenode zookeeper fluo'), ('leader2', 'resourcemanager zookeeper'), ('leader3', 'accumulomaster zookeeper'),
                                    ('worker1', 'worker'), ('worker2', 'worker'), ('worker3', 'worker')]
   assert c.zookeeper_server_config() == "server.1=leader1:2888:3888\nserver.2=leader2:2888:3888\nserver.3=leader3:2888:3888"
-

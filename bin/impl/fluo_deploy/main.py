@@ -18,7 +18,7 @@
 Script to help deploy Fluo cluster (optionally to AWS EC2)
 """
 
-import os
+import os, sys
 from config import DeployConfig
 from util import get_image_id, setup_boto, parse_args, exit
 from os.path import isfile, join
@@ -324,9 +324,6 @@ def setup_cluster(config):
       
 def main():
 
-  # parse command line args
-  (opts, action, cluster_name) = parse_args()
-
   deploy_path = os.environ.get('FLUO_DEPLOY')
   if not deploy_path:
     exit('ERROR - The FLUO_DEPLOY env variable must be set!')
@@ -337,9 +334,18 @@ def main():
   if not isfile(config_path):
     exit('ERROR - A config file does not exist at '+config_path)  
 
-  hosts_path = join(deploy_path, "conf/hosts/"+cluster_name)
+  hosts_dir = join(deploy_path, "conf/hosts/")
 
-  config = DeployConfig(deploy_path, config_path, hosts_path, cluster_name)
+  # parse command line args
+  retval = parse_args(hosts_dir)
+  if not retval:
+    print "Invalid command line arguments. For help, use 'fluo-deploy -h'"
+    sys.exit(1)
+  (opts, action) = retval
+
+  hosts_path = join(hosts_dir, opts.cluster)
+
+  config = DeployConfig(deploy_path, config_path, hosts_path, opts.cluster)
 
   if action == 'launch':
     conn = get_ec2_conn(config)
@@ -352,6 +358,11 @@ def main():
       print "  ", node.tags.get('Name', 'UNKNOWN_NAME'), node.id, node.private_ip_address, node.ip_address
   elif action == 'setup':
     setup_cluster(config)
+  elif action == 'config':
+    if opts.property == 'all':
+      config.print_all()
+    else:
+      config.print_property(opts.property)
   elif action == 'ssh':
     print "Connecting to leader", config.leader_public_ip()
     wait_until_leader_ready(config)

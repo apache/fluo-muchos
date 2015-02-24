@@ -274,3 +274,23 @@ class DeployConfig(ConfigParser):
   def leader_private_ip(self):
     return self.get_private_ip(self.leader_hostname())
 
+  def print_all(self):
+    print 'leader.public.ip = ', self.leader_public_ip()
+    for (name, val) in self.items('general'):
+      print name, '=', val
+
+    for (name, val) in self.items('ec2'):
+      print name, '=', val
+
+  def print_property(self, key):
+
+    if key == 'leader.public.ip':
+      print self.leader_public_ip()
+      return
+    else:
+      for section in self.sections():
+        if self.has_option(section, key):
+          print self.get(section, key)
+          return
+
+    exit("Property '{0}' was not found".format(key))
