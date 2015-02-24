@@ -114,10 +114,9 @@ Install nose using pip:
 pip install nose
 ```
 
-Run the following commands to run the tests:
+The following command runs the unit tests:
 ```
-cd bin/impl
-nosetests
+nosetests -w bin/impl
 ```
 
 [1]: http://docs.aws.amazon.com/cli/latest/userguide/installing.html
