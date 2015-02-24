@@ -17,6 +17,7 @@ Utility methods
 """
 
 import os
+from os.path import isfile, join
 import hashlib
 import sys
 from sys import stderr
@@ -108,27 +109,53 @@ def setup_boto(lib_dir):
     print "Finished downloading Boto"
   sys.path.insert(0, boto_lib_dir)
 
-def parse_args(input=None):
+def parse_args(hosts_dir, input=None):
   parser = OptionParser(
-            usage="fluo-deploy [options] <action> <cluster_name>"
-            + "\n\nwhere <action> can be:\n  launch - Launch cluster in EC2\n  status - Check status of EC2 cluster\n"
-            + "  setup - Setup Fluo and its dependencies on cluster\n  ssh - SSH to cluster leader node\n"
-            + "  kill - Kill Fluo and its dependencies on cluster\n  terminate - Terminate EC2 cluster",
+            usage="fluo-deploy [options] <action>\n\n"
+            + "where <action> can be:\n"
+            + "  launch - Launch cluster in EC2\n"
+            + "  status - Check status of EC2 cluster\n"
+            + "  setup - Setup Fluo and its dependencies on cluster\n"
+            + "  config - Print configuration for that cluster.  Requires '-p' option.  Use '-p all' for all config.\n"
+            + "  ssh - SSH to cluster leader node\n"
+            + "  kill - Kill Fluo and its dependencies on cluster\n"
+            + "  terminate - Terminate EC2 cluster",
             add_help_option=False)
-  parser.add_option(
-    "-h", "--help", action="help",
-    help="Show this help message and exit")
+  parser.add_option("-c", "--cluster", dest="cluster", help="Specifies cluster")
+  parser.add_option("-p", "--property", dest="property", help="Specifies property to print (if using 'config' action).  Set to 'all' to print every property")
+  parser.add_option("-h", "--help", action="help", help="Show this help message and exit")
 
   if input:
     (opts, args) = parser.parse_args(input)
   else:
     (opts, args) = parser.parse_args()
 
-  if len(args) != 2:
-    parser.print_help()
-    sys.exit(1)
+  if len(args) == 0:
+    print "ERROR - You must specify on action"
+    return
+  elif len(args) > 1:
+    print "ERROR - Too many arguments given"
+    return
+  action = args[0]
 
-  (action, cluster_name) = args
+  if action == 'launch' and not opts.cluster:
+    print "ERROR - You must specify a cluster if using launch command"
+    return
 
-  return (opts, action, cluster_name)
+  clusters = [ f for f in os.listdir(hosts_dir) if isfile(join(hosts_dir, f))]
 
+  if not opts.cluster:
+    if len(clusters) == 0:
+      print "ERROR - No clusters found in conf/hosts or specified by --cluster option"
+      return 
+    elif len(clusters) == 1:
+      opts.cluster = clusters[0]
+    else:
+      print "ERROR - Multiple clusters {0} found in conf/hosts/.  Please pick one using --cluster option".format(clusters)
+      return 
+
+  if action == 'config' and not opts.property:
+    print "ERROR - For config action, you must set -p to a property or 'all'"
+    return
+
+  return (opts, action)

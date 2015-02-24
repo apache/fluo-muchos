@@ -38,17 +38,20 @@ Launching an EC2 cluster
 
 Run the following command to launch an EC2 cluster called `mycluster`:
 ```
-fluo-deploy launch mycluster
+fluo-deploy launch -c mycluster
 ```
 
-After your cluster has launched, run the following command to confirm that you can ssh to the leader node:
+After your cluster has launched, you do not have to specify a cluster anymore using `-c` (unless you have 
+multiple clusters running).
+
+Run the following command to confirm that you can ssh to the leader node:
 ```
-fluo-deploy ssh mycluster
+fluo-deploy ssh
 ```
 
 You can check the status of the nodes using the EC2 Dashboard or by running the following command:
 ```
-fluo-deploy status mycluster
+fluo-deploy status
 ```
 
 Set up Fluo on your cluster
@@ -67,14 +70,14 @@ cp modules/distribution/target/fluo-1.0.0-beta-1-SNAPSHOT-bin.tar.gz /path/to/fl
 
 Run the following command to set up your cluster and run Hadoop, Zookeeper, & Accumulo:
 ```
-fluo-deploy setup mycluster
+fluo-deploy setup
 ```
 
 The `setup` command can be run again if you cluster becomes unstable or if you want to change Accumulo or Hadoop 
 configuration found in `templates/conf`.  The `setup` command installs and configures Fluo but does not start it.
 This lets you setup Fluo with any observers.  Run the commands below to access your Fluo install:
 ```
-fluo-deploy ssh mycluster
+fluo-deploy ssh
 ssh <FLUO_HOSTNAME>
 cdf   # Alias to change directory to Fluo Home
 ```
@@ -91,7 +94,16 @@ Terminating your EC2 cluster
 If you launched your cluster on EC2, run the following command terminate your cluster.  WARNING - All data on
 your cluster will be lost:
 ```
-fluo-deploy terminate mycluster
+fluo-deploy terminate
+```
+
+Retrieving cluster configuration
+--------------------------------
+
+The `config` command allows you to retrieve cluster configuration for your own scripts:
+```
+$ fluo-deploy config -p leader.public.ip
+10.10.10.10
 ```
 
 Running unit tests
