@@ -8,3 +8,4 @@ env.sh
 bashrc
 accumulo-env.sh
 fluo-env.sh
+keys
