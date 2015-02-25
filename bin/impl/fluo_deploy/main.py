@@ -19,6 +19,7 @@ Script to help deploy Fluo cluster (optionally to AWS EC2)
 """
 
 import os, sys
+import shutil
 from config import DeployConfig
 from util import get_image_id, setup_boto, parse_args, exit
 from os.path import isfile, join
@@ -211,6 +212,12 @@ def setup_cluster(config):
   print 'Setting up {0} cluster'.format(config.cluster_name)
   conf_templates = join(config.deploy_path, "cluster/templates/fluo-cluster/conf")
   conf_install = join(config.deploy_path, "cluster/install/fluo-cluster/conf")
+
+  # copy keys file to conf (if it exists)
+  conf_keys = join(config.deploy_path, "conf/keys")
+  install_keys = join(config.deploy_path, "cluster/install/fluo-cluster/conf/keys")
+  if isfile(conf_keys):
+    shutil.copyfile(conf_keys, install_keys)
 
   sub_d = {}
   sub_d["BASE_DIR"] = config.cluster_base_dir()

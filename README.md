@@ -1,7 +1,9 @@
 fluo-deploy
-========
+===========
 
-Scripts used to run a Fluo cluster on EC2
+[![Build Status](https://travis-ci.org/fluo-io/fluo-deploy.svg?branch=master)](https://travis-ci.org/fluo-io/fluo-deploy)
+
+Scripts used to deploy Fluo to a cluster that can be optionally launched in EC2
 
 Installation
 ------------
@@ -9,7 +11,7 @@ Installation
 First clone the `fluo-deploy` repo:
 ```
 git clone https://github.com/fluo-io/fluo-deploy.git
-```
+```  
 
 In order to run `fluo-deploy`, your AWS credentials need to be set at `~/.aws/credentials` in a file like this:
 ```
@@ -30,8 +32,10 @@ cd fluo-deploy/
 cp conf/fluo-deploy.props.example conf/fluo-deploy.props
 ```
 
-You will need upload your public key to the AWS management console and set `key.name` in `fluo-deploy.props`
-to the name of your key pair.
+You will need to upload your public key to the AWS management console and set `key.name` in `fluo-deploy.props`
+to the name of your key pair.  If you want to give others access to your cluster, add their public keys to 
+a file named `keys` in your `conf/` directory.  During the setup of your cluster, this file will be appended 
+on each node to the `~/.ssh/authorized_keys` file for the user set by the `cluster.username` property.
 
 Launching an EC2 cluster
 ------------------------
