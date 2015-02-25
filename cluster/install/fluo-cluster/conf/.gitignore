@@ -9,3 +9,4 @@ bashrc
 accumulo-env.sh
 fluo-env.sh
 keys
+metrics.yaml

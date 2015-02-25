@@ -245,6 +245,7 @@ def setup_cluster(config):
   sub_d["ACCUMULO_PASSWORD"] = config.accumulo_password()
   sub_d["NUM_EPHEMERAL"] = config.num_ephemeral()
   sub_d["DATANODE_DIRS"] = config.datanode_dirs()
+  sub_d["GRAPHITE_SERVER"] = config.get_service_private_ips("graphite")[0]
   
   for fn in os.listdir(conf_templates):
     template_path = join(conf_templates, fn)

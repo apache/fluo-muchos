@@ -17,7 +17,7 @@ from util import get_num_ephemeral, exit
 import os
 from os.path import join
 
-SERVICES = ['zookeeper', 'namenode', 'resourcemanager', 'accumulomaster', 'worker', 'fluo']
+SERVICES = ['zookeeper', 'namenode', 'resourcemanager', 'accumulomaster', 'worker', 'fluo', 'graphite']
 
 class DeployConfig(ConfigParser):
 

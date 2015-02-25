@@ -65,10 +65,11 @@ key.name = my_aws_key
 # Where: 
 #   Hostname = Must be unique.  Will be used for hostname in EC2 or should match hostname on your own cluster
 #   Instance Type = EC2 instance type.  Ignored if not launching cluster.  Set to 'default' to use value set by 'default.instance.type'
-#   Service = Service to run on node (possible values: zookeeper, namenode, resourcemanager, accumulomaster, worker, fluo)
+#   Service = Service to run on node (possible values: zookeeper, namenode, resourcemanager, accumulomaster, worker, fluo, graphite)
 leader1 = default:namenode,zookeeper,fluo
 leader2 = default:resourcemanager,zookeeper
 leader3 = default:accumulomaster,zookeeper
+monitor = default:graphite
 worker1 = default:worker
 worker2 = default:worker
 worker3 = default:worker
