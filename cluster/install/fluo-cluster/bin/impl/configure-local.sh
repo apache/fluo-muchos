@@ -17,7 +17,9 @@ if [ ! -f /home/$CLUSTER_USERNAME/.fluo-cluster/configured ]; then
   sudo bash -c "cat $CONF_DIR/hosts/append_to_hosts >> /etc/hosts"
   cat $CONF_DIR/ssh_config >> /home/$CLUSTER_USERNAME/.ssh/config
   chmod 600 /home/$CLUSTER_USERNAME/.ssh/config
-  cat $CONF_DIR/keys >> /home/$CLUSTER_USERNAME/.ssh/authorized_keys
+  if [ -f $CONF_DIR/keys ]; then
+    cat $CONF_DIR/keys >> /home/$CLUSTER_USERNAME/.ssh/authorized_keys
+  fi
   cat $CONF_DIR/bashrc >> /home/$CLUSTER_USERNAME/.bashrc
   sudo bash -c "echo 'vm.swappiness = 0' >> /etc/sysctl.conf"
   sudo bash -c "cat $CONF_DIR/limits.conf >> /etc/security/limits.conf"

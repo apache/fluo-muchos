@@ -30,15 +30,17 @@ class DeployConfig(ConfigParser):
     self.node_d = None
     self.hosts = None
     self.init_nodes()
-    self.verify_config()
 
-  def verify_config(self):
+  def verify_config(self, action):
     leader = self.leader_hostname()
     if not leader:
       exit("ERROR - leader.hostname must be set in fluo-deploy.props")
 
     if leader not in self.node_d:
       exit("ERROR - The leader (set by property leader.hostname={0}) cannot be found in 'nodes' section of fluo-deploy.props".format(leader))
+
+    if action != 'launch':
+      self.leader_public_ip()
 
   def init_nodes(self):
     self.node_d = {}
@@ -269,7 +271,10 @@ class DeployConfig(ConfigParser):
     return self.get_hosts()[hostname][1]
 
   def leader_public_ip(self):
-    return self.get_public_ip(self.leader_hostname())
+    retval = self.get_public_ip(self.leader_hostname())
+    if not retval:
+      exit("ERROR - Leader {0} does not have a public IP".format(self.leader_hostname()))
+    return retval
 
   def leader_private_ip(self):
     return self.get_private_ip(self.leader_hostname())
