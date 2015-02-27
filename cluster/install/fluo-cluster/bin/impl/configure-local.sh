@@ -26,11 +26,12 @@ if [ ! -f /home/$CLUSTER_USERNAME/.fluo-cluster/configured ]; then
   sudo sed -i "s/localhost.localdomain/$1/g" /etc/sysconfig/network
 
   #mount ephermal devices... 
+  sudo sed -i 's/defaults,nofail,comment=cloudconfig/defaults,nofail,noatime,nodiratime,comment=cloudconfig/g' /etc/fstab
   c="c"
   for i in $(seq 1 $((NUM_EPHEMERAL-1)))
   do
     sudo mkdir /media/ephemeral$i
-    sudo bash -c "echo '/dev/xvd$c  /media/ephemeral$i  auto  defaults,nofail,comment=cloudconfig  0  2' >> /etc/fstab"
+    sudo bash -c "echo '/dev/xvd$c  /media/ephemeral$i  auto  defaults,nofail,noatime,nodiratime,comment=cloudconfig  0  2' >> /etc/fstab"
     c=$(echo $c | tr 'a-z' 'b-z')
     sudo mount /media/ephemeral$i
   done
