@@ -13,12 +13,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific 
 
-SSH_OPTS=(-o 'StrictHostKeyChecking no' -A)
+SSH_OPTS=(-tt -o 'StrictHostKeyChecking no' -A)
 
 $BIN_DIR/fluo-cluster kill &> /dev/null
 
 for host in `cat $CONF_DIR/hosts/all_hosts`; do
-  ssh "${SSH_OPTS[@]}" $CLUSTER_USERNAME@$host rm -rf /media/ephemeral*/*
+  ssh "${SSH_OPTS[@]}" $CLUSTER_USERNAME@$host rm -rf /media/ephemeral*/zoo*  /media/ephemeral*/hadoop* /media/ephemeral*/yarn*
 done
 
 while read line; do

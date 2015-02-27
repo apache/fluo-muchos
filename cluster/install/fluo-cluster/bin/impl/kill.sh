@@ -13,7 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific 
 
-SSH_OPTS=(-o 'StrictHostKeyChecking no' -A)
+SSH_OPTS=(-tt -o 'StrictHostKeyChecking no' -A)
 
 echo "Killing cluster"
 for host in `cat $CONF_DIR/hosts/all_ips`; do

@@ -118,15 +118,6 @@ def launch_cluster(conn, config):
     num_expected = len(config.nodes())
 
     if num_actual == num_expected:
-      # Associate Public IP if 
-      if config.subnet_id():
-        leader_instance = get_instance(nodes, instance_d[config.leader_hostname()])
-        address = conn.allocate_address("vpc")
-        address.associate(instance_id=leader_instance.id)
-        print "Assigned public IP {0} to {1} node".format(address.public_ip, config.leader_hostname())
-        time.sleep(5)
-        nodes = get_cluster(conn, config, ['running'])
-
       # Tag instances and create hosts file
       with open(config.hosts_path, 'w') as hosts_file:
         for (hostname, (instance_type, services)) in config.nodes().items():
@@ -245,6 +236,7 @@ def setup_cluster(config):
   sub_d["ACCUMULO_PASSWORD"] = config.accumulo_password()
   sub_d["NUM_EPHEMERAL"] = config.num_ephemeral()
   sub_d["DATANODE_DIRS"] = config.datanode_dirs()
+  sub_d["GRAPHITE_SERVER"] = config.get_service_private_ips("graphite")[0]
   
   for fn in os.listdir(conf_templates):
     template_path = join(conf_templates, fn)
@@ -353,6 +345,7 @@ def main():
   hosts_path = join(hosts_dir, opts.cluster)
 
   config = DeployConfig(deploy_path, config_path, hosts_path, opts.cluster)
+  config.verify_config(action)
 
   if action == 'launch':
     conn = get_ec2_conn(config)
@@ -398,20 +391,6 @@ def main():
 
     response = raw_input("Do you want to continue? (y/n) ")
     if response == "y":
-      if config.subnet_id():
-        public_ip = config.leader_public_ip()
-        if public_ip:
-          addrs = conn.get_all_addresses(addresses=[public_ip])
-          if len(addrs) == 1:
-            leader_addr = addrs[0]
-            leader_addr.disassociate()
-            leader_addr.release()
-            print "Released public IP ",public_ip
-          else:
-            print "Failed to release Public IP ",public_ip
-        else:
-          print "No public IP found to release"
-
       for node in nodes:
         node.terminate()
       print "Terminated instances"

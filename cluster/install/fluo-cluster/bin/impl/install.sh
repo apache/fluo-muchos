@@ -59,6 +59,7 @@ function install_fluo() {
     cp $FLUO_HOME/conf/examples/* $FLUO_HOME/conf/
     cp $CONF_DIR/fluo.properties $FLUO_HOME/conf/
     cp $CONF_DIR/fluo-env.sh $FLUO_HOME/conf/
+    cp $CONF_DIR/metrics.yaml $FLUO_HOME/conf/
     echo "`hostname`: Fluo installed"
   fi
 }
@@ -69,6 +70,46 @@ function install_java() {
     tar -C $INSTALL_DIR -xzf $TARBALLS_DIR/$JAVA_TARBALL
     echo "`hostname`: Java installed"
   fi
+}
+
+function install_graphite(){
+  if ! rpm -qa | grep -qw docker; then  
+    sudo yum install -y docker
+    sudo mv /var/lib/docker "$DATA_DIR/"
+    sudo ln -s "$DATA_DIR/docker" /var/lib/
+    sudo service docker start
+
+    sudo docker run -d --name graphite -p 80:80 -p 2003:2003 -p 8125:8125/udp hopsoft/graphite-statsd
+
+    sudo yum install -y expect
+    expect << DONE
+spawn sudo docker exec -t -i graphite python /opt/graphite/webapp/graphite/manage.py changepassword
+expect "Password: "
+send -- "foo10\r"
+expect "Password (again): "
+send -- "foo10\r"
+expect eof
+DONE
+
+  else
+    RUNNING=$(sudo docker inspect --format="{{ .State.Running }}" graphite 2> /dev/null)
+    if [ $? -eq 1 ]; then
+      #UNKNOWN container
+      sudo docker run -d --name graphite -p 80:80 -p 2003:2003 -p 8125:8125/udp hopsoft/graphite-statsd
+    fi
+
+    if [ "$RUNNING" == "false" ]; then
+      sudo docker start graphite
+    fi 
+  fi
+
+  #setup initial dashboard for fluo
+  # based on comment from http://serverfault.com/questions/505871/graphite-edit-dashboard  which did not mention --data-urlencode state@
+  while ! curl --data-urlencode state@$CONF_DIR/graphite-dash.json http://localhost:80/dashboard/save/fluo
+  do
+    echo "Unable to update graphite dashboard... sleeping and retrying"    
+    sleep 1
+  done
 }
 
 for service in "$@"; do
@@ -103,6 +144,10 @@ for service in "$@"; do
       install_java
       install_fluo
       ;;
+    graphite)
+      install_graphite
+      ;;
+
     *)
       echo "Unknown service: $service"
       exit 1

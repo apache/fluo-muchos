@@ -18,4 +18,7 @@ pkill -9 -f accumulo.start
 pkill -9 -f hadoop.hdfs
 pkill -9 -f hadoop.yarn
 pkill -9 -f QuorumPeerMain
+if rpm -qa | grep -qw docker; then
+  sudo docker kill graphite
+fi
 echo "`hostname`- killed all"
