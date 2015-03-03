@@ -239,7 +239,9 @@ def setup_cluster(config):
   sub_d["LEADER_HOST"] = config.leader_hostname()
   sub_d["ACCUMULO_INSTANCE"] = config.accumulo_instance()
   sub_d["ACCUMULO_PASSWORD"] = config.accumulo_password()
-  sub_d["DATANODE_DIRS"] = config.datanode_dirs()
+  sub_d["DATANODE_DIRS"] = config.worker_ephemeral_dirs("/hadoop/data")
+  sub_d["MAPRED_TEMP_DIRS"] = config.worker_ephemeral_dirs("/hadoop/mapred/temp")
+  sub_d["MAPRED_LOCAL_DIRS"] = config.worker_ephemeral_dirs("/hadoop/mapred/local")
   sub_d["GRAPHITE_SERVER"] = config.get_service_private_ips("graphite")[0]
   
   for fn in os.listdir(conf_templates):

@@ -38,6 +38,7 @@ function install_hadoop() {
     cp $CONF_DIR/core-site.xml $HADOOP_PREFIX/etc/hadoop/
     cp $CONF_DIR/hdfs-site.xml $HADOOP_PREFIX/etc/hadoop/
     cp $CONF_DIR/yarn-site.xml $HADOOP_PREFIX/etc/hadoop/
+    cp $CONF_DIR/mapred-site.xml $HADOOP_PREFIX/etc/hadoop/
     cp $CONF_DIR/hosts/workers $HADOOP_PREFIX/etc/hadoop/slaves
     echo "`hostname`: Hadoop installed"
   fi
