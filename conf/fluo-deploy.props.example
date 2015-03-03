@@ -46,8 +46,11 @@ accumulo.md5.hash = bbc6f15907330f5f292bae7ed0f02b2f
 [ec2]
 # EC2 region to connect to
 region = us-east-1
-# Type of AWS instance to launch by default
+# Type of AWS instance launched by default
 default.instance.type = m3.large
+# Type of AWS instance launched for any node running 'worker' service
+# Leave default below to use same instance type set by 'default.instance.type' property
+worker.instance.type = %(default.instance.type)s
 # VPC to launch instances in (optional)
 #vpc.id = vpc-xxxxx
 # VPC Subnet to launch instances in (optional)
@@ -61,15 +64,14 @@ key.name = my_aws_key
 
 [nodes]
 # Describes nodes in cluster in the following format: 
-# <Hostname> = <Instance Type>:<Service1>[,<Service2>,<Service3>]
+# <Hostname> = <Service1>[,<Service2>,<Service3>]
 # Where: 
 #   Hostname = Must be unique.  Will be used for hostname in EC2 or should match hostname on your own cluster
-#   Instance Type = EC2 instance type.  Ignored if not launching cluster.  Set to 'default' to use value set by 'default.instance.type'
 #   Service = Service to run on node (possible values: zookeeper, namenode, resourcemanager, accumulomaster, worker, fluo, graphite)
-leader1 = default:namenode,zookeeper,fluo
-leader2 = default:resourcemanager,zookeeper
-leader3 = default:accumulomaster,zookeeper
-monitor = default:graphite
-worker1 = default:worker
-worker2 = default:worker
-worker3 = default:worker
+leader1 = namenode,zookeeper,fluo
+leader2 = resourcemanager,zookeeper
+leader3 = accumulomaster,zookeeper
+monitor = graphite
+worker1 = worker
+worker2 = worker
+worker3 = worker

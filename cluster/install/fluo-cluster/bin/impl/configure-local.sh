@@ -14,6 +14,9 @@
 # See the License for the specific 
 
 if [ ! -f /home/$CLUSTER_USERNAME/.fluo-cluster/configured ]; then
+  HOST=$1
+  NUM_EPHEMERAL=$2
+
   sudo bash -c "cat $CONF_DIR/hosts/append_to_hosts >> /etc/hosts"
   cat $CONF_DIR/ssh_config >> /home/$CLUSTER_USERNAME/.ssh/config
   chmod 600 /home/$CLUSTER_USERNAME/.ssh/config
@@ -23,7 +26,7 @@ if [ ! -f /home/$CLUSTER_USERNAME/.fluo-cluster/configured ]; then
   cat $CONF_DIR/bashrc >> /home/$CLUSTER_USERNAME/.bashrc
   sudo bash -c "echo 'vm.swappiness = 0' >> /etc/sysctl.conf"
   sudo bash -c "cat $CONF_DIR/limits.conf >> /etc/security/limits.conf"
-  sudo sed -i "s/localhost.localdomain/$1/g" /etc/sysconfig/network
+  sudo sed -i "s/localhost.localdomain/$HOST/g" /etc/sysconfig/network
 
   #mount ephermal devices... 
   sudo sed -i 's/defaults,nofail,comment=cloudconfig/defaults,nofail,noatime,nodiratime,comment=cloudconfig/g' /etc/fstab
@@ -44,8 +47,8 @@ if [ ! -f /home/$CLUSTER_USERNAME/.fluo-cluster/configured ]; then
 
   mkdir /home/$CLUSTER_USERNAME/.fluo-cluster
   touch /home/$CLUSTER_USERNAME/.fluo-cluster/configured
-  echo "`hostname`: Configured $1.  Rebooting..."
+  echo "`hostname`: Configured $HOST.  Rebooting..."
   sudo reboot
 else
-  echo "`hostname`: Already configured $1"
+  echo "`hostname`: Already configured $HOST"
 fi

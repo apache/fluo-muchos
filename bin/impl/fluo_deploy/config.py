@@ -47,14 +47,13 @@ class DeployConfig(ConfigParser):
     for (hostname, value) in self.items('nodes'):
       if hostname in self.node_d:
         exit('Hostname {0} already exists twice in nodes'.format(hostname))
-      (instance_type, services) = value.split(':')
       service_list = []
-      for service in services.split(','):
+      for service in value.split(','):
         if service in SERVICES:
           service_list.append(service)
         else:
           exit('Unknown service "%s" declared for node %s' % (service, hostname))
-      self.node_d[hostname] = (instance_type, service_list)
+      self.node_d[hostname] = service_list
 
   def cluster_username(self):
     return self.get('general', 'cluster.username')
@@ -85,24 +84,31 @@ class DeployConfig(ConfigParser):
   def local_install_dir(self):
     return join(self.deploy_path, "cluster/install")
 
-  def num_ephemeral(self):
-    #TODO support two instance types see fluo-deploy-17
-    instance_type = self.get('ec2', 'default.instance.type')
-    return get_num_ephemeral(instance_type)
+  def default_num_ephemeral(self):
+    return get_num_ephemeral(self.default_instance_type())
+
+  def worker_num_ephemeral(self):
+    return get_num_ephemeral(self.worker_instance_type())
+
+  def num_ephemeral(self, hostname):
+    if 'worker' in self.node_d[hostname]:
+      return self.worker_num_ephemeral()
+    else:
+      return self.default_num_ephemeral()
 
   def data_dir(self):
     return "/media/ephemeral0"
 
-  def ephemeral_dirs(self, suffix):
+  def ephemeral_dirs(self, suffix, num_ephemeral):
     dirs = ""
     sep = ""
-    for i in range(0, self.num_ephemeral()):
+    for i in range(0, num_ephemeral):
       dirs = dirs + sep + "/media/ephemeral"+str(i)+suffix
       sep = ","
     return dirs
 
   def datanode_dirs(self):
-    return self.ephemeral_dirs("/hadoop/data")
+    return self.ephemeral_dirs("/hadoop/data", self.worker_num_ephemeral())
 
   def hadoop_prefix(self):
     return join(self.cluster_install_dir(), "hadoop-"+self.hadoop_version())
@@ -176,6 +182,9 @@ class DeployConfig(ConfigParser):
   def default_instance_type(self):
     return self.get('ec2', 'default.instance.type')
 
+  def worker_instance_type(self):
+    return self.get('ec2', 'worker.instance.type')
+
   def region(self):
     return self.get('ec2', 'region')
 
@@ -211,14 +220,14 @@ class DeployConfig(ConfigParser):
 
   def get_host_services(self):
     retval = []
-    for (hostname, (instance_type, service_list)) in self.node_d.items():
+    for (hostname, service_list) in self.node_d.items():
       retval.append((hostname, ' '.join(service_list)))
     retval.sort()
     return retval
 
   def get_service_private_ips(self, service):
     retval = []
-    for (hostname, (instance_type, service_list)) in self.node_d.items():
+    for (hostname, service_list) in self.node_d.items():
       if service in service_list:
         retval.append(self.get_private_ip(hostname))
     retval.sort()
@@ -226,7 +235,7 @@ class DeployConfig(ConfigParser):
 
   def get_service_hostnames(self, service):
     retval = []
-    for (hostname, (instance_type, service_list)) in self.node_d.items():
+    for (hostname, service_list) in self.node_d.items():
       if service in service_list:
         retval.append(hostname)
     retval.sort()

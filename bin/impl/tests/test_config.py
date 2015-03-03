@@ -17,16 +17,19 @@ from fluo_deploy.config import DeployConfig
 def test_defaults():
   c = DeployConfig("fluo-deploy", '../../conf/fluo-deploy.props.example', '../../conf/hosts/example/example_cluster', 'mycluster')
   assert c.default_instance_type() == 'm3.large'
+  assert c.worker_instance_type() == 'm3.large'
+  print c.num_ephemeral('worker1')
+  assert c.num_ephemeral('worker1') == c.worker_num_ephemeral()
   assert c.region() == 'us-east-1'
   assert c.vpc_id() == None
   assert c.subnet_id() == None
   assert c.key_name() == 'my_aws_key'
   assert c.instance_tags() == {}
   assert len(c.nodes()) == 7
-  assert c.get_node('leader1') == ('default', ['namenode', 'zookeeper', 'fluo'])
-  assert c.get_node('worker1') == ('default', ['worker'])
-  assert c.get_node('worker2') == ('default', ['worker'])
-  assert c.get_node('worker3') == ('default', ['worker'])
+  assert c.get_node('leader1') == ['namenode', 'zookeeper', 'fluo']
+  assert c.get_node('worker1') == ['worker']
+  assert c.get_node('worker2') == ['worker']
+  assert c.get_node('worker3') == ['worker']
   assert c.get_service_hostnames('worker') == ['worker1', 'worker2', 'worker3']
   assert c.get_service_hostnames('zookeeper') == ['leader1', 'leader2', 'leader3']
   assert c.get_hosts() == {'leader2': ('10.0.0.1', None), 'leader3': ('10.0.0.2', None), 'leader1': ('10.0.0.0', '23.0.0.0'),

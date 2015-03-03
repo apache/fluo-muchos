@@ -79,16 +79,21 @@ def launch_cluster(conn, config):
     security_group.authorize('tcp', 22, 22, '0.0.0.0/0')
 
   instance_d = {}
-  for (hostname, (instance_type, services)) in config.nodes().items():
-    if instance_type == 'default':
+  for (hostname, services) in config.nodes().items():
+
+    if 'worker' in services:
+      instance_type = config.worker_instance_type()
+      num_ephemeral = config.worker_num_ephemeral()
+    else:
       instance_type = config.default_instance_type()
+      num_ephemeral = config.default_num_ephemeral()
 
     host_ami = get_image_id(instance_type)
     if not host_ami:
       exit('ERROR - Image not found for instance type: '+instance_type)
 
     bdm = BlockDeviceMapping()
-    for i in range(0, config.num_ephemeral()):
+    for i in range(0, num_ephemeral):
       bdt = BlockDeviceType()
       bdt.ephemeral_name='ephemeral' + str(i)
       bdm['/dev/xvd' + chr(ord('b') + i)] = bdt
@@ -120,7 +125,7 @@ def launch_cluster(conn, config):
     if num_actual == num_expected:
       # Tag instances and create hosts file
       with open(config.hosts_path, 'w') as hosts_file:
-        for (hostname, (instance_type, services)) in config.nodes().items():
+        for (hostname, services) in config.nodes().items():
           instance = get_instance(nodes, instance_d[hostname])
 
           instance.add_tag(key='Name', value='{cn}-{id}'.format(cn=config.cluster_name, id=hostname))
@@ -234,7 +239,6 @@ def setup_cluster(config):
   sub_d["LEADER_HOST"] = config.leader_hostname()
   sub_d["ACCUMULO_INSTANCE"] = config.accumulo_instance()
   sub_d["ACCUMULO_PASSWORD"] = config.accumulo_password()
-  sub_d["NUM_EPHEMERAL"] = config.num_ephemeral()
   sub_d["DATANODE_DIRS"] = config.datanode_dirs()
   sub_d["GRAPHITE_SERVER"] = config.get_service_private_ips("graphite")[0]
   
@@ -256,12 +260,12 @@ def setup_cluster(config):
     for (private_ip, hostname) in config.get_non_leaders():
       print >>ael_file, private_ip
 
-  llast_path = join(conf_install, "hosts/all_leader_last")
+  llast_path = join(conf_install, "hosts/all_for_configure")
   with open(llast_path, 'w') as llast_file:
     for (private_ip, hostname) in config.get_non_leaders():
-      print >>llast_file, private_ip, hostname
+      print >>llast_file, private_ip, hostname, config.num_ephemeral(hostname)
     leader_host = config.leader_hostname()
-    print >>llast_file, config.get_private_ip(leader_host), leader_host
+    print >>llast_file, config.get_private_ip(leader_host), leader_host, config.num_ephemeral(leader_host)
 
   services_path = join(conf_install, "hosts/hosts_with_services")
   with open(services_path, 'w') as services_file:
