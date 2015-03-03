@@ -107,8 +107,8 @@ class DeployConfig(ConfigParser):
       sep = ","
     return dirs
 
-  def datanode_dirs(self):
-    return self.ephemeral_dirs("/hadoop/data", self.worker_num_ephemeral())
+  def worker_ephemeral_dirs(self, suffix):
+    return self.ephemeral_dirs(suffix, self.worker_num_ephemeral())
 
   def hadoop_prefix(self):
     return join(self.cluster_install_dir(), "hadoop-"+self.hadoop_version())

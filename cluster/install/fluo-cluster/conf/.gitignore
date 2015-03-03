@@ -3,6 +3,7 @@ core-site.xml
 fluo.properties
 hdfs-site.xml
 yarn-site.xml
+mapred-site.xml
 zoo.cfg
 env.sh
 bashrc
