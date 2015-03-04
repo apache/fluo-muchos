@@ -242,6 +242,7 @@ def setup_cluster(config):
   sub_d["DATANODE_DIRS"] = config.worker_ephemeral_dirs("/hadoop/data")
   sub_d["MAPRED_TEMP_DIRS"] = config.worker_ephemeral_dirs("/hadoop/mapred/temp")
   sub_d["MAPRED_LOCAL_DIRS"] = config.worker_ephemeral_dirs("/hadoop/mapred/local")
+  sub_d["YARN_LOCAL_DIRS"] = config.worker_ephemeral_dirs("/hadoop/yarn/local")
   sub_d["GRAPHITE_SERVER"] = config.get_service_private_ips("graphite")[0]
   
   for fn in os.listdir(conf_templates):
