@@ -37,10 +37,12 @@ accumulo.password = secret
 fluo.version = 1.0.0-beta-1-SNAPSHOT
 hadoop.version = 2.6.0
 zookeeper.version = 3.4.6
+#If the Accumulo version contains SNAPSHOT, then the scripts expect it to be in cluster/tarballs/ and will not try to download from a mirror.
 accumulo.version = 1.6.2
 # Software md5 checksums
 hadoop.md5.hash = 37f371faab033bb8c2cb50100c5774dc
 zookeeper.md5.hash = 971c379ba65714fd25dc5fe8f14e9ad1
+#Accumulo hash is only checked if not a SNAPSHOT version.
 accumulo.md5.hash = bbc6f15907330f5f292bae7ed0f02b2f
 
 [ec2]

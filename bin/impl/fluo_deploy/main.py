@@ -201,6 +201,11 @@ def get_ec2_conn(config):
 
 def setup_cluster(config):
 
+  if "SNAPSHOT" in config.accumulo_version():
+    accumulo_tarball =  join(config.local_tarballs_dir(), "accumulo-{0}-bin.tar.gz".format(config.accumulo_version()))
+    if not isfile(accumulo_tarball):
+      exit("Please create an Accumulo tarball and copy it to "+accumulo_tarball)
+
   fluo_tarball = join(config.local_tarballs_dir(), "fluo-{0}-bin.tar.gz".format(config.fluo_version()))
   if not isfile(fluo_tarball):
     exit("Please create a Fluo tarball and copy it to "+fluo_tarball)
@@ -319,6 +324,10 @@ def setup_cluster(config):
 
   exec_leader(config, "mkdir -p {0}".format(config.cluster_tarballs_dir()))
   send_leader(config, install_tarball, config.cluster_tarballs_dir(), skipIfExists=False)
+
+  if "SNAPSHOT" in config.accumulo_version():
+    send_leader(config, accumulo_tarball, config.cluster_tarballs_dir())
+
   send_leader(config, fluo_tarball, config.cluster_tarballs_dir())
   exec_leader(config, "rm -rf {base}/install; tar -C {base} -xzf {base}/tarballs/install.tar.gz".format(base=config.cluster_base_dir()))
 
