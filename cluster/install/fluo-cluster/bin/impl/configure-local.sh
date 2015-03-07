@@ -28,6 +28,9 @@ if [ ! -f /home/$CLUSTER_USERNAME/.fluo-cluster/configured ]; then
   sudo bash -c "cat $CONF_DIR/limits.conf >> /etc/security/limits.conf"
   sudo sed -i "s/localhost.localdomain/$HOST/g" /etc/sysconfig/network
 
+  #need g++ to build accumulo native libs
+  sudo yum install -y gcc-c++
+
   #mount ephermal devices... 
   sudo sed -i 's/defaults,nofail,comment=cloudconfig/defaults,nofail,noatime,nodiratime,comment=cloudconfig/g' /etc/fstab
   c="c"

@@ -27,6 +27,7 @@ function install_accumulo() {
     cp $CONF_DIR/hosts/accumulomaster $ACCUMULO_HOME/conf/monitor
     cp $CONF_DIR/hosts/accumulomaster $ACCUMULO_HOME/conf/tracers
     cp $CONF_DIR/hosts/workers $ACCUMULO_HOME/conf/slaves
+    $ACCUMULO_HOME/bin/build_native_library.sh
     echo "`hostname`: Accumulo installed"
   fi
 }

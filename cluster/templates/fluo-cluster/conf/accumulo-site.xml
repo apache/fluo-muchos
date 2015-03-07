@@ -29,12 +29,12 @@
 
   <property>
     <name>tserver.cache.data.size</name>
-    <value>1G</value>
+    <value>512M</value>
   </property>
 
   <property>
     <name>tserver.cache.index.size</name>
-    <value>1G</value>
+    <value>512M</value>
   </property>
 
   <property>
@@ -44,17 +44,7 @@
 
   <property>
     <name>tserver.memory.maps.native.enabled</name>
-    <value>false</value>
-  </property>
-
-  <property>
-    <name>tserver.cache.data.size</name>
-    <value>30M</value>
-  </property>
-
-  <property>
-    <name>tserver.cache.index.size</name>
-    <value>80M</value>
+    <value>true</value>
   </property>
 
   <property>
