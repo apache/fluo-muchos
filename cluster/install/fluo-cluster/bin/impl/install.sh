@@ -17,7 +17,7 @@ RSYNC_OPTS=(-e "ssh -o 'StrictHostKeyChecking no'" --ignore-existing)
 
 function install_accumulo() {
   if [ ! -d "$ACCUMULO_HOME" ]; then
-    rsync "${RSYNC_OPTS[@]}" $CLUSTER_USERNAME@$LEADER_HOST:$TARBALLS_DIR/$ACCUMULO_TARBALL $TARBALLS_DIR
+    rsync "${RSYNC_OPTS[@]}" $CLUSTER_USERNAME@$PROXY_HOST:$TARBALLS_DIR/$ACCUMULO_TARBALL $TARBALLS_DIR
     tar -C $INSTALL_DIR -xzf $TARBALLS_DIR/$ACCUMULO_TARBALL
     cp $ACCUMULO_HOME/conf/templates/* $ACCUMULO_HOME/conf/
     cp $CONF_DIR/accumulo-site.xml $ACCUMULO_HOME/conf/
@@ -34,7 +34,7 @@ function install_accumulo() {
 
 function install_hadoop() {
   if [ ! -d "$HADOOP_PREFIX" ]; then
-    rsync "${RSYNC_OPTS[@]}" $CLUSTER_USERNAME@$LEADER_HOST:$TARBALLS_DIR/$HADOOP_TARBALL $TARBALLS_DIR
+    rsync "${RSYNC_OPTS[@]}" $CLUSTER_USERNAME@$PROXY_HOST:$TARBALLS_DIR/$HADOOP_TARBALL $TARBALLS_DIR
     tar -C $INSTALL_DIR -xzf $TARBALLS_DIR/$HADOOP_TARBALL
     cp $CONF_DIR/core-site.xml $HADOOP_PREFIX/etc/hadoop/
     cp $CONF_DIR/hdfs-site.xml $HADOOP_PREFIX/etc/hadoop/
@@ -47,7 +47,7 @@ function install_hadoop() {
 
 function install_zookeeper() {
   if [ ! -d "$ZOOKEEPER_HOME" ]; then
-    rsync "${RSYNC_OPTS[@]}" $CLUSTER_USERNAME@$LEADER_HOST:$TARBALLS_DIR/$ZOOKEEPER_TARBALL $TARBALLS_DIR
+    rsync "${RSYNC_OPTS[@]}" $CLUSTER_USERNAME@$PROXY_HOST:$TARBALLS_DIR/$ZOOKEEPER_TARBALL $TARBALLS_DIR
     tar -C $INSTALL_DIR -xzf $TARBALLS_DIR/$ZOOKEEPER_TARBALL
     cp $CONF_DIR/zoo.cfg $ZOOKEEPER_HOME/conf/
     echo "`hostname`: Zookeeper installed"
@@ -56,7 +56,7 @@ function install_zookeeper() {
 
 function install_fluo() {
   if [ ! -d "$FLUO_HOME" ]; then
-    rsync "${RSYNC_OPTS[@]}" $CLUSTER_USERNAME@$LEADER_HOST:$TARBALLS_DIR/$FLUO_TARBALL $TARBALLS_DIR
+    rsync "${RSYNC_OPTS[@]}" $CLUSTER_USERNAME@$PROXY_HOST:$TARBALLS_DIR/$FLUO_TARBALL $TARBALLS_DIR
     tar -C $INSTALL_DIR -xzf $TARBALLS_DIR/$FLUO_TARBALL
     cp $FLUO_HOME/conf/examples/* $FLUO_HOME/conf/
     cp $CONF_DIR/fluo.properties $FLUO_HOME/conf/
@@ -68,7 +68,7 @@ function install_fluo() {
 
 function install_java() {
   if [ ! -d "$JAVA_INSTALL" ]; then
-    rsync "${RSYNC_OPTS[@]}" $CLUSTER_USERNAME@$LEADER_HOST:$TARBALLS_DIR/$JAVA_TARBALL $TARBALLS_DIR
+    rsync "${RSYNC_OPTS[@]}" $CLUSTER_USERNAME@$PROXY_HOST:$TARBALLS_DIR/$JAVA_TARBALL $TARBALLS_DIR
     tar -C $INSTALL_DIR -xzf $TARBALLS_DIR/$JAVA_TARBALL
     echo "`hostname`: Java installed"
   fi

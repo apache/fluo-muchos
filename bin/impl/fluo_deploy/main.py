@@ -63,8 +63,8 @@ def launch_cluster(conn, config):
   if isfile(config.hosts_path):
     exit("ERROR - A hosts file already exists at {0}.  Please delete before running launch again".format(config.hosts_path))
 
-  if not config.leader_hostname():
-    exit("ERROR - leader.node.id must specified in properties file")
+  if not config.proxy_hostname():
+    exit("ERROR - proxy.hostname must specified in fluo-deploy.props file")
 
   print "Launching {0} cluster".format(config.cluster_name)
 
@@ -159,39 +159,39 @@ def check_code(retcode, command):
   if retcode != 0:
     exit("ERROR - Command failed with return code of {0}: {1}".format(retcode, command))
 
-def ssh_leader(config, command, opts=''):
+def exec_on_proxy(config, command, opts=''):
   ssh_command = "ssh -A -o 'StrictHostKeyChecking no' {opts} {usr}@{ldr} '{cmd}'".format(usr=config.cluster_username(),
-    ldr=config.leader_public_ip(), cmd=command, opts=opts)
+    ldr=config.proxy_public_ip(), cmd=command, opts=opts)
   return (subprocess.call(ssh_command, shell=True), ssh_command)
 
-def exec_leader(config, command, opts=''):
-  (retcode, ssh_command) = ssh_leader(config, command, opts)
+def exec_on_proxy_verified(config, command, opts=''):
+  (retcode, ssh_command) = exec_on_proxy(config, command, opts)
   check_code(retcode, ssh_command)
 
-def wait_until_leader_ready(config):
+def wait_until_proxy_ready(config):
   while True:
-    (retcode, ssh_command) = ssh_leader(config, 'pwd > /dev/null')
+    (retcode, ssh_command) = exec_on_proxy(config, 'pwd > /dev/null')
     if retcode == 0:
-      print "Leader is ready!"
+      print "Proxy is ready!"
       time.sleep(1)
       break;
-    print "Leader is not ready yet.  Will retry in 5 sec..."
+    print "Proxy is not ready yet.  Will retry in 5 sec..."
     time.sleep(5)  
 
 def wait_until_cluster_ready(config):
-  wait_until_leader_ready(config)
+  wait_until_proxy_ready(config)
   exec_fluo_cluster_command(config, "ready")
  
 def exec_fluo_cluster_command(config, command):
-  exec_leader(config, "bash {base}/install/fluo-cluster/bin/fluo-cluster {command}".format(base=config.cluster_base_dir(), command=command))
+  exec_on_proxy_verified(config, "bash {base}/install/fluo-cluster/bin/fluo-cluster {command}".format(base=config.cluster_base_dir(), command=command))
 
-def send_leader(config, path, target, skipIfExists=True): 
-  print "Copying to leader: ",path
+def send_to_proxy(config, path, target, skipIfExists=True): 
+  print "Copying to proxy: ",path
   cmd = "scp -o 'StrictHostKeyChecking no'"
   if skipIfExists:
     cmd = "rsync --ignore-existing --progress -e \"ssh -o 'StrictHostKeyChecking no'\""
   subprocess.call("{cmd} {src} {usr}@{ldr}:{tdir}".format(cmd=cmd, src=path, 
-          usr=config.cluster_username(), ldr=config.leader_public_ip(), tdir=target), shell=True)
+          usr=config.cluster_username(), ldr=config.proxy_public_ip(), tdir=target), shell=True)
 
 def get_ec2_conn(config):
   conn = ec2.connect_to_region(config.region())
@@ -241,7 +241,7 @@ def setup_cluster(config):
   sub_d["RESOURCEMANAGER_HOST"] = config.get_service_private_ips("resourcemanager")[0]
   sub_d["ACCUMULOMASTER_HOST"] = config.get_service_hostnames("accumulomaster")[0]
   sub_d["NUM_WORKERS"] = len(config.get_service_hostnames("worker"))
-  sub_d["LEADER_HOST"] = config.leader_hostname()
+  sub_d["PROXY_HOST"] = config.proxy_hostname()
   sub_d["ACCUMULO_INSTANCE"] = config.accumulo_instance()
   sub_d["ACCUMULO_PASSWORD"] = config.accumulo_password()
   sub_d["DATANODE_DIRS"] = config.worker_ephemeral_dirs("/hadoop/data")
@@ -263,17 +263,17 @@ def setup_cluster(config):
         with open(install_path, "w") as install_file:
           install_file.write(sub_data)
 
-  ael_path = join(conf_install, "hosts/all_except_leader")
+  ael_path = join(conf_install, "hosts/all_except_proxy")
   with open(ael_path, 'w') as ael_file:
-    for (private_ip, hostname) in config.get_non_leaders():
+    for (private_ip, hostname) in config.get_non_proxy():
       print >>ael_file, private_ip
 
   llast_path = join(conf_install, "hosts/all_for_configure")
   with open(llast_path, 'w') as llast_file:
-    for (private_ip, hostname) in config.get_non_leaders():
+    for (private_ip, hostname) in config.get_non_proxy():
       print >>llast_file, private_ip, hostname, config.num_ephemeral(hostname)
-    leader_host = config.leader_hostname()
-    print >>llast_file, config.get_private_ip(leader_host), leader_host, config.num_ephemeral(leader_host)
+    proxy_host = config.proxy_hostname()
+    print >>llast_file, config.get_private_ip(proxy_host), proxy_host, config.num_ephemeral(proxy_host)
 
   services_path = join(conf_install, "hosts/hosts_with_services")
   with open(services_path, 'w') as services_file:
@@ -320,16 +320,16 @@ def setup_cluster(config):
   if retcode != 0:
     error("Failed to create install tarball")
 
-  wait_until_leader_ready(config)
+  wait_until_proxy_ready(config)
 
-  exec_leader(config, "mkdir -p {0}".format(config.cluster_tarballs_dir()))
-  send_leader(config, install_tarball, config.cluster_tarballs_dir(), skipIfExists=False)
+  exec_on_proxy_verified(config, "mkdir -p {0}".format(config.cluster_tarballs_dir()))
+  send_to_proxy(config, install_tarball, config.cluster_tarballs_dir(), skipIfExists=False)
 
   if "SNAPSHOT" in config.accumulo_version():
-    send_leader(config, accumulo_tarball, config.cluster_tarballs_dir())
+    send_to_proxy(config, accumulo_tarball, config.cluster_tarballs_dir())
 
-  send_leader(config, fluo_tarball, config.cluster_tarballs_dir())
-  exec_leader(config, "rm -rf {base}/install; tar -C {base} -xzf {base}/tarballs/install.tar.gz".format(base=config.cluster_base_dir()))
+  send_to_proxy(config, fluo_tarball, config.cluster_tarballs_dir())
+  exec_on_proxy_verified(config, "rm -rf {base}/install; tar -C {base} -xzf {base}/tarballs/install.tar.gz".format(base=config.cluster_base_dir()))
 
   exec_fluo_cluster_command(config, "setup")
 
@@ -380,13 +380,13 @@ def main():
     else:
       config.print_property(opts.property)
   elif action == 'ssh':
-    print "Connecting to leader", config.leader_public_ip()
-    wait_until_leader_ready(config)
+    print "Connecting to proxy: {0} {1}".format(config.proxy_hostname(), config.proxy_public_ip())
+    wait_until_proxy_ready(config)
     fwd = ''
-    if config.leader_socks_proxy():
-      fwd = "-D "+config.leader_socks_proxy()
+    if config.proxy_socks_port():
+      fwd = "-D "+config.proxy_socks_port()
     ssh_command = "ssh -A -o 'StrictHostKeyChecking no' {fwd} {usr}@{ldr}".format(usr=config.cluster_username(),
-      ldr=config.leader_public_ip(), fwd=fwd)
+      ldr=config.proxy_public_ip(), fwd=fwd)
     retcode = subprocess.call(ssh_command, shell=True)
     check_code(retcode, ssh_command)
   elif action == 'kill':
