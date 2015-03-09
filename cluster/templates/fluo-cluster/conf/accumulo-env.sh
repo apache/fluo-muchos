@@ -23,7 +23,7 @@ if [ -f $${ACCUMULO_CONF_DIR}/accumulo.policy ]
 then
    POLICY="-Djava.security.manager -Djava.security.policy=$${ACCUMULO_CONF_DIR}/accumulo.policy"
 fi
-export ACCUMULO_TSERVER_OPTS="$${POLICY} -Xmx768m -Xms768m "
+export ACCUMULO_TSERVER_OPTS="$${POLICY} -Xmx2G -Xms2G "
 export ACCUMULO_MASTER_OPTS="$${POLICY} -Xmx256m -Xms256m"
 export ACCUMULO_MONITOR_OPTS="$${POLICY} -Xmx128m -Xms64m"
 export ACCUMULO_GC_OPTS="-Xmx128m -Xms128m"
