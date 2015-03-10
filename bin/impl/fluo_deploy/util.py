@@ -117,7 +117,7 @@ def parse_args(hosts_dir, input=None):
             + "  status - Check status of EC2 cluster\n"
             + "  setup - Setup Fluo and its dependencies on cluster\n"
             + "  config - Print configuration for that cluster.  Requires '-p' option.  Use '-p all' for all config.\n"
-            + "  ssh - SSH to cluster leader node\n"
+            + "  ssh - SSH to cluster proxy node\n"
             + "  kill - Kill Fluo and its dependencies on cluster\n"
             + "  terminate - Terminate EC2 cluster",
             add_help_option=False)

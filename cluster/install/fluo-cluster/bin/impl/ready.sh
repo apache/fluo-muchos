@@ -16,7 +16,7 @@
 SSH_OPTS=(-o 'StrictHostKeyChecking no' -A)
 
 echo "Checking if cluster is ready..."
-for host in `cat $CONF_DIR/hosts/all_except_leader`; do
+for host in `cat $CONF_DIR/hosts/all_except_proxy`; do
   ssh "${SSH_OPTS[@]}" $CLUSTER_USERNAME@$host pwd > /dev/null
   if [ $? -ne 0 ]; then
     echo "Cluster is NOT ready - Failed to connect to $host"

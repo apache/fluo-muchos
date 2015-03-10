@@ -19,12 +19,12 @@ cluster.username = ec2-user
 # Cluster base directory where install/ & tarballs/ directories are created
 # Leave default below if launching cluster in AWS
 cluster.base.dir = /home/ec2-user
-# Hostname of node that must direct installation of cluster.  Will be given Public IP if launching in EC2.
-# If not launching in EC2, node must have Public IP that can be reached from your machine.
-# Hostname can be chosen from "nodes" section below.
-leader.hostname = leader1
-# If set, a SOCKS proxy will be created on the specified port when connecting to leader using 'fluo-deploy ssh <cluster>'
-#leader.socks.proxy = 38585
+# Hostname of proxy node that fluo-deploy will use to direct installation of cluster.  Will be given 
+# public IP if launching in EC2.  If not launching in EC2, node must have public IP that can be reached
+# from your machine. Hostname can be chosen from "nodes" section below.
+proxy.hostname = leader1
+# If set, a SOCKS proxy will be created on the specified port when connecting to proxy using 'fluo-deploy ssh <cluster>'
+#proxy.socks.port = 38585
 # Specifies if SSH, Hosts, and .bashrc should be configured on cluster
 configure.cluster = true
 # Apache mirror to download Hadoop, Zookeeper, Accumulo

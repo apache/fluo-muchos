@@ -44,7 +44,7 @@ wget -nc -nv -P $TARBALLS_DIR --no-check-certificate --no-cookies --header "Cook
 verify_checksum $JAVA_TARBALL 6f1f81030a34f7a9c987f8b68a24d139
 
 # Push install directory to all hosts
-for host in `cat $CONF_DIR/hosts/all_except_leader`; do
+for host in `cat $CONF_DIR/hosts/all_except_proxy`; do
   echo "`hostname`: Copying scripts to $host"
   ssh "${SSH_OPTS[@]}" $CLUSTER_USERNAME@$host mkdir -p $TARBALLS_DIR
   scp $TARBALLS_DIR/install.tar.gz $CLUSTER_USERNAME@$host:$TARBALLS_DIR

@@ -1,5 +1,5 @@
 hosts_with_services
-all_except_leader
+all_except_proxy
 all_for_configure
 workers
 accumulomaster

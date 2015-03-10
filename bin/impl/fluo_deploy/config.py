@@ -32,15 +32,15 @@ class DeployConfig(ConfigParser):
     self.init_nodes()
 
   def verify_config(self, action):
-    leader = self.leader_hostname()
-    if not leader:
-      exit("ERROR - leader.hostname must be set in fluo-deploy.props")
+    proxy = self.proxy_hostname()
+    if not proxy:
+      exit("ERROR - proxy.hostname must be set in fluo-deploy.props")
 
-    if leader not in self.node_d:
-      exit("ERROR - The leader (set by property leader.hostname={0}) cannot be found in 'nodes' section of fluo-deploy.props".format(leader))
+    if proxy not in self.node_d:
+      exit("ERROR - The proxy (set by property proxy.hostname={0}) cannot be found in 'nodes' section of fluo-deploy.props".format(proxy))
 
     if action != 'launch':
-      self.leader_public_ip()
+      self.proxy_public_ip()
 
   def init_nodes(self):
     self.node_d = {}
@@ -67,12 +67,12 @@ class DeployConfig(ConfigParser):
   def accumulo_password(self):
     return self.get('general', 'accumulo.password')
 
-  def leader_hostname(self):
-    return self.get('general', 'leader.hostname')
+  def proxy_hostname(self):
+    return self.get('general', 'proxy.hostname')
 
-  def leader_socks_proxy(self):
-    if self.has_option('general', 'leader.socks.proxy'):
-      return self.get('general', 'leader.socks.proxy')
+  def proxy_socks_port(self):
+    if self.has_option('general', 'proxy.socks.port'):
+      return self.get('general', 'proxy.socks.port')
 
   def configure_cluster(self):
     if self.has_option('general', 'configure.cluster'):
@@ -241,11 +241,11 @@ class DeployConfig(ConfigParser):
     retval.sort()
     return retval
 
-  def get_non_leaders(self):
+  def get_non_proxy(self):
     retval = []
-    leader_ip = self.get_private_ip(self.leader_hostname())
+    proxy_ip = self.get_private_ip(self.proxy_hostname())
     for (hostname, (private_ip, public_ip)) in self.hosts.items():
-      if private_ip != leader_ip:
+      if private_ip != proxy_ip:
         retval.append((private_ip, hostname))
     retval.sort()
     return retval
@@ -279,17 +279,17 @@ class DeployConfig(ConfigParser):
   def get_public_ip(self, hostname):
     return self.get_hosts()[hostname][1]
 
-  def leader_public_ip(self):
-    retval = self.get_public_ip(self.leader_hostname())
+  def proxy_public_ip(self):
+    retval = self.get_public_ip(self.proxy_hostname())
     if not retval:
-      exit("ERROR - Leader {0} does not have a public IP".format(self.leader_hostname()))
+      exit("ERROR - Leader {0} does not have a public IP".format(self.proxy_hostname()))
     return retval
 
-  def leader_private_ip(self):
-    return self.get_private_ip(self.leader_hostname())
+  def proxy_private_ip(self):
+    return self.get_private_ip(self.proxy_hostname())
 
   def print_all(self):
-    print 'leader.public.ip = ', self.leader_public_ip()
+    print 'proxy.public.ip = ', self.proxy_public_ip()
     for (name, val) in self.items('general'):
       print name, '=', val
 
@@ -298,8 +298,8 @@ class DeployConfig(ConfigParser):
 
   def print_property(self, key):
 
-    if key == 'leader.public.ip':
-      print self.leader_public_ip()
+    if key == 'proxy.public.ip':
+      print self.proxy_public_ip()
       return
     else:
       for section in self.sections():

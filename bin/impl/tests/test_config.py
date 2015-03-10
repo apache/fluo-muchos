@@ -50,13 +50,13 @@ def test_defaults():
   assert c.accumulo_url() == "http://www.gtlib.gatech.edu/pub/apache/accumulo/1.6.2/accumulo-1.6.2-bin.tar.gz"
   assert c.get_service_private_ips("worker") == ['10.0.0.3', '10.0.0.4', '10.0.0.5']
   assert c.zookeeper_connect() == "leader1,leader2,leader3"
-  assert c.leader_hostname() == "leader1"
-  assert c.leader_public_ip() == "23.0.0.0"
-  assert c.leader_private_ip() == "10.0.0.0"
+  assert c.proxy_hostname() == "leader1"
+  assert c.proxy_public_ip() == "23.0.0.0"
+  assert c.proxy_private_ip() == "10.0.0.0"
   assert c.cluster_base_dir() == "/home/ec2-user"
   assert c.cluster_username() == "ec2-user"
   assert c.configure_cluster() == "true"
-  assert c.get_non_leaders() == [('10.0.0.1', 'leader2'), ('10.0.0.2', 'leader3'), ('10.0.0.3', 'worker1'), ('10.0.0.4', 'worker2'), ('10.0.0.5', 'worker3')]
+  assert c.get_non_proxy() == [('10.0.0.1', 'leader2'), ('10.0.0.2', 'leader3'), ('10.0.0.3', 'worker1'), ('10.0.0.4', 'worker2'), ('10.0.0.5', 'worker3')]
   assert c.get_host_services() == [('leader1', 'namenode zookeeper fluo'), ('leader2', 'resourcemanager zookeeper'), ('leader3', 'accumulomaster zookeeper'),
                                    ('monitor', 'graphite'), ('worker1', 'worker'), ('worker2', 'worker'), ('worker3', 'worker')]
   assert c.zookeeper_server_config() == "server.1=leader1:2888:3888\nserver.2=leader2:2888:3888\nserver.3=leader3:2888:3888"
