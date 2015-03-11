@@ -26,7 +26,7 @@ def test_defaults():
   assert c.key_name() == 'my_aws_key'
   assert c.instance_tags() == {}
   assert len(c.nodes()) == 7
-  assert c.get_node('leader1') == ['namenode', 'zookeeper', 'fluo']
+  assert c.get_node('leader1') == ['namenode', 'zookeeper', 'fluo', 'dev']
   assert c.get_node('worker1') == ['worker']
   assert c.get_node('worker2') == ['worker']
   assert c.get_node('worker3') == ['worker']
@@ -58,6 +58,6 @@ def test_defaults():
   assert c.cluster_username() == "ec2-user"
   assert c.configure_cluster() == "true"
   assert c.get_non_proxy() == [('10.0.0.1', 'leader2'), ('10.0.0.2', 'leader3'), ('10.0.0.3', 'worker1'), ('10.0.0.4', 'worker2'), ('10.0.0.5', 'worker3')]
-  assert c.get_host_services() == [('leader1', 'namenode zookeeper fluo'), ('leader2', 'resourcemanager zookeeper'), ('leader3', 'accumulomaster zookeeper'),
+  assert c.get_host_services() == [('leader1', 'namenode zookeeper fluo dev'), ('leader2', 'resourcemanager zookeeper'), ('leader3', 'accumulomaster zookeeper'),
                                    ('monitor', 'graphite'), ('worker1', 'worker'), ('worker2', 'worker'), ('worker3', 'worker')]
   assert c.zookeeper_server_config() == "server.1=leader1:2888:3888\nserver.2=leader2:2888:3888\nserver.3=leader3:2888:3888"
