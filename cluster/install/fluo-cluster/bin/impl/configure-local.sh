@@ -29,7 +29,7 @@ if [ ! -f /home/$CLUSTER_USERNAME/.fluo-cluster/configured ]; then
   sudo sed -i "s/localhost.localdomain/$HOST/g" /etc/sysconfig/network
 
   #need g++ to build accumulo native libs
-  sudo yum install -y gcc-c++
+  sudo yum install -q -y gcc-c++
 
   #mount ephermal devices... 
   sudo sed -i 's/defaults,nofail,comment=cloudconfig/defaults,nofail,noatime,nodiratime,comment=cloudconfig/g' /etc/fstab

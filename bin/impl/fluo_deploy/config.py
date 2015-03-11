@@ -42,6 +42,12 @@ class DeployConfig(ConfigParser):
     if action != 'launch':
       self.proxy_public_ip()
 
+    if action in ['launch', 'setup']:
+      for service in SERVICES:
+        if service not in ['fluo', 'graphite']:
+          if not self.has_service(service):
+            exit("ERROR - Missing '{0}' service from [nodes] section of fluo-deploy.props".format(service))
+
   def init_nodes(self):
     self.node_d = {}
     for (hostname, value) in self.items('nodes'):
@@ -217,6 +223,12 @@ class DeployConfig(ConfigParser):
 
   def get_node(self, hostname):
     return self.node_d[hostname]
+
+  def has_service(self, service):
+    for (hostname, service_list) in self.node_d.items():
+      if service in service_list:
+        return True
+    return False
 
   def get_host_services(self):
     retval = []

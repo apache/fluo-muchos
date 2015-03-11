@@ -206,9 +206,10 @@ def setup_cluster(config):
     if not isfile(accumulo_tarball):
       exit("Please create an Accumulo tarball and copy it to "+accumulo_tarball)
 
-  fluo_tarball = join(config.local_tarballs_dir(), "fluo-{0}-bin.tar.gz".format(config.fluo_version()))
-  if not isfile(fluo_tarball):
-    exit("Please create a Fluo tarball and copy it to "+fluo_tarball)
+  if config.has_service('fluo'): 
+    fluo_tarball = join(config.local_tarballs_dir(), "fluo-{0}-bin.tar.gz".format(config.fluo_version()))
+    if not isfile(fluo_tarball):
+      exit("Please create a Fluo tarball and copy it to "+fluo_tarball)
 
   print 'Setting up {0} cluster'.format(config.cluster_name)
   conf_templates = join(config.deploy_path, "cluster/templates/fluo-cluster/conf")
@@ -248,9 +249,12 @@ def setup_cluster(config):
   sub_d["MAPRED_TEMP_DIRS"] = config.worker_ephemeral_dirs("/hadoop/mapred/temp")
   sub_d["MAPRED_LOCAL_DIRS"] = config.worker_ephemeral_dirs("/hadoop/mapred/local")
   sub_d["YARN_LOCAL_DIRS"] = config.worker_ephemeral_dirs("/hadoop/yarn/local")
-  sub_d["GRAPHITE_SERVER"] = config.get_service_private_ips("graphite")[0]
+  if config.has_service("graphite"):
+    sub_d["GRAPHITE_SERVER"] = config.get_service_private_ips("graphite")[0]
   
   for fn in os.listdir(conf_templates):
+    if not config.has_service("graphite") and fn == "metrics.yaml":
+      continue
     template_path = join(conf_templates, fn)
     install_path = join(conf_install, fn)
     if isfile(install_path):
@@ -328,7 +332,9 @@ def setup_cluster(config):
   if "SNAPSHOT" in config.accumulo_version():
     send_to_proxy(config, accumulo_tarball, config.cluster_tarballs_dir())
 
-  send_to_proxy(config, fluo_tarball, config.cluster_tarballs_dir())
+  if config.has_service('fluo'):
+    send_to_proxy(config, fluo_tarball, config.cluster_tarballs_dir())
+
   exec_on_proxy_verified(config, "rm -rf {base}/install; tar -C {base} -xzf {base}/tarballs/install.tar.gz".format(base=config.cluster_base_dir()))
 
   exec_fluo_cluster_command(config, "setup")
