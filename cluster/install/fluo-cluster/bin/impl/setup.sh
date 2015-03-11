@@ -39,9 +39,11 @@ fi
 wget -nc -nv -P $TARBALLS_DIR $APACHE_MIRROR/hadoop/common/hadoop-$HADOOP_VERSION/$HADOOP_TARBALL
 verify_checksum $HADOOP_TARBALL $HADOOP_MD5
 
-JAVA_TARBALL=jdk-7u75-linux-x64.tar.gz
 wget -nc -nv -P $TARBALLS_DIR --no-check-certificate --no-cookies --header "Cookie: oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/7u75-b13/$JAVA_TARBALL
 verify_checksum $JAVA_TARBALL 6f1f81030a34f7a9c987f8b68a24d139
+
+wget -nc -nv -P $TARBALLS_DIR $APACHE_MIRROR/maven/maven-3/$MAVEN_VERSION/binaries/$MAVEN_TARBALL
+verify_checksum $MAVEN_TARBALL $MAVEN_MD5
 
 # Push install directory to all hosts
 for host in `cat $CONF_DIR/hosts/all_except_proxy`; do
