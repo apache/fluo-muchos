@@ -30,6 +30,7 @@ def test_defaults():
   assert c.get_node('worker1') == ['worker']
   assert c.get_node('worker2') == ['worker']
   assert c.get_node('worker3') == ['worker']
+  assert c.has_service('fluo')
   assert c.get_service_hostnames('worker') == ['worker1', 'worker2', 'worker3']
   assert c.get_service_hostnames('zookeeper') == ['leader1', 'leader2', 'leader3']
   assert c.get_hosts() == {'leader2': ('10.0.0.1', None), 'leader3': ('10.0.0.2', None), 'leader1': ('10.0.0.0', '23.0.0.0'),
