@@ -74,6 +74,22 @@ function install_java() {
   fi
 }
 
+function install_maven() {
+  if [ ! -d "$MAVEN_INSTALL" ]; then
+    rsync "${RSYNC_OPTS[@]}" $CLUSTER_USERNAME@$PROXY_HOST:$TARBALLS_DIR/$MAVEN_TARBALL $TARBALLS_DIR
+    tar -C $INSTALL_DIR -xzf $TARBALLS_DIR/$MAVEN_TARBALL
+    ln -s $MAVEN_INSTALL $INSTALL_DIR/maven
+    echo "`hostname`: Maven installed"
+  fi
+}
+
+function install_git() {
+  if ! rpm -q --quiet git ; then
+    sudo yum install -q -y git
+    echo "`hostname`: Git installed"
+  fi
+}
+
 function install_graphite(){
   if ! rpm -qa | grep -qw docker; then  
     sudo yum install -y docker
@@ -149,7 +165,11 @@ for service in "$@"; do
     graphite)
       install_graphite
       ;;
-
+    dev)
+      install_java
+      install_git
+      install_maven
+      ;;
     *)
       echo "Unknown service: $service"
       exit 1

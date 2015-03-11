@@ -69,9 +69,9 @@ key.name = my_aws_key
 # <Hostname> = <Service1>[,<Service2>,<Service3>]
 # Where: 
 #   Hostname = Must be unique.  Will be used for hostname in EC2 or should match hostname on your own cluster
-#   Service = Service to run on node (possible values: zookeeper, namenode, resourcemanager, accumulomaster, worker, fluo, graphite)
-#             All services are required below except for fluo & graphite which are optional
-leader1 = namenode,zookeeper,fluo
+#   Service = Service to run on node (possible values: zookeeper, namenode, resourcemanager, accumulomaster, worker, fluo, graphite, dev)
+#             All services are required below except for fluo, dev, & graphite which are optional
+leader1 = namenode,zookeeper,fluo,dev
 leader2 = resourcemanager,zookeeper
 leader3 = accumulomaster,zookeeper
 monitor = graphite

@@ -17,7 +17,7 @@ from util import get_num_ephemeral, exit
 import os
 from os.path import join
 
-SERVICES = ['zookeeper', 'namenode', 'resourcemanager', 'accumulomaster', 'worker', 'fluo', 'graphite']
+SERVICES = ['zookeeper', 'namenode', 'resourcemanager', 'accumulomaster', 'worker', 'fluo', 'graphite', 'dev']
 
 class DeployConfig(ConfigParser):
 
@@ -44,7 +44,7 @@ class DeployConfig(ConfigParser):
 
     if action in ['launch', 'setup']:
       for service in SERVICES:
-        if service not in ['fluo', 'graphite']:
+        if service not in ['fluo', 'graphite', 'dev']:
           if not self.has_service(service):
             exit("ERROR - Missing '{0}' service from [nodes] section of fluo-deploy.props".format(service))
 
