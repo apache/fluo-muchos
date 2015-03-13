@@ -249,6 +249,11 @@ def setup_cluster(config):
   sub_d["MAPRED_TEMP_DIRS"] = config.worker_ephemeral_dirs("/hadoop/mapred/temp")
   sub_d["MAPRED_LOCAL_DIRS"] = config.worker_ephemeral_dirs("/hadoop/mapred/local")
   sub_d["YARN_LOCAL_DIRS"] = config.worker_ephemeral_dirs("/hadoop/yarn/local")
+  sub_d["TEST_REPO"] = config.get("test","repo")
+  sub_d["TEST_BRANCH"] = config.get("test","branch")
+  sub_d["TEST_PRE_INIT"] = config.get("test","command.pre.init")
+  sub_d["TEST_POST_START"] = config.get("test","command.post.start")
+
   if config.has_service("graphite"):
     sub_d["GRAPHITE_SERVER"] = config.get_service_private_ips("graphite")[0]
   
@@ -400,6 +405,8 @@ def main():
       exit("Hosts file does not exist for cluster: "+hosts_path)
     print "Killing {0} cluster".format(config.cluster_name)
     exec_fluo_cluster_command(config, "kill")
+  elif action == 'test':
+    exec_fluo_cluster_command(config, "test")
   elif action == 'terminate':
     conn = get_ec2_conn(config)
     nodes = get_active_cluster(conn, config)
