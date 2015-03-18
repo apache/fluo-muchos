@@ -51,6 +51,9 @@ ready)
 ashell)
   $ACCUMULO_HOME/bin/accumulo shell -u root -p $ACCUMULO_PASSWORD
   ;;
+test)
+  "$bin"/impl/test.sh ${*:2}
+  ;;
 *)
   echo -e "Usage: fluo-cluster command (<argument>)\n"
   echo -e "Possible commands:\n"
@@ -62,6 +65,7 @@ ashell)
   echo "  kill         Kill cluster processes"
   echo "  ready        Checks if cluster is running and ready"
   echo "  ashell       Runs Accumulo shell"
+  echo "  test         Runs a user specified fluo test"
   echo " " 
   exit 1
 esac

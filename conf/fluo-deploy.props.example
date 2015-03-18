@@ -64,6 +64,18 @@ key.name = my_aws_key
 # Tags to add instances
 #instance.tags = key1:value1,key2:value2
 
+[test]
+#git repo to clone when running a test
+repo=https://github.com/fluo-io/fluo-stress
+#branch to checkout in test repo
+branch=master
+#command from test repo to run before initializing and starting fluo.  When
+#this command is run FLUO_HOME will be set in env.  The command can do things
+#like change fluo config and copy observers.
+command.pre.init=bin/configure-fluo.sh 
+#test script to run from test repo after fluo is started
+command.post.start=bin/run-test.sh
+
 [nodes]
 # Describes nodes in cluster in the following format: 
 # <Hostname> = <Service1>[,<Service2>,<Service3>]
