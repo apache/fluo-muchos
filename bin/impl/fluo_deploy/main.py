@@ -199,6 +199,14 @@ def get_ec2_conn(config):
     exit('ERROR - Failed to connect to region ' + config.region())
   return conn
 
+def write_test_props(config):
+  conf_install = join(config.deploy_path, "cluster/install/fluo-cluster/conf")
+
+  test_props_path = join(conf_install, "test.properties")
+  with open(test_props_path, 'w') as test_props_file:
+    for (name, value) in config.items("test"):
+      print >>test_props_file, "{0}={1}".format(name, value)
+
 def setup_cluster(config):
 
   if "SNAPSHOT" in config.accumulo_version():
@@ -249,10 +257,6 @@ def setup_cluster(config):
   sub_d["MAPRED_TEMP_DIRS"] = config.worker_ephemeral_dirs("/hadoop/mapred/temp")
   sub_d["MAPRED_LOCAL_DIRS"] = config.worker_ephemeral_dirs("/hadoop/mapred/local")
   sub_d["YARN_LOCAL_DIRS"] = config.worker_ephemeral_dirs("/hadoop/yarn/local")
-  sub_d["TEST_REPO"] = config.get("test","repo")
-  sub_d["TEST_BRANCH"] = config.get("test","branch")
-  sub_d["TEST_PRE_INIT"] = config.get("test","command.pre.init")
-  sub_d["TEST_POST_START"] = config.get("test","command.post.start")
 
   if config.has_service("graphite"):
     sub_d["GRAPHITE_SERVER"] = config.get_service_private_ips("graphite")[0]
@@ -271,6 +275,8 @@ def setup_cluster(config):
         sub_data = template.substitute(sub_d)
         with open(install_path, "w") as install_file:
           install_file.write(sub_data)
+
+  write_test_props(config)
 
   ael_path = join(conf_install, "hosts/all_except_proxy")
   with open(ael_path, 'w') as ael_file:
@@ -406,7 +412,9 @@ def main():
     print "Killing {0} cluster".format(config.cluster_name)
     exec_fluo_cluster_command(config, "kill")
   elif action == 'test':
-    exec_fluo_cluster_command(config, "test")
+    write_test_props(config)
+    send_to_proxy(config, join(config.deploy_path, "cluster/install/fluo-cluster/conf/test.properties"), join(config.cluster_install_dir(), "fluo-cluster/conf"), skipIfExists=False)
+    exec_fluo_cluster_command(config, "test {0}".format(opts.application))
   elif action == 'terminate':
     conn = get_ec2_conn(config)
     nodes = get_active_cluster(conn, config)

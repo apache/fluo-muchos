@@ -86,11 +86,20 @@ ssh <FLUO_HOSTNAME>
 cdf   # Alias to change directory to Fluo Home
 ```
 
-When Fluo is configured with your observers, run the following commands to initialize and start Fluo:
+Run a Fluo application
+----------------------
+
+If you have a Fluo application to run, follow the instructions starting at [Configure a Fluo application][3] 
+section of the Fluo production install instructions to configure, initialize, and start your application.
+
+If you don't have an application and want to test your cluster, you can run the following command to
+run the [stress test][4] application:
 ```
-fluo init
-fluo yarn start
+fluo-deploy test -a stress
 ```
+
+The stress test can take up to an hour to complete.  Status will be output to console and logs are written 
+to `install/tests/stress/logs`.
 
 Terminating your EC2 cluster
 ----------------------------
@@ -125,3 +134,5 @@ nosetests -w bin/impl
 
 [1]: http://docs.aws.amazon.com/cli/latest/userguide/installing.html
 [2]: http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html
+[3]: https://github.com/fluo-io/fluo/blob/master/docs/production-install.md#configure-a-fluo-application
+[4]: https://github.com/fluo-io/fluo-stress
