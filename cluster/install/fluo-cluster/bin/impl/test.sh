@@ -13,20 +13,35 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific 
 
-mkdir -p $INSTALL_DIR/user-test
-cd $INSTALL_DIR/user-test
+function echo_prop() {
+  prop=$1
+  echo "`grep $prop $CONF_DIR/test.properties | cut -d = -f 2-`"
+}
 
-$FLUO_HOME/bin/fluo yarn stop
+if [ -z $1 ]; then 
+  echo "ERROR - The 'test' command expects an application name as an argument"
+  exit 1
+fi
+export FLUO_APP_NAME=$1
 
-rm -rf clone_dir
-git clone -b $TEST_BRANCH $TEST_REPO clone_dir
+TEST_REPO=`echo_prop $FLUO_APP_NAME.repo`
+TEST_BRANCH=`echo_prop $FLUO_APP_NAME.branch`
+TEST_PRE_INIT=`echo_prop $FLUO_APP_NAME.command.pre.init`
+TEST_POST_START=`echo_prop $FLUO_APP_NAME.command.post.start`
 
-cd clone_dir
+mkdir -p $INSTALL_DIR/tests
+cd $INSTALL_DIR/tests
+
+rm -rf $FLUO_APP_NAME
+git clone -b $TEST_BRANCH $TEST_REPO $FLUO_APP_NAME
+
+cd $FLUO_APP_NAME
 
 $TEST_PRE_INIT
 
-$FLUO_HOME/bin/fluo init -f
-$FLUO_HOME/bin/fluo yarn start
+echo "Restarting '$FLUO_APP_NAME' application.  Errors may be printed if it's not running..."
+$FLUO_HOME/bin/fluo kill $FLUO_APP_NAME
+$FLUO_HOME/bin/fluo init $FLUO_APP_NAME -f
+$FLUO_HOME/bin/fluo start $FLUO_APP_NAME
 
 $TEST_POST_START
-
