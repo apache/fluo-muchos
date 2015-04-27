@@ -29,6 +29,15 @@ TEST_BRANCH=`echo_prop $FLUO_APP_NAME.branch`
 TEST_PRE_INIT=`echo_prop $FLUO_APP_NAME.command.pre.init`
 TEST_POST_START=`echo_prop $FLUO_APP_NAME.command.post.start`
 
+if [ ! -d $FLUO_HOME/apps/$FLUO_APP_NAME ]; then
+  $FLUO_HOME/bin/fluo new $FLUO_APP_NAME
+else
+  echo "Restarting '$FLUO_APP_NAME' application.  Errors may be printed if it's not running..."
+  $FLUO_HOME/bin/fluo kill $FLUO_APP_NAME
+  rm -rf $FLUO_HOME/apps/$FLUO_APP_NAME
+  $FLUO_HOME/bin/fluo new $FLUO_APP_NAME
+fi
+
 mkdir -p $INSTALL_DIR/tests
 cd $INSTALL_DIR/tests
 
@@ -39,8 +48,6 @@ cd $FLUO_APP_NAME
 
 $TEST_PRE_INIT
 
-echo "Restarting '$FLUO_APP_NAME' application.  Errors may be printed if it's not running..."
-$FLUO_HOME/bin/fluo kill $FLUO_APP_NAME
 $FLUO_HOME/bin/fluo init $FLUO_APP_NAME -f
 $FLUO_HOME/bin/fluo start $FLUO_APP_NAME
 
