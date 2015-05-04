@@ -36,11 +36,22 @@ function install_hadoop() {
   if [ ! -d "$HADOOP_PREFIX" ]; then
     rsync "${RSYNC_OPTS[@]}" $CLUSTER_USERNAME@$PROXY_HOST:$TARBALLS_DIR/$HADOOP_TARBALL $TARBALLS_DIR
     tar -C $INSTALL_DIR -xzf $TARBALLS_DIR/$HADOOP_TARBALL
+    cp $CONF_DIR/hadoop/* $HADOOP_PREFIX/etc/hadoop/
     cp $CONF_DIR/core-site.xml $HADOOP_PREFIX/etc/hadoop/
     cp $CONF_DIR/hdfs-site.xml $HADOOP_PREFIX/etc/hadoop/
     cp $CONF_DIR/yarn-site.xml $HADOOP_PREFIX/etc/hadoop/
     cp $CONF_DIR/mapred-site.xml $HADOOP_PREFIX/etc/hadoop/
     cp $CONF_DIR/hosts/workers $HADOOP_PREFIX/etc/hadoop/slaves
+    # The hadoop-ce directory needs to be placed at the Linux root as the container-executor has 
+    # funky permission requirements that need to be applied to all parent directories.
+    HCE_DIR=/hadoop-ce
+    sudo rm -rf $HCE_DIR
+    sudo mkdir -p $HCE_DIR/bin
+    sudo mkdir -p $HCE_DIR/etc/hadoop
+    sudo cp $HADOOP_PREFIX/bin/container-executor $HCE_DIR/bin
+    sudo cp $CONF_DIR/hadoop/container-executor.cfg $HCE_DIR/etc/hadoop/
+    sudo chown -R root:ec2-user $HCE_DIR/
+    sudo chmod -R 6050 $HCE_DIR/
     echo "`hostname`: Hadoop installed"
   fi
 }

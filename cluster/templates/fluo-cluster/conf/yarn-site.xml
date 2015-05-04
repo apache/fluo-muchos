@@ -53,4 +53,28 @@
     <name>yarn.nodemanager.delete.debug-delay-sec</name>
     <value>259200</value>
   </property>
+  <property>
+    <name>yarn.resourcemanager.scheduler.class</name>
+    <value>org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.container-executor.class</name>
+    <value>org.apache.hadoop.yarn.server.nodemanager.LinuxContainerExecutor</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.container-executor.resources-handler.class</name>
+    <value>org.apache.hadoop.yarn.server.nodemanager.util.CgroupsLCEResourcesHandler</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.linux-container-executor.path</name>
+    <value>/hadoop-ce/bin/container-executor</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.container-executor.group</name>
+    <value>ec2-user</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.linux-container-executor.nonsecure-mode.local-user</name>
+    <value>ec2-user</value>
+  </property>
 </configuration>
