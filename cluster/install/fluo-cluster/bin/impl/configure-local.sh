@@ -23,6 +23,8 @@ if [ ! -f /home/$CLUSTER_USERNAME/.fluo-cluster/configured ]; then
   if [ -f $CONF_DIR/keys ]; then
     cat $CONF_DIR/keys >> /home/$CLUSTER_USERNAME/.ssh/authorized_keys
   fi
+  ssh $PROXY_HOST cat /home/$CLUSTER_USERNAME/.ssh/id_rsa.pub >> /home/$CLUSTER_USERNAME/.ssh/authorized_keys
+  scp $CLUSTER_USERNAME@$PROXY_HOST:.ssh/id_rsa /home/$CLUSTER_USERNAME/.ssh/
   cat $CONF_DIR/bashrc >> /home/$CLUSTER_USERNAME/.bashrc
   sudo bash -c "echo 'vm.swappiness = 0' >> /etc/sysctl.conf"
   sudo bash -c "cat $CONF_DIR/limits.conf >> /etc/security/limits.conf"

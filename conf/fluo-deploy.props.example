@@ -63,6 +63,10 @@ worker.instance.type = %(default.instance.type)s
 key.name = my_aws_key
 # Tags to add instances
 #instance.tags = key1:value1,key2:value2
+#Size in GB of EBS root device.  Set to 0 or don't set to use default.  For some
+#reason setting this to non zero causes some instance types to fail, so use with
+#caution.  See issue #59
+ebs.root.size=0
 
 [test]
 ###
