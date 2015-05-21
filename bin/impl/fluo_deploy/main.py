@@ -93,6 +93,12 @@ def launch_cluster(conn, config):
       exit('ERROR - Image not found for instance type: '+instance_type)
 
     bdm = BlockDeviceMapping()
+    if config.ebs_root_size() > 0 :
+      bdt = BlockDeviceType()
+      bdt.size = config.ebs_root_size()
+      bdt. delete_on_termination = True
+      bdm['/dev/sda1'] = bdt
+
     for i in range(0, num_ephemeral):
       bdt = BlockDeviceType()
       bdt.ephemeral_name='ephemeral' + str(i)
@@ -209,10 +215,7 @@ def write_test_props(config):
 
 def setup_cluster(config):
 
-  if "SNAPSHOT" in config.accumulo_version():
-    accumulo_tarball =  join(config.local_tarballs_dir(), "accumulo-{0}-bin.tar.gz".format(config.accumulo_version()))
-    if not isfile(accumulo_tarball):
-      exit("Please create an Accumulo tarball and copy it to "+accumulo_tarball)
+  accumulo_tarball =  join(config.local_tarballs_dir(), "accumulo-{0}-bin.tar.gz".format(config.accumulo_version()))
 
   if config.has_service('fluo'): 
     fluo_tarball = join(config.local_tarballs_dir(), "fluo-{0}-bin.tar.gz".format(config.fluo_version()))
@@ -340,7 +343,7 @@ def setup_cluster(config):
   exec_on_proxy_verified(config, "mkdir -p {0}".format(config.cluster_tarballs_dir()))
   send_to_proxy(config, install_tarball, config.cluster_tarballs_dir(), skipIfExists=False)
 
-  if "SNAPSHOT" in config.accumulo_version():
+  if isfile(accumulo_tarball):
     send_to_proxy(config, accumulo_tarball, config.cluster_tarballs_dir())
 
   if config.has_service('fluo'):

@@ -39,7 +39,12 @@
 
   <property>
     <name>tserver.memory.maps.max</name>
-    <value>512M</value>
+    <value>1G</value>
+  </property>
+
+  <property>
+    <name>general.rpc.timeout</name>
+    <value>240s</value>
   </property>
 
   <property>

@@ -16,6 +16,9 @@
 SSH_OPTS=(-o 'StrictHostKeyChecking no' -A)
 
 if [ "$CONFIGURE_CLUSTER" == "true" ]; then
+  if [ ! -f /home/$CLUSTER_USERNAME/.ssh/id_rsa ]; then
+   ssh-keygen  -q -t rsa -N ''  -f /home/$CLUSTER_USERNAME/.ssh/id_rsa
+  fi
   while read line; do
     IFS=' ' read -ra ARR <<< "$line"
     ADDR=${ARR[0]}
