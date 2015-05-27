@@ -3,7 +3,7 @@ fluo-deploy
 
 [![Build Status](https://travis-ci.org/fluo-io/fluo-deploy.svg?branch=master)](https://travis-ci.org/fluo-io/fluo-deploy)
 
-Scripts used to deploy Fluo to a cluster that can be optionally launched in EC2
+Command-line tool for deploying Fluo to a cluster that can be optionally launched in Amazon EC2.
 
 Installation
 ------------
@@ -89,8 +89,8 @@ cdf   # Alias to change directory to Fluo Home
 Run a Fluo application
 ----------------------
 
-If you have a Fluo application to run, follow the instructions starting at [Configure a Fluo application][3] 
-section of the Fluo production install instructions to configure, initialize, and start your application.
+If you have a Fluo application to run, follow the instructions starting at the [Configure a Fluo application][3] 
+section of the Fluo production setup instructions to configure, initialize, and start your application.
 
 If you don't have an application and want to test your cluster, you can run the following command to
 run the [stress test][4] application:
@@ -134,5 +134,5 @@ nosetests -w bin/impl
 
 [1]: http://docs.aws.amazon.com/cli/latest/userguide/installing.html
 [2]: http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html
-[3]: https://github.com/fluo-io/fluo/blob/master/docs/production-install.md#configure-a-fluo-application
+[3]: https://github.com/fluo-io/fluo/blob/master/docs/prod-fluo-setup.md#configure-a-fluo-application
 [4]: https://github.com/fluo-io/fluo-stress
