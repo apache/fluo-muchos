@@ -40,7 +40,7 @@ def test_defaults():
   assert c.cluster_name == 'mycluster'
   assert c.apache_mirror() == 'http://www.gtlib.gatech.edu/pub/apache'
   assert c.accumulo_version() == '1.6.2'
-  assert c.fluo_version() == '1.0.0-beta-1-SNAPSHOT'
+  assert c.fluo_version() == '1.0.0-beta-2-SNAPSHOT'
   assert c.hadoop_version() == '2.7.0'
   assert c.zookeeper_version() == '3.4.6'
   assert c.hadoop_prefix() == "/home/ec2-user/install/hadoop-2.7.0"

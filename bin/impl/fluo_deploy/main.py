@@ -205,13 +205,13 @@ def get_ec2_conn(config):
     exit('ERROR - Failed to connect to region ' + config.region())
   return conn
 
-def write_test_props(config):
+def write_apps_props(config):
   conf_install = join(config.deploy_path, "cluster/install/fluo-cluster/conf")
 
-  test_props_path = join(conf_install, "test.properties")
-  with open(test_props_path, 'w') as test_props_file:
-    for (name, value) in config.items("test"):
-      print >>test_props_file, "{0}={1}".format(name, value)
+  apps_props_path = join(conf_install, "apps.properties")
+  with open(apps_props_path, 'w') as apps_props_file:
+    for (name, value) in config.items("apps"):
+      print >>apps_props_file, "{0}={1}".format(name, value)
 
 def setup_cluster(config):
 
@@ -279,7 +279,7 @@ def setup_cluster(config):
         with open(install_path, "w") as install_file:
           install_file.write(sub_data)
 
-  write_test_props(config)
+  write_apps_props(config)
 
   ael_path = join(conf_install, "hosts/all_except_proxy")
   with open(ael_path, 'w') as ael_file:
@@ -376,7 +376,7 @@ def main():
   if not retval:
     print "Invalid command line arguments. For help, use 'fluo-deploy -h'"
     sys.exit(1)
-  (opts, action) = retval
+  (opts, action, args) = retval
 
   hosts_path = join(hosts_dir, opts.cluster)
 
@@ -414,10 +414,10 @@ def main():
       exit("Hosts file does not exist for cluster: "+hosts_path)
     print "Killing {0} cluster".format(config.cluster_name)
     exec_fluo_cluster_command(config, "kill")
-  elif action == 'test':
-    write_test_props(config)
-    send_to_proxy(config, join(config.deploy_path, "cluster/install/fluo-cluster/conf/test.properties"), join(config.cluster_install_dir(), "fluo-cluster/conf"), skipIfExists=False)
-    exec_fluo_cluster_command(config, "test {0}".format(opts.application))
+  elif action == 'run':
+    write_apps_props(config)
+    send_to_proxy(config, join(config.deploy_path, "cluster/install/fluo-cluster/conf/apps.properties"), join(config.cluster_install_dir(), "fluo-cluster/conf"), skipIfExists=False)
+    exec_fluo_cluster_command(config, "run {0} {1}".format(opts.application, " ".join(args)))
   elif action == 'terminate':
     conn = get_ec2_conn(config)
     nodes = get_active_cluster(conn, config)
