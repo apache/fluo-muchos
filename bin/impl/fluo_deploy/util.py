@@ -113,18 +113,19 @@ def parse_args(hosts_dir, input=None):
   parser = OptionParser(
             usage="fluo-deploy [options] <action>\n\n"
             + "where <action> can be:\n"
-            + "  launch - Launch cluster in EC2\n"
-            + "  status - Check status of EC2 cluster\n"
-            + "  setup - Setup Fluo and its dependencies on cluster\n"
-            + "  config - Print configuration for that cluster.  Requires '-p' option.  Use '-p all' for all config.\n"
-            + "  ssh - SSH to cluster proxy node\n"
-            + "  test - Run the specified test application.  Requires '-a <appName>' to be set\n"
-            + "  kill - Kill Fluo and its dependencies on cluster\n"
-            + "  terminate - Terminate EC2 cluster",
+            + "  launch     Launch cluster in EC2\n"
+            + "  status     Check status of EC2 cluster\n"
+            + "  setup      Setup Fluo and its dependencies on cluster\n"
+            + "  config     Print configuration for that cluster.  Requires '-p' option.  Use '-p all' for all config.\n"
+            + "  ssh        SSH to cluster proxy node\n"
+            + "  run        Runs the specified application configured in fluo-deploy.props.  Requires '-a <appName>' to be set.\n"
+            + "             Arguments after '-a <appName>' will be be passed to commands for application in fluo-deploy.props\n"
+            + "  kill       Kill Fluo and its dependencies on cluster\n"
+            + "  terminate  Terminate EC2 cluster",
             add_help_option=False)
   parser.add_option("-c", "--cluster", dest="cluster", help="Specifies cluster")
   parser.add_option("-p", "--property", dest="property", help="Specifies property to print (if using 'config' action).  Set to 'all' to print every property")
-  parser.add_option("-a", "--application", dest="application", help="Specifies the application name (if using 'test' action)")
+  parser.add_option("-a", "--application", dest="application", help="Specifies the application name (if using 'run' action)")
   parser.add_option("-h", "--help", action="help", help="Show this help message and exit")
 
   if input:
@@ -134,9 +135,6 @@ def parse_args(hosts_dir, input=None):
 
   if len(args) == 0:
     print "ERROR - You must specify on action"
-    return
-  elif len(args) > 1:
-    print "ERROR - Too many arguments given"
     return
   action = args[0]
 
@@ -159,8 +157,8 @@ def parse_args(hosts_dir, input=None):
   if action == 'config' and not opts.property:
     print "ERROR - For config action, you must set -p to a property or 'all'"
     return
-  elif action == 'test' and not opts.application:
-    print "ERROR - For 'test' action, you must set -a to the name of your application"
+  elif action == 'run' and not opts.application:
+    print "ERROR - For 'run' action, you must set -a to the name of your application"
     return
 
-  return (opts, action)
+  return (opts, action, args[1:])

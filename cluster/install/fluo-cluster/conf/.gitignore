@@ -11,4 +11,4 @@ accumulo-env.sh
 fluo-env.sh
 keys
 metrics.yaml
-test.properties
+apps.properties

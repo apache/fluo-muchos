@@ -49,14 +49,12 @@ After your cluster has launched, you do not have to specify a cluster anymore us
 multiple clusters running).
 
 Run the following command to confirm that you can ssh to the leader node:
-```
-fluo-deploy ssh
-```
+
+    fluo-deploy ssh
 
 You can check the status of the nodes using the EC2 Dashboard or by running the following command:
-```
-fluo-deploy status
-```
+
+    fluo-deploy status
 
 Set up Fluo on your cluster
 ---------------------------
@@ -66,21 +64,22 @@ create a hosts file in `conf/hosts` that is named after you cluster (see `conf/h
 
 Before running the next command, you will need to build a Fluo distribution and copy it to `cluster/tarballs/` directory of
 fluo-deploy:
-```
+
+```bash
 cd /path/to/fluo
 mvn package
 cp modules/distribution/target/fluo-1.0.0-beta-1-SNAPSHOT-bin.tar.gz /path/to/fluo-deploy/cluster/tarballs/
 ```
 
 Run the following command to set up your cluster and run Hadoop, Zookeeper, & Accumulo:
-```
-fluo-deploy setup
-```
+
+    fluo-deploy setup
 
 The `setup` command can be run again if you cluster becomes unstable or if you want to change Accumulo or Hadoop 
 configuration found in `templates/conf`.  The `setup` command installs and configures Fluo but does not start it.
 This lets you setup Fluo with any observers.  Run the commands below to access your Fluo install:
-```
+
+```bash
 fluo-deploy ssh
 ssh <FLUO_HOSTNAME>
 cdf   # Alias to change directory to Fluo Home
@@ -92,29 +91,28 @@ Run a Fluo application
 If you have a Fluo application to run, follow the instructions starting at the [Configure a Fluo application][3] 
 section of the Fluo production setup instructions to configure, initialize, and start your application.
 
-If you don't have an application and want to test your cluster, you can run the following command to
-run the [stress test][4] application:
-```
-fluo-deploy test -a stress
-```
+If you don't have an application, you can run a Fluo example application.  All example applications are listed
+and configured in [fluo-deploy.props][5].  In general applications are run using the following command:
 
-The stress test can take up to an hour to complete.  Status will be output to console and logs are written 
-to `install/tests/stress/logs`.
+    fluo-deploy run -a <application> [<argument1> <argument2>]
+
+While the application name is required, additional arguments are dependent on the application.  In 
+[fluo-deploy.props][5], you can find more documentation on how to run each application.
 
 Terminating your EC2 cluster
 ----------------------------
 
 If you launched your cluster on EC2, run the following command terminate your cluster.  WARNING - All data on
 your cluster will be lost:
-```
-fluo-deploy terminate
-```
+
+    fluo-deploy terminate
 
 Retrieving cluster configuration
 --------------------------------
 
 The `config` command allows you to retrieve cluster configuration for your own scripts:
-```
+
+```bash
 $ fluo-deploy config -p leader.public.ip
 10.10.10.10
 ```
@@ -123,16 +121,15 @@ Running unit tests
 ------------------
 
 Install nose using pip:
-```
-pip install nose
-```
+
+    pip install nose
 
 The following command runs the unit tests:
-```
-nosetests -w bin/impl
-```
+
+    nosetests -w bin/impl
 
 [1]: http://docs.aws.amazon.com/cli/latest/userguide/installing.html
 [2]: http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html
 [3]: https://github.com/fluo-io/fluo/blob/master/docs/prod-fluo-setup.md#configure-a-fluo-application
 [4]: https://github.com/fluo-io/fluo-stress
+[5]: conf/fluo-deploy.props.example

@@ -34,7 +34,7 @@ accumulo.instance = instance16
 # Accumluo Password
 accumulo.password = secret
 # Software versions
-fluo.version = 1.0.0-beta-1-SNAPSHOT
+fluo.version = 1.0.0-beta-2-SNAPSHOT
 hadoop.version = 2.7.0
 zookeeper.version = 3.4.6
 #If the Accumulo version contains SNAPSHOT, then the scripts expect it to be in cluster/tarballs/ and will not try to download from a mirror.
@@ -68,11 +68,10 @@ key.name = my_aws_key
 #caution.  See issue #59
 ebs.root.size=0
 
-[test]
+[apps]
 ###
-# This section is used to configure Fluo 'test' applications which are indentified
-# by a unique application name (which replaces <app> below).  Each test has the following
-# configuration settings:
+# This section is used to configure Fluo applications which are indentified by a unique application
+# name (which replaces <app> below).  Each test has the following configuration settings:
 #
 # <app>.repo                # Git repo containing code for test. It is cloned when the test is run.
 # <app>.branch              # Branch to checkout in git repo
@@ -81,13 +80,28 @@ ebs.root.size=0
 #                           # can do things like change fluo config and copy observers
 # <app>.command.post.start  # Test script to run from test repo after Fluo is started
 #
-# Tests can be run using the following command 'fluo-deploy test <app>`
-#
-# Below is configuration for a 'stress' test which can be run using 'fluo-deploy test stress'
+# Applications can be run using the following command 'fluo-deploy run -a <app>`
+# Arguments can be added after <app> and will be passed to configured commands for that app.
+# Any files or directories referenced by arguments must exist on leader node.
+
+# Stress test application
+# Usage: fluo-deploy run -a stress
+# Notes: - Stress test can take up to one hour to complete
+# 			 - Status will be output to console
+# 			 - Logs are written to install/tests/stress/logs
 stress.repo=https://github.com/fluo-io/fluo-stress
 stress.branch=master
 stress.command.pre.init=bin/configure-fluo.sh 
 stress.command.post.start=bin/run-test.sh
+
+# Phrasecount application
+# Usage: fluo-deploy run -a phrasecount <txtDocsDir>
+# Notes: - The directory <txtDocsDir> must exist on leader node
+#        - Cluster cannot be set up with multiple zookeepers until FLUO-521 is resolved. 
+phrasecount.repo=https://github.com/fluo-io/phrasecount
+phrasecount.branch=master
+phrasecount.command.pre.init=bin/configure.sh
+phrasecount.command.post.start=bin/run.sh
 
 [nodes]
 # Describes nodes in cluster in the following format: 
