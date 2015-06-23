@@ -405,7 +405,7 @@ def main():
     fwd = ''
     if config.proxy_socks_port():
       fwd = "-D "+config.proxy_socks_port()
-    ssh_command = "ssh -A -o 'StrictHostKeyChecking no' {fwd} {usr}@{ldr}".format(usr=config.cluster_username(),
+    ssh_command = "ssh -C -A -o 'StrictHostKeyChecking no' {fwd} {usr}@{ldr}".format(usr=config.cluster_username(),
       ldr=config.proxy_public_ip(), fwd=fwd)
     retcode = subprocess.call(ssh_command, shell=True)
     check_code(retcode, ssh_command)
