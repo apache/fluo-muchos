@@ -166,7 +166,7 @@ def check_code(retcode, command):
     exit("ERROR - Command failed with return code of {0}: {1}".format(retcode, command))
 
 def exec_on_proxy(config, command, opts=''):
-  ssh_command = "ssh -A -o 'StrictHostKeyChecking no' {opts} {usr}@{ldr} '{cmd}'".format(usr=config.cluster_username(),
+  ssh_command = "ssh -t -A -o 'StrictHostKeyChecking no' {opts} {usr}@{ldr} '{cmd}'".format(usr=config.cluster_username(),
     ldr=config.proxy_public_ip(), cmd=command, opts=opts)
   return (subprocess.call(ssh_command, shell=True), ssh_command)
 

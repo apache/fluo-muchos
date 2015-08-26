@@ -24,8 +24,9 @@ if [ "$CONFIGURE_CLUSTER" == "true" ]; then
     ADDR=${ARR[0]}
     HOST=${ARR[1]}
     NUM_EPHEMERAL=${ARR[2]}
-    ssh -tt "${SSH_OPTS[@]}" $CLUSTER_USERNAME@$ADDR $BIN_DIR/fluo-cluster configure-local $HOST $NUM_EPHEMERAL < /dev/null
+    ssh -tt "${SSH_OPTS[@]}" $CLUSTER_USERNAME@$ADDR $BIN_DIR/fluo-cluster configure-local $HOST $NUM_EPHEMERAL < /dev/null &
   done < $CONF_DIR/hosts/all_for_configure
+  wait
 else
   echo "User chose not to configure ~/.ssh/config, /etc/hosts, & ~/.bashrc on cluster"
 fi

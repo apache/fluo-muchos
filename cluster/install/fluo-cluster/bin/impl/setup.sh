@@ -27,8 +27,17 @@ function verify_checksum() {
 }
 
 # Download required tarballs
-wget -nc -nv -P $TARBALLS_DIR $APACHE_MIRROR/zookeeper/zookeeper-$ZOOKEEPER_VERSION/$ZOOKEEPER_TARBALL
+wget -nc -nv -P $TARBALLS_DIR $APACHE_MIRROR/zookeeper/zookeeper-$ZOOKEEPER_VERSION/$ZOOKEEPER_TARBALL &
+wget -nc -nv -P $TARBALLS_DIR $APACHE_MIRROR/hadoop/common/hadoop-$HADOOP_VERSION/$HADOOP_TARBALL &
+wget -nc -nv -P $TARBALLS_DIR --no-check-certificate --no-cookies --header "Cookie: oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/7u75-b13/$JAVA_TARBALL &
+wget -nc -nv -P $TARBALLS_DIR $APACHE_MIRROR/maven/maven-3/$MAVEN_VERSION/binaries/$MAVEN_TARBALL &
+echo "Waiting"
+wait
+
+verify_checksum $HADOOP_TARBALL $HADOOP_MD5
+verify_checksum $JAVA_TARBALL 6f1f81030a34f7a9c987f8b68a24d139
 verify_checksum $ZOOKEEPER_TARBALL $ZOOKEEPER_MD5
+verify_checksum $MAVEN_TARBALL $MAVEN_MD5
 
 if [[ $ACCUMULO_VERSION != *"SNAPSHOT"* ]]
 then
@@ -36,22 +45,15 @@ then
   verify_checksum $ACCUMULO_TARBALL $ACCUMULO_MD5
 fi
 
-wget -nc -nv -P $TARBALLS_DIR $APACHE_MIRROR/hadoop/common/hadoop-$HADOOP_VERSION/$HADOOP_TARBALL
-verify_checksum $HADOOP_TARBALL $HADOOP_MD5
-
-wget -nc -nv -P $TARBALLS_DIR --no-check-certificate --no-cookies --header "Cookie: oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/7u75-b13/$JAVA_TARBALL
-verify_checksum $JAVA_TARBALL 6f1f81030a34f7a9c987f8b68a24d139
-
-wget -nc -nv -P $TARBALLS_DIR $APACHE_MIRROR/maven/maven-3/$MAVEN_VERSION/binaries/$MAVEN_TARBALL
-verify_checksum $MAVEN_TARBALL $MAVEN_MD5
-
-# Push install directory to all hosts
+# do an initial ssh to each node to set-up the strict keys
 for host in `cat $CONF_DIR/hosts/all_except_proxy`; do
-  echo "`hostname`: Copying scripts to $host"
-  ssh "${SSH_OPTS[@]}" $CLUSTER_USERNAME@$host mkdir -p $TARBALLS_DIR
-  scp $TARBALLS_DIR/install.tar.gz $CLUSTER_USERNAME@$host:$TARBALLS_DIR
-  ssh $CLUSTER_USERNAME@$host "rm -rf $INSTALL_DIR; tar -C $BASE_DIR -xzf $TARBALLS_DIR/install.tar.gz"
+   ssh "${SSH_OPTS[@]}" $CLUSTER_USERNAME@$host mkdir -p $TARBALLS_DIR
 done
+
+sudo yum install -y pssh
+echo copying scripts
+pscp.pssh -h $CONF_DIR/hosts/all_except_proxy $TARBALLS_DIR/install.tar.gz $TARBALLS_DIR/install.tar.gz
+pssh -i -h $CONF_DIR/hosts/all_except_proxy "rm -rf $INSTALL_DIR; tar -C $BASE_DIR -xzf $TARBALLS_DIR/install.tar.gz"
 
 $BIN_DIR/fluo-cluster kill &> /dev/null
 
