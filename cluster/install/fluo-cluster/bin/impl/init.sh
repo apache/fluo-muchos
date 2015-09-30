@@ -17,17 +17,9 @@ SSH_OPTS=(-tt -o 'StrictHostKeyChecking no' -A)
 
 $BIN_DIR/fluo-cluster kill &> /dev/null
 
-for host in `cat $CONF_DIR/hosts/all_hosts`; do
-  ssh "${SSH_OPTS[@]}" $CLUSTER_USERNAME@$host rm -rf /media/ephemeral*/zoo*  /media/ephemeral*/hadoop* /media/ephemeral*/yarn*
-done
+pssh -i -h $CONF_DIR/hosts/all_hosts "rm -rf /media/ephemeral*/zoo*  /media/ephemeral*/hadoop* /media/ephemeral*/yarn*"
 
-while read line; do
-  IFS=' ' read -ra ARR <<< "$line"
-  HOST=${ARR[0]}
-  SERVICES=${ARR[@]:1}
-  echo "`hostname`: Installing services on $HOST: $SERVICES"
-  ssh "${SSH_OPTS[@]}" $CLUSTER_USERNAME@$HOST $BIN_DIR/fluo-cluster install $SERVICES < /dev/null
-done < $CONF_DIR/hosts/hosts_with_services
+pssh -x "-tt -o 'StrictHostKeyChecking no'" -i -h $CONF_DIR/hosts/all_hosts "$BIN_DIR/fluo-cluster install --use-config"
 
 # Setup myid file on each zookeeper server
 while read line; do

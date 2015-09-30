@@ -52,6 +52,9 @@ function install_hadoop() {
     sudo cp $CONF_DIR/hadoop/container-executor.cfg $HCE_DIR/etc/hadoop/
     sudo chown -R root:ec2-user $HCE_DIR/
     sudo chmod -R 6050 $HCE_DIR/
+
+    install_spark
+    cp $SPARK_INSTALL/lib/spark-$SPARK_VERSION-yarn-shuffle.jar $HADOOP_PREFIX/share/hadoop/yarn/lib/
     echo "`hostname`: Hadoop installed"
   fi
 }
@@ -91,6 +94,14 @@ function install_maven() {
     tar -C $INSTALL_DIR -xzf $TARBALLS_DIR/$MAVEN_TARBALL
     ln -s $MAVEN_INSTALL $INSTALL_DIR/maven
     echo "`hostname`: Maven installed"
+  fi
+}
+
+function install_spark() {
+  if [ ! -d "$SPARK_INSTALL" ]; then
+    rsync "${RSYNC_OPTS[@]}" $CLUSTER_USERNAME@$PROXY_HOST:$TARBALLS_DIR/$SPARK_TARBALL $TARBALLS_DIR
+    tar -C $INSTALL_DIR -xzf $TARBALLS_DIR/$SPARK_TARBALL
+    echo "`hostname`: Spark installed"
   fi
 }
 
@@ -141,7 +152,17 @@ DONE
   done
 }
 
-for service in "$@"; do
+SERVICES=$@
+if [ "$SERVICES" == "--use-config" ]; then
+  HOST=`hostname`
+  HOSTS_FILE=$CONF_DIR/hosts/hosts_with_services
+  SERVICES=`grep $HOST $HOSTS_FILE | cut -d ' ' -f 2-`
+  if [ -z "$SERVICES" ]; then
+    echo "ERROR - The hostname $HOST was not found in $HOSTS_FILE so no services will be installed on this machine"
+  fi
+fi
+
+for service in $SERVICES; do
   echo "`hostname`: Installing $service service"
 
   case "$service" in
@@ -180,6 +201,7 @@ for service in "$@"; do
       install_java
       install_git
       install_maven
+      install_spark
       ;;
     *)
       echo "Unknown service: $service"

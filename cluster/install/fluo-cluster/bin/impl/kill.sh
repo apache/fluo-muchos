@@ -11,11 +11,7 @@
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific 
-
-SSH_OPTS=(-tt -o 'StrictHostKeyChecking no' -A)
+# See the License for the specific
 
 echo "Killing cluster"
-for host in `cat $CONF_DIR/hosts/all_ips`; do
-  ssh "${SSH_OPTS[@]}" $CLUSTER_USERNAME@$host $BIN_DIR/impl/kill-local.sh
-done
+pssh -x "-tt -o 'StrictHostKeyChecking no'" --inline-stdout -h $CONF_DIR/hosts/all_ips "$BIN_DIR/impl/kill-local.sh"

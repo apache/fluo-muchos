@@ -26,18 +26,21 @@ function verify_checksum() {
   fi
 }
 
-# Download required tarballs
+echo "Downloading required software"
 wget -nc -nv -P $TARBALLS_DIR $APACHE_MIRROR/zookeeper/zookeeper-$ZOOKEEPER_VERSION/$ZOOKEEPER_TARBALL &
 wget -nc -nv -P $TARBALLS_DIR $APACHE_MIRROR/hadoop/common/hadoop-$HADOOP_VERSION/$HADOOP_TARBALL &
-wget -nc -nv -P $TARBALLS_DIR --no-check-certificate --no-cookies --header "Cookie: oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/7u75-b13/$JAVA_TARBALL &
+wget -nc -nv -P $TARBALLS_DIR --no-check-certificate --no-cookies --header "Cookie: oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/8u60-b27/$JAVA_TARBALL &
 wget -nc -nv -P $TARBALLS_DIR $APACHE_MIRROR/maven/maven-3/$MAVEN_VERSION/binaries/$MAVEN_TARBALL &
+wget -nc -nv -P $TARBALLS_DIR $APACHE_MIRROR/spark/spark-$SPARK_VERSION/$SPARK_TARBALL &
 echo "Waiting"
 wait
 
+echo "Verifying checksums of software"
 verify_checksum $HADOOP_TARBALL $HADOOP_MD5
-verify_checksum $JAVA_TARBALL 6f1f81030a34f7a9c987f8b68a24d139
+verify_checksum $JAVA_TARBALL b8ca513d4f439782c019cb78cd7fd101
 verify_checksum $ZOOKEEPER_TARBALL $ZOOKEEPER_MD5
 verify_checksum $MAVEN_TARBALL $MAVEN_MD5
+verify_checksum $SPARK_TARBALL $SPARK_MD5
 
 if [[ $ACCUMULO_VERSION != *"SNAPSHOT"* ]]
 then
@@ -51,10 +54,12 @@ for host in `cat $CONF_DIR/hosts/all_except_proxy`; do
 done
 
 sudo yum install -y pssh
-echo copying scripts
+
+echo "Copying scripts to all nodes"
 pscp.pssh -h $CONF_DIR/hosts/all_except_proxy $TARBALLS_DIR/install.tar.gz $TARBALLS_DIR/install.tar.gz
 pssh -i -h $CONF_DIR/hosts/all_except_proxy "rm -rf $INSTALL_DIR; tar -C $BASE_DIR -xzf $TARBALLS_DIR/install.tar.gz"
 
+echo "Confirm that nothing is running on cluster"
 $BIN_DIR/fluo-cluster kill &> /dev/null
 
 $BIN_DIR/fluo-cluster configure

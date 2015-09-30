@@ -152,6 +152,12 @@ class DeployConfig(ConfigParser):
   def zookeeper_md5(self):
     return self.get('general', 'zookeeper.md5.hash')
 
+  def spark_version(self):
+    return self.get('general', 'spark.version')
+
+  def spark_md5(self):
+    return self.get('general', 'spark.md5.hash')
+
   def accumulo_tarball(self):
     return 'accumulo-%s-bin.tar.gz' % self.accumulo_version()
 

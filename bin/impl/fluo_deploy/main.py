@@ -244,6 +244,8 @@ def setup_cluster(config):
   sub_d["HADOOP_MD5"] = config.hadoop_md5()
   sub_d["ZOOKEEPER_VERSION"] = config.zookeeper_version()
   sub_d["ZOOKEEPER_MD5"] = config.zookeeper_md5()
+  sub_d["SPARK_BIN_VERSION"] = config.spark_version()
+  sub_d["SPARK_MD5"] = config.spark_md5()
   sub_d["DATA_DIR"] = config.data_dir()
   sub_d["HADOOP_PREFIX"] = config.hadoop_prefix()
   sub_d["ZOOKEEPER_HOME"] = config.zookeeper_home()
