@@ -39,16 +39,16 @@ def test_defaults():
   assert c.get_private_ip('leader1') == '10.0.0.0'
   assert c.cluster_name == 'mycluster'
   assert c.apache_mirror() == 'http://www.gtlib.gatech.edu/pub/apache'
-  assert c.accumulo_version() == '1.6.2'
+  assert c.accumulo_version() == '1.6.3'
   assert c.fluo_version() == '1.0.0-beta-2-SNAPSHOT'
   assert c.hadoop_version() == '2.7.0'
   assert c.zookeeper_version() == '3.4.6'
   assert c.hadoop_prefix() == "/home/ec2-user/install/hadoop-2.7.0"
   assert c.data_dir() == "/media/ephemeral0"
   assert c.cluster_tarballs_dir() == "/home/ec2-user/tarballs"
-  assert c.accumulo_tarball() == "accumulo-1.6.2-bin.tar.gz"
-  assert c.accumulo_path() == "fluo-deploy/cluster/tarballs/accumulo-1.6.2-bin.tar.gz"
-  assert c.accumulo_url() == "http://www.gtlib.gatech.edu/pub/apache/accumulo/1.6.2/accumulo-1.6.2-bin.tar.gz"
+  assert c.accumulo_tarball() == "accumulo-1.6.3-bin.tar.gz"
+  assert c.accumulo_path() == "fluo-deploy/cluster/tarballs/accumulo-1.6.3-bin.tar.gz"
+  assert c.accumulo_url() == "http://www.gtlib.gatech.edu/pub/apache/accumulo/1.6.3/accumulo-1.6.3-bin.tar.gz"
   assert c.get_service_private_ips("worker") == ['10.0.0.3', '10.0.0.4', '10.0.0.5']
   assert c.zookeeper_connect() == "leader1,leader2,leader3"
   assert c.proxy_hostname() == "leader1"
