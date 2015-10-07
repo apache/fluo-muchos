@@ -15,10 +15,15 @@
 
 RSYNC_OPTS=(-e "ssh -o 'StrictHostKeyChecking no'" --ignore-existing)
 
+function get_install() {
+  tarball_filename=$1
+  rsync "${RSYNC_OPTS[@]}" $CLUSTER_USERNAME@$PROXY_HOST:$TARBALLS_DIR/$tarball_filename $TARBALLS_DIR
+  tar -C $INSTALL_DIR -xzf $TARBALLS_DIR/$tarball_filename
+}
+
 function install_accumulo() {
   if [ ! -d "$ACCUMULO_HOME" ]; then
-    rsync "${RSYNC_OPTS[@]}" $CLUSTER_USERNAME@$PROXY_HOST:$TARBALLS_DIR/$ACCUMULO_TARBALL $TARBALLS_DIR
-    tar -C $INSTALL_DIR -xzf $TARBALLS_DIR/$ACCUMULO_TARBALL
+    get_install $ACCUMULO_TARBALL
     cp $ACCUMULO_HOME/conf/templates/* $ACCUMULO_HOME/conf/
     cp $CONF_DIR/accumulo-site.xml $ACCUMULO_HOME/conf/
     cp $CONF_DIR/accumulo-env.sh $ACCUMULO_HOME/conf/
@@ -34,8 +39,7 @@ function install_accumulo() {
 
 function install_hadoop() {
   if [ ! -d "$HADOOP_PREFIX" ]; then
-    rsync "${RSYNC_OPTS[@]}" $CLUSTER_USERNAME@$PROXY_HOST:$TARBALLS_DIR/$HADOOP_TARBALL $TARBALLS_DIR
-    tar -C $INSTALL_DIR -xzf $TARBALLS_DIR/$HADOOP_TARBALL
+    get_install $HADOOP_TARBALL
     cp $CONF_DIR/hadoop/* $HADOOP_PREFIX/etc/hadoop/
     cp $CONF_DIR/core-site.xml $HADOOP_PREFIX/etc/hadoop/
     cp $CONF_DIR/hdfs-site.xml $HADOOP_PREFIX/etc/hadoop/
@@ -61,8 +65,7 @@ function install_hadoop() {
 
 function install_zookeeper() {
   if [ ! -d "$ZOOKEEPER_HOME" ]; then
-    rsync "${RSYNC_OPTS[@]}" $CLUSTER_USERNAME@$PROXY_HOST:$TARBALLS_DIR/$ZOOKEEPER_TARBALL $TARBALLS_DIR
-    tar -C $INSTALL_DIR -xzf $TARBALLS_DIR/$ZOOKEEPER_TARBALL
+    get_install $ZOOKEEPER_TARBALL
     cp $CONF_DIR/zoo.cfg $ZOOKEEPER_HOME/conf/
     echo "`hostname`: Zookeeper installed"
   fi
@@ -70,8 +73,7 @@ function install_zookeeper() {
 
 function install_fluo() {
   if [ ! -d "$FLUO_HOME" ]; then
-    rsync "${RSYNC_OPTS[@]}" $CLUSTER_USERNAME@$PROXY_HOST:$TARBALLS_DIR/$FLUO_TARBALL $TARBALLS_DIR
-    tar -C $INSTALL_DIR -xzf $TARBALLS_DIR/$FLUO_TARBALL
+    get_install $FLUO_TARBALL
     cp $FLUO_HOME/conf/examples/* $FLUO_HOME/conf/
     cp $CONF_DIR/fluo.properties $FLUO_HOME/conf/
     cp $CONF_DIR/fluo-env.sh $FLUO_HOME/conf/
@@ -82,16 +84,14 @@ function install_fluo() {
 
 function install_java() {
   if [ ! -d "$JAVA_INSTALL" ]; then
-    rsync "${RSYNC_OPTS[@]}" $CLUSTER_USERNAME@$PROXY_HOST:$TARBALLS_DIR/$JAVA_TARBALL $TARBALLS_DIR
-    tar -C $INSTALL_DIR -xzf $TARBALLS_DIR/$JAVA_TARBALL
+    get_install $JAVA_TARBALL
     echo "`hostname`: Java installed"
   fi
 }
 
 function install_maven() {
   if [ ! -d "$MAVEN_INSTALL" ]; then
-    rsync "${RSYNC_OPTS[@]}" $CLUSTER_USERNAME@$PROXY_HOST:$TARBALLS_DIR/$MAVEN_TARBALL $TARBALLS_DIR
-    tar -C $INSTALL_DIR -xzf $TARBALLS_DIR/$MAVEN_TARBALL
+    get_install $MAVEN_TARBALL
     ln -s $MAVEN_INSTALL $INSTALL_DIR/maven
     echo "`hostname`: Maven installed"
   fi
@@ -99,8 +99,7 @@ function install_maven() {
 
 function install_spark() {
   if [ ! -d "$SPARK_INSTALL" ]; then
-    rsync "${RSYNC_OPTS[@]}" $CLUSTER_USERNAME@$PROXY_HOST:$TARBALLS_DIR/$SPARK_TARBALL $TARBALLS_DIR
-    tar -C $INSTALL_DIR -xzf $TARBALLS_DIR/$SPARK_TARBALL
+    get_install $SPARK_TARBALL
     echo "`hostname`: Spark installed"
   fi
 }
@@ -152,11 +151,14 @@ DONE
   done
 }
 
+# Exit if any command fails
+set -e
+
 SERVICES=$@
 if [ "$SERVICES" == "--use-config" ]; then
   HOST=`hostname`
   HOSTS_FILE=$CONF_DIR/hosts/hosts_with_services
-  SERVICES=`grep $HOST $HOSTS_FILE | cut -d ' ' -f 2-`
+  SERVICES=`grep -w $HOST $HOSTS_FILE | cut -d ' ' -f 2-`
   if [ -z "$SERVICES" ]; then
     echo "ERROR - The hostname $HOST was not found in $HOSTS_FILE so no services will be installed on this machine"
   fi

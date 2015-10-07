@@ -21,7 +21,7 @@ Script to help deploy Fluo cluster (optionally to AWS EC2)
 import os, sys
 import shutil
 from config import DeployConfig
-from util import get_image_id, setup_boto, parse_args, exit
+from util import setup_boto, parse_args, exit
 from os.path import isfile, join
 from string import Template
 import random
@@ -88,7 +88,7 @@ def launch_cluster(conn, config):
       instance_type = config.default_instance_type()
       num_ephemeral = config.default_num_ephemeral()
 
-    host_ami = get_image_id(instance_type)
+    host_ami = config.get_image_id(instance_type)
     if not host_ami:
       exit('ERROR - Image not found for instance type: '+instance_type)
 
@@ -217,14 +217,15 @@ def setup_cluster(config):
 
   accumulo_tarball =  join(config.local_tarballs_dir(), "accumulo-{0}-bin.tar.gz".format(config.accumulo_version()))
 
-  if config.has_service('fluo'): 
-    fluo_tarball = join(config.local_tarballs_dir(), "fluo-{0}-bin.tar.gz".format(config.fluo_version()))
-    if not isfile(fluo_tarball):
-      exit("Please create a Fluo tarball and copy it to "+fluo_tarball)
-
   print 'Setting up {0} cluster'.format(config.cluster_name)
   conf_templates = join(config.deploy_path, "cluster/templates/fluo-cluster/conf")
   conf_install = join(config.deploy_path, "cluster/install/fluo-cluster/conf")
+
+  download_fluo = False
+  if config.has_service('fluo'): 
+    fluo_tarball = join(config.local_tarballs_dir(), "fluo-{0}-bin.tar.gz".format(config.fluo_version()))
+    if not isfile(fluo_tarball):
+      download_fluo = True
 
   # copy keys file to conf (if it exists)
   conf_keys = join(config.deploy_path, "conf/keys")
@@ -265,7 +266,11 @@ def setup_cluster(config):
 
   if config.has_service("graphite"):
     sub_d["GRAPHITE_SERVER"] = config.get_service_private_ips("graphite")[0]
-  
+ 
+  sub_d["DOWNLOAD_FLUO"] = "false"
+  if download_fluo:
+    sub_d["DOWNLOAD_FLUO"] = "true"
+    
   for fn in os.listdir(conf_templates):
     if not config.has_service("graphite") and fn == "metrics.yaml":
       continue
@@ -288,12 +293,10 @@ def setup_cluster(config):
     for (private_ip, hostname) in config.get_non_proxy():
       print >>ael_file, private_ip
 
-  llast_path = join(conf_install, "hosts/all_for_configure")
-  with open(llast_path, 'w') as llast_file:
-    for (private_ip, hostname) in config.get_non_proxy():
-      print >>llast_file, private_ip, hostname, config.num_ephemeral(hostname)
-    proxy_host = config.proxy_hostname()
-    print >>llast_file, config.get_private_ip(proxy_host), proxy_host, config.num_ephemeral(proxy_host)
+  cnp_path = join(conf_install, "hosts/configure")
+  with open(cnp_path, 'w') as cnp_file:
+    for (private_ip, hostname) in config.get_private_ip_hostnames():
+      print >>cnp_file, private_ip, hostname, config.num_ephemeral(hostname)
 
   services_path = join(conf_install, "hosts/hosts_with_services")
   with open(services_path, 'w') as services_file:
@@ -348,7 +351,7 @@ def setup_cluster(config):
   if isfile(accumulo_tarball):
     send_to_proxy(config, accumulo_tarball, config.cluster_tarballs_dir())
 
-  if config.has_service('fluo'):
+  if config.has_service('fluo') and not download_fluo:
     send_to_proxy(config, fluo_tarball, config.cluster_tarballs_dir())
 
   exec_on_proxy_verified(config, "rm -rf {base}/install; tar -C {base} -xzf {base}/tarballs/install.tar.gz".format(base=config.cluster_base_dir()))

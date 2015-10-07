@@ -23,15 +23,15 @@ bin="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 . "$bin"/../conf/env.sh
 
+# Exit if any command fails
+set -e
+
 case "$1" in 
 setup)
   "$bin"/impl/setup.sh "${@:2}"
   ;;
 configure)
   "$bin"/impl/configure.sh "${@:2}"
-  ;;
-configure-local)
-  "$bin"/impl/configure-local.sh "${@:2}"
   ;;
 install)
   "$bin"/impl/install.sh "${@:2}"
@@ -56,16 +56,17 @@ run)
   ;;
 *)
   echo -e "Usage: fluo-cluster command (<argument>)\n"
-  echo -e "Possible commands:\n"
+  echo -e  "Commands that run on entire cluster:\n"
   echo "  setup        Setup, initialize, and start cluster"
   echo "  init         Initialize and start cluster"
-  echo "  configure    Configure SSH, /etc/hosts, bashrc on cluster"
-  echo "  install      Install services on this node"
   echo "  start        Start all services on cluster"
   echo "  kill         Kill cluster processes"
   echo "  ready        Checks if cluster is running and ready"
   echo "  ashell       Runs Accumulo shell"
   echo "  run <app>    Runs Fluo application specified by <app>"
+  echo -e "\nLocal commands that run on a single node:\n"
+  echo "  configure    Configure Linux on this node"
+  echo "  install      Install services on this node"
   echo " " 
   exit 1
 esac

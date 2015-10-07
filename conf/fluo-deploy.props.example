@@ -37,15 +37,15 @@ accumulo.password = secret
 fluo.version = 1.0.0-beta-2-SNAPSHOT
 hadoop.version = 2.7.0
 zookeeper.version = 3.4.6
-spark.version = 1.4.1-bin-hadoop2.6
+spark.version = 1.5.1-bin-hadoop2.6
 #If the Accumulo version contains SNAPSHOT, then the scripts expect it to be in cluster/tarballs/ and will not try to download from a mirror.
-accumulo.version = 1.6.3
+accumulo.version = 1.6.4
 # Software md5 checksums
 hadoop.md5.hash = 79a6e87b09011861309c153a856c3ca1
 zookeeper.md5.hash = 971c379ba65714fd25dc5fe8f14e9ad1
-spark.md5.hash = 858ab5dd5dc0ad4564affbb8a777ad47
+spark.md5.hash = 6b0830240dc9f18e3a1ab29994cc4d20
 #Accumulo hash is only checked if not a SNAPSHOT version.
-accumulo.md5.hash = 924127a29fdda542d0f6f62ba8c0dd91
+accumulo.md5.hash = 530dfe488d5c2ee415b514ce72baa691
 
 [ec2]
 # EC2 region to connect to
@@ -69,6 +69,15 @@ key.name = my_aws_key
 #reason setting this to non zero causes some instance types to fail, so use with
 #caution.  See issue #59
 ebs.root.size=0
+# Set AMI image given virtualization type (which is determined by your instance type)
+# Most instance types use HVM rather than PVM virtualization. AMI IDs differ by EC2 region. 
+# Below are settings for Amazon Linux AMI for different regions.  N. Virginia is set by default.
+# N. Virginia
+hvm.ami = ami-e3106686
+pvm.ami = ami-cf1066aa
+# Oregon
+#hvm.ami = ami-9ff7e8af
+#pvm.ami = ami-81f7e8b1
 
 [apps]
 ###

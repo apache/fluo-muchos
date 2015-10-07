@@ -71,15 +71,6 @@ def get_arch(instance_type):
 def get_num_ephemeral(instance_type):
   return instance_types.get(instance_type).ephemeral
 
-def get_image_id(instance_type):
-  arch = get_arch(instance_type)
-  if arch == "hvm":
-    return "ami-b66ed3de"
-  elif arch == "pvm":
-    return "ami-246ed34c"
-  else:
-    return None
-
 def exit(msg):
   print msg
   sys.exit(1)
