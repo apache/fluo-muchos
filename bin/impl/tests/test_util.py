@@ -12,14 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from fluo_deploy.util import get_image_id, get_arch, parse_args
+from fluo_deploy.util import get_arch, parse_args
 
 def test_util():
   assert get_arch('m1.large') == 'pvm'
   assert get_arch('m3.large') == 'hvm'
-
-  assert get_image_id('m1.large') == 'ami-246ed34c'
-  assert get_image_id('m3.large') == 'ami-b66ed3de'
 
   hosts_dir = '../../conf/hosts'
   assert parse_args(hosts_dir, ['launch']) == None

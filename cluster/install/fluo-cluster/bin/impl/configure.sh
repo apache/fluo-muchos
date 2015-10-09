@@ -13,20 +13,62 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific 
 
-SSH_OPTS=(-o 'StrictHostKeyChecking no' -A)
+# Exit if any command fails
+set -e
 
-if [ "$CONFIGURE_CLUSTER" == "true" ]; then
-  if [ ! -f /home/$CLUSTER_USERNAME/.ssh/id_rsa ]; then
-   ssh-keygen  -q -t rsa -N ''  -f /home/$CLUSTER_USERNAME/.ssh/id_rsa
+if [ ! -f /home/$CLUSTER_USERNAME/.fluo-cluster/configured ]; then
+
+  if [ "$1" == "--use-config" ]; then
+    IP_ADDR=`/sbin/ifconfig eth0 | grep "inet addr" | cut -d: -f 2 | cut -d' ' -f 1`
+    CONF_HOSTS=$CONF_DIR/hosts/configure
+    HOST=`grep -w $IP_ADDR $CONF_HOSTS | cut -d ' ' -f 2`
+    NUM_EPHEMERAL=`grep -w $IP_ADDR $CONF_HOSTS | cut -d ' ' -f 3`
+    if [ -z "$HOST" ]; then
+      echo "ERROR - The IP addr $IP_ADDR was not found in $CONF_HOSTS so `hostname` will not be configured"
+      exit 1
+    fi
+  else
+    HOST=$1
+    NUM_EPHEMERAL=$2
   fi
-  while read line; do
-    IFS=' ' read -ra ARR <<< "$line"
-    ADDR=${ARR[0]}
-    HOST=${ARR[1]}
-    NUM_EPHEMERAL=${ARR[2]}
-    ssh -tt "${SSH_OPTS[@]}" $CLUSTER_USERNAME@$ADDR $BIN_DIR/fluo-cluster configure-local $HOST $NUM_EPHEMERAL < /dev/null &
-  done < $CONF_DIR/hosts/all_for_configure
-  wait
+
+  echo "`hostname`: Configuring $HOST with $NUM_EPHEMERAL drives"
+  sudo bash -c "cat $CONF_DIR/hosts/append_to_hosts >> /etc/hosts"
+  cat $CONF_DIR/ssh_config >> $SSH_DIR/config
+  chmod 600 $SSH_DIR/config
+  if [ -f $CONF_DIR/keys ]; then
+    cat $CONF_DIR/keys >> $SSH_DIR/authorized_keys
+  fi
+  cat $SSH_DIR/id_rsa.pub >> $SSH_DIR/authorized_keys
+  cat $CONF_DIR/bashrc >> /home/$CLUSTER_USERNAME/.bashrc
+  sudo bash -c "echo 'vm.swappiness = 0' >> /etc/sysctl.conf"
+  sudo bash -c "cat $CONF_DIR/limits.conf >> /etc/security/limits.conf"
+  sudo sed -i "s/localhost.localdomain/$HOST/g" /etc/sysconfig/network
+
+  #need g++ to build accumulo native libs
+  sudo yum install -q -y gcc-c++
+
+  #mount ephermal devices... 
+  sudo sed -i 's/defaults,nofail,comment=cloudconfig/defaults,nofail,noatime,nodiratime,comment=cloudconfig/g' /etc/fstab
+  c="c"
+  for i in $(seq 1 $((NUM_EPHEMERAL-1)))
+  do
+    sudo mkdir /media/ephemeral$i
+    sudo bash -c "echo '/dev/xvd$c  /media/ephemeral$i  auto  defaults,nofail,noatime,nodiratime,comment=cloudconfig  0  2' >> /etc/fstab"
+    c=$(echo $c | tr 'a-z' 'b-z')
+    sudo mount /media/ephemeral$i
+  done
+
+  #make ephemeral drives writable
+  for i in $(seq 0 $((NUM_EPHEMERAL-1)))
+  do
+    sudo chown $CLUSTER_USERNAME /media/ephemeral$i
+  done
+
+  mkdir /home/$CLUSTER_USERNAME/.fluo-cluster
+  touch /home/$CLUSTER_USERNAME/.fluo-cluster/configured
+  echo "`hostname`: Configured $HOST.  Rebooting..."
+  sudo reboot
 else
-  echo "User chose not to configure ~/.ssh/config, /etc/hosts, & ~/.bashrc on cluster"
+  echo "`hostname`: Already configured"
 fi

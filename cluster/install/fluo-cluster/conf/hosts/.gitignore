@@ -1,6 +1,6 @@
 hosts_with_services
 all_except_proxy
-all_for_configure
+configure
 workers
 accumulomaster
 append_to_hosts

@@ -15,13 +15,21 @@
 
 SSH_OPTS=(-tt -o 'StrictHostKeyChecking no' -A)
 
+set -e
+
+echo "Initializing cluster"
+
+echo "Confirming that nothing running on cluster"
 $BIN_DIR/fluo-cluster kill &> /dev/null
 
+echo "Removing any previous data"
 pssh -i -h $CONF_DIR/hosts/all_hosts "rm -rf /media/ephemeral*/zoo*  /media/ephemeral*/hadoop* /media/ephemeral*/yarn*"
 
-pssh -x "-tt -o 'StrictHostKeyChecking no'" -i -h $CONF_DIR/hosts/all_hosts "$BIN_DIR/fluo-cluster install --use-config"
+echo "Installing all services on cluster"
+pssh -p 10 -x "-tt -o 'StrictHostKeyChecking no'" -t 300 -i -h $CONF_DIR/hosts/all_hosts "$BIN_DIR/fluo-cluster install --use-config"
+echo "Finished installing all services on cluster"
 
-# Setup myid file on each zookeeper server
+echo "Setting up myid file on each zookeeper server"
 while read line; do
   IFS=' ' read -ra ARR <<< "$line"
   HOST=${ARR[0]}
@@ -30,13 +38,15 @@ while read line; do
   ssh "${SSH_OPTS[@]}" $CLUSTER_USERNAME@$HOST "mkdir -p $DATA_DIR/zookeeper; echo $ID > $DATA_DIR/zookeeper/myid" < /dev/null
 done < $CONF_DIR/hosts/zookeeper_ids
 
-# Setup & Start Hadoop
+echo "Starting hadoop"
 ssh "${SSH_OPTS[@]}" $CLUSTER_USERNAME@$NAMENODE_HOST $HADOOP_PREFIX/bin/hdfs namenode -format
 $BIN_DIR/fluo-cluster start hadoop
 
-# Setup & Start Zookeeper
+echo "Starting zookeeper"
 $BIN_DIR/fluo-cluster start zookeeper
 
-# Setup & Start Accumulo
+echo "Starting accumulo"
 ssh "${SSH_OPTS[@]}" $CLUSTER_USERNAME@$ACCUMULOMASTER_HOST "source $CONF_DIR/env.sh; $ACCUMULO_HOME/bin/accumulo init --clear-instance-name --instance-name $ACCUMULO_INSTANCE --password $ACCUMULO_PASSWORD"
 $BIN_DIR/fluo-cluster start accumulo
+
+echo "Cluster initialization is finished"

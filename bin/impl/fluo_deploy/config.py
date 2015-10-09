@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from ConfigParser import ConfigParser
-from util import get_num_ephemeral, exit
+from util import get_num_ephemeral, exit, get_arch
 import os
 from os.path import join
 
@@ -197,6 +197,21 @@ class DeployConfig(ConfigParser):
   def worker_instance_type(self):
     return self.get('ec2', 'worker.instance.type')
 
+  def hvm_ami(self):
+    return self.get('ec2', 'hvm.ami')
+
+  def pvm_ami(self):
+    return self.get('ec2', 'pvm.ami')
+
+  def get_image_id(self, instance_type):
+    arch = get_arch(instance_type)
+    if arch == "hvm":
+      return self.hvm_ami()
+    elif arch == "pvm":
+      return self.pvm_ami()
+    else:
+      return None
+
   def region(self):
     return self.get('ec2', 'region')
 
@@ -271,6 +286,13 @@ class DeployConfig(ConfigParser):
     for (hostname, (private_ip, public_ip)) in self.hosts.items():
       if private_ip != proxy_ip:
         retval.append((private_ip, hostname))
+    retval.sort()
+    return retval
+
+  def get_private_ip_hostnames(self):
+    retval = []
+    for (hostname, (private_ip, public_ip)) in self.hosts.items():
+      retval.append((private_ip, hostname))
     retval.sort()
     return retval
 
