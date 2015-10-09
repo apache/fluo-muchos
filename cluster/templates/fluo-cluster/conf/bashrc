@@ -1,6 +1,16 @@
 
 export JAVA_HOME=$BASE_DIR/install/jdk1.8.0_60
-export PATH=$$JAVA_HOME/bin:$BASE_DIR/install/fluo-cluster/bin:$BASE_DIR/install/fluo-$FLUO_VERSION/bin:$HADOOP_PREFIX/bin:$BASE_DIR/install/accumulo-$ACCUMULO_VERSION/bin:$BASE_DIR/install/maven/bin:$BASE_DIR/install/spark-$SPARK_BIN_VERSION/bin:$$PATH
+
+PATH="$$PATH:$$JAVA_HOME/bin"
+PATH="$$PATH:$BASE_DIR/install/fluo-cluster/bin"
+PATH="$$PATH:$BASE_DIR/install/fluo-$FLUO_VERSION/bin"
+PATH="$$PATH:$HADOOP_PREFIX/bin"
+PATH="$$PATH:$HADOOP_PREFIX/sbin"
+PATH="$$PATH:$BASE_DIR/install/accumulo-$ACCUMULO_VERSION/bin"
+PATH="$$PATH:$BASE_DIR/install/maven/bin"
+PATH="$$PATH:$BASE_DIR/install/spark-$SPARK_BIN_VERSION/bin"
+PATH="$$PATH:$ZOOKEEPER_HOME/bin"
+export PATH
 
 alias ssh='ssh -A'
 alias cdh='cd $HADOOP_PREFIX'
