@@ -3,6 +3,11 @@
 
 <configuration>
   <property>
+    <name>instance.volumes</name>
+    <value>hdfs://$NAMENODE_HOST:10000/accumulo</value>
+  </property>
+
+  <property>
     <name>instance.zookeeper.host</name>
     <value>$ZOOKEEPERS</value>
   </property>
