@@ -200,7 +200,9 @@ def send_to_proxy(config, path, target, skipIfExists=True):
           usr=config.cluster_username(), ldr=config.proxy_public_ip(), tdir=target), shell=True)
 
 def get_ec2_conn(config):
-  conn = ec2.connect_to_region(config.region())
+  if config.aws_access_key() == 'access_key' or config.aws_secret_key() == 'secret_key':
+    exit('ERROR - You must set AWS access & secret keys in fluo-deploy.props')
+  conn = ec2.connect_to_region(config.region(), aws_access_key_id=config.aws_access_key(), aws_secret_access_key=config.aws_secret_key())
   if not conn:
     exit('ERROR - Failed to connect to region ' + config.region())
   return conn
@@ -212,6 +214,10 @@ def write_apps_props(config):
   with open(apps_props_path, 'w') as apps_props_file:
     for (name, value) in config.items("apps"):
       print >>apps_props_file, "{0}={1}".format(name, value)
+
+
+class DeployTemplate(Template):
+  idpattern="[_a-z][_.a-z0-9]*"
 
 def setup_cluster(config):
 
@@ -234,19 +240,13 @@ def setup_cluster(config):
     shutil.copyfile(conf_keys, install_keys)
 
   sub_d = {}
-  sub_d["BASE_DIR"] = config.cluster_base_dir()
-  sub_d["CLUSTER_USERNAME"] = config.cluster_username()
-  sub_d["CONFIGURE_CLUSTER"] = config.configure_cluster()
-  sub_d["APACHE_MIRROR"] = config.apache_mirror()
-  sub_d["ACCUMULO_VERSION"] = config.accumulo_version()
-  sub_d["ACCUMULO_MD5"] = config.accumulo_md5()
-  sub_d["FLUO_VERSION"] = config.fluo_version()
-  sub_d["HADOOP_VERSION"] = config.hadoop_version()
-  sub_d["HADOOP_MD5"] = config.hadoop_md5()
-  sub_d["ZOOKEEPER_VERSION"] = config.zookeeper_version()
-  sub_d["ZOOKEEPER_MD5"] = config.zookeeper_md5()
-  sub_d["SPARK_BIN_VERSION"] = config.spark_version()
-  sub_d["SPARK_MD5"] = config.spark_md5()
+
+  # set all properties in config file
+  for section in ("general", "ec2"):
+    for (name, value) in config.items(section):
+      sub_d[name] = value
+
+  # set all derived properties
   sub_d["DATA_DIR"] = config.data_dir()
   sub_d["HADOOP_PREFIX"] = config.hadoop_prefix()
   sub_d["ZOOKEEPER_HOME"] = config.zookeeper_home()
@@ -256,9 +256,6 @@ def setup_cluster(config):
   sub_d["RESOURCEMANAGER_HOST"] = config.get_service_private_ips("resourcemanager")[0]
   sub_d["ACCUMULOMASTER_HOST"] = config.get_service_hostnames("accumulomaster")[0]
   sub_d["NUM_WORKERS"] = len(config.get_service_hostnames("worker"))
-  sub_d["PROXY_HOST"] = config.proxy_hostname()
-  sub_d["ACCUMULO_INSTANCE"] = config.accumulo_instance()
-  sub_d["ACCUMULO_PASSWORD"] = config.accumulo_password()
   sub_d["DATANODE_DIRS"] = config.worker_ephemeral_dirs("/hadoop/data")
   sub_d["MAPRED_TEMP_DIRS"] = config.worker_ephemeral_dirs("/hadoop/mapred/temp")
   sub_d["MAPRED_LOCAL_DIRS"] = config.worker_ephemeral_dirs("/hadoop/mapred/local")
@@ -281,7 +278,7 @@ def setup_cluster(config):
     if isfile(template_path) and not template_path.startswith('.'):
       with open(template_path, "r") as template_file:
         template_data = template_file.read()
-        template = Template(template_data)
+        template = DeployTemplate(template_data)
         sub_data = template.substitute(sub_d)
         with open(install_path, "w") as install_file:
           install_file.write(sub_data)

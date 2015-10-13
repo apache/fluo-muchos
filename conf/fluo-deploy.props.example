@@ -48,6 +48,9 @@ spark.md5.hash = 6b0830240dc9f18e3a1ab29994cc4d20
 accumulo.md5.hash = 530dfe488d5c2ee415b514ce72baa691
 
 [ec2]
+# AWS Access & Secret keys
+aws.access.key = access_key
+aws.secret.key = secret_key
 # EC2 region to connect to
 region = us-east-1
 # Type of AWS instance launched by default

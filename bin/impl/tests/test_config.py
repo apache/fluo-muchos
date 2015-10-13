@@ -61,6 +61,7 @@ def test_defaults():
   assert c.get_host_services() == [('leader1', 'namenode zookeeper fluo dev'), ('leader2', 'resourcemanager zookeeper'), ('leader3', 'accumulomaster zookeeper'),
                                    ('monitor', 'graphite'), ('worker1', 'worker'), ('worker2', 'worker'), ('worker3', 'worker')]
   assert c.zookeeper_server_config() == "server.1=leader1:2888:3888\nserver.2=leader2:2888:3888\nserver.3=leader3:2888:3888"
-
   assert c.get_image_id('m1.large') == 'ami-cf1066aa'
   assert c.get_image_id('m3.large') == 'ami-e3106686'
+  assert c.aws_access_key() == 'access_key'
+  assert c.aws_secret_key() == 'secret_key'

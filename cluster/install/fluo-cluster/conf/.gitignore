@@ -12,3 +12,4 @@ fluo-env.sh
 keys
 metrics.yaml
 apps.properties
+awscreds.conf

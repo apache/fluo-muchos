@@ -1,27 +1,27 @@
 #!/bin/bash
 
 # Variables set by python
-export BASE_DIR=$BASE_DIR
+export BASE_DIR=$cluster.base.dir
 export DATA_DIR=$DATA_DIR
-export CLUSTER_USERNAME=$CLUSTER_USERNAME
-export CONFIGURE_CLUSTER=$CONFIGURE_CLUSTER
-export APACHE_MIRROR=$APACHE_MIRROR
-export ACCUMULO_VERSION=$ACCUMULO_VERSION
-export ACCUMULO_MD5=$ACCUMULO_MD5
-export HADOOP_VERSION=$HADOOP_VERSION
-export HADOOP_MD5=$HADOOP_MD5
-export ZOOKEEPER_VERSION=$ZOOKEEPER_VERSION
-export ZOOKEEPER_MD5=$ZOOKEEPER_MD5
-export SPARK_BIN_VERSION=$SPARK_BIN_VERSION
-export SPARK_MD5=$SPARK_MD5
-export FLUO_VERSION=$FLUO_VERSION
+export CLUSTER_USERNAME=$cluster.username
+export CONFIGURE_CLUSTER=$configure.cluster
+export APACHE_MIRROR=$apache.mirror
+export ACCUMULO_VERSION=$accumulo.version
+export ACCUMULO_MD5=$accumulo.md5.hash
+export HADOOP_VERSION=$hadoop.version
+export HADOOP_MD5=$hadoop.md5.hash
+export ZOOKEEPER_VERSION=$zookeeper.version
+export ZOOKEEPER_MD5=$zookeeper.md5.hash
+export SPARK_BIN_VERSION=$spark.version
+export SPARK_MD5=$spark.md5.hash
+export FLUO_VERSION=$fluo.version
 export DOWNLOAD_FLUO=$DOWNLOAD_FLUO
-export PROXY_HOST=$PROXY_HOST
+export PROXY_HOST=$proxy.hostname
 export NAMENODE_HOST=$NAMENODE_HOST
 export RESOURCEMANAGER_HOST=$RESOURCEMANAGER_HOST
 export ACCUMULOMASTER_HOST=$ACCUMULOMASTER_HOST
-export ACCUMULO_INSTANCE=$ACCUMULO_INSTANCE
-export ACCUMULO_PASSWORD=$ACCUMULO_PASSWORD
+export ACCUMULO_INSTANCE=$accumulo.instance
+export ACCUMULO_PASSWORD=$accumulo.password
 export HADOOP_PREFIX=$HADOOP_PREFIX
 export ZOOKEEPER_HOME=$ZOOKEEPER_HOME
 
@@ -45,4 +45,5 @@ export CONF_DIR=$$INSTALL_DIR/fluo-cluster/conf
 export BIN_DIR=$$INSTALL_DIR/fluo-cluster/bin
 export ACCUMULO_HOME=$$INSTALL_DIR/accumulo-$$ACCUMULO_VERSION
 export FLUO_HOME=$$INSTALL_DIR/fluo-$$FLUO_VERSION
-export SSH_DIR=/home/$$CLUSTER_USERNAME/.ssh
+export HOME_DIR=/home/$$CLUSTER_USERNAME
+export SSH_DIR=$$HOME_DIR/.ssh
