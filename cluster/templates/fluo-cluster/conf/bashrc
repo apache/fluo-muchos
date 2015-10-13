@@ -1,20 +1,20 @@
 
-export JAVA_HOME=$BASE_DIR/install/jdk1.8.0_60
+export JAVA_HOME=$cluster.base.dir/install/jdk1.8.0_60
 
-PATH="$$PATH:$$JAVA_HOME/bin"
-PATH="$$PATH:$BASE_DIR/install/fluo-cluster/bin"
-PATH="$$PATH:$BASE_DIR/install/fluo-$FLUO_VERSION/bin"
-PATH="$$PATH:$HADOOP_PREFIX/bin"
-PATH="$$PATH:$HADOOP_PREFIX/sbin"
-PATH="$$PATH:$BASE_DIR/install/accumulo-$ACCUMULO_VERSION/bin"
-PATH="$$PATH:$BASE_DIR/install/maven/bin"
-PATH="$$PATH:$BASE_DIR/install/spark-$SPARK_BIN_VERSION/bin"
-PATH="$$PATH:$ZOOKEEPER_HOME/bin"
+PATH="$$JAVA_HOME/bin:$$PATH"
+PATH="$cluster.base.dir/install/fluo-cluster/bin:$$PATH"
+PATH="$cluster.base.dir/install/fluo-$fluo.version/bin:$$PATH"
+PATH="$HADOOP_PREFIX/bin:$$PATH"
+PATH="$HADOOP_PREFIX/sbin:$$PATH"
+PATH="$cluster.base.dir/install/accumulo-$accumulo.version/bin:$$PATH"
+PATH="$cluster.base.dir/install/maven/bin:$$PATH"
+PATH="$cluster.base.dir/install/spark-$spark.version/bin:$$PATH"
+PATH="$ZOOKEEPER_HOME/bin:$$PATH"
 export PATH
 
 alias ssh='ssh -A'
 alias cdh='cd $HADOOP_PREFIX'
 alias cdz='cd $ZOOKEEPER_HOME'
-alias cda='cd $BASE_DIR/install/accumulo-$ACCUMULO_VERSION'
-alias cdf='cd $BASE_DIR/install/fluo-$FLUO_VERSION'
+alias cda='cd $cluster.base.dir/install/accumulo-$accumulo.version'
+alias cdf='cd $cluster.base.dir/install/fluo-$fluo.version'
 alias ashell='fluo-cluster ashell'

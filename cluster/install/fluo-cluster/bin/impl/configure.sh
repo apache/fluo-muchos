@@ -48,6 +48,14 @@ if [ ! -f /home/$CLUSTER_USERNAME/.fluo-cluster/configured ]; then
   #need g++ to build accumulo native libs
   sudo yum install -q -y gcc-c++
 
+  # set up cloudwatch memory and disk metrics
+  sudo yum install -q -y perl-DateTime perl-Sys-Syslog perl-LWP-Protocol-https
+  wget -nc -nv -P $HOME_DIR http://aws-cloudwatch.s3.amazonaws.com/downloads/CloudWatchMonitoringScripts-1.2.1.zip
+  unzip -q $HOME_DIR/CloudWatchMonitoringScripts-1.2.1.zip
+  rm $HOME_DIR/CloudWatchMonitoringScripts-1.2.1.zip
+  MON_CRON="*/5 * * * * ~/aws-scripts-mon/mon-put-instance-data.pl --mem-util --disk-space-util --disk-path=/ --from-cron --aws-credential-file=$CONF_DIR/awscreds.conf"
+  bash -c "(crontab -l 2>/dev/null; echo \"$MON_CRON\")| crontab -"
+
   #mount ephermal devices... 
   sudo sed -i 's/defaults,nofail,comment=cloudconfig/defaults,nofail,noatime,nodiratime,comment=cloudconfig/g' /etc/fstab
   c="c"
@@ -65,8 +73,8 @@ if [ ! -f /home/$CLUSTER_USERNAME/.fluo-cluster/configured ]; then
     sudo chown $CLUSTER_USERNAME /media/ephemeral$i
   done
 
-  mkdir /home/$CLUSTER_USERNAME/.fluo-cluster
-  touch /home/$CLUSTER_USERNAME/.fluo-cluster/configured
+  mkdir $HOME_DIR/.fluo-cluster
+  touch $HOME_DIR/.fluo-cluster/configured
   echo "`hostname`: Configured $HOST.  Rebooting..."
   sudo reboot
 else

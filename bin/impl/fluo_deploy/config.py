@@ -197,6 +197,12 @@ class DeployConfig(ConfigParser):
   def worker_instance_type(self):
     return self.get('ec2', 'worker.instance.type')
 
+  def aws_access_key(self):
+    return self.get('ec2', 'aws.access.key')
+
+  def aws_secret_key(self):
+    return self.get('ec2', 'aws.secret.key')
+
   def hvm_ami(self):
     return self.get('ec2', 'hvm.ami')
 
