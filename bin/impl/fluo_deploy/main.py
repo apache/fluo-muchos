@@ -111,7 +111,8 @@ def launch_cluster(conn, config):
                               subnet_id=config.subnet_id(),
                               min_count=1,
                               max_count=1,
-                              block_device_map=bdm)
+                              block_device_map=bdm,
+                              monitoring_enabled=config.detailed_monitoring())
   
     if len(resv.instances) != 1:
       exit('ERROR - Failed to start {0} node'.format(hostname))

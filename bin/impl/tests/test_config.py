@@ -65,3 +65,4 @@ def test_defaults():
   assert c.get_image_id('m3.large') == 'ami-e3106686'
   assert c.aws_access_key() == 'access_key'
   assert c.aws_secret_key() == 'secret_key'
+  assert c.detailed_monitoring() == False

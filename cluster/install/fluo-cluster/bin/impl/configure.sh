@@ -53,8 +53,12 @@ if [ ! -f /home/$CLUSTER_USERNAME/.fluo-cluster/configured ]; then
   wget -nc -nv -P $HOME_DIR http://aws-cloudwatch.s3.amazonaws.com/downloads/CloudWatchMonitoringScripts-1.2.1.zip
   unzip -q $HOME_DIR/CloudWatchMonitoringScripts-1.2.1.zip
   rm $HOME_DIR/CloudWatchMonitoringScripts-1.2.1.zip
-  MON_CRON="*/5 * * * * ~/aws-scripts-mon/mon-put-instance-data.pl --mem-util --disk-space-util --disk-path=/ --from-cron --aws-credential-file=$CONF_DIR/awscreds.conf"
-  bash -c "(crontab -l 2>/dev/null; echo \"$MON_CRON\")| crontab -"
+  CRON_SCHED="*/5 * * * *"
+  if [ $DETAILED_MONITORING == "true" ]; then
+    CRON_SCHED="* * * * *"
+  fi
+  CRON_COMMAND="$CRON_SCHED ~/aws-scripts-mon/mon-put-instance-data.pl --mem-util --disk-space-util --disk-path=/ --from-cron --aws-credential-file=$CONF_DIR/awscreds.conf"
+  bash -c "(crontab -l 2>/dev/null; echo \"$CRON_COMMAND\")| crontab -"
 
   #mount ephermal devices... 
   sudo sed -i 's/defaults,nofail,comment=cloudconfig/defaults,nofail,noatime,nodiratime,comment=cloudconfig/g' /etc/fstab

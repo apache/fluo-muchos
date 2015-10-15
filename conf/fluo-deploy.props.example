@@ -71,7 +71,9 @@ key.name = my_aws_key
 #Size in GB of EBS root device.  Set to 0 or don't set to use default.  For some
 #reason setting this to non zero causes some instance types to fail, so use with
 #caution.  See issue #59
-ebs.root.size=0
+ebs.root.size = 0
+# Enables detailed monitoring on EC2 instance which costs extra in AWS
+detailed.monitoring = false
 # Set AMI image given virtualization type (which is determined by your instance type)
 # Most instance types use HVM rather than PVM virtualization. AMI IDs differ by EC2 region. 
 # Below are settings for Amazon Linux AMI for different regions.  N. Virginia is set by default.

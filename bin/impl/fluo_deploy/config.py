@@ -203,6 +203,11 @@ class DeployConfig(ConfigParser):
   def aws_secret_key(self):
     return self.get('ec2', 'aws.secret.key')
 
+  def detailed_monitoring(self):
+    if self.get('ec2', 'detailed.monitoring') == "true":
+      return True
+    return False
+
   def hvm_ami(self):
     return self.get('ec2', 'hvm.ami')
 
