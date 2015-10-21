@@ -32,6 +32,10 @@ accumulo)
   ssh "${SSH_OPTS[@]}" $CLUSTER_USERNAME@$ACCUMULOMASTER_HOST $ACCUMULO_HOME/bin/start-all.sh
   echo "$ACCUMULOMASTER_HOST: Accumulo started"
   ;;
+spark)
+  ssh "${SSH_OPTS[@]}" $CLUSTER_USERNAME@$RESOURCEMANAGER_HOST $SPARK_INSTALL/sbin/start-history-server.sh
+  echo "$RESOURCEMANAGER_HOST: Spark HistoryServer started"
+  ;;
 *)
   echo -e "Usage: fluo-cluster start <argument>\n"
   echo -e "Possible arguments:\n"

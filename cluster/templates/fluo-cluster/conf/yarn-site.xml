@@ -19,7 +19,7 @@
 <configuration>
   <property>
     <name>yarn.resourcemanager.hostname</name>
-    <value>$RESOURCEMANAGER_HOST</value>
+    <value>$RESOURCEMANAGER_IP</value>
   </property>
   <property>
     <name>yarn.nodemanager.local-dirs</name>

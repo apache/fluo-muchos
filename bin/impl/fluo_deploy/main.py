@@ -253,8 +253,10 @@ def setup_cluster(config):
   sub_d["ZOOKEEPER_HOME"] = config.zookeeper_home()
   sub_d["ZOOKEEPERS"] = config.zookeeper_connect()
   sub_d["ZOOKEEPER_SERVER_CONFIG"] = config.zookeeper_server_config()
-  sub_d["NAMENODE_HOST"] = config.get_service_private_ips("namenode")[0]
-  sub_d["RESOURCEMANAGER_HOST"] = config.get_service_private_ips("resourcemanager")[0]
+  sub_d["NAMENODE_HOST"] = config.get_service_hostnames("namenode")[0]
+  sub_d["NAMENODE_IP"] = config.get_service_private_ips("namenode")[0]
+  sub_d["RESOURCEMANAGER_HOST"] = config.get_service_hostnames("resourcemanager")[0]
+  sub_d["RESOURCEMANAGER_IP"] = config.get_service_private_ips("resourcemanager")[0]
   sub_d["ACCUMULOMASTER_HOST"] = config.get_service_hostnames("accumulomaster")[0]
   sub_d["NUM_WORKERS"] = len(config.get_service_hostnames("worker"))
   sub_d["DATANODE_DIRS"] = config.worker_ephemeral_dirs("/hadoop/data")

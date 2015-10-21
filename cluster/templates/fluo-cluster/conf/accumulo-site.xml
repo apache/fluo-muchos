@@ -4,7 +4,7 @@
 <configuration>
   <property>
     <name>instance.volumes</name>
-    <value>hdfs://$NAMENODE_HOST:10000/accumulo</value>
+    <value>hdfs://$NAMENODE_IP:10000/accumulo</value>
   </property>
 
   <property>

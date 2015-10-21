@@ -49,4 +49,8 @@ echo "Starting accumulo"
 ssh "${SSH_OPTS[@]}" $CLUSTER_USERNAME@$ACCUMULOMASTER_HOST "source $CONF_DIR/env.sh; $ACCUMULO_HOME/bin/accumulo init --clear-instance-name --instance-name $ACCUMULO_INSTANCE --password $ACCUMULO_PASSWORD"
 $BIN_DIR/fluo-cluster start accumulo
 
+echo "Starting spark history server" 
+$HADOOP_PREFIX/bin/hdfs dfs -mkdir -p /spark/history
+$BIN_DIR/fluo-cluster start spark
+
 echo "Cluster initialization is finished"

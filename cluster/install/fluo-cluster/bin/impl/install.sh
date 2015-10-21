@@ -100,6 +100,8 @@ function install_maven() {
 function install_spark() {
   if [ ! -d "$SPARK_INSTALL" ]; then
     get_install $SPARK_TARBALL
+    cp $CONF_DIR/spark-defaults.conf $SPARK_INSTALL/conf
+    cp $CONF_DIR/spark-env.sh $SPARK_INSTALL/conf
     echo "`hostname`: Spark installed"
   fi
 }
