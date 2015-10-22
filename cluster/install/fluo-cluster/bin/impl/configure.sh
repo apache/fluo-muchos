@@ -60,6 +60,9 @@ if [ ! -f /home/$CLUSTER_USERNAME/.fluo-cluster/configured ]; then
   CRON_COMMAND="$CRON_SCHED ~/aws-scripts-mon/mon-put-instance-data.pl --mem-util --disk-space-util --disk-path=/ --from-cron --aws-credential-file=$CONF_DIR/awscreds.conf"
   bash -c "(crontab -l 2>/dev/null; echo \"$CRON_COMMAND\")| crontab -"
 
+  # settings to resolve network issues on AWS while running Spark (see FLUO-DEPLOY-83)
+  sudo cp $CONF_DIR/ifup-local /sbin/ifup-local
+
   #mount ephermal devices... 
   sudo sed -i 's/defaults,nofail,comment=cloudconfig/defaults,nofail,noatime,nodiratime,comment=cloudconfig/g' /etc/fstab
   c="c"
