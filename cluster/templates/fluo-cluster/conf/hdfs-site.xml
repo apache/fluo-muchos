@@ -31,10 +31,10 @@
   </property>
   <property>
     <name>dfs.namenode.secondary.http-address</name>
-    <value>$NAMENODE_HOST:50090</value>
+    <value>$NAMENODE_IP:50090</value>
   </property>
   <property>
     <name>dfs.namenode.secondary.https-address</name>
-    <value>$NAMENODE_HOST:50091</value>
+    <value>$NAMENODE_IP:50091</value>
   </property>
 </configuration>

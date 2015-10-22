@@ -21,4 +21,5 @@ pkill -9 -f QuorumPeerMain
 if rpm -qa | grep -qw docker; then
   sudo docker kill graphite
 fi
+pkill -9 -f org.apache.spark.deploy.history.HistoryServer
 echo "`hostname` - Killed all processes"

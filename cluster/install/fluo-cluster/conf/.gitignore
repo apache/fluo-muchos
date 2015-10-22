@@ -13,3 +13,5 @@ keys
 metrics.yaml
 apps.properties
 awscreds.conf
+spark-defaults.conf
+spark-env.sh

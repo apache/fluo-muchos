@@ -38,8 +38,8 @@ wget -nc -nv -P $TARBALLS_DIR $APACHE_MIRROR/spark/spark-$SPARK_VERSION/$SPARK_T
 if [[ "$DOWNLOAD_FLUO" = "true" ]]; then
   if [[ "$FLUO_VERSION" =~ "SNAPSHOT" ]]; then
     SONATYPE_URL=https://oss.sonatype.org/content/repositories/snapshots/io/fluo/fluo-distribution/$FLUO_VERSION/
-    FLUO_TARBALL_URL=`curl -s $SONATYPE_URL | grep 'bin.tar.gz"' | cut -d'"' -f 2`
-    FLUO_MD5_URL=`curl -s $SONATYPE_URL | grep 'bin.tar.gz.md5"' | cut -d'"' -f 2`
+    FLUO_TARBALL_URL=`curl -s $SONATYPE_URL | grep 'bin.tar.gz"' | tail -1 | cut -d'"' -f 2`
+    FLUO_MD5_URL=`curl -s $SONATYPE_URL | grep 'bin.tar.gz.md5"' | tail -1 | cut -d'"' -f 2`
   else
     SONATYPE_URL=https://repo1.maven.org/maven2/io/fluo/fluo-distribution/$FLUO_VERSION
     FLUO_TARBALL_URL=$SONATYPE_URL/fluo-distribution-$FLUO_VERSION-bin.tar.gz
