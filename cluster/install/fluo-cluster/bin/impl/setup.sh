@@ -51,6 +51,10 @@ fi
 if [[ $ACCUMULO_VERSION != *"SNAPSHOT"* ]]; then
   wget -nc -nv -P $TARBALLS_DIR $APACHE_MIRROR/accumulo/$ACCUMULO_VERSION/$ACCUMULO_TARBALL &
 fi
+if [[ "$SETUP_METRICS" = "true" ]]; then
+  wget -nc -nv -P $TARBALLS_DIR https://s3.amazonaws.com/influxdb/$INFLUXDB_TARBALL &
+  wget -nc -nv -P $TARBALLS_DIR https://grafanarel.s3.amazonaws.com/builds/$GRAFANA_TARBALL &
+fi
 
 echo "Waiting for downloads to finish"
 wait
@@ -67,6 +71,10 @@ if [[ "$DOWNLOAD_FLUO" = "true" ]]; then
 fi
 if [[ $ACCUMULO_VERSION != *"SNAPSHOT"* ]]; then
   verify_checksum $ACCUMULO_TARBALL $ACCUMULO_MD5
+fi
+if [[ "$SETUP_METRICS" = "true" ]]; then
+  verify_checksum $INFLUXDB_TARBALL $INFLUXDB_MD5
+  verify_checksum $GRAFANA_TARBALL $GRAFANA_MD5
 fi
 echo "Checksums are valid"
 

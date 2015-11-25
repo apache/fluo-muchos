@@ -38,12 +38,16 @@ fluo.version = 1.0.0-beta-2-SNAPSHOT
 hadoop.version = 2.7.0
 zookeeper.version = 3.4.6
 spark.version = 1.5.1-bin-hadoop2.6
+influxdb.version = 0.9.4.2
+grafana.version = 2.5.0
 #If the Accumulo version contains SNAPSHOT, then the scripts expect it to be in cluster/tarballs/ and will not try to download from a mirror.
 accumulo.version = 1.6.4
 # Software md5 checksums
 hadoop.md5.hash = 79a6e87b09011861309c153a856c3ca1
 zookeeper.md5.hash = 971c379ba65714fd25dc5fe8f14e9ad1
 spark.md5.hash = 6b0830240dc9f18e3a1ab29994cc4d20
+influxdb.md5.hash = 6abb3d5df9b69aeb9bae37d0889bf67a
+grafana.md5.hash = e5fe934a27e94f954e87f5d18043a40e
 #Accumulo hash is only checked if not a SNAPSHOT version.
 accumulo.md5.hash = 530dfe488d5c2ee415b514ce72baa691
 
@@ -124,12 +128,12 @@ phrasecount.command.post.start=bin/run.sh
 # <Hostname> = <Service1>[,<Service2>,<Service3>]
 # Where: 
 #   Hostname = Must be unique.  Will be used for hostname in EC2 or should match hostname on your own cluster
-#   Service = Service to run on node (possible values: zookeeper, namenode, resourcemanager, accumulomaster, worker, fluo, graphite, dev)
-#             All services are required below except for fluo, dev, & graphite which are optional
+#   Service = Service to run on node (possible values: zookeeper, namenode, resourcemanager, accumulomaster, worker, fluo, metrics, dev)
+#             All services are required below except for fluo, dev, & metrics which are optional
 leader1 = namenode,zookeeper,fluo,dev
 leader2 = resourcemanager,zookeeper
 leader3 = accumulomaster,zookeeper
-monitor = graphite
+metrics = metrics
 worker1 = worker
 worker2 = worker
 worker3 = worker

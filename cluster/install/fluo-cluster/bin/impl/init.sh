@@ -23,7 +23,7 @@ echo "Confirming that nothing running on cluster"
 $BIN_DIR/fluo-cluster kill &> /dev/null
 
 echo "Removing any previous data"
-pssh -i -h $CONF_DIR/hosts/all_hosts "rm -rf /media/ephemeral*/zoo*  /media/ephemeral*/hadoop* /media/ephemeral*/yarn*"
+pssh -i -h $CONF_DIR/hosts/all_hosts "rm -rf /media/ephemeral*/zoo*  /media/ephemeral*/hadoop* /media/ephemeral*/yarn* /media/ephemeral*/influxdb /media/ephemeral*/grafana"
 
 echo "Installing all services on cluster"
 pssh -p 10 -x "-tt -o 'StrictHostKeyChecking no'" -t 300 -i -h $CONF_DIR/hosts/all_hosts "$BIN_DIR/fluo-cluster install --use-config"
@@ -52,5 +52,10 @@ $BIN_DIR/fluo-cluster start accumulo
 echo "Starting spark history server" 
 $HADOOP_PREFIX/bin/hdfs dfs -mkdir -p /spark/history
 $BIN_DIR/fluo-cluster start spark
+
+if [[ "$SETUP_METRICS" = "true" ]]; then
+  echo "Starting metrics (InfluxDB+Grafana)"
+  $BIN_DIR/fluo-cluster start metrics
+fi
 
 echo "Cluster initialization is finished"

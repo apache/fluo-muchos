@@ -113,44 +113,22 @@ function install_git() {
   fi
 }
 
-function install_graphite(){
-  if ! rpm -qa | grep -qw docker; then  
-    sudo yum install -y docker
-    sudo mv /var/lib/docker "$DATA_DIR/"
-    sudo ln -s "$DATA_DIR/docker" /var/lib/
-    sudo service docker start
-
-    sudo docker run -d --name graphite -p 80:80 -p 2003:2003 -p 8125:8125/udp hopsoft/graphite-statsd
-
-    sudo yum install -y expect
-    expect << DONE
-spawn sudo docker exec -t -i graphite python /opt/graphite/webapp/graphite/manage.py changepassword
-expect "Password: "
-send -- "foo10\r"
-expect "Password (again): "
-send -- "foo10\r"
-expect eof
-DONE
-
-  else
-    RUNNING=$(sudo docker inspect --format="{{ .State.Running }}" graphite 2> /dev/null)
-    if [ $? -eq 1 ]; then
-      #UNKNOWN container
-      sudo docker run -d --name graphite -p 80:80 -p 2003:2003 -p 8125:8125/udp hopsoft/graphite-statsd
-    fi
-
-    if [ "$RUNNING" == "false" ]; then
-      sudo docker start graphite
-    fi 
+function install_metrics(){
+  if [ ! -d "$INFLUXDB_INSTALL" ]; then
+    get_install $INFLUXDB_TARBALL
+    mkdir $INFLUXDB_INSTALL/bin
+    mv $INFLUXDB_INSTALL/opt/influxdb/versions/$INFLUXDB_VERSION/* $INFLUXDB_INSTALL/bin
+    rm -rf $INFLUXDB_INSTALL/opt
+    cp $CONF_DIR/influxdb.conf $INFLUXDB_INSTALL/
+    echo "`hostname`: InfluxDB installed"
   fi
-
-  #setup initial dashboard for fluo
-  # based on comment from http://serverfault.com/questions/505871/graphite-edit-dashboard  which did not mention --data-urlencode state@
-  while ! curl --data-urlencode state@$CONF_DIR/graphite-dash.json http://localhost:80/dashboard/save/fluo
-  do
-    echo "Unable to update graphite dashboard... sleeping and retrying"    
-    sleep 1
-  done
+  if [ ! -d "$GRAFANA_INSTALL" ]; then
+    get_install $GRAFANA_TARBALL
+    cp $CONF_DIR/grafana.ini $GRAFANA_INSTALL/conf/custom.ini
+    mkdir $GRAFANA_INSTALL/dashboards
+    cp $FLUO_HOME/contrib/grafana/* $GRAFANA_INSTALL/dashboards/
+    echo "`hostname`: Grafana installed"
+  fi
 }
 
 # Exit if any command fails
@@ -198,8 +176,9 @@ for service in $SERVICES; do
       install_java
       install_fluo
       ;;
-    graphite)
-      install_graphite
+    metrics)
+      install_fluo
+      install_metrics
       ;;
     dev)
       install_java
