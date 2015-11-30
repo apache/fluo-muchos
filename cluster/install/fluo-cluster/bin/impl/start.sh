@@ -36,6 +36,23 @@ spark)
   ssh "${SSH_OPTS[@]}" $CLUSTER_USERNAME@$RESOURCEMANAGER_HOST $SPARK_INSTALL/sbin/start-history-server.sh
   echo "$RESOURCEMANAGER_HOST: Spark HistoryServer started"
   ;;
+metrics)
+  ssh "${SSH_OPTS[@]}" $CLUSTER_USERNAME@$METRICS_SERVER "nohup $INFLUXDB_INSTALL/bin/influxd -config $INFLUXDB_INSTALL/influxdb.conf &> $INFLUXDB_INSTALL/influxdb.log &"
+  ssh "${SSH_OPTS[@]}" $CLUSTER_USERNAME@$METRICS_SERVER "nohup $GRAFANA_INSTALL/bin/grafana-server -homepath=$GRAFANA_INSTALL &> $GRAFANA_INSTALL/grafana.log &"
+  sleep 10
+  ssh "${SSH_OPTS[@]}" $CLUSTER_USERNAME@$METRICS_SERVER $INFLUXDB_INSTALL/bin/influx -execute "CREATE USER fluo WITH PASSWORD 'secret' WITH ALL PRIVILEGES"
+  sleep 10
+  retcode=1
+  while [ $retcode != 0 ];  do
+    URL=http://admin:admin@"$METRICS_SERVER":3000/api/datasources 
+    curl $URL -X POST -H 'Content-Type: application/json;charset=UTF-8' --data-binary `cat $CONF_DIR/grafana-datasource.json`
+    retcode=$?
+    if [ $retcode != 0 ]; then
+      echo "Failed to add Grafana data source.  Retrying in 5 sec.."
+      sleep 5
+    fi
+  done 
+  ;;
 *)
   echo -e "Usage: fluo-cluster start <argument>\n"
   echo -e "Possible arguments:\n"

@@ -222,7 +222,7 @@ class DeployTemplate(Template):
 
 def setup_cluster(config):
 
-  accumulo_tarball =  join(config.local_tarballs_dir(), "accumulo-{0}-bin.tar.gz".format(config.accumulo_version()))
+  accumulo_tarball =  join(config.local_tarballs_dir(), "accumulo-{0}-bin.tar.gz".format(config.version("accumulo")))
 
   print 'Setting up {0} cluster'.format(config.cluster_name)
   conf_templates = join(config.deploy_path, "cluster/templates/fluo-cluster/conf")
@@ -230,7 +230,7 @@ def setup_cluster(config):
 
   download_fluo = False
   if config.has_service('fluo'): 
-    fluo_tarball = join(config.local_tarballs_dir(), "fluo-{0}-bin.tar.gz".format(config.fluo_version()))
+    fluo_tarball = join(config.local_tarballs_dir(), "fluo-{0}-bin.tar.gz".format(config.version("fluo")))
     if not isfile(fluo_tarball):
       download_fluo = True
 
@@ -264,15 +264,17 @@ def setup_cluster(config):
   sub_d["MAPRED_LOCAL_DIRS"] = config.worker_ephemeral_dirs("/hadoop/mapred/local")
   sub_d["YARN_LOCAL_DIRS"] = config.worker_ephemeral_dirs("/hadoop/yarn/local")
 
-  if config.has_service("graphite"):
-    sub_d["GRAPHITE_SERVER"] = config.get_service_private_ips("graphite")[0]
+  sub_d["SETUP_METRICS"] = "false"
+  if config.has_service("metrics"):
+    sub_d["SETUP_METRICS"] = "true"
+    sub_d["METRICS_SERVER"] = config.get_service_hostnames("metrics")[0]
  
   sub_d["DOWNLOAD_FLUO"] = "false"
   if download_fluo:
     sub_d["DOWNLOAD_FLUO"] = "true"
     
   for fn in os.listdir(conf_templates):
-    if not config.has_service("graphite") and fn == "metrics.yaml":
+    if not config.has_service("metrics") and fn == "metrics.yaml":
       continue
     template_path = join(conf_templates, fn)
     install_path = join(conf_install, fn)

@@ -39,10 +39,10 @@ def test_defaults():
   assert c.get_private_ip('leader1') == '10.0.0.0'
   assert c.cluster_name == 'mycluster'
   assert c.apache_mirror() == 'http://www.gtlib.gatech.edu/pub/apache'
-  assert c.accumulo_version() == '1.6.4'
-  assert c.fluo_version() == '1.0.0-beta-2-SNAPSHOT'
-  assert c.hadoop_version() == '2.7.0'
-  assert c.zookeeper_version() == '3.4.6'
+  assert c.version("accumulo") == '1.6.4'
+  assert c.version("fluo") == '1.0.0-beta-2-SNAPSHOT'
+  assert c.version("hadoop") == '2.7.0'
+  assert c.version("zookeeper") == '3.4.6'
   assert c.hadoop_prefix() == "/home/ec2-user/install/hadoop-2.7.0"
   assert c.data_dir() == "/media/ephemeral0"
   assert c.cluster_tarballs_dir() == "/home/ec2-user/tarballs"
@@ -59,7 +59,7 @@ def test_defaults():
   assert c.configure_cluster() == "true"
   assert c.get_non_proxy() == [('10.0.0.1', 'leader2'), ('10.0.0.2', 'leader3'), ('10.0.0.3', 'worker1'), ('10.0.0.4', 'worker2'), ('10.0.0.5', 'worker3')]
   assert c.get_host_services() == [('leader1', 'namenode zookeeper fluo dev'), ('leader2', 'resourcemanager zookeeper'), ('leader3', 'accumulomaster zookeeper'),
-                                   ('monitor', 'graphite'), ('worker1', 'worker'), ('worker2', 'worker'), ('worker3', 'worker')]
+                                   ('metrics', 'metrics'), ('worker1', 'worker'), ('worker2', 'worker'), ('worker3', 'worker')]
   assert c.zookeeper_server_config() == "server.1=leader1:2888:3888\nserver.2=leader2:2888:3888\nserver.3=leader3:2888:3888"
   assert c.get_image_id('m1.large') == 'ami-cf1066aa'
   assert c.get_image_id('m3.large') == 'ami-e3106686'

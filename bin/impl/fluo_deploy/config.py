@@ -17,7 +17,7 @@ from util import get_num_ephemeral, exit, get_arch
 import os
 from os.path import join
 
-SERVICES = ['zookeeper', 'namenode', 'resourcemanager', 'accumulomaster', 'worker', 'fluo', 'graphite', 'dev']
+SERVICES = ['zookeeper', 'namenode', 'resourcemanager', 'accumulomaster', 'worker', 'fluo', 'metrics', 'dev']
 
 class DeployConfig(ConfigParser):
 
@@ -44,7 +44,7 @@ class DeployConfig(ConfigParser):
 
     if action in ['launch', 'setup']:
       for service in SERVICES:
-        if service not in ['fluo', 'graphite', 'dev']:
+        if service not in ['fluo', 'metrics', 'dev']:
           if not self.has_service(service):
             exit("ERROR - Missing '{0}' service from [nodes] section of fluo-deploy.props".format(service))
 
@@ -117,10 +117,10 @@ class DeployConfig(ConfigParser):
     return self.ephemeral_dirs(suffix, self.worker_num_ephemeral())
 
   def hadoop_prefix(self):
-    return join(self.cluster_install_dir(), "hadoop-"+self.hadoop_version())
+    return join(self.cluster_install_dir(), "hadoop-"+self.version("hadoop"))
 
   def zookeeper_home(self):
-    return join(self.cluster_install_dir(), 'zookeeper-'+self.zookeeper_version())
+    return join(self.cluster_install_dir(), 'zookeeper-'+self.version("zookeeper"))
 
   def cluster_tarballs_dir(self):
     return join(self.cluster_base_dir(), "tarballs")
@@ -131,50 +131,29 @@ class DeployConfig(ConfigParser):
   def apache_mirror(self):
     return self.get('general', 'apache.mirror')
 
-  def accumulo_version(self):
-    return self.get('general', 'accumulo.version')
+  def version(self, software_id):
+    return self.get('general', software_id + '.version')
 
-  def accumulo_md5(self):
-    return self.get('general', 'accumulo.md5.hash')
-
-  def fluo_version(self):
-    return self.get('general', 'fluo.version')
-
-  def hadoop_version(self):
-    return self.get('general', 'hadoop.version')
-
-  def hadoop_md5(self):
-    return self.get('general', 'hadoop.md5.hash')
-
-  def zookeeper_version(self):
-    return self.get('general', 'zookeeper.version')
-
-  def zookeeper_md5(self):
-    return self.get('general', 'zookeeper.md5.hash')
-
-  def spark_version(self):
-    return self.get('general', 'spark.version')
-
-  def spark_md5(self):
-    return self.get('general', 'spark.md5.hash')
+  def md5_hash(self, software_id):
+    return self.get('general', software_id + '.md5.hash')
 
   def accumulo_tarball(self):
-    return 'accumulo-%s-bin.tar.gz' % self.accumulo_version()
+    return 'accumulo-%s-bin.tar.gz' % self.version("accumulo")
 
   def hadoop_tarball(self):
-    return 'hadoop-%s.tar.gz' % self.hadoop_version()
+    return 'hadoop-%s.tar.gz' % self.version("hadoop")
 
   def zookeeper_tarball(self): 
-    return 'zookeeper-%s.tar.gz' % self.zookeeper_version()
+    return 'zookeeper-%s.tar.gz' % self.version("zookeeper")
  
   def accumulo_url(self):
-    return '%s/accumulo/%s/%s' % (self.apache_mirror(), self.accumulo_version(), self.accumulo_tarball())
+    return '%s/accumulo/%s/%s' % (self.apache_mirror(), self.version("accumulo"), self.accumulo_tarball())
 
   def hadoop_url(self):
-    return '%s/hadoop/common/hadoop-%s/%s' % (self.apache_mirror(), self.hadoop_version(), self.hadoop_tarball())
+    return '%s/hadoop/common/hadoop-%s/%s' % (self.apache_mirror(), self.version("hadoop"), self.hadoop_tarball())
 
   def zookeeper_url(self): 
-    return '%s/zookeeper/zookeeper-%s/%s' % (self.apache_mirror(), self.zookeeper_version(), self.zookeeper_tarball())
+    return '%s/zookeeper/zookeeper-%s/%s' % (self.apache_mirror(), self.version("zookeeper"), self.zookeeper_tarball())
 
   def accumulo_path(self): 
     return join(self.deploy_path, "cluster/tarballs/"+self.accumulo_tarball())

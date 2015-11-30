@@ -1,0 +1,1 @@
+{"name":"influxdb","type":"influxdb","url":"http://$METRICS_SERVER:8086","access":"direct","isDefault":true,"database":"fluo_metrics","user":"fluo","password":"secret"}

@@ -15,3 +15,6 @@ apps.properties
 awscreds.conf
 spark-defaults.conf
 spark-env.sh
+influxdb.conf
+grafana.ini
+grafana-datasource.json

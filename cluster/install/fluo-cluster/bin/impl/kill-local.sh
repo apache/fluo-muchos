@@ -18,8 +18,7 @@ pkill -9 -f accumulo.start
 pkill -9 -f hadoop.hdfs
 pkill -9 -f hadoop.yarn
 pkill -9 -f QuorumPeerMain
-if rpm -qa | grep -qw docker; then
-  sudo docker kill graphite
-fi
 pkill -9 -f org.apache.spark.deploy.history.HistoryServer
+pkill -9 -f influxdb
+pkill -9 -f grafana-server
 echo "`hostname` - Killed all processes"
