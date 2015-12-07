@@ -42,7 +42,7 @@ def test_defaults():
   assert c.version("accumulo") == '1.6.4'
   assert c.version("fluo") == '1.0.0-beta-2-SNAPSHOT'
   assert c.version("hadoop") == '2.7.0'
-  assert c.version("zookeeper") == '3.4.6'
+  assert c.version("zookeeper") == '3.4.7'
   assert c.hadoop_prefix() == "/home/ec2-user/install/hadoop-2.7.0"
   assert c.data_dir() == "/media/ephemeral0"
   assert c.cluster_tarballs_dir() == "/home/ec2-user/tarballs"

@@ -36,7 +36,7 @@ accumulo.password = secret
 # Software versions
 fluo.version = 1.0.0-beta-2-SNAPSHOT
 hadoop.version = 2.7.0
-zookeeper.version = 3.4.6
+zookeeper.version = 3.4.7
 spark.version = 1.5.1-bin-hadoop2.6
 influxdb.version = 0.9.4.2
 grafana.version = 2.5.0
@@ -44,7 +44,7 @@ grafana.version = 2.5.0
 accumulo.version = 1.6.4
 # Software md5 checksums
 hadoop.md5.hash = 79a6e87b09011861309c153a856c3ca1
-zookeeper.md5.hash = 971c379ba65714fd25dc5fe8f14e9ad1
+zookeeper.md5.hash = 58b515d1c1352e135d17c9a9a9ffedd0
 spark.md5.hash = 6b0830240dc9f18e3a1ab29994cc4d20
 influxdb.md5.hash = 6abb3d5df9b69aeb9bae37d0889bf67a
 grafana.md5.hash = e5fe934a27e94f954e87f5d18043a40e
