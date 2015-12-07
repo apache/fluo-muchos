@@ -10,7 +10,6 @@ bashrc
 accumulo-env.sh
 fluo-env.sh
 keys
-metrics.yaml
 apps.properties
 awscreds.conf
 spark-defaults.conf

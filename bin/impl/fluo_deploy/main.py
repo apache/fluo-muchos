@@ -274,8 +274,6 @@ def setup_cluster(config):
     sub_d["DOWNLOAD_FLUO"] = "true"
     
   for fn in os.listdir(conf_templates):
-    if not config.has_service("metrics") and fn == "metrics.yaml":
-      continue
     template_path = join(conf_templates, fn)
     install_path = join(conf_install, fn)
     if isfile(install_path):

@@ -77,7 +77,6 @@ function install_fluo() {
     cp $FLUO_HOME/conf/examples/* $FLUO_HOME/conf/
     cp $CONF_DIR/fluo.properties $FLUO_HOME/conf/
     cp $CONF_DIR/fluo-env.sh $FLUO_HOME/conf/
-    cp $CONF_DIR/metrics.yaml $FLUO_HOME/conf/ || true
     echo "`hostname`: Fluo installed"
   fi
 }
