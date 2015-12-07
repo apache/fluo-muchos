@@ -13,24 +13,20 @@ First clone the `fluo-deploy` repo:
 git clone https://github.com/fluo-io/fluo-deploy.git
 ```  
 
-In order to run `fluo-deploy`, your AWS credentials need to be set at `~/.aws/credentials` in a file like this:
-```
-[default]
-aws_access_key_id=AKIAIOSFODNN7EXAMPLE
-aws_secret_access_key=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
-```
-
-This file can be created by [installing the AWS client][1] and running the following command:
-```
-aws configure
-```
-See [AWS getting started guide][2] for more information.
-
 Now, create and modify your configuration file for fluo-deploy:
 ```
 cd fluo-deploy/
 cp conf/fluo-deploy.props.example conf/fluo-deploy.props
 ```
+
+In order to run `fluo-deploy`, your AWS credentials need to be set in `fluo-deploy.props` like this:
+```
+[ec2]
+aws.access.key_id=AKIAIOSFODNN7EXAMPLE
+aws.secret.key=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+```
+
+See [AWS Key ID Documentation][2] for more information.
 
 You will need to upload your public key to the AWS management console and set `key.name` in `fluo-deploy.props`
 to the name of your key pair.  If you want to give others access to your cluster, add their public keys to 
@@ -128,8 +124,7 @@ The following command runs the unit tests:
 
     nosetests -w bin/impl
 
-[1]: http://docs.aws.amazon.com/cli/latest/userguide/installing.html
-[2]: http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html
+[2]: http://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSGettingStartedGuide/AWSCredentials.html
 [3]: https://github.com/fluo-io/fluo/blob/master/docs/prod-fluo-setup.md#configure-a-fluo-application
 [4]: https://github.com/fluo-io/fluo-stress
 [5]: conf/fluo-deploy.props.example
