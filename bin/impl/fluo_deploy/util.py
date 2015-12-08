@@ -110,13 +110,14 @@ def parse_args(hosts_dir, input=None):
             + "  config     Print configuration for that cluster.  Requires '-p' option.  Use '-p all' for all config.\n"
             + "  ssh        SSH to cluster proxy node\n"
             + "  run        Runs the specified application configured in fluo-deploy.props.  Requires '-a <appName>' to be set.\n"
-            + "             Arguments after '-a <appName>' will be be passed to commands for application in fluo-deploy.props\n"
+            + "             Use --args '<arg1> ...' to pass arguments to the application command configured in fluo-deploy.props\n"
             + "  kill       Kill Fluo and its dependencies on cluster\n"
             + "  terminate  Terminate EC2 cluster",
             add_help_option=False)
   parser.add_option("-c", "--cluster", dest="cluster", help="Specifies cluster")
   parser.add_option("-p", "--property", dest="property", help="Specifies property to print (if using 'config' action).  Set to 'all' to print every property")
   parser.add_option("-a", "--application", dest="application", help="Specifies the application name (if using 'run' action)")
+  parser.add_option("--args", dest="app_args", help="Specifies arguments to pass to application command (if using 'run' action)")
   parser.add_option("-h", "--help", action="help", help="Show this help message and exit")
 
   if input:

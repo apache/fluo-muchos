@@ -111,17 +111,23 @@ pvm.ami = ami-cf1066aa
 # 			 - Logs are written to install/tests/stress/logs
 stress.repo=https://github.com/fluo-io/fluo-stress
 stress.branch=master
-stress.command.pre.init=bin/configure-fluo.sh 
-stress.command.post.start=bin/run-test.sh
+stress.command=bin/run-test.sh
 
 # Phrasecount application
-# Usage: fluo-deploy run -a phrasecount <txtDocsDir>
+# Usage: fluo-deploy run -a phrasecount --args <txtDocsDir>
 # Notes: - The directory <txtDocsDir> must exist on leader node
 #        - Cluster cannot be set up with multiple zookeepers until FLUO-521 is resolved. 
 phrasecount.repo=https://github.com/fluo-io/phrasecount
 phrasecount.branch=master
-phrasecount.command.pre.init=bin/configure.sh
-phrasecount.command.post.start=bin/run.sh
+phrasecount.command=bin/run.sh
+
+# Webindex application
+# Usage: fluo-deploy run -a webindex --args <args>
+# Notes: - If setting multiple args, wrap them in quotes
+#        - Set <args> to 'test-id load1 -fg' to load 1 Common Crawl file.
+webindex.repo=https://github.com/fluo-io/webindex
+webindex.branch=master
+webindex.command=bin/webindex
 
 [nodes]
 # Describes nodes in cluster in the following format: 

@@ -35,6 +35,7 @@ export ZOOKEEPER_HOME=$ZOOKEEPER_HOME
 # Derived variables
 export ACCUMULO_TARBALL=accumulo-$$ACCUMULO_VERSION-bin.tar.gz
 export HADOOP_TARBALL=hadoop-$$HADOOP_VERSION.tar.gz
+export HADOOP_CONF_DIR=$$HADOOP_PREFIX/etc/hadoop
 export ZOOKEEPER_TARBALL=zookeeper-$$ZOOKEEPER_VERSION.tar.gz
 export FLUO_TARBALL=fluo-$$FLUO_VERSION-bin.tar.gz
 export JAVA_TARBALL=jdk-8u60-linux-x64.tar.gz
@@ -46,7 +47,9 @@ export MAVEN_INSTALL=$$BASE_DIR/install/apache-maven-$$MAVEN_VERSION
 export SPARK_VERSION=`echo $$SPARK_BIN_VERSION | cut -d '-' -f 1`
 export SPARK_TARBALL=spark-$$SPARK_BIN_VERSION.tgz
 export SPARK_INSTALL=$$BASE_DIR/install/spark-$$SPARK_BIN_VERSION
+export SPARK_HOME=$$SPARK_INSTALL
 export INSTALL_DIR=$$BASE_DIR/install
+export APPS_DIR=$$BASE_DIR/apps
 export TARBALLS_DIR=$$BASE_DIR/tarballs
 export CONF_DIR=$$INSTALL_DIR/fluo-cluster/conf
 export BIN_DIR=$$INSTALL_DIR/fluo-cluster/bin
