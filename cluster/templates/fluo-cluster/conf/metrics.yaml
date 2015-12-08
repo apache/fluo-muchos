@@ -1,5 +1,0 @@
-frequency: 10 seconds
-reporters:
-    - type: graphite
-      host: $METRICS_SERVER
-      port: 2003
