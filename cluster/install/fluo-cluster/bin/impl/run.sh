@@ -26,29 +26,14 @@ export FLUO_APP_NAME=$1
 
 APP_REPO=`echo_prop $FLUO_APP_NAME.repo`
 APP_BRANCH=`echo_prop $FLUO_APP_NAME.branch`
-APP_PRE_INIT=`echo_prop $FLUO_APP_NAME.command.pre.init`
-APP_POST_START=`echo_prop $FLUO_APP_NAME.command.post.start`
+APP_COMMAND=`echo_prop $FLUO_APP_NAME.command`
 
-if [ ! -d $FLUO_HOME/apps/$FLUO_APP_NAME ]; then
-  $FLUO_HOME/bin/fluo new $FLUO_APP_NAME
-else
-  echo "Restarting '$FLUO_APP_NAME' application.  Errors may be printed if it's not running..."
-  $FLUO_HOME/bin/fluo kill $FLUO_APP_NAME
-  rm -rf $FLUO_HOME/apps/$FLUO_APP_NAME
-  $FLUO_HOME/bin/fluo new $FLUO_APP_NAME
-fi
-
-mkdir -p $INSTALL_DIR/fluo-app-repos
-cd $INSTALL_DIR/fluo-app-repos
+mkdir -p $APPS_DIR
+cd $APPS_DIR
 
 rm -rf $FLUO_APP_NAME
 git clone -b $APP_BRANCH $APP_REPO $FLUO_APP_NAME
 
 cd $FLUO_APP_NAME
 
-$APP_PRE_INIT "${@:2}"
-
-$FLUO_HOME/bin/fluo init $FLUO_APP_NAME -f
-$FLUO_HOME/bin/fluo start $FLUO_APP_NAME
-
-$APP_POST_START "${@:2}"
+$APP_COMMAND ${@:2}

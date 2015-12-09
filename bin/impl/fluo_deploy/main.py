@@ -422,7 +422,7 @@ def main():
   elif action == 'run':
     write_apps_props(config)
     send_to_proxy(config, join(config.deploy_path, "cluster/install/fluo-cluster/conf/apps.properties"), join(config.cluster_install_dir(), "fluo-cluster/conf"), skipIfExists=False)
-    exec_fluo_cluster_command(config, "run {0} {1}".format(opts.application, " ".join(args)))
+    exec_fluo_cluster_command(config, "run {0} {1}".format(opts.application, opts.app_args))
   elif action == 'terminate':
     conn = get_ec2_conn(config)
     nodes = get_active_cluster(conn, config)
