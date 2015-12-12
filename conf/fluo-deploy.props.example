@@ -88,6 +88,53 @@ pvm.ami = ami-cf1066aa
 #hvm.ami = ami-9ff7e8af
 #pvm.ami = ami-81f7e8b1
 
+[performance]
+#Automatically tune Accumulo, Yarn, and Fluo performance setting by selecting or
+#creating a performance profile.  Try not to use more memory than each node has 
+#and leave some space for the OS.
+profile=perf-small
+
+#Below are different performance profiles that can be selected.  Each profile
+#has the same properties with different values.
+
+[perf-small]
+#amount of JVM heap for each tserver
+accumulo.tserv.mem=2G
+#amount of data cache for each tserver
+accumulo.dcache.size=768M
+#amount of index cache for each tserver
+accumulo.icache.size=256M
+#in memory map size for each tserver
+accumulo.imap.size=512M
+#amount of JVM heap for each Fluo worker
+fluo.worker.mem.mb=2048
+#Number of threads for each Flup worker
+fluo.worker.threads=20
+#Number of worker to run per node
+fluo.worker.instances.multiplier=1
+#Max amount of memory for YARN per node
+yarn.nm.mem.mb=4096
+
+[perf-medium]
+accumulo.tserv.mem=3G
+accumulo.dcache.size=1536M
+accumulo.icache.size=512M
+accumulo.imap.size=512M
+fluo.worker.mem.mb=4096
+fluo.worker.threads=64
+fluo.worker.instances.multiplier=1
+yarn.nm.mem.mb=8192
+
+[perf-large]
+accumulo.tserv.mem=4G
+accumulo.dcache.size=2G
+accumulo.icache.size=1G
+accumulo.imap.size=512M
+fluo.worker.mem.mb=4096
+fluo.worker.threads=64
+fluo.worker.instances.multiplier=2
+yarn.nm.mem.mb=16384
+
 [apps]
 ###
 # This section is used to configure Fluo applications which are indentified by a unique application
