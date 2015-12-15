@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from ConfigParser import ConfigParser
-from util import get_num_ephemeral, exit, get_arch
+from util import get_num_ephemeral, exit, get_arch, get_ami
 import os
 from os.path import join
 
@@ -43,6 +43,9 @@ class DeployConfig(ConfigParser):
       self.proxy_public_ip()
 
     if action in ['launch', 'setup']:
+      self.get_image_id(self.default_instance_type())
+      self.get_image_id(self.worker_instance_type())
+
       for service in SERVICES:
         if service not in ['fluo', 'metrics', 'dev']:
           if not self.has_service(service):
@@ -182,25 +185,10 @@ class DeployConfig(ConfigParser):
   def aws_secret_key(self):
     return self.get('ec2', 'aws.secret.key')
 
-  def detailed_monitoring(self):
-    if self.get('ec2', 'detailed.monitoring') == "true":
-      return True
-    return False
-
-  def hvm_ami(self):
-    return self.get('ec2', 'hvm.ami')
-
-  def pvm_ami(self):
-    return self.get('ec2', 'pvm.ami')
-
   def get_image_id(self, instance_type):
-    arch = get_arch(instance_type)
-    if arch == "hvm":
-      return self.hvm_ami()
-    elif arch == "pvm":
-      return self.pvm_ami()
-    else:
-      return None
+    if get_arch(instance_type) == 'pvm':
+      exit("ERROR - Configuration contains instance type '{0}' that uses pvm architecture.  Only hvm architecture is supported!".format(instance_type))
+    return get_ami(instance_type, self.region())
 
   def region(self):
     return self.get('ec2', 'region')

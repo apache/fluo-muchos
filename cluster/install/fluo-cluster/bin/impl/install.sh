@@ -11,7 +11,9 @@
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific 
+# See the License for the specific
+
+set -e
 
 RSYNC_OPTS=(-e "ssh -o 'StrictHostKeyChecking no'" --ignore-existing)
 
@@ -53,8 +55,8 @@ function install_hadoop() {
     sudo mkdir -p $HCE_DIR/bin
     sudo mkdir -p $HCE_DIR/etc/hadoop
     sudo cp $HADOOP_PREFIX/bin/container-executor $HCE_DIR/bin
-    sudo cp $CONF_DIR/hadoop/container-executor.cfg $HCE_DIR/etc/hadoop/
-    sudo chown -R root:ec2-user $HCE_DIR/
+    sudo cp $CONF_DIR/container-executor.cfg $HCE_DIR/etc/hadoop/
+    sudo chown -R root:$CLUSTER_USERNAME $HCE_DIR/
     sudo chmod -R 6050 $HCE_DIR/
 
     install_spark
@@ -112,6 +114,19 @@ function install_git() {
   fi
 }
 
+function install_collectd() {
+  if ! rpm -q --quiet collectd ; then
+    sudo yum install -q -y collectd
+    sudo cp $CONF_DIR/collectd.conf /etc/collectd.conf
+    sudo service collectd start
+    echo "`hostname`: Collectd installed"
+  else 
+    sudo service collectd stop
+    sudo cp $CONF_DIR/collectd.conf /etc/collectd.conf
+    sudo service collectd start
+  fi
+}
+
 function install_metrics(){
   if [ ! -d "$INFLUXDB_INSTALL" ]; then
     get_install $INFLUXDB_TARBALL
@@ -125,6 +140,7 @@ function install_metrics(){
     get_install $GRAFANA_TARBALL
     cp $CONF_DIR/grafana.ini $GRAFANA_INSTALL/conf/custom.ini
     mkdir $GRAFANA_INSTALL/dashboards
+    cp $CONF_DIR/grafana/cluster-dashboard.json $GRAFANA_INSTALL/dashboards/
     cp $FLUO_HOME/contrib/grafana/* $GRAFANA_INSTALL/dashboards/
     echo "`hostname`: Grafana installed"
   fi
@@ -132,6 +148,14 @@ function install_metrics(){
 
 # Exit if any command fails
 set -e
+
+rpm -q --quiet epel-release || sudo yum install -q -y epel-release
+rpm -q --quiet wget || sudo yum install -q -y wget
+
+# install collectd everywhere if metrics is configured
+if [[ "$SETUP_METRICS" = "true" ]]; then
+  install_collectd
+fi
 
 SERVICES=$@
 if [ "$SERVICES" == "--use-config" ]; then

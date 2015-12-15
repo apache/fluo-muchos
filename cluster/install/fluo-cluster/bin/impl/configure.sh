@@ -19,7 +19,7 @@ set -e
 if [ ! -f /home/$CLUSTER_USERNAME/.fluo-cluster/configured ]; then
 
   if [ "$1" == "--use-config" ]; then
-    IP_ADDR=`/sbin/ifconfig eth0 | grep "inet addr" | cut -d: -f 2 | cut -d' ' -f 1`
+    IP_ADDR=`hostname -I`
     CONF_HOSTS=$CONF_DIR/hosts/configure
     HOST=`grep -w $IP_ADDR $CONF_HOSTS | cut -d ' ' -f 2`
     NUM_EPHEMERAL=`grep -w $IP_ADDR $CONF_HOSTS | cut -d ' ' -f 3`
@@ -32,6 +32,13 @@ if [ ! -f /home/$CLUSTER_USERNAME/.fluo-cluster/configured ]; then
     NUM_EPHEMERAL=$2
   fi
 
+  : ${HOST?"HOST must be set"}
+  : ${NUM_EPHEMERAL?"NUM_EPHEMERAL must be set"}
+  : ${CONF_DIR?"CONF_DIR must be set"}
+  : ${SSH_DIR?"SSH_DIR must be set"}
+  : ${CLUSTER_USERNAME?"CLUSTER_USERNAME must be set"}
+  : ${HOME_DIR?"HOME_DIR must be set"}
+
   echo "`hostname`: Configuring $HOST with $NUM_EPHEMERAL drives"
   sudo bash -c "cat $CONF_DIR/hosts/append_to_hosts >> /etc/hosts"
   cat $CONF_DIR/ssh_config >> $SSH_DIR/config
@@ -43,28 +50,21 @@ if [ ! -f /home/$CLUSTER_USERNAME/.fluo-cluster/configured ]; then
   cat $CONF_DIR/bashrc >> /home/$CLUSTER_USERNAME/.bashrc
   sudo bash -c "echo 'vm.swappiness = 0' >> /etc/sysctl.conf"
   sudo bash -c "cat $CONF_DIR/limits.conf >> /etc/security/limits.conf"
-  sudo sed -i "s/localhost.localdomain/$HOST/g" /etc/sysconfig/network
+  sudo rm /etc/security/limits.d/20-nproc.conf
+  sudo hostnamectl set-hostname $HOST
+  sudo bash -c "echo 'preserve_hostname: true' >> /etc/cloud/cloud.cfg"
 
-  #need g++ to build accumulo native libs
+  # Need g++ to build accumulo native libs
   sudo yum install -q -y gcc-c++
 
-  # set up cloudwatch memory and disk metrics
-  sudo yum install -q -y perl-DateTime perl-Sys-Syslog perl-LWP-Protocol-https
-  wget -nc -nv -P $HOME_DIR http://aws-cloudwatch.s3.amazonaws.com/downloads/CloudWatchMonitoringScripts-1.2.1.zip
-  unzip -q $HOME_DIR/CloudWatchMonitoringScripts-1.2.1.zip
-  rm $HOME_DIR/CloudWatchMonitoringScripts-1.2.1.zip
-  CRON_SCHED="*/5 * * * *"
-  if [ $DETAILED_MONITORING == "true" ]; then
-    CRON_SCHED="* * * * *"
-  fi
-  CRON_COMMAND="$CRON_SCHED ~/aws-scripts-mon/mon-put-instance-data.pl --mem-util --disk-space-util --disk-path=/ --from-cron --aws-credential-file=$CONF_DIR/awscreds.conf"
-  bash -c "(crontab -l 2>/dev/null; echo \"$CRON_COMMAND\")| crontab -"
-
-  # settings to resolve network issues on AWS while running Spark (see FLUO-DEPLOY-83)
+  # Settings to resolve network issues on AWS while running Spark (see FLUO-DEPLOY-83)
   sudo cp $CONF_DIR/ifup-local /sbin/ifup-local
 
-  #mount ephermal devices... 
-  sudo sed -i 's/defaults,nofail,comment=cloudconfig/defaults,nofail,noatime,nodiratime,comment=cloudconfig/g' /etc/fstab
+  # Mount ephermal devices...
+  sudo umount /mnt
+  sudo mkdir /media/ephemeral0
+  sudo sed -i 's#/mnt\tauto\tdefaults,nofail,comment=cloudconfig#/media/ephemeral0\tauto\tdefaults,nofail,noatime,nodiratime,comment=cloudconfig#g' /etc/fstab 
+  sudo mount /media/ephemeral0
   c="c"
   for i in $(seq 1 $((NUM_EPHEMERAL-1)))
   do
@@ -74,7 +74,7 @@ if [ ! -f /home/$CLUSTER_USERNAME/.fluo-cluster/configured ]; then
     sudo mount /media/ephemeral$i
   done
 
-  #make ephemeral drives writable
+  # Make ephemeral drives writable
   for i in $(seq 0 $((NUM_EPHEMERAL-1)))
   do
     sudo chown $CLUSTER_USERNAME /media/ephemeral$i

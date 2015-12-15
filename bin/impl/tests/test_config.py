@@ -43,9 +43,9 @@ def test_defaults():
   assert c.version("fluo") == '1.0.0-beta-2-SNAPSHOT'
   assert c.version("hadoop") == '2.7.0'
   assert c.version("zookeeper") == '3.4.7'
-  assert c.hadoop_prefix() == "/home/ec2-user/install/hadoop-2.7.0"
+  assert c.hadoop_prefix() == "/home/centos/install/hadoop-2.7.0"
   assert c.data_dir() == "/media/ephemeral0"
-  assert c.cluster_tarballs_dir() == "/home/ec2-user/tarballs"
+  assert c.cluster_tarballs_dir() == "/home/centos/tarballs"
   assert c.accumulo_tarball() == "accumulo-1.6.4-bin.tar.gz"
   assert c.accumulo_path() == "fluo-deploy/cluster/tarballs/accumulo-1.6.4-bin.tar.gz"
   assert c.accumulo_url() == "http://www.gtlib.gatech.edu/pub/apache/accumulo/1.6.4/accumulo-1.6.4-bin.tar.gz"
@@ -54,15 +54,13 @@ def test_defaults():
   assert c.proxy_hostname() == "leader1"
   assert c.proxy_public_ip() == "23.0.0.0"
   assert c.proxy_private_ip() == "10.0.0.0"
-  assert c.cluster_base_dir() == "/home/ec2-user"
-  assert c.cluster_username() == "ec2-user"
+  assert c.cluster_base_dir() == "/home/centos"
+  assert c.cluster_username() == "centos"
   assert c.configure_cluster() == "true"
   assert c.get_non_proxy() == [('10.0.0.1', 'leader2'), ('10.0.0.2', 'leader3'), ('10.0.0.3', 'worker1'), ('10.0.0.4', 'worker2'), ('10.0.0.5', 'worker3')]
   assert c.get_host_services() == [('leader1', 'namenode zookeeper fluo dev'), ('leader2', 'resourcemanager zookeeper'), ('leader3', 'accumulomaster zookeeper'),
                                    ('metrics', 'metrics'), ('worker1', 'worker'), ('worker2', 'worker'), ('worker3', 'worker')]
   assert c.zookeeper_server_config() == "server.1=leader1:2888:3888\nserver.2=leader2:2888:3888\nserver.3=leader3:2888:3888"
-  assert c.get_image_id('m1.large') == 'ami-cf1066aa'
-  assert c.get_image_id('m3.large') == 'ami-e3106686'
+  assert c.get_image_id('m3.large') == 'ami-61bbf104'
   assert c.aws_access_key() == 'access_key'
   assert c.aws_secret_key() == 'secret_key'
-  assert c.detailed_monitoring() == False

@@ -79,10 +79,10 @@
   </property>
   <property>
     <name>yarn.nodemanager.container-executor.group</name>
-    <value>ec2-user</value>
+    <value>$cluster.username</value>
   </property>
   <property>
     <name>yarn.nodemanager.linux-container-executor.nonsecure-mode.local-user</name>
-    <value>ec2-user</value>
+    <value>$cluster.username</value>
   </property>
 </configuration>

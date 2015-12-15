@@ -1,0 +1,1 @@
+{"name":"cluster_metrics","type":"influxdb","url":"http://$METRICS_SERVER:8086","access":"direct","isDefault":true,"database":"cluster_metrics","user":"fluo","password":"secret"}

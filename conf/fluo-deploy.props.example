@@ -15,10 +15,10 @@
 [general]
 # Cluster user name (install command will SSH to cluster using this user)
 # Leave default below if launching cluster in AWS
-cluster.username = ec2-user
+cluster.username = centos
 # Cluster base directory where install/ & tarballs/ directories are created
 # Leave default below if launching cluster in AWS
-cluster.base.dir = /home/ec2-user
+cluster.base.dir = /home/centos
 # Hostname of proxy node that fluo-deploy will use to direct installation of cluster.  Will be given 
 # public IP if launching in EC2.  If not launching in EC2, node must have public IP that can be reached
 # from your machine. Hostname can be chosen from "nodes" section below.
@@ -76,17 +76,6 @@ key.name = my_aws_key
 #reason setting this to non zero causes some instance types to fail, so use with
 #caution.  See issue #59
 ebs.root.size = 0
-# Enables detailed monitoring on EC2 instance which costs extra in AWS
-detailed.monitoring = false
-# Set AMI image given virtualization type (which is determined by your instance type)
-# Most instance types use HVM rather than PVM virtualization. AMI IDs differ by EC2 region. 
-# Below are settings for Amazon Linux AMI for different regions.  N. Virginia is set by default.
-# N. Virginia
-hvm.ami = ami-e3106686
-pvm.ami = ami-cf1066aa
-# Oregon
-#hvm.ami = ami-9ff7e8af
-#pvm.ami = ami-81f7e8b1
 
 [apps]
 ###

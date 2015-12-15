@@ -11,9 +11,11 @@ accumulo-env.sh
 fluo-env.sh
 keys
 apps.properties
-awscreds.conf
 spark-defaults.conf
 spark-env.sh
 influxdb.conf
 grafana.ini
-grafana-datasource.json
+grafana-fluo-datasource.json
+grafana-cluster-datasource.json
+collectd.conf
+container-executor.cfg

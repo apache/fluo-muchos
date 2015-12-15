@@ -111,8 +111,7 @@ def launch_cluster(conn, config):
                               subnet_id=config.subnet_id(),
                               min_count=1,
                               max_count=1,
-                              block_device_map=bdm,
-                              monitoring_enabled=config.detailed_monitoring())
+                              block_device_map=bdm)
   
     if len(resv.instances) != 1:
       exit('ERROR - Failed to start {0} node'.format(hostname))
@@ -191,6 +190,9 @@ def wait_until_cluster_ready(config):
  
 def exec_fluo_cluster_command(config, command):
   exec_on_proxy_verified(config, "bash {base}/install/fluo-cluster/bin/fluo-cluster {command}".format(base=config.cluster_base_dir(), command=command))
+
+def exec_fluo_cluster_command_unverified(config, command):
+  exec_on_proxy(config, "bash {base}/install/fluo-cluster/bin/fluo-cluster {command}".format(base=config.cluster_base_dir(), command=command))
 
 def send_to_proxy(config, path, target, skipIfExists=True): 
   print "Copying to proxy: ",path
@@ -356,11 +358,11 @@ def setup_cluster(config):
 
   exec_on_proxy_verified(config, "rm -rf {base}/install; tar -C {base} -xzf {base}/tarballs/install.tar.gz".format(base=config.cluster_base_dir()))
 
-  exec_fluo_cluster_command(config, "setup")
+  exec_fluo_cluster_command_unverified(config, "setup-os")
 
   wait_until_cluster_ready(config)
  
-  exec_fluo_cluster_command(config, "init")
+  exec_fluo_cluster_command(config, "setup-sw")
       
 def main():
 
