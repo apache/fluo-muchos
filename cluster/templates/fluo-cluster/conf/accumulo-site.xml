@@ -28,23 +28,33 @@
   </property>
 
   <property>
+    <name>table.durability</name>
+    <value>flush</value>
+  </property>
+
+  <property>
     <name>tserver.server.threads.minimum</name>
     <value>64</value>
   </property>
 
   <property>
+    <name>tserver.readahead.concurrent.max</name>
+    <value>64</value>
+  </property>
+
+  <property>
     <name>tserver.cache.data.size</name>
-    <value>512M</value>
+    <value>$ACCUMULO_DCACHE_SIZE</value>
   </property>
 
   <property>
     <name>tserver.cache.index.size</name>
-    <value>512M</value>
+    <value>$ACCUMULO_ICACHE_SIZE</value>
   </property>
 
   <property>
     <name>tserver.memory.maps.max</name>
-    <value>1G</value>
+    <value>$ACCUMULO_IMAP_SIZE</value>
   </property>
 
   <property>

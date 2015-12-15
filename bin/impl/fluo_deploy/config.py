@@ -324,6 +324,10 @@ class DeployConfig(ConfigParser):
   def proxy_private_ip(self):
     return self.get_private_ip(self.proxy_hostname())
 
+  def get_performance_prop(self, prop):
+    profile = self.get('performance', 'profile')
+    return self.get(profile, prop)
+
   def print_all(self):
     print 'proxy.public.ip = ', self.proxy_public_ip()
     for (name, val) in self.items('general'):

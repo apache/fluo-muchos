@@ -258,11 +258,19 @@ def setup_cluster(config):
   sub_d["RESOURCEMANAGER_HOST"] = config.get_service_hostnames("resourcemanager")[0]
   sub_d["RESOURCEMANAGER_IP"] = config.get_service_private_ips("resourcemanager")[0]
   sub_d["ACCUMULOMASTER_HOST"] = config.get_service_hostnames("accumulomaster")[0]
-  sub_d["NUM_WORKERS"] = len(config.get_service_hostnames("worker"))
+  sub_d["NUM_WORKERS"] = str(int(len(config.get_service_hostnames("worker"))) * int(config.get_performance_prop("fluo.worker.instances.multiplier")))
   sub_d["DATANODE_DIRS"] = config.worker_ephemeral_dirs("/hadoop/data")
   sub_d["MAPRED_TEMP_DIRS"] = config.worker_ephemeral_dirs("/hadoop/mapred/temp")
   sub_d["MAPRED_LOCAL_DIRS"] = config.worker_ephemeral_dirs("/hadoop/mapred/local")
   sub_d["YARN_LOCAL_DIRS"] = config.worker_ephemeral_dirs("/hadoop/yarn/local")
+
+  sub_d["ACCUMULO_TSERV_MEM"]=config.get_performance_prop("accumulo.tserv.mem");
+  sub_d["ACCUMULO_DCACHE_SIZE"]=config.get_performance_prop("accumulo.dcache.size");
+  sub_d["ACCUMULO_ICACHE_SIZE"]=config.get_performance_prop("accumulo.icache.size");
+  sub_d["ACCUMULO_IMAP_SIZE"]=config.get_performance_prop("accumulo.imap.size");
+  sub_d["FLUO_WORKER_MEM_MB"]=config.get_performance_prop("fluo.worker.mem.mb");
+  sub_d["FLUO_WORKER_THREADS"]=config.get_performance_prop("fluo.worker.threads");
+  sub_d["YARN_NM_MEM_MB"]=config.get_performance_prop("yarn.nm.mem.mb");
 
   sub_d["SETUP_METRICS"] = "false"
   if config.has_service("metrics"):
