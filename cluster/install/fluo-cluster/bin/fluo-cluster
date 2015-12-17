@@ -27,8 +27,8 @@ bin="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 set -e
 
 case "$1" in 
-setup)
-  "$bin"/impl/setup.sh "${@:2}"
+setup-os)
+  "$bin"/impl/setup-os.sh "${@:2}"
   ;;
 configure)
   "$bin"/impl/configure.sh "${@:2}"
@@ -36,8 +36,8 @@ configure)
 install)
   "$bin"/impl/install.sh "${@:2}"
   ;;
-init)
-  "$bin"/impl/init.sh "${@:2}"
+setup-sw)
+  "$bin"/impl/setup-sw.sh "${@:2}"
   ;;
 start)
   "$bin"/impl/start.sh "${@:2}"
@@ -57,8 +57,8 @@ run)
 *)
   echo -e "Usage: fluo-cluster command (<argument>)\n"
   echo -e  "Commands that run on entire cluster:\n"
-  echo "  setup        Setup, initialize, and start cluster"
-  echo "  init         Initialize and start cluster"
+  echo "  setup-os     Sets up OS of each machine in cluster"
+  echo "  setup-sw     Sets up cluster software"
   echo "  start        Start all services on cluster"
   echo "  kill         Kill cluster processes"
   echo "  ready        Checks if cluster is running and ready"

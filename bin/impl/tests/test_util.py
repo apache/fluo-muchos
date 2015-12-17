@@ -12,11 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from fluo_deploy.util import get_arch, parse_args
+from fluo_deploy.util import get_arch, parse_args, get_ami
 
 def test_util():
   assert get_arch('m1.large') == 'pvm'
   assert get_arch('m3.large') == 'hvm'
+  
+  assert get_ami('m3.large', 'us-east-1') == 'ami-61bbf104'
+  assert get_ami('m1.large', 'us-east-1') == None
 
   hosts_dir = '../../conf/hosts'
   assert parse_args(hosts_dir, ['launch']) == None

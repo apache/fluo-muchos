@@ -45,7 +45,17 @@ metrics)
   retcode=1
   while [ $retcode != 0 ];  do
     URL=http://admin:admin@"$METRICS_SERVER":3000/api/datasources 
-    curl $URL -X POST -H 'Content-Type: application/json;charset=UTF-8' --data-binary `cat $CONF_DIR/grafana-datasource.json`
+    curl $URL -X POST -H 'Content-Type: application/json;charset=UTF-8' --data-binary `cat $CONF_DIR/grafana-fluo-datasource.json`
+    retcode=$?
+    if [ $retcode != 0 ]; then
+      echo "Failed to add Grafana data source.  Retrying in 5 sec.."
+      sleep 5
+    fi
+  done
+  retcode=1
+  while [ $retcode != 0 ];  do
+    URL=http://admin:admin@"$METRICS_SERVER":3000/api/datasources 
+    curl $URL -X POST -H 'Content-Type: application/json;charset=UTF-8' --data-binary `cat $CONF_DIR/grafana-cluster-datasource.json`
     retcode=$?
     if [ $retcode != 0 ]; then
       echo "Failed to add Grafana data source.  Retrying in 5 sec.."

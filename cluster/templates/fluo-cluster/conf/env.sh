@@ -5,7 +5,6 @@ export BASE_DIR=$cluster.base.dir
 export DATA_DIR=$DATA_DIR
 export CLUSTER_USERNAME=$cluster.username
 export CONFIGURE_CLUSTER=$configure.cluster
-export DETAILED_MONITORING=$detailed.monitoring
 export APACHE_MIRROR=$apache.mirror
 export ACCUMULO_VERSION=$accumulo.version
 export ACCUMULO_MD5=$accumulo.md5.hash

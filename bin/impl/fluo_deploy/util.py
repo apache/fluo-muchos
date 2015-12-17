@@ -65,11 +65,36 @@ instance_types = {
   "r3.xlarge": EC2Type("hvm", 1),
 }
 
+# AMI given arch & region.  PVM arch currently not supported
+ami_lookup = {
+  "hvm": { "us-east-1": "ami-61bbf104",
+           "us-west-1": "ami-f77fbeb3",
+           "us-west-2": "ami-d440a6e7",
+           "eu-west-1": "ami-33734044",
+           "eu-central-1": "ami-e68f82fb",
+           "ap-southeast-1": "ami-2a7b6b78",
+           "ap-southeast-2": "ami-d38dc6e9",
+           "ap-northeast-1": " ami-b80b6db8",
+           "sa-east-1": "ami-fd0197e0"},
+  "pvm": { "us-east-1": None,
+           "us-west-1": None,
+           "us-west-2": None,
+           "eu-west-1": None,
+           "eu-central-1": None,
+           "ap-southeast-1": None,
+           "ap-southeast-2": None,
+           "ap-northeast-1": None,
+           "sa-east-1": None},
+}
+
 def get_arch(instance_type):
   return instance_types.get(instance_type).arch
 
 def get_num_ephemeral(instance_type):
   return instance_types.get(instance_type).ephemeral
+
+def get_ami(instance_type, region):
+  return ami_lookup.get(get_arch(instance_type)).get(region)
 
 def exit(msg):
   print msg

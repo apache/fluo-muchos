@@ -13,6 +13,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific 
 
+SSH_OPTS=(-tt -o 'StrictHostKeyChecking no' -A)
+
 function verify_checksum() {
   tarball=$1
   expected_md5=$2
@@ -24,11 +26,9 @@ function verify_checksum() {
   fi
 }
 
-# Exit if any command fails
 set -e
 
-echo "Cluster setup started"
-
+echo "Initializing cluster"
 echo "Downloading required software"
 wget -nc -nv -P $TARBALLS_DIR $APACHE_MIRROR/zookeeper/zookeeper-$ZOOKEEPER_VERSION/$ZOOKEEPER_TARBALL &
 wget -nc -nv -P $TARBALLS_DIR $APACHE_MIRROR/hadoop/common/hadoop-$HADOOP_VERSION/$HADOOP_TARBALL &
@@ -78,39 +78,44 @@ if [[ "$SETUP_METRICS" = "true" ]]; then
 fi
 echo "Checksums are valid"
 
-echo "Installing pssh"
-sudo yum install -q -y pssh
 
-echo "Creating tarballs directory on all nodes"
-pssh -x "-o 'StrictHostKeyChecking no'" -i -h $CONF_DIR/hosts/all_except_proxy "mkdir -p $TARBALLS_DIR"
-
-echo "Copying scripts to all nodes"
-pscp.pssh -h $CONF_DIR/hosts/all_except_proxy $TARBALLS_DIR/install.tar.gz $TARBALLS_DIR/install.tar.gz
-
-echo "Installing scripts on all nodes"
-pssh -i -h $CONF_DIR/hosts/all_except_proxy "rm -rf $INSTALL_DIR; tar -C $BASE_DIR -xzf $TARBALLS_DIR/install.tar.gz"
-
-echo "Confirming that nothing is running on cluster"
+echo "Confirming that nothing running on cluster"
 $BIN_DIR/fluo-cluster kill &> /dev/null
 
-if [ "$CONFIGURE_CLUSTER" == "true" ]; then
-  echo "Configuring machines on cluster"
-  if [ ! -f /home/$CLUSTER_USERNAME/.ssh/id_rsa ]; then
-   ssh-keygen  -q -t rsa -N ''  -f /home/$CLUSTER_USERNAME/.ssh/id_rsa
-  fi
+echo "Removing any previous data"
+pssh -i -h $CONF_DIR/hosts/all_hosts "rm -rf /media/ephemeral*/zoo*  /media/ephemeral*/hadoop* /media/ephemeral*/yarn* /media/ephemeral*/influxdb /media/ephemeral*/grafana"
 
-  echo "Copying private key to all nodes"
-  pscp.pssh -h $CONF_DIR/hosts/all_except_proxy $SSH_DIR/id_rsa $SSH_DIR/id_rsa
-  echo "Copying public key to all nodes"
-  pscp.pssh -h $CONF_DIR/hosts/all_except_proxy $SSH_DIR/id_rsa $SSH_DIR/id_rsa.pub
+echo "Installing all services on cluster"
+pssh -p 10 -x "-tt -o 'StrictHostKeyChecking no'" -t 300 -i -h $CONF_DIR/hosts/all_hosts "$BIN_DIR/fluo-cluster install --use-config"
+echo "Finished installing all services on cluster"
 
-  echo "Configuring non-proxy nodes"
-  pssh -x "-tt -o 'StrictHostKeyChecking no'" -i -h $CONF_DIR/hosts/all_except_proxy "$BIN_DIR/fluo-cluster configure --use-config"
+echo "Setting up myid file on each zookeeper server"
+while read line; do
+  IFS=' ' read -ra ARR <<< "$line"
+  HOST=${ARR[0]}
+  ID=${ARR[1]}
+  echo "`hostname`: Setting zookeeper myid to $ID on $HOST"
+  ssh "${SSH_OPTS[@]}" $CLUSTER_USERNAME@$HOST "mkdir -p $DATA_DIR/zookeeper; echo $ID > $DATA_DIR/zookeeper/myid" < /dev/null
+done < $CONF_DIR/hosts/zookeeper_ids
 
-  echo "Configuring proxy"
-  $BIN_DIR/fluo-cluster configure --use-config
-else
-  echo "User chose not to configure ~/.ssh/config, /etc/hosts, & ~/.bashrc on cluster"
+echo "Starting hadoop"
+ssh "${SSH_OPTS[@]}" $CLUSTER_USERNAME@$NAMENODE_HOST $HADOOP_PREFIX/bin/hdfs namenode -format
+$BIN_DIR/fluo-cluster start hadoop
+
+echo "Starting zookeeper"
+$BIN_DIR/fluo-cluster start zookeeper
+
+echo "Starting accumulo"
+ssh "${SSH_OPTS[@]}" $CLUSTER_USERNAME@$ACCUMULOMASTER_HOST "source $CONF_DIR/env.sh; $ACCUMULO_HOME/bin/accumulo init --clear-instance-name --instance-name $ACCUMULO_INSTANCE --password $ACCUMULO_PASSWORD"
+$BIN_DIR/fluo-cluster start accumulo
+
+echo "Starting spark history server" 
+$HADOOP_PREFIX/bin/hdfs dfs -mkdir -p /spark/history
+$BIN_DIR/fluo-cluster start spark
+
+if [[ "$SETUP_METRICS" = "true" ]]; then
+  echo "Starting metrics (InfluxDB+Grafana)"
+  $BIN_DIR/fluo-cluster start metrics
 fi
 
-echo "Cluster setup finished"
+echo "Cluster initialization is finished"
