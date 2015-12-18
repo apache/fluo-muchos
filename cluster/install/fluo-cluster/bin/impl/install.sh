@@ -13,6 +13,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific
 
+impl=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+. "$impl"/../../conf/env.sh
+
 set -e
 
 RSYNC_OPTS=(-e "ssh -o 'StrictHostKeyChecking no'" --ignore-existing)
@@ -146,9 +149,6 @@ function install_metrics(){
   fi
 }
 
-# Exit if any command fails
-set -e
-
 rpm -q --quiet epel-release || sudo yum install -q -y epel-release
 rpm -q --quiet wget || sudo yum install -q -y wget
 
@@ -157,14 +157,11 @@ if [[ "$SETUP_METRICS" = "true" ]]; then
   install_collectd
 fi
 
-SERVICES=$@
-if [ "$SERVICES" == "--use-config" ]; then
-  HOST=`hostname`
-  HOSTS_FILE=$CONF_DIR/hosts/hosts_with_services
-  SERVICES=`grep -w $HOST $HOSTS_FILE | cut -d ' ' -f 2-`
-  if [ -z "$SERVICES" ]; then
-    echo "ERROR - The hostname $HOST was not found in $HOSTS_FILE so no services will be installed on this machine"
-  fi
+HOST=`hostname`
+HOSTS_FILE=$CONF_DIR/hosts/hosts_with_services
+SERVICES=`grep -w $HOST $HOSTS_FILE | cut -d ' ' -f 2-`
+if [ -z "$SERVICES" ]; then
+  echo "ERROR - The hostname $HOST was not found in $HOSTS_FILE so no services will be installed on this machine"
 fi
 
 for service in $SERVICES; do
