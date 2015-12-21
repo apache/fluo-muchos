@@ -366,11 +366,7 @@ def setup_cluster(config):
 
   exec_on_proxy_verified(config, "rm -rf {base}/install; tar -C {base} -xzf {base}/tarballs/install.tar.gz".format(base=config.cluster_base_dir()))
 
-  exec_fluo_cluster_command_unverified(config, "setup-os")
-
-  wait_until_cluster_ready(config)
- 
-  exec_fluo_cluster_command(config, "setup-sw")
+  exec_fluo_cluster_command(config, "setup")
       
 def main():
 

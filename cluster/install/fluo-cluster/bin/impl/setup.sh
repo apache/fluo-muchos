@@ -13,6 +13,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific 
 
+# Exit if any command fails
+set -e
+
 SSH_OPTS=(-tt -o 'StrictHostKeyChecking no' -A)
 
 function verify_checksum() {
@@ -26,9 +29,46 @@ function verify_checksum() {
   fi
 }
 
-set -e
+echo "Started cluster setup"
 
-echo "Initializing cluster"
+rpm -q --quiet epel-release || sudo yum install -q -y epel-release
+rpm -q --quiet wget || sudo yum install -q -y wget
+rpm -q --quiet pssh || sudo yum install -q -y pssh
+
+echo "Creating tarballs directory on all nodes"
+pssh -x "-o 'StrictHostKeyChecking no'" -i -h $CONF_DIR/hosts/all_except_proxy "mkdir -p $TARBALLS_DIR"
+
+echo "Copying scripts to all nodes"
+pscp.pssh -h $CONF_DIR/hosts/all_except_proxy $TARBALLS_DIR/install.tar.gz $TARBALLS_DIR/install.tar.gz
+
+echo "Installing scripts on all nodes"
+pssh -i -h $CONF_DIR/hosts/all_except_proxy "rm -rf $INSTALL_DIR; tar -C $BASE_DIR -xzf $TARBALLS_DIR/install.tar.gz"
+
+echo "Confirming that nothing is running on cluster"
+$BIN_DIR/fluo-cluster kill &> /dev/null
+
+if [ "$CONFIGURE_CLUSTER" == "true" ]; then
+  echo "Configuring machines on cluster"
+  if [ ! -f /home/$CLUSTER_USERNAME/.ssh/id_rsa ]; then
+   ssh-keygen  -q -t rsa -N ''  -f /home/$CLUSTER_USERNAME/.ssh/id_rsa
+  fi
+
+  echo "Copying private key to all nodes"
+  pscp.pssh -h $CONF_DIR/hosts/all_except_proxy $SSH_DIR/id_rsa $SSH_DIR/id_rsa
+  echo "Copying public key to all nodes"
+  pscp.pssh -h $CONF_DIR/hosts/all_except_proxy $SSH_DIR/id_rsa.pub $SSH_DIR/id_rsa.pub
+
+  echo "Configuring system settings on all nodes"
+  IMPL_DIR=$BIN_DIR/impl
+  pssh -p 10 -x "-tt" -i -t 300 -h $CONF_DIR/hosts/all_ips "$IMPL_DIR/configure-system.sh"
+  source $HOME/.bashrc
+
+  echo "Configuring hostname and drives on all nodes"
+  pssh -p 10 -x "-tt" -i -t 300 -h $CONF_DIR/hosts/all_ips "$IMPL_DIR/configure-drives.sh"
+else
+  echo "User chose to skip configuring machines"
+fi
+
 echo "Downloading required software"
 wget -nc -nv -P $TARBALLS_DIR $APACHE_MIRROR/zookeeper/zookeeper-$ZOOKEEPER_VERSION/$ZOOKEEPER_TARBALL &
 wget -nc -nv -P $TARBALLS_DIR $APACHE_MIRROR/hadoop/common/hadoop-$HADOOP_VERSION/$HADOOP_TARBALL &
@@ -78,7 +118,6 @@ if [[ "$SETUP_METRICS" = "true" ]]; then
 fi
 echo "Checksums are valid"
 
-
 echo "Confirming that nothing running on cluster"
 $BIN_DIR/fluo-cluster kill &> /dev/null
 
@@ -86,7 +125,7 @@ echo "Removing any previous data"
 pssh -i -h $CONF_DIR/hosts/all_hosts "rm -rf /media/ephemeral*/zoo*  /media/ephemeral*/hadoop* /media/ephemeral*/yarn* /media/ephemeral*/influxdb /media/ephemeral*/grafana"
 
 echo "Installing all services on cluster"
-pssh -p 10 -x "-tt -o 'StrictHostKeyChecking no'" -t 300 -i -h $CONF_DIR/hosts/all_hosts "$BIN_DIR/fluo-cluster install --use-config"
+pssh -p 10 -x "-tt -o 'StrictHostKeyChecking no'" -t 300 -i -h $CONF_DIR/hosts/all_hosts "$BIN_DIR/impl/install.sh"
 echo "Finished installing all services on cluster"
 
 echo "Setting up myid file on each zookeeper server"
@@ -118,4 +157,4 @@ if [[ "$SETUP_METRICS" = "true" ]]; then
   $BIN_DIR/fluo-cluster start metrics
 fi
 
-echo "Cluster initialization is finished"
+echo -e "\nCluster setup is finished"
