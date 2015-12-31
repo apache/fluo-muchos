@@ -1,0 +1,13 @@
+# The tasks below are designed for setting up ephemeral drives on Amazon EC2
+# This file will need to be modified to support other environments
+- name: "unmount default emphemeral drive at /mnt"
+  mount: name=/mnt src=/dev/xvdb fstype=auto state=unmounted
+- name: "mount ephemeral drives"
+  mount: name=/media/ephemeral{{item.0}} src=/dev/xvd{{item.1}} fstype=auto state=mounted
+    opts=defaults,nofail,noatime,nodiratime,comment=cloudconfig passno=2
+  when: item.0 < {{ drives }}
+  with_indexed_items: ['b','c','d','e','f','g','h','i']
+- name: "ensure drives are owned by cluster user"
+  file: path=/media/ephemeral{{item}} state=directory owner={{ cluster_user }} group={{ cluster_user }} 
+  with_sequence: start=0 end={{ drives-1 }}
+

@@ -1,0 +1,6 @@
+- name: "ensure zookeeper data dir exists"
+  file: path={{ data_dir }}/zookeeper state=directory
+- name: "ensure myid file is set"
+  template: src=myid dest={{ data_dir }}/zookeeper/myid
+- name: "start zookeeper"
+  shell: "{{ zookeeper_home }}/bin/zkServer.sh start"

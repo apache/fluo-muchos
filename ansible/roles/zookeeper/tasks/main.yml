@@ -1,0 +1,7 @@
+- name: "install zookeeper tarball"
+  unarchive: src={{ tarballs_dir }}/{{ zookeeper_tarball }} dest={{ install_dir }} creates={{ zookeeper_home }} copy=yes
+- name: "configure zookeeper"
+  template: src={{ item }} dest={{ zookeeper_home }}/conf/{{ item }}
+  with_items:
+    - zoo.cfg
+    - zookeeper-env.sh

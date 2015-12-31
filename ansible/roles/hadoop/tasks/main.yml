@@ -1,0 +1,31 @@
+- name: "install hadoop tarball"
+  unarchive: src={{ tarballs_dir }}/{{ hadoop_tarball }} dest={{ install_dir }} creates={{ hadoop_prefix }} copy=yes
+- name: "configure hadoop with templates"
+  template: src={{ item }} dest={{ hadoop_prefix }}/etc/hadoop/{{ item }}
+  with_items:
+    - core-site.xml
+    - hdfs-site.xml
+    - yarn-site.xml
+    - mapred-site.xml
+    - slaves
+- name: "configure hadoop with files"
+  copy: src=capacity-scheduler.xml dest={{ hadoop_prefix }}/etc/hadoop/capacity-scheduler.xml
+- name: "copy spark yarn shuffle jar to hadoop lib"
+  command: cp {{ spark_home }}/lib/spark-{{ spark_version }}-yarn-shuffle.jar {{ hadoop_prefix }}/share/hadoop/yarn/lib/ creates={{ hadoop_prefix }}/share/hadoop/yarn/lib/spark-{{ spark_version }}-yarn-shuffle.jar
+- name: "create hadoop containor executor directories"
+  # The hadoop-ce directory needs to be placed at the Linux root as the container-executor has 
+  # funky permission requirements that need to be applied to all parent directories.
+  file: path={{ item }} state=directory
+  with_items:
+    - /hadoop-ce/bin
+    - /hadoop-ce/etc/hadoop
+  become: yes
+- name: "copy hadoop container executor binary"
+  command: cp {{ hadoop_prefix }}/bin/container-executor /hadoop-ce/bin/ creates=/hadoop-ce/bin/container-executor
+  become: yes
+- name: "configure hadoop container executor"
+  template: src=container-executor.cfg dest=/hadoop-ce/etc/hadoop/container-executor.cfg
+  become: yes
+- name: "set hadoop container exector permisions"
+  file: path=/hadoop-ce recurse=yes owner=root group={{ cluster_user }} mode=6050
+  become: yes

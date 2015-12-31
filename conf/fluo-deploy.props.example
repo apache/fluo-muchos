@@ -15,67 +15,63 @@
 [general]
 # Cluster user name (install command will SSH to cluster using this user)
 # Leave default below if launching cluster in AWS
-cluster.username = centos
+cluster_user = centos
 # Cluster base directory where install/ & tarballs/ directories are created
 # Leave default below if launching cluster in AWS
-cluster.base.dir = /home/centos
+cluster_basedir = /home/centos
 # Hostname of proxy node that fluo-deploy will use to direct installation of cluster.  Will be given 
 # public IP if launching in EC2.  If not launching in EC2, node must have public IP that can be reached
 # from your machine. Hostname can be chosen from "nodes" section below.
-proxy.hostname = leader1
+proxy_hostname = leader1
 # If set, a SOCKS proxy will be created on the specified port when connecting to proxy using 'fluo-deploy ssh <cluster>'
-#proxy.socks.port = 38585
-# Specifies if SSH, Hosts, and .bashrc should be configured on cluster
-configure.cluster = true
+#proxy_socks_port = 38585
 # Apache mirror to download Hadoop, Zookeeper, Accumulo
-apache.mirror = http://www.gtlib.gatech.edu/pub/apache
+apache_mirror = http://www.gtlib.gatech.edu/pub/apache
 # Accumulo Instance name
-accumulo.instance = instance16
+accumulo_instance = instance16
 # Accumluo Password
-accumulo.password = secret
+accumulo_password = secret
 # Software versions
-fluo.version = 1.0.0-beta-2-SNAPSHOT
-hadoop.version = 2.7.0
-zookeeper.version = 3.4.7
-spark.version = 1.5.1-bin-hadoop2.6
-influxdb.version = 0.9.4.2
-grafana.version = 2.5.0
-#If the Accumulo version contains SNAPSHOT, then the scripts expect it to be in cluster/tarballs/ and will not try to download from a mirror.
-accumulo.version = 1.6.4
-# Software md5 checksums
-hadoop.md5.hash = 79a6e87b09011861309c153a856c3ca1
-zookeeper.md5.hash = 58b515d1c1352e135d17c9a9a9ffedd0
-spark.md5.hash = 6b0830240dc9f18e3a1ab29994cc4d20
-influxdb.md5.hash = 6abb3d5df9b69aeb9bae37d0889bf67a
-grafana.md5.hash = e5fe934a27e94f954e87f5d18043a40e
-#Accumulo hash is only checked if not a SNAPSHOT version.
-accumulo.md5.hash = 530dfe488d5c2ee415b514ce72baa691
+fluo_version = 1.0.0-beta-2-SNAPSHOT
+hadoop_version = 2.7.0
+zookeeper_version = 3.4.7
+spark_version = 1.5.1
+spark_bin_version = 1.5.1-bin-hadoop2.6
+maven_version = 3.2.5
+accumulo_version = 1.6.4
+# Software sha256 checksums
+hadoop_sha256 = ad270af05fff59d3f7021efe79328ed92dadfa64aa5ab4fcde4a204f803dbf9e
+zookeeper_sha256 = 2e043e04c4da82fbdb38a68e585f3317535b3842c726e0993312948afcc83870
+spark_sha256 = 41ab59b28581b7952e3b0cfd8182980f033d2bf22d0f6a088ee6d120ddf24953
+maven_sha256 = 8c190264bdf591ff9f1268dc0ad940a2726f9e958e367716a09b8aaa7e74a755
+# Accumulo checksum is only checked if not a SNAPSHOT version.
+accumulo_sha256 = 6853be86dbf60a0e1efb1431e78a99fc1fc98c9a8fa1feae655def2ee33b30ff
 
 [ec2]
 # AWS Access & Secret keys
-aws.access.key = access_key
-aws.secret.key = secret_key
+aws_access_key = access_key
+aws_secret_key = secret_key
 # EC2 region to connect to
 region = us-east-1
 # Type of AWS instance launched by default
-default.instance.type = m3.large
+default_instance_type = m3.large
 # Type of AWS instance launched for any node running 'worker' service
-# Leave default below to use same instance type set by 'default.instance.type' property
-worker.instance.type = %(default.instance.type)s
+# Leave default below to use same instance type set by 'default_instance_type' property
+worker_instance_type = %(default_instance_type)s
 # VPC to launch instances in (optional)
-#vpc.id = vpc-xxxxx
+#vpc_id = vpc-xxxxx
 # VPC Subnet to launch instances in (optional)
-#subnet.id = subnet-xxxxxx
+#subnet_id = subnet-xxxxxx
 # Name of public key that will be loaded by Amazon on to your EC2 instances.
 # You can upload and name your public key using the EC2 Management Console.
 # Only the user with this key will be able to SSH to the cluster.
-key.name = my_aws_key
+key_name = my_aws_key
 # Tags to add instances
-#instance.tags = key1:value1,key2:value2
+#instance_tags = key1:value1,key2:value2
 #Size in GB of EBS root device.  Set to 0 or don't set to use default.  For some
 #reason setting this to non zero causes some instance types to fail, so use with
 #caution.  See issue #59
-ebs.root.size = 0
+ebs_root_size = 0
 
 [performance]
 #Automatically tune Accumulo, Yarn, and Fluo performance setting by selecting or
@@ -88,53 +84,50 @@ profile=perf-small
 
 [perf-small]
 #amount of JVM heap for each tserver
-accumulo.tserv.mem=2G
+accumulo_tserv_mem=2G
 #amount of data cache for each tserver
-accumulo.dcache.size=768M
+accumulo_dcache_size=768M
 #amount of index cache for each tserver
-accumulo.icache.size=256M
+accumulo_icache_size=256M
 #in memory map size for each tserver
-accumulo.imap.size=512M
+accumulo_imap_size=512M
 #amount of JVM heap for each Fluo worker
-fluo.worker.mem.mb=2048
+fluo_worker_mem_mb=2048
 #Number of threads for each Flup worker
-fluo.worker.threads=20
+fluo_worker_threads=20
 #Number of worker to run per node
-fluo.worker.instances.multiplier=1
+fluo_worker_instances_multiplier=1
 #Max amount of memory for YARN per node
-yarn.nm.mem.mb=4096
+yarn_nm_mem_mb=4096
 
 [perf-medium]
-accumulo.tserv.mem=3G
-accumulo.dcache.size=1536M
-accumulo.icache.size=512M
-accumulo.imap.size=512M
-fluo.worker.mem.mb=4096
-fluo.worker.threads=64
-fluo.worker.instances.multiplier=1
-yarn.nm.mem.mb=8192
+accumulo_tserv_mem=3G
+accumulo_dcache_size=1536M
+accumulo_icache_size=512M
+accumulo_imap_size=512M
+fluo_worker_mem_mb=4096
+fluo_worker_threads=64
+fluo_worker_instances_multiplier=1
+yarn_nm_mem_mb=8192
 
 [perf-large]
-accumulo.tserv.mem=4G
-accumulo.dcache.size=2G
-accumulo.icache.size=1G
-accumulo.imap.size=512M
-fluo.worker.mem.mb=4096
-fluo.worker.threads=64
-fluo.worker.instances.multiplier=2
-yarn.nm.mem.mb=16384
+accumulo_tserv_mem=4G
+accumulo_dcache_size=2G
+accumulo_icache_size=1G
+accumulo_imap_size=512M
+fluo_worker_mem_mb=4096
+fluo_worker_threads=64
+fluo_worker_instances_multiplier=2
+yarn_nm_mem_mb=16384
 
 [apps]
 ###
 # This section is used to configure Fluo applications which are indentified by a unique application
 # name (which replaces <app> below).  Each test has the following configuration settings:
 #
-# <app>.repo                # Git repo containing code for test. It is cloned when the test is run.
-# <app>.branch              # Branch to checkout in git repo
-# <app>.command.pre.init    # Command in test repo to run before initializing and starting Fluo.
-#                           # FLUO_HOME & FLUO_APP_NAME will be set in env when run.  This command
-#                           # can do things like change fluo config and copy observers
-# <app>.command.post.start  # Test script to run from test repo after Fluo is started
+# <app>_repo                # Git repo containing code for test. It is cloned when the test is run.
+# <app>_branch              # Branch to checkout in git repo
+# <app>_command             # Test script in repo that starts test
 #
 # Applications can be run using the following command 'fluo-deploy run -a <app>`
 # Arguments can be added after <app> and will be passed to configured commands for that app.
@@ -145,34 +138,34 @@ yarn.nm.mem.mb=16384
 # Notes: - Stress test can take up to one hour to complete
 # 			 - Status will be output to console
 # 			 - Logs are written to install/tests/stress/logs
-stress.repo=https://github.com/fluo-io/fluo-stress
-stress.branch=master
-stress.command=bin/run-test.sh
+stress_repo=https://github.com/fluo-io/fluo-stress
+stress_branch=master
+stress_command=bin/run-test.sh
 
 # Phrasecount application
 # Usage: fluo-deploy run -a phrasecount --args <txtDocsDir>
 # Notes: - The directory <txtDocsDir> must exist on leader node
 #        - Cluster cannot be set up with multiple zookeepers until FLUO-521 is resolved. 
-phrasecount.repo=https://github.com/fluo-io/phrasecount
-phrasecount.branch=master
-phrasecount.command=bin/run.sh
+phrasecount_repo=https://github.com/fluo-io/phrasecount
+phrasecount_branch=master
+phrasecount_command=bin/run.sh
 
 # Webindex application
 # Usage: fluo-deploy run -a webindex --args <args>
 # Notes: - If setting multiple args, wrap them in quotes
 #        - Set <args> to 'test-id load1 -fg' to load 1 Common Crawl file.
-webindex.repo=https://github.com/fluo-io/webindex
-webindex.branch=master
-webindex.command=bin/webindex
+webindex_repo=https://github.com/fluo-io/webindex
+webindex_branch=master
+webindex_command=bin/webindex
 
 [nodes]
 # Describes nodes in cluster in the following format: 
 # <Hostname> = <Service1>[,<Service2>,<Service3>]
 # Where: 
 #   Hostname = Must be unique.  Will be used for hostname in EC2 or should match hostname on your own cluster
-#   Service = Service to run on node (possible values: zookeeper, namenode, resourcemanager, accumulomaster, worker, fluo, metrics, dev)
-#             All services are required below except for fluo, dev, & metrics which are optional
-leader1 = namenode,zookeeper,fluo,dev
+#   Service = Service to run on node (possible values: zookeeper, namenode, resourcemanager, accumulomaster, worker, fluo, metrics)
+#             All services are required below except for fluo & metrics which are optional
+leader1 = namenode,zookeeper,fluo
 leader2 = resourcemanager,zookeeper
 leader3 = accumulomaster,zookeeper
 metrics = metrics

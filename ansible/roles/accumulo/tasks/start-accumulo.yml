@@ -1,0 +1,9 @@
+- name: "check if accumulo has been initialized"
+  command: "{{ hadoop_prefix }}/bin/hdfs dfs -stat /accumulo"
+  register: accumulo_stat
+  failed_when: "accumulo_stat.rc != 0 and 'No such file or directory' not in accumulo_stat.stderr"
+- name: "initialize accumulo"
+  command: "{{ accumulo_home }}/bin/accumulo init --clear-instance-name --instance-name {{ accumulo_instance }} --password {{ accumulo_password }}"
+  when: "accumulo_stat.rc != 0"
+- name: "start accumulo"
+  command: "{{ accumulo_home }}/bin/start-all.sh"

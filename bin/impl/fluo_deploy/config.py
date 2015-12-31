@@ -17,7 +17,7 @@ from util import get_num_ephemeral, exit, get_arch, get_ami
 import os
 from os.path import join
 
-SERVICES = ['zookeeper', 'namenode', 'resourcemanager', 'accumulomaster', 'worker', 'fluo', 'metrics', 'dev']
+SERVICES = ['zookeeper', 'namenode', 'resourcemanager', 'accumulomaster', 'worker', 'fluo', 'metrics']
 
 class DeployConfig(ConfigParser):
 
@@ -32,7 +32,7 @@ class DeployConfig(ConfigParser):
     self.init_nodes()
 
   def verify_config(self, action):
-    proxy = self.proxy_hostname()
+    proxy = self.get('general', 'proxy_hostname')
     if not proxy:
       exit("ERROR - proxy.hostname must be set in fluo-deploy.props")
 
@@ -43,11 +43,11 @@ class DeployConfig(ConfigParser):
       self.proxy_public_ip()
 
     if action in ['launch', 'setup']:
-      self.get_image_id(self.default_instance_type())
-      self.get_image_id(self.worker_instance_type())
+      self.get_image_id(self.get('ec2', 'default_instance_type'))
+      self.get_image_id(self.get('ec2', 'worker_instance_type'))
 
       for service in SERVICES:
-        if service not in ['fluo', 'metrics', 'dev']:
+        if service not in ['fluo', 'metrics']:
           if not self.has_service(service):
             exit("ERROR - Missing '{0}' service from [nodes] section of fluo-deploy.props".format(service))
 
@@ -64,40 +64,11 @@ class DeployConfig(ConfigParser):
           exit('Unknown service "%s" declared for node %s' % (service, hostname))
       self.node_d[hostname] = service_list
 
-  def cluster_username(self):
-    return self.get('general', 'cluster.username')
-
-  def cluster_base_dir(self):
-    return self.get('general', 'cluster.base.dir')
-
-  def accumulo_instance(self):
-    return self.get('general', 'accumulo.instance')
-
-  def accumulo_password(self):
-    return self.get('general', 'accumulo.password')
-
-  def proxy_hostname(self):
-    return self.get('general', 'proxy.hostname')
-
-  def proxy_socks_port(self):
-    if self.has_option('general', 'proxy.socks.port'):
-      return self.get('general', 'proxy.socks.port')
-
-  def configure_cluster(self):
-    if self.has_option('general', 'configure.cluster'):
-      return self.get('general', 'configure.cluster')
-
-  def cluster_install_dir(self):
-    return join(self.cluster_base_dir(), "install")
-
-  def local_install_dir(self):
-    return join(self.deploy_path, "cluster/install")
-
   def default_num_ephemeral(self):
-    return get_num_ephemeral(self.default_instance_type())
+    return get_num_ephemeral(self.get('ec2', 'default_instance_type'))
 
   def worker_num_ephemeral(self):
-    return get_num_ephemeral(self.worker_instance_type())
+    return get_num_ephemeral(self.get('ec2', 'worker_instance_type'))
 
   def num_ephemeral(self, hostname):
     if 'worker' in self.node_d[hostname]:
@@ -119,93 +90,19 @@ class DeployConfig(ConfigParser):
   def worker_ephemeral_dirs(self, suffix):
     return self.ephemeral_dirs(suffix, self.worker_num_ephemeral())
 
-  def hadoop_prefix(self):
-    return join(self.cluster_install_dir(), "hadoop-"+self.version("hadoop"))
-
-  def zookeeper_home(self):
-    return join(self.cluster_install_dir(), 'zookeeper-'+self.version("zookeeper"))
-
-  def cluster_tarballs_dir(self):
-    return join(self.cluster_base_dir(), "tarballs")
-
-  def local_tarballs_dir(self):
-    return join(self.deploy_path, "cluster/tarballs")
-
-  def apache_mirror(self):
-    return self.get('general', 'apache.mirror')
-
   def version(self, software_id):
-    return self.get('general', software_id + '.version')
+    return self.get('general', software_id + '_version')
 
-  def md5_hash(self, software_id):
-    return self.get('general', software_id + '.md5.hash')
-
-  def accumulo_tarball(self):
-    return 'accumulo-%s-bin.tar.gz' % self.version("accumulo")
-
-  def hadoop_tarball(self):
-    return 'hadoop-%s.tar.gz' % self.version("hadoop")
-
-  def zookeeper_tarball(self): 
-    return 'zookeeper-%s.tar.gz' % self.version("zookeeper")
- 
-  def accumulo_url(self):
-    return '%s/accumulo/%s/%s' % (self.apache_mirror(), self.version("accumulo"), self.accumulo_tarball())
-
-  def hadoop_url(self):
-    return '%s/hadoop/common/hadoop-%s/%s' % (self.apache_mirror(), self.version("hadoop"), self.hadoop_tarball())
-
-  def zookeeper_url(self): 
-    return '%s/zookeeper/zookeeper-%s/%s' % (self.apache_mirror(), self.version("zookeeper"), self.zookeeper_tarball())
-
-  def accumulo_path(self): 
-    return join(self.deploy_path, "cluster/tarballs/"+self.accumulo_tarball())
-
-  def hadoop_path(self): 
-    return join(self.deploy_path, "cluster/tarballs/"+self.hadoop_tarball())
-
-  def zookeeper_path(self): 
-    return join(self.deploy_path, "cluster/tarballs/"+self.zookeeper_tarball())
+  def sha256(self, software_id):
+    return self.get('general', software_id + '_sha256')
 
   def zookeeper_connect(self):
     return ",".join(self.get_service_hostnames("zookeeper"))
 
-  def zookeeper_server_config(self):
-    return "\n".join(["server.{0}={1}:2888:3888".format(index, server) for (index, server) in enumerate(self.get_service_hostnames("zookeeper"), start=1)])
-
-  def default_instance_type(self):
-    return self.get('ec2', 'default.instance.type')
-
-  def worker_instance_type(self):
-    return self.get('ec2', 'worker.instance.type')
-
-  def aws_access_key(self):
-    return self.get('ec2', 'aws.access.key')
-
-  def aws_secret_key(self):
-    return self.get('ec2', 'aws.secret.key')
-
   def get_image_id(self, instance_type):
     if get_arch(instance_type) == 'pvm':
       exit("ERROR - Configuration contains instance type '{0}' that uses pvm architecture.  Only hvm architecture is supported!".format(instance_type))
-    return get_ami(instance_type, self.region())
-
-  def region(self):
-    return self.get('ec2', 'region')
-
-  def vpc_id(self):
-    if self.has_option('ec2', 'vpc.id'):
-      return self.get('ec2', 'vpc.id')
-
-  def subnet_id(self):
-    if self.has_option('ec2', 'subnet.id'):
-      return self.get('ec2', 'subnet.id')
-
-  def key_name(self):
-    if self.has_option('ec2', 'key.name'):
-      val = self.get('ec2', 'key.name')
-      if val:
-        return val
+    return get_ami(instance_type, self.get('ec2', 'region'))
 
   def instance_tags(self):
     retd = {}
@@ -260,7 +157,7 @@ class DeployConfig(ConfigParser):
 
   def get_non_proxy(self):
     retval = []
-    proxy_ip = self.get_private_ip(self.proxy_hostname())
+    proxy_ip = self.get_private_ip(self.get('general', 'proxy_hostname'))
     for (hostname, (private_ip, public_ip)) in self.hosts.items():
       if private_ip != proxy_ip:
         retval.append((private_ip, hostname))
@@ -304,13 +201,13 @@ class DeployConfig(ConfigParser):
     return self.get_hosts()[hostname][1]
 
   def proxy_public_ip(self):
-    retval = self.get_public_ip(self.proxy_hostname())
+    retval = self.get_public_ip(self.get('general', 'proxy_hostname'))
     if not retval:
-      exit("ERROR - Leader {0} does not have a public IP".format(self.proxy_hostname()))
+      exit("ERROR - Leader {0} does not have a public IP".format(self.get('general', 'proxy_hostname')))
     return retval
 
   def proxy_private_ip(self):
-    return self.get_private_ip(self.proxy_hostname())
+    return self.get_private_ip(self.get('general', 'proxy_hostname'))
 
   def get_performance_prop(self, prop):
     profile = self.get('performance', 'profile')
@@ -325,7 +222,6 @@ class DeployConfig(ConfigParser):
       print name, '=', val
 
   def print_property(self, key):
-
     if key == 'proxy.public.ip':
       print self.proxy_public_ip()
       return

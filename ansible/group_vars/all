@@ -1,0 +1,17 @@
+accumulo_home: "{{ install_dir }}/accumulo-{{ accumulo_version }}"
+accumulo_tarball: accumulo-{{ accumulo_version }}-bin.tar.gz
+fluo_home: "{{ install_dir }}/fluo-{{ fluo_version }}"
+fluo_tarball: fluo-{{ fluo_version }}-bin.tar.gz
+hadoop_prefix: "{{ install_dir }}/hadoop-{{ hadoop_version }}"
+hadoop_tarball: hadoop-{{ hadoop_version }}.tar.gz
+install_dir: "{{ cluster_basedir }}/install"
+java_home: "{{ install_dir }}/jdk1.8.0_60"
+java_sha256: ebe51554d2f6c617a4ae8fc9a8742276e65af01bd273e96848b262b3c05424e5
+java_tarball: jdk-8u60-linux-x64.tar.gz
+maven_home: "{{ install_dir }}/apache-maven-{{ maven_version }}"
+maven_tarball: apache-maven-{{ maven_version }}-bin.tar.gz
+spark_home: "{{ install_dir }}/spark-{{ spark_bin_version }}"
+spark_tarball: spark-{{ spark_bin_version }}.tgz
+tarballs_dir: "{{ cluster_basedir }}/tarballs"
+zookeeper_home: "{{ install_dir }}/zookeeper-{{ zookeeper_version }}"
+zookeeper_tarball: zookeeper-{{ zookeeper_version }}.tar.gz

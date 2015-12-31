@@ -23,7 +23,6 @@ import shutil
 from config import DeployConfig
 from util import setup_boto, parse_args, exit
 from os.path import isfile, join
-from string import Template
 import random
 import time
 import urllib
@@ -53,7 +52,8 @@ def get_instance(instances, instance_id):
       return instance
 
 def launch_cluster(conn, config):
-  if not config.key_name():
+  key_name = config.get('ec2', 'key_name')
+  if not key_name:
     exit('ERROR - key.name is not set fluo-deploy.props')
 
   cur_nodes = get_active_cluster(conn, config)
@@ -63,14 +63,19 @@ def launch_cluster(conn, config):
   if isfile(config.hosts_path):
     exit("ERROR - A hosts file already exists at {0}.  Please delete before running launch again".format(config.hosts_path))
 
-  if not config.proxy_hostname():
-    exit("ERROR - proxy.hostname must specified in fluo-deploy.props file")
-
   print "Launching {0} cluster".format(config.cluster_name)
 
-  security_group = get_or_make_group(conn, config.cluster_name + "-group", config.vpc_id())
+  vpc_id = None
+  if config.has_option('ec2', 'vpc_id'):
+    vpc_id = config.get('ec2', 'vpc_id')
+
+  subnet_id = None
+  if config.has_option('ec2', 'subnet_id'):
+    subnet_id = config.get('ec2', 'subnet_id')
+
+  security_group = get_or_make_group(conn, config.cluster_name + "-group", vpc_id)
   if security_group.rules == []: # Group was just now created
-    if config.vpc_id() is None:
+    if vpc_id is None:
       security_group.authorize(src_group=security_group)
     else:
       security_group.authorize(ip_protocol='icmp', from_port=-1, to_port=-1, src_group=security_group)
@@ -82,10 +87,10 @@ def launch_cluster(conn, config):
   for (hostname, services) in config.nodes().items():
 
     if 'worker' in services:
-      instance_type = config.worker_instance_type()
+      instance_type = config.get('ec2', 'worker_instance_type')
       num_ephemeral = config.worker_num_ephemeral()
     else:
-      instance_type = config.default_instance_type()
+      instance_type = config.get('ec2', 'default_instance_type')
       num_ephemeral = config.default_num_ephemeral()
 
     host_ami = config.get_image_id(instance_type)
@@ -104,11 +109,11 @@ def launch_cluster(conn, config):
       bdt.ephemeral_name='ephemeral' + str(i)
       bdm['/dev/xvd' + chr(ord('b') + i)] = bdt
 
-    resv = conn.run_instances(key_name=config.key_name(),
+    resv = conn.run_instances(key_name=key_name,
                               image_id=host_ami,
                               security_group_ids=[security_group.id],
                               instance_type=instance_type,
-                              subnet_id=config.subnet_id(),
+                              subnet_id=subnet_id,
                               min_count=1,
                               max_count=1,
                               block_device_map=bdm)
@@ -166,7 +171,7 @@ def check_code(retcode, command):
     exit("ERROR - Command failed with return code of {0}: {1}".format(retcode, command))
 
 def exec_on_proxy(config, command, opts=''):
-  ssh_command = "ssh -t -A -o 'StrictHostKeyChecking no' {opts} {usr}@{ldr} '{cmd}'".format(usr=config.cluster_username(),
+  ssh_command = "ssh -A -o 'StrictHostKeyChecking no' {opts} {usr}@{ldr} '{cmd}'".format(usr=config.get('general', 'cluster_user'),
     ldr=config.proxy_public_ip(), cmd=command, opts=opts)
   return (subprocess.call(ssh_command, shell=True), ssh_command)
 
@@ -184,15 +189,10 @@ def wait_until_proxy_ready(config):
     print "Proxy is not ready yet.  Will retry in 5 sec..."
     time.sleep(5)  
 
-def wait_until_cluster_ready(config):
-  wait_until_proxy_ready(config)
-  exec_fluo_cluster_command(config, "ready")
- 
-def exec_fluo_cluster_command(config, command):
-  exec_on_proxy_verified(config, "bash {base}/install/fluo-cluster/bin/fluo-cluster {command}".format(base=config.cluster_base_dir(), command=command))
-
-def exec_fluo_cluster_command_unverified(config, command):
-  exec_on_proxy(config, "bash {base}/install/fluo-cluster/bin/fluo-cluster {command}".format(base=config.cluster_base_dir(), command=command))
+def execute_playbook(config, playbook):
+  print "Executing '{0}' playbook".format(playbook)
+  basedir = config.get('general', 'cluster_basedir')
+  exec_on_proxy_verified(config, "time -p ansible-playbook {base}/ansible/{playbook}".format(base=basedir, playbook=playbook), opts='-t')
 
 def send_to_proxy(config, path, target, skipIfExists=True): 
   print "Copying to proxy: ",path
@@ -200,173 +200,103 @@ def send_to_proxy(config, path, target, skipIfExists=True):
   if skipIfExists:
     cmd = "rsync --ignore-existing --progress -e \"ssh -o 'StrictHostKeyChecking no'\""
   subprocess.call("{cmd} {src} {usr}@{ldr}:{tdir}".format(cmd=cmd, src=path, 
-          usr=config.cluster_username(), ldr=config.proxy_public_ip(), tdir=target), shell=True)
+          usr=config.get('general', 'cluster_user'), ldr=config.proxy_public_ip(), tdir=target), shell=True)
 
 def get_ec2_conn(config):
-  if config.aws_access_key() == 'access_key' or config.aws_secret_key() == 'secret_key':
+  access_key = config.get('ec2', 'aws_access_key')
+  secret_key = config.get('ec2', 'aws_secret_key')
+  if access_key == 'access_key' or secret_key == 'secret_key':
     exit('ERROR - You must set AWS access & secret keys in fluo-deploy.props')
-  conn = ec2.connect_to_region(config.region(), aws_access_key_id=config.aws_access_key(), aws_secret_access_key=config.aws_secret_key())
+  region = config.get('ec2', 'region')
+  conn = ec2.connect_to_region(region, aws_access_key_id=access_key, aws_secret_access_key=secret_key)
   if not conn:
-    exit('ERROR - Failed to connect to region ' + config.region())
+    exit('ERROR - Failed to connect to region ' + region)
   return conn
 
-def write_apps_props(config):
-  conf_install = join(config.deploy_path, "cluster/install/fluo-cluster/conf")
+def sync_cluster(config):
+  print 'Syncing ansible directory on {0} cluster proxy node'.format(config.cluster_name)
 
-  apps_props_path = join(conf_install, "apps.properties")
-  with open(apps_props_path, 'w') as apps_props_file:
-    for (name, value) in config.items("apps"):
-      print >>apps_props_file, "{0}={1}".format(name, value)
+  vars_d = {}
+  for section in ("general", config.get('performance', 'profile')):
+    for (name, value) in config.items(section):
+      vars_d[name] = value
+  vars_d["namenode_ip"] = config.get_service_private_ips("namenode")[0]
+  vars_d["resourcemanager_host"] = config.get_service_hostnames("resourcemanager")[0]
+  vars_d["resourcemanager_ip"] = config.get_service_private_ips("resourcemanager")[0]
+  vars_d["data_dir"] = "/media/ephemeral0"
+  vars_d["zookeeper_connect"] = config.zookeeper_connect()
+  vars_d["num_workers"] = str(int(len(config.get_service_hostnames("worker"))) * int(config.get_performance_prop("fluo_worker_instances_multiplier")))
+  vars_d["datanode_dirs"] = config.worker_ephemeral_dirs("/hadoop/data")
+  vars_d["mapred_temp_dirs"] = config.worker_ephemeral_dirs("/hadoop/mapred/temp")
+  vars_d["mapred_local_dirs"] = config.worker_ephemeral_dirs("/hadoop/mapred/local")
+  vars_d["yarn_local_dirs"] = config.worker_ephemeral_dirs("/hadoop/yarn/local")
 
+  ansible_conf = join(config.deploy_path, "ansible/conf")
+  with open(join(ansible_conf, "hosts"), 'w') as hosts_file:
+    print >>hosts_file, "[proxy]\n{0}".format(config.get('general', 'proxy_hostname'))
+    print >>hosts_file, "\n[accumulomaster]\n{0}".format(config.get_service_hostnames("accumulomaster")[0])
+    print >>hosts_file, "\n[namenode]\n{0}".format(config.get_service_hostnames("namenode")[0])
+    print >>hosts_file, "\n[resourcemanager]\n{0}".format(config.get_service_hostnames("resourcemanager")[0])
 
-class DeployTemplate(Template):
-  idpattern="[_a-z][_.a-z0-9]*"
+    if config.has_service("metrics"):
+      print >>hosts_file, "\n[metrics]\n{0}".format(config.get_service_hostnames("metrics")[0])
+
+    print >>hosts_file, "\n[zookeepers]"
+    for (index, zk_host) in enumerate(config.get_service_hostnames("zookeeper"), start=1):
+      print >>hosts_file, "{0} id={1}".format(zk_host, index)
+
+    if config.has_service('fluo'):
+      print >>hosts_file, "\n[fluo]"
+      for host in config.get_service_hostnames("fluo"):
+        print >>hosts_file, host
+
+    print >>hosts_file, "\n[workers]"
+    for worker_host in config.get_service_hostnames("worker"):
+      print >>hosts_file, worker_host
+
+    print >>hosts_file, "\n[accumulo:children]\naccumulomaster\nworkers"
+    print >>hosts_file, "\n[hadoop:children]\nnamenode\nresourcemanager\nworkers"
+
+    print >>hosts_file, "\n[nodes]"
+    for (private_ip, hostname) in config.get_private_ip_hostnames():
+      print >>hosts_file, "{0} ansible_ssh_host={1} drives={2}".format(hostname, private_ip, config.num_ephemeral(hostname))
+
+    print >>hosts_file, "\n[all:vars]"
+    for (name, value) in sorted(vars_d.items()):
+      print >>hosts_file, "{0} = {1}".format(name, value)
+
+  # copy keys file to ansible/conf (if it exists)
+  conf_keys = join(config.deploy_path, "conf/keys")
+  ansible_keys = join(ansible_conf, "keys")
+  if isfile(conf_keys):
+    shutil.copyfile(conf_keys, ansible_keys)
+  else:
+    open(ansible_keys, 'w').close()
+
+  basedir = config.get('general', 'cluster_basedir')
+  cmd = "rsync -az --delete -e \"ssh -o 'StrictHostKeyChecking no'\""
+  subprocess.call("{cmd} {src} {usr}@{ldr}:{tdir}".format(cmd=cmd, src=join(config.deploy_path, "ansible"), 
+        usr=config.get('general', 'cluster_user'), ldr=config.proxy_public_ip(), tdir=basedir), shell=True)
+
+  exec_on_proxy_verified(config, "{0}/ansible/scripts/install_ansible.sh".format(basedir), opts='-t')
 
 def setup_cluster(config):
-
-  accumulo_tarball =  join(config.local_tarballs_dir(), "accumulo-{0}-bin.tar.gz".format(config.version("accumulo")))
-
   print 'Setting up {0} cluster'.format(config.cluster_name)
-  conf_templates = join(config.deploy_path, "cluster/templates/fluo-cluster/conf")
-  conf_install = join(config.deploy_path, "cluster/install/fluo-cluster/conf")
 
-  download_fluo = False
-  if config.has_service('fluo'): 
-    fluo_tarball = join(config.local_tarballs_dir(), "fluo-{0}-bin.tar.gz".format(config.version("fluo")))
-    if not isfile(fluo_tarball):
-      download_fluo = True
+  sync_cluster(config)
 
-  # copy keys file to conf (if it exists)
-  conf_keys = join(config.deploy_path, "conf/keys")
-  install_keys = join(config.deploy_path, "cluster/install/fluo-cluster/conf/keys")
-  if isfile(conf_keys):
-    shutil.copyfile(conf_keys, install_keys)
-
-  sub_d = {}
-
-  # set all properties in config file
-  for section in ("general", "ec2"):
-    for (name, value) in config.items(section):
-      sub_d[name] = value
-
-  # set all derived properties
-  sub_d["DATA_DIR"] = config.data_dir()
-  sub_d["HADOOP_PREFIX"] = config.hadoop_prefix()
-  sub_d["ZOOKEEPER_HOME"] = config.zookeeper_home()
-  sub_d["ZOOKEEPERS"] = config.zookeeper_connect()
-  sub_d["ZOOKEEPER_SERVER_CONFIG"] = config.zookeeper_server_config()
-  sub_d["NAMENODE_HOST"] = config.get_service_hostnames("namenode")[0]
-  sub_d["NAMENODE_IP"] = config.get_service_private_ips("namenode")[0]
-  sub_d["RESOURCEMANAGER_HOST"] = config.get_service_hostnames("resourcemanager")[0]
-  sub_d["RESOURCEMANAGER_IP"] = config.get_service_private_ips("resourcemanager")[0]
-  sub_d["ACCUMULOMASTER_HOST"] = config.get_service_hostnames("accumulomaster")[0]
-  sub_d["NUM_WORKERS"] = str(int(len(config.get_service_hostnames("worker"))) * int(config.get_performance_prop("fluo.worker.instances.multiplier")))
-  sub_d["DATANODE_DIRS"] = config.worker_ephemeral_dirs("/hadoop/data")
-  sub_d["MAPRED_TEMP_DIRS"] = config.worker_ephemeral_dirs("/hadoop/mapred/temp")
-  sub_d["MAPRED_LOCAL_DIRS"] = config.worker_ephemeral_dirs("/hadoop/mapred/local")
-  sub_d["YARN_LOCAL_DIRS"] = config.worker_ephemeral_dirs("/hadoop/yarn/local")
-
-  sub_d["ACCUMULO_TSERV_MEM"]=config.get_performance_prop("accumulo.tserv.mem");
-  sub_d["ACCUMULO_DCACHE_SIZE"]=config.get_performance_prop("accumulo.dcache.size");
-  sub_d["ACCUMULO_ICACHE_SIZE"]=config.get_performance_prop("accumulo.icache.size");
-  sub_d["ACCUMULO_IMAP_SIZE"]=config.get_performance_prop("accumulo.imap.size");
-  sub_d["FLUO_WORKER_MEM_MB"]=config.get_performance_prop("fluo.worker.mem.mb");
-  sub_d["FLUO_WORKER_THREADS"]=config.get_performance_prop("fluo.worker.threads");
-  sub_d["YARN_NM_MEM_MB"]=config.get_performance_prop("yarn.nm.mem.mb");
-
-  sub_d["SETUP_METRICS"] = "false"
-  if config.has_service("metrics"):
-    sub_d["SETUP_METRICS"] = "true"
-    sub_d["METRICS_SERVER"] = config.get_service_hostnames("metrics")[0]
- 
-  sub_d["DOWNLOAD_FLUO"] = "false"
-  if download_fluo:
-    sub_d["DOWNLOAD_FLUO"] = "true"
-    
-  for fn in os.listdir(conf_templates):
-    template_path = join(conf_templates, fn)
-    install_path = join(conf_install, fn)
-    if isfile(install_path):
-      os.remove(install_path)
-    if isfile(template_path) and not template_path.startswith('.'):
-      with open(template_path, "r") as template_file:
-        template_data = template_file.read()
-        template = DeployTemplate(template_data)
-        sub_data = template.substitute(sub_d)
-        with open(install_path, "w") as install_file:
-          install_file.write(sub_data)
-
-  write_apps_props(config)
-
-  ael_path = join(conf_install, "hosts/all_except_proxy")
-  with open(ael_path, 'w') as ael_file:
-    for (private_ip, hostname) in config.get_non_proxy():
-      print >>ael_file, private_ip
-
-  cnp_path = join(conf_install, "hosts/configure")
-  with open(cnp_path, 'w') as cnp_file:
-    for (private_ip, hostname) in config.get_private_ip_hostnames():
-      print >>cnp_file, private_ip, hostname, config.num_ephemeral(hostname)
-
-  services_path = join(conf_install, "hosts/hosts_with_services")
-  with open(services_path, 'w') as services_file:
-    for (host, services) in config.get_host_services():
-      print >>services_file, host, services
-
-  aht_path = join(conf_install, "hosts/all_hosts")
-  with open(aht_path, 'w') as aht_file:
-    for (host, services) in config.get_host_services():
-      print >>aht_file, host
-
-  aip_path = join(conf_install, "hosts/all_ips")
-  with open(aip_path, 'w') as aip_file:
-    for (host, services) in config.get_host_services():
-      print >>aip_file, config.get_private_ip(host)
-
-  workers_path = join(conf_install, "hosts/workers")
-  with open(workers_path, 'w') as workers_file:
-    for worker_host in config.get_service_hostnames("worker"):
-      print >>workers_file, worker_host
-
-  zk_path = join(conf_install, "hosts/zookeepers")
-  with open(zk_path, 'w') as zk_file:
-    for zk_host in config.get_service_hostnames("zookeeper"):
-      print >>zk_file, zk_host
-
-  zkid_path = join(conf_install, "hosts/zookeeper_ids")
-  with open(zkid_path, 'w') as zkid_file:
-    for (index, zk_host) in enumerate(config.get_service_hostnames("zookeeper"), start=1):
-      print >>zkid_file, zk_host, index
-
-  with open(join(conf_install, "hosts/accumulomaster"), 'w') as am_file:
-    print >>am_file, config.get_service_hostnames("accumulomaster")[0]
-
-  with open(join(conf_install, "hosts/append_to_hosts"), 'w') as ath_file:
-    for (hostname, (private_ip, public_ip)) in config.get_hosts().items():
-      print >>ath_file, private_ip, hostname
-
-  install_tarball = join(config.local_tarballs_dir(), "install.tar.gz")
-  if isfile(install_tarball):
-    os.remove(install_tarball)
-
-  retcode = subprocess.call("cd {0}; tar czf tarballs/install.tar.gz install".format(join(config.deploy_path, "cluster")), shell=True)
-  if retcode != 0:
-    error("Failed to create install tarball")
-
-  wait_until_proxy_ready(config)
-
-  exec_on_proxy_verified(config, "mkdir -p {0}".format(config.cluster_tarballs_dir()))
-  send_to_proxy(config, install_tarball, config.cluster_tarballs_dir(), skipIfExists=False)
-
+  local_tarballs = join(config.deploy_path, "tarballs")
+  accumulo_tarball =  join(local_tarballs, "accumulo-{0}-bin.tar.gz".format(config.version("accumulo")))
+  fluo_tarball = join(local_tarballs, "fluo-{0}-bin.tar.gz".format(config.version("fluo")))
+  basedir = config.get('general', 'cluster_basedir')
+  cluster_tarballs = "{0}/tarballs".format(basedir)
+  exec_on_proxy_verified(config, "mkdir -p {0}".format(cluster_tarballs))
   if isfile(accumulo_tarball):
-    send_to_proxy(config, accumulo_tarball, config.cluster_tarballs_dir())
+    send_to_proxy(config, accumulo_tarball, cluster_tarballs)
+  if isfile(fluo_tarball) and config.has_service('fluo'):
+    send_to_proxy(config, fluo_tarball, cluster_tarballs)
 
-  if config.has_service('fluo') and not download_fluo:
-    send_to_proxy(config, fluo_tarball, config.cluster_tarballs_dir())
-
-  exec_on_proxy_verified(config, "rm -rf {base}/install; tar -C {base} -xzf {base}/tarballs/install.tar.gz".format(base=config.cluster_base_dir()))
-
-  exec_fluo_cluster_command(config, "setup")
+  execute_playbook(config, "site.yml")
       
 def main():
 
@@ -403,6 +333,8 @@ def main():
     print "Found {0} nodes in {1} cluster".format(len(nodes), config.cluster_name)
     for node in nodes:
       print "  ", node.tags.get('Name', 'UNKNOWN_NAME'), node.id, node.private_ip_address, node.ip_address
+  elif action == 'sync':
+    sync_cluster(config)
   elif action == 'setup':
     setup_cluster(config)
   elif action == 'config':
@@ -411,24 +343,32 @@ def main():
     else:
       config.print_property(opts.property)
   elif action == 'ssh':
-    print "Connecting to proxy: {0} {1}".format(config.proxy_hostname(), config.proxy_public_ip())
+    print "Connecting to proxy: {0} {1}".format(config.get('general', 'proxy_hostname'), config.proxy_public_ip())
     wait_until_proxy_ready(config)
     fwd = ''
-    if config.proxy_socks_port():
-      fwd = "-D "+config.proxy_socks_port()
-    ssh_command = "ssh -C -A -o 'StrictHostKeyChecking no' {fwd} {usr}@{ldr}".format(usr=config.cluster_username(),
+    if config.has_option('general', 'proxy_socks_port'):
+      fwd = "-D "+config.get('general', 'proxy_socks_port')
+    ssh_command = "ssh -C -A -o 'StrictHostKeyChecking no' {fwd} {usr}@{ldr}".format(usr=config.get('general', 'cluster_user'),
       ldr=config.proxy_public_ip(), fwd=fwd)
     retcode = subprocess.call(ssh_command, shell=True)
     check_code(retcode, ssh_command)
-  elif action == 'kill':
+  elif action == 'wipe':
     if not isfile(hosts_path):
       exit("Hosts file does not exist for cluster: "+hosts_path)
-    print "Killing {0} cluster".format(config.cluster_name)
-    exec_fluo_cluster_command(config, "kill")
+    print "Killing all processes and wiping data from {0} cluster".format(config.cluster_name)
+    execute_playbook(config, "wipe.yml")
   elif action == 'run':
-    write_apps_props(config)
-    send_to_proxy(config, join(config.deploy_path, "cluster/install/fluo-cluster/conf/apps.properties"), join(config.cluster_install_dir(), "fluo-cluster/conf"), skipIfExists=False)
-    exec_fluo_cluster_command(config, "run {0} {1}".format(opts.application, opts.app_args))
+    app = opts.application
+    repo = config.get('apps', app + '_repo')
+    branch = config.get('apps', app + '_branch')
+    command = config.get('apps', app + '_command')
+
+    run_args = "{0} {1} {2} {3}".format(app, repo, branch, command)
+    if opts.app_args:
+      run_args = "{0} {1}".format(run_args, opts.app_args)
+  
+    basedir = config.get('general', 'cluster_basedir')
+    exec_on_proxy_verified(config, "{0}/apps/run.sh {1}".format(basedir, run_args), opts='-t')
   elif action == 'terminate':
     conn = get_ec2_conn(config)
     nodes = get_active_cluster(conn, config)

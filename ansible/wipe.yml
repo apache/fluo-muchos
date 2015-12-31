@@ -1,0 +1,25 @@
+- hosts: all
+  remote_user: "{{ cluster_user }}"
+  sudo: yes
+  tasks:
+  - name: "stop services"
+    service: name={{ item }} state=stopped
+    with_items:
+      - influxdb
+      - grafana-server
+  - name: "ensure all processes are killed"
+    script: roles/common/files/kill.sh
+  - name: "wipe hadoop data"
+    file: path=/media/ephemeral{{item}}/hadoop state=absent
+    with_sequence: start=0 end={{ drives-1 }}
+  - name: "wipe other data"
+    file: path={{ item }} state=absent
+    with_items:
+      - "{{ data_dir }}/zookeeper"
+      - "{{ data_dir }}/influxdb"
+  - name: "remove logs"
+    shell: rm -rf {{ item }}
+    with_items:
+      - "{{ hadoop_prefix }}/logs/*"
+      - "{{ accumulo_home }}/logs/*"
+      - "{{ zookeeper_home }}/zookeeper.out"

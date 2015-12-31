@@ -52,34 +52,38 @@ You can check the status of the nodes using the EC2 Dashboard or by running the 
 
     fluo-deploy status
 
-Set up Fluo on your cluster
+Set up the cluster
 ---------------------------
 
-If you are setting up Fluo on a cluster that was not created using the `launch` command, you will need to 
-create a hosts file in `conf/hosts` that is named after you cluster (see `conf/hosts/example_cluster` for an example).
-
-Before running the next command, you will need to build a Fluo distribution and copy it to `cluster/tarballs/` directory of
-fluo-deploy:
+The `fluo-deploy setup` command will set up your cluster and start Hadoop, Zookeeper, & Accumulo.  It will 
+download all necessary releases of Fluo, Accumulo, Hadoop, etc.  Optionally, if you want to use a snapshot 
+distribution of Accumulo or Fluo place it in the `tarballs/` directory of fluo-deploy before running 
+`'fluo-deploy setup`.
 
 ```bash
 cd /path/to/fluo
 mvn package
-cp modules/distribution/target/fluo-1.0.0-beta-1-SNAPSHOT-bin.tar.gz /path/to/fluo-deploy/cluster/tarballs/
+cp modules/distribution/target/fluo-1.0.0-beta-1-SNAPSHOT-bin.tar.gz /path/to/fluo-deploy/tarballs/
 ```
 
-Run the following command to set up your cluster and run Hadoop, Zookeeper, & Accumulo:
-
-    fluo-deploy setup
-
-The `setup` command can be run again if you cluster becomes unstable or if you want to change Accumulo or Hadoop 
-configuration found in `templates/conf`.  The `setup` command installs and configures Fluo but does not start it.
-This lets you setup Fluo with any observers.  Run the commands below to access your Fluo install:
+The `setup` command installs and configures Fluo but does not start it.  This lets you setup Fluo with any 
+observers.  Run the commands below to access your cluster and get to your fluo install:
 
 ```bash
 fluo-deploy ssh
 ssh <FLUO_HOSTNAME>
 cdf   # Alias to change directory to Fluo Home
 ```
+
+Manage the cluster
+------------------
+
+The `setup` command is idempotent.  It can be run again on a working cluster.  It will not change the 
+cluster if everything is configured and running correctly.  If a process has stopped, the `setup` 
+command will restart the process.
+
+The `fluo-deploy wipe` command can be used to wipe all data from the cluster and kill any running processes.
+After running the `wipe` command, run the `setup` command to start a fresh cluster.
 
 Run a Fluo application
 ----------------------

@@ -1,0 +1,6 @@
+- name: "create spark history directory in hdfs" 
+  command: "{{ hadoop_prefix}}/bin/hdfs dfs -mkdir -p /spark/history"
+- name: "start spark history server"
+  command: "{{ spark_home }}/sbin/start-history-server.sh"
+  register: sparkhist
+  failed_when: "sparkhist.rc != 0 and 'org.apache.spark.deploy.history.HistoryServer running as process' not in sparkhist.stdout"

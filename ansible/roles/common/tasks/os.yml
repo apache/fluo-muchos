@@ -1,0 +1,12 @@
+- name: "set swappiness to zero"
+  sysctl: name=vm.swappiness value=0
+- name: "remove old limits file"
+  file: path=/etc/security/limits.d/20-nproc.conf state=absent
+- name: "copy new limits.conf"
+  copy: src=limits.conf dest=/etc/security/limits.conf
+- name: "configure network settings for spark"
+  copy: src=ifup-local dest=/sbin/ifup-local mode=0755
+- name: "run network settings command"
+  command: /sbin/ifup-local eth0
+- name: "configure ~/.bashrc"
+  template: src=bashrc dest=/home/{{ cluster_user }}/.bashrc owner={{ cluster_user }} group={{ cluster_user }} mode=0644

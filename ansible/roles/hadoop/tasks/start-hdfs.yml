@@ -1,0 +1,6 @@
+- name: "format namenode"
+  command: "{{ hadoop_prefix }}/bin/hdfs namenode -format"
+  args:
+    creates: "{{ data_dir }}/hadoop/name"
+- name: "start hdfs"
+  command: "{{ hadoop_prefix }}/sbin/start-dfs.sh"
