@@ -68,10 +68,6 @@ worker_instance_type = %(default_instance_type)s
 key_name = my_aws_key
 # Tags to add instances
 #instance_tags = key1:value1,key2:value2
-#Size in GB of EBS root device.  Set to 0 or don't set to use default.  For some
-#reason setting this to non zero causes some instance types to fail, so use with
-#caution.  See issue #59
-ebs_root_size = 0
 
 [performance]
 #Automatically tune Accumulo, Yarn, and Fluo performance setting by selecting or

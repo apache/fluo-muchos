@@ -114,12 +114,6 @@ class DeployConfig(ConfigParser):
           retd[key] = val
     return retd
 
-  def ebs_root_size(self):
-    if self.has_option('ec2', 'ebs.root.size'):
-      return int(self.get('ec2', 'ebs.root.size'))
-    else:
-      return 0
-
   def nodes(self):
     return self.node_d
 
