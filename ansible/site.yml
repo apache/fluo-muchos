@@ -1,0 +1,52 @@
+- hosts: nodes
+  remote_user: "{{ cluster_user }}"
+  sudo: yes
+  tasks:
+  - include: roles/common/tasks/hosts.yml
+- hosts: proxy
+  remote_user: "{{ cluster_user }}"
+  roles:
+    - proxy
+- hosts: all
+  remote_user: "{{ cluster_user }}"
+  sudo: yes
+  roles:
+    - common
+  tasks:
+  - include: roles/common/tasks/ssh.yml
+  - include: roles/common/tasks/os.yml
+  - include: roles/common/tasks/drives.yml
+- hosts: metrics
+  remote_user: "{{ cluster_user }}"
+  sudo: yes
+  roles:
+    - influxdb
+    - grafana
+- hosts: all
+  remote_user: "{{ cluster_user }}"
+  roles:
+    - spark
+    - hadoop
+    - zookeeper
+    - accumulo
+- hosts: namenode
+  remote_user: "{{ cluster_user }}"
+  tasks:
+    - include: roles/hadoop/tasks/start-hdfs.yml
+- hosts: resourcemanager
+  remote_user: "{{ cluster_user }}"
+  tasks:
+    - include: roles/hadoop/tasks/start-yarn.yml
+    - include: roles/spark/tasks/start-spark-history.yml
+- hosts: zookeepers
+  remote_user: "{{ cluster_user }}"
+  tasks:
+    - include: roles/zookeeper/tasks/start-zookeeper.yml
+- hosts: accumulomaster
+  remote_user: "{{ cluster_user }}"
+  tasks:
+    - include: roles/accumulo/tasks/start-accumulo.yml
+- hosts: fluo
+  remote_user: "{{ cluster_user }}"
+  roles:
+    - fluo

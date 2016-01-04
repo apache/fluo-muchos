@@ -1,0 +1,19 @@
+- name: "download influxdb rpm"
+  get_url:
+  args: 
+    url: https://influxdb.s3.amazonaws.com/{{ influxdb_rpm }}
+    dest: /tmp/{{ influxdb_rpm }}
+    sha256sum: "{{ influxdb_sha256 }}"
+    force: no
+- name: "ensure influxdb is installed"
+  yum: name=/tmp/{{ influxdb_rpm }} state=present
+- name: "configure influxdb"
+  template: src=influxdb-9.4.2.conf dest=/etc/opt/influxdb/influxdb.conf
+  notify:
+    - restart influxdb
+- name: "create data dir"
+  file: path={{ data_dir }}/influxdb state=directory owner=influxdb group=influxdb
+- name: "ensure influxdb is running (and enable it at boot)"
+  service: name=influxdb state=started enabled=yes
+- name: "create fluo user"
+  shell: influx -execute "CREATE USER fluo WITH PASSWORD 'secret' WITH ALL PRIVILEGES" || true warn=false

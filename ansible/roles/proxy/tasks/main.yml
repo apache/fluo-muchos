@@ -1,0 +1,24 @@
+- name: "ensure cluster user exists and generate ssh key" 
+  user: name={{ cluster_user }} generate_ssh_key=yes ssh_key_bits=4096 state=present
+  become: yes
+- name: "create tarball directory on proxy"
+  file: path={{ tarballs_dir }} state=directory
+- name: "download tarballs to proxy" 
+  get_url: url={{ item.urlp }}/{{ item.fn }} dest={{ tarballs_dir }}/{{ item.fn }} sha256sum={{ item.sum }} force=no
+  with_items:
+    - { urlp: "{{ apache_mirror }}/zookeeper/zookeeper-{{ zookeeper_version }}", fn: "{{ zookeeper_tarball }}", sum: "{{ zookeeper_sha256 }}" }
+    - { urlp: "{{ apache_mirror }}/hadoop/common/hadoop-{{ hadoop_version }}", fn: "{{ hadoop_tarball }}", sum: "{{ hadoop_sha256 }}" }
+    - { urlp: "{{ apache_mirror }}/maven/maven-3/{{ maven_version }}/binaries", fn: "{{ maven_tarball }}", sum: "{{ maven_sha256 }}" }
+    - { urlp: "{{ apache_mirror }}/spark/spark-{{ spark_version }}", fn: "{{ spark_tarball }}", sum: "{{ spark_sha256 }}" }
+    - { urlp: "{{ apache_mirror }}/accumulo/{{ accumulo_version }}", fn: "{{ accumulo_tarball }}", sum: "{{ accumulo_sha256 }}" }
+- name: "install wget package"
+  yum: name=wget state=present
+  become: yes
+- name: "download java"
+  script: download-java.sh {{ tarballs_dir }} {{ java_tarball }} {{ java_sha256 }} creates={{ tarballs_dir }}/{{ java_tarball }}
+- name: "download fluo"
+  script: download-fluo.sh {{ tarballs_dir }} {{ fluo_tarball }} {{ fluo_version }} creates={{ tarballs_dir }}/{{ fluo_tarball }}
+- name: "create apps directory on proxy"
+  file: path={{ cluster_basedir }}/apps state=directory
+- name: "create apps run.sh script"
+  template: src=run.sh dest={{ cluster_basedir }}/apps/run.sh mode=0744

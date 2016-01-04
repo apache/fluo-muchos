@@ -1,0 +1,12 @@
+- name: "ensure cluster user exists but don't generate ssh key" 
+  user: name={{ cluster_user }} generate_ssh_key=no state=present
+- name: "copy cluster private key to all nodes"
+  copy: src=/home/{{ cluster_user }}/.ssh/id_rsa dest=/home/{{ cluster_user }}/.ssh/id_rsa owner={{ cluster_user }} group={{ cluster_user }} mode=0600
+- name: "copy cluster public key to all nodes"
+  copy: src=/home/{{ cluster_user }}/.ssh/id_rsa.pub dest=/home/{{ cluster_user }}/.ssh/id_rsa.pub owner={{ cluster_user }} group={{ cluster_user }} mode=0644
+- name: "add cluster user to ~/.ssh/authorized_keys"
+  authorized_key: user={{ cluster_user }} key="{{ lookup('file', '/home/' + cluster_user + '/.ssh/id_rsa.pub') }}"
+- name: "add conf/keys to ~/.ssh/authorized_keys"
+  authorized_key: user={{ cluster_user }} key="{{ lookup('file', 'conf/keys') }}"
+- name: "set ssh config"
+  copy: src=ssh_config dest=/home/{{ cluster_user}}/.ssh/config owner={{ cluster_user }} group={{ cluster_user }} mode=0600

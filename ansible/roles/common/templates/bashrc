@@ -1,0 +1,25 @@
+# .bashrc
+
+# Source global definitions
+if [ -f /etc/bashrc ]; then
+  . /etc/bashrc
+fi
+
+export JAVA_HOME="{{ java_home }}"
+
+PATH="$JAVA_HOME/bin:$PATH"
+PATH="{{ fluo_home }}/bin:$PATH"
+PATH="{{ hadoop_prefix }}/bin:$PATH"
+PATH="{{ hadoop_prefix }}/sbin:$PATH"
+PATH="{{ accumulo_home }}/bin:$PATH"
+PATH="{{ maven_home }}/bin:$PATH"
+PATH="{{ spark_home }}/bin:$PATH"
+PATH="{{ zookeeper_home }}/bin:$PATH"
+export PATH
+
+alias ssh='ssh -A'
+alias cdh='cd {{ hadoop_prefix }}'
+alias cdz='cd {{ zookeeper_home }}'
+alias cda='cd {{ accumulo_home }}'
+alias cdf='cd {{ fluo_home }}'
+alias ashell='{{ accumulo_home }}/bin/accumulo shell -u root -p {{ accumulo_password }}'

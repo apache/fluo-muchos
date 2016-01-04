@@ -1,0 +1,2 @@
+- name: "start yarn"
+  command: "{{ hadoop_prefix }}/sbin/start-yarn.sh"

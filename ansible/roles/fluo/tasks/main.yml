@@ -1,0 +1,14 @@
+- name: "install fluo from tarball"
+  unarchive: src={{ tarballs_dir }}/{{ fluo_tarball }} dest={{ install_dir }} creates={{ fluo_home }} copy=yes
+- name: "copy default fluo configuration"
+  command: cp {{ fluo_home }}/conf/examples/{{ item }} {{ fluo_home }}/conf/ creates={{ fluo_home }}/conf/{{ item }}
+  with_items:
+    - log4j.xml
+    - logback.xml
+- name: "configure fluo"
+  template: src={{ item }} dest={{ fluo_home }}/conf/{{ item }}
+  with_items:
+    - fluo-env.sh
+    - fluo.properties
+- name: "set correct owner & group"
+  file: path={{ fluo_home }} recurse=yes owner={{ cluster_user }} group={{ cluster_user}}
