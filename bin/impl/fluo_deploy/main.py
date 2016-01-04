@@ -98,11 +98,7 @@ def launch_cluster(conn, config):
       exit('ERROR - Image not found for instance type: '+instance_type)
 
     bdm = BlockDeviceMapping()
-    if config.ebs_root_size() > 0 :
-      bdt = BlockDeviceType()
-      bdt.size = config.ebs_root_size()
-      bdt. delete_on_termination = True
-      bdm['/dev/sda1'] = bdt
+    bdm['/dev/sda1'] = BlockDeviceType(delete_on_termination=True)
 
     for i in range(0, num_ephemeral):
       bdt = BlockDeviceType()
