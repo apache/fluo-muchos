@@ -281,9 +281,9 @@ def setup_cluster(config):
 
   sync_cluster(config)
 
-  local_tarballs = join(config.deploy_path, "tarballs")
-  accumulo_tarball =  join(local_tarballs, "accumulo-{0}-bin.tar.gz".format(config.version("accumulo")))
-  fluo_tarball = join(local_tarballs, "fluo-{0}-bin.tar.gz".format(config.version("fluo")))
+  conf_upload = join(config.deploy_path, "conf/upload")
+  accumulo_tarball =  join(conf_upload, "accumulo-{0}-bin.tar.gz".format(config.version("accumulo")))
+  fluo_tarball = join(conf_upload, "fluo-{0}-bin.tar.gz".format(config.version("fluo")))
   basedir = config.get('general', 'cluster_basedir')
   cluster_tarballs = "{0}/tarballs".format(basedir)
   exec_on_proxy_verified(config, "mkdir -p {0}".format(cluster_tarballs))

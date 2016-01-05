@@ -57,13 +57,13 @@ Set up the cluster
 
 The `fluo-deploy setup` command will set up your cluster and start Hadoop, Zookeeper, & Accumulo.  It will 
 download all necessary releases of Fluo, Accumulo, Hadoop, etc.  Optionally, if you want to use a snapshot 
-distribution of Accumulo or Fluo place it in the `tarballs/` directory of fluo-deploy before running 
-`'fluo-deploy setup`.
+distribution of Accumulo or Fluo, place it in the `conf/upload` directory of fluo-deploy before running 
+`'fluo-deploy setup` and it will be uploaded and installed on the cluster.
 
 ```bash
 cd /path/to/fluo
 mvn package
-cp modules/distribution/target/fluo-1.0.0-beta-1-SNAPSHOT-bin.tar.gz /path/to/fluo-deploy/tarballs/
+cp modules/distribution/target/fluo-1.0.0-beta-1-SNAPSHOT-bin.tar.gz /path/to/fluo-deploy/conf/upload/
 ```
 
 The `setup` command installs and configures Fluo but does not start it.  This lets you setup Fluo with any 
