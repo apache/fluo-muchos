@@ -102,8 +102,8 @@ def launch_cluster(conn, config):
 
     for i in range(0, num_ephemeral):
       bdt = BlockDeviceType()
-      bdt.ephemeral_name='ephemeral' + str(i)
-      bdm['/dev/xvd' + chr(ord('b') + i)] = bdt
+      bdt.ephemeral_name=config.ephemeral_root + str(i)
+      bdm[config.device_root + chr(ord('b') + i)] = bdt
 
     resv = conn.run_instances(key_name=key_name,
                               image_id=host_ami,
@@ -215,17 +215,12 @@ def sync_cluster(config):
   vars_d = {}
   for section in ("general", config.get('performance', 'profile')):
     for (name, value) in config.items(section):
-      vars_d[name] = value
-  vars_d["namenode_ip"] = config.get_service_private_ips("namenode")[0]
-  vars_d["resourcemanager_host"] = config.get_service_hostnames("resourcemanager")[0]
-  vars_d["resourcemanager_ip"] = config.get_service_private_ips("resourcemanager")[0]
-  vars_d["data_dir"] = "/media/ephemeral0"
-  vars_d["zookeeper_connect"] = config.zookeeper_connect()
-  vars_d["num_workers"] = str(int(len(config.get_service_hostnames("worker"))) * int(config.get_performance_prop("fluo_worker_instances_multiplier")))
-  vars_d["datanode_dirs"] = config.worker_ephemeral_dirs("/hadoop/data")
-  vars_d["mapred_temp_dirs"] = config.worker_ephemeral_dirs("/hadoop/mapred/temp")
-  vars_d["mapred_local_dirs"] = config.worker_ephemeral_dirs("/hadoop/mapred/local")
-  vars_d["yarn_local_dirs"] = config.worker_ephemeral_dirs("/hadoop/yarn/local")
+      if name not in ('proxy_hostname', 'proxy_socks_port'):
+        vars_d[name] = value
+  vars_d["node_type_map"] = str(config.node_type_map())
+  vars_d["cloud_provider"] = "aws-ec2"
+  vars_d["mount_root"] = config.mount_root
+  vars_d["metrics_drive_ids"] = str(config.metrics_drive_ids())
 
   ansible_conf = join(config.deploy_path, "ansible/conf")
   with open(join(ansible_conf, "hosts"), 'w') as hosts_file:
@@ -255,7 +250,7 @@ def sync_cluster(config):
 
     print >>hosts_file, "\n[nodes]"
     for (private_ip, hostname) in config.get_private_ip_hostnames():
-      print >>hosts_file, "{0} ansible_ssh_host={1} drives={2}".format(hostname, private_ip, config.num_ephemeral(hostname))
+      print >>hosts_file, "{0} ansible_ssh_host={1} node_type={2}".format(hostname, private_ip, config.node_type(hostname))
 
     print >>hosts_file, "\n[all:vars]"
     for (name, value) in sorted(vars_d.items()):

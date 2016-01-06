@@ -1,0 +1,6 @@
+- name: "determine if accumulo needs to be initialized"
+  command: "{{ hadoop_prefix }}/bin/hdfs dfs -stat /accumulo"
+  register: accumulo_stat
+  changed_when: accumulo_stat.rc != 0
+  failed_when: accumulo_stat.rc != 0 and 'No such file or directory' not in accumulo_stat.stderr
+  notify: initialize accumulo

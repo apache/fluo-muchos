@@ -1,2 +1,4 @@
 - name: "restart influxdb"
   service: name=influxdb state=restarted
+- name: "create fluo user"
+  shell: influx -execute "CREATE USER fluo WITH PASSWORD 'secret' WITH ALL PRIVILEGES" || true warn=false

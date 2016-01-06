@@ -360,17 +360,16 @@
             {
               "refId": "A",
               "tags": [
+                {% for drive in metrics_drive_ids %}
                 {
+                {% if not loop.first %} 
+                  "condition": "OR", 
+                {% endif %}
                   "key": "instance",
                   "operator": "=",
-                  "value": "media-ephemeral0"
+                  "value": "{{ drive }}"
                 },
-                {
-                  "condition": "OR",
-                  "key": "instance",
-                  "operator": "=",
-                  "value": "media-ephemeral1"
-                },
+                {% endfor %}
                 {
                   "condition": "AND",
                   "key": "type_instance",
@@ -395,7 +394,7 @@
                 }
               ],
               "measurement": "df_value",
-              "query": "SELECT sum(\"value\") AS \"value\" FROM \"df_value\" WHERE \"instance\" = 'media-ephemeral0' OR \"instance\" = 'media-ephemeral1' AND \"type_instance\" = 'free' AND $timeFilter GROUP BY time($interval), \"host\"",
+              "query": "SELECT sum(\"value\") AS \"value\" FROM \"df_value\" WHERE {% for drive in metrics_drive_ids %} {% if not loop.first %} OR {% endif %} \"instance\" = '{{ drive }}' {%- endfor %} AND \"type_instance\" = 'free' AND $timeFilter GROUP BY time($interval), \"host\"",
               "alias": "$tag_host",
               "rawQuery": false
             }

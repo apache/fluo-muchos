@@ -19,15 +19,18 @@
 <configuration>
   <property>
     <name>yarn.resourcemanager.hostname</name>
-    <value>{{ resourcemanager_ip }}</value>
+    <value>{{ groups['resourcemanager'][0] }}</value>
   </property>
   <property>
     <name>yarn.nodemanager.local-dirs</name>
-    <value>{{ yarn_local_dirs }}</value>
+    <value>{% for dir in worker_data_dirs -%} 
+              {{ dir }}/hadoop/yarn/local
+              {%- if not loop.last -%} , {%- endif -%}
+           {%- endfor %}</value>
   </property>
   <property>
     <name>yarn.nodemanager.log-dirs</name>
-    <value>{{ data_dir }}/hadoop/yarn/logs</value>
+    <value>{{ worker_data_dirs[0] }}/hadoop/yarn/logs</value>
   </property>
   <property>
     <name>yarn.nodemanager.aux-services</name>

@@ -33,14 +33,14 @@ accumulo_instance = instance16
 accumulo_password = secret
 # Software versions
 fluo_version = 1.0.0-beta-2-SNAPSHOT
-hadoop_version = 2.7.0
+hadoop_version = 2.6.3
 zookeeper_version = 3.4.7
 spark_version = 1.5.1
 spark_bin_version = 1.5.1-bin-hadoop2.6
 maven_version = 3.2.5
 accumulo_version = 1.6.4
 # Software sha256 checksums
-hadoop_sha256 = ad270af05fff59d3f7021efe79328ed92dadfa64aa5ab4fcde4a204f803dbf9e
+hadoop_sha256 = ada83d8c2ff72d4665ca2d70ce77af79bd57265beb3ce253cd2869b507e32152
 zookeeper_sha256 = 2e043e04c4da82fbdb38a68e585f3317535b3842c726e0993312948afcc83870
 spark_sha256 = 41ab59b28581b7952e3b0cfd8182980f033d2bf22d0f6a088ee6d120ddf24953
 maven_sha256 = 8c190264bdf591ff9f1268dc0ad940a2726f9e958e367716a09b8aaa7e74a755
