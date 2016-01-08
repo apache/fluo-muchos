@@ -20,7 +20,7 @@
           "datasource": "cluster_metrics",
           "editable": true,
           "error": false,
-          "fill": 1,
+          "fill": 0,
           "grid": {
             "leftLogBase": 1,
             "leftMax": null,
@@ -114,7 +114,7 @@
           "datasource": "cluster_metrics",
           "editable": true,
           "error": false,
-          "fill": 1,
+          "fill": 0,
           "grid": {
             "leftLogBase": 1,
             "leftMax": null,
@@ -222,7 +222,7 @@
           "datasource": "cluster_metrics",
           "editable": true,
           "error": false,
-          "fill": 1,
+          "fill": 0,
           "grid": {
             "leftLogBase": 1,
             "leftMax": null,
@@ -332,7 +332,7 @@
             "threshold2Color": "rgba(234, 112, 112, 0.22)"
           },
           "lines": true,
-          "fill": 1,
+          "fill": 0,
           "linewidth": 2,
           "points": false,
           "pointradius": 5,
@@ -369,7 +369,7 @@
                   "condition": "OR",
                   "key": "instance",
                   "operator": "=",
-                  "value": "media-ephemeral0"
+                  "value": "media-ephemeral1"
                 },
                 {
                   "condition": "AND",
@@ -395,7 +395,7 @@
                 }
               ],
               "measurement": "df_value",
-              "query": "SELECT sum(\"value\") AS \"value\" FROM \"df_value\" WHERE \"instance\" = 'media-ephemeral0' OR \"instance\" = 'media-ephemeral0' AND \"type_instance\" = 'free' AND $timeFilter GROUP BY time($interval), \"host\"",
+              "query": "SELECT sum(\"value\") AS \"value\" FROM \"df_value\" WHERE \"instance\" = 'media-ephemeral0' OR \"instance\" = 'media-ephemeral1' AND \"type_instance\" = 'free' AND $timeFilter GROUP BY time($interval), \"host\"",
               "alias": "$tag_host",
               "rawQuery": false
             }
