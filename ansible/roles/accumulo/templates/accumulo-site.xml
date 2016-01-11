@@ -4,7 +4,7 @@
 <configuration>
   <property>
     <name>instance.volumes</name>
-    <value>hdfs://{{ namenode_ip }}:10000/accumulo</value>
+    <value>{{ hdfs_root }}/accumulo</value>
   </property>
 
   <property>

@@ -27,6 +27,10 @@ class DeployConfig(ConfigParser):
     self.read(config_path)
     self.hosts_path = hosts_path
     self.cluster_name = cluster_name
+    self.ephemeral_root = 'ephemeral'
+    self.mount_root = '/media/' + self.ephemeral_root
+    self.device_root = '/dev/xvd'
+    self.metrics_drive_root = 'media-' + self.ephemeral_root
     self.node_d = None
     self.hosts = None
     self.init_nodes()
@@ -70,34 +74,50 @@ class DeployConfig(ConfigParser):
   def worker_num_ephemeral(self):
     return get_num_ephemeral(self.get('ec2', 'worker_instance_type'))
 
+  def max_ephemeral(self):
+    return max((self.worker_num_ephemeral(), self.default_num_ephemeral()))
+
+  def node_type_map(self):
+    node_types = {}
+    node_list = [('default', self.default_num_ephemeral()), ('worker', self.worker_num_ephemeral())]
+    for (ntype, num_ephemeral) in node_list:
+      node_types[ntype] = {'mounts': self.mounts(num_ephemeral), 'devices': self.devices(num_ephemeral)}
+    return node_types
+
+  def node_type(self, hostname):
+    if 'worker' in self.node_d[hostname]:
+      return 'worker'
+    return 'default'
+
   def num_ephemeral(self, hostname):
     if 'worker' in self.node_d[hostname]:
       return self.worker_num_ephemeral()
     else:
       return self.default_num_ephemeral()
 
-  def data_dir(self):
-    return "/media/ephemeral0"
-
-  def ephemeral_dirs(self, suffix, num_ephemeral):
-    dirs = ""
-    sep = ""
+  def mounts(self, num_ephemeral):
+    mounts = []
     for i in range(0, num_ephemeral):
-      dirs = dirs + sep + "/media/ephemeral"+str(i)+suffix
-      sep = ","
-    return dirs
+      mounts.append(self.mount_root + str(i))
+    return tuple(mounts)
 
-  def worker_ephemeral_dirs(self, suffix):
-    return self.ephemeral_dirs(suffix, self.worker_num_ephemeral())
+  def devices(self, num_ephemeral):
+    devices = []
+    for i in range(0, num_ephemeral):
+      devices.append(self.device_root + chr(ord('b') + i))
+    return tuple(devices)
+
+  def metrics_drive_ids(self):
+    drive_ids = []
+    for i in range(0, self.max_ephemeral()):
+      drive_ids.append(self.metrics_drive_root + str(i))
+    return tuple(drive_ids)
 
   def version(self, software_id):
     return self.get('general', software_id + '_version')
 
   def sha256(self, software_id):
     return self.get('general', software_id + '_sha256')
-
-  def zookeeper_connect(self):
-    return ",".join(self.get_service_hostnames("zookeeper"))
 
   def get_image_id(self, instance_type):
     if get_arch(instance_type) == 'pvm':
@@ -208,7 +228,7 @@ class DeployConfig(ConfigParser):
     return self.get(profile, prop)
 
   def print_all(self):
-    print 'proxy.public.ip = ', self.proxy_public_ip()
+    print 'proxy_public_ip = ', self.proxy_public_ip()
     for (name, val) in self.items('general'):
       print name, '=', val
 

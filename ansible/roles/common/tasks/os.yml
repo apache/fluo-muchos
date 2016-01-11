@@ -6,7 +6,6 @@
   copy: src=limits.conf dest=/etc/security/limits.conf
 - name: "configure network settings for spark"
   copy: src=ifup-local dest=/sbin/ifup-local mode=0755
-- name: "run network settings command"
-  command: /sbin/ifup-local eth0
+  notify: "update network settings"
 - name: "configure ~/.bashrc"
   template: src=bashrc dest=/home/{{ cluster_user }}/.bashrc owner={{ cluster_user }} group={{ cluster_user }} mode=0644

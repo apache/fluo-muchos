@@ -1,25 +1,34 @@
-- hosts: all
-  remote_user: "{{ cluster_user }}"
+- hosts: metrics
   sudo: yes
   tasks:
-  - name: "stop services"
+  - name: "stop influxdb and grafana"
     service: name={{ item }} state=stopped
     with_items:
       - influxdb
       - grafana-server
+  - name: "wipe influxdb data"
+    file: path={{ default_data_dirs[0] }}/influxdb state=absent
+  - name: "wipe grafana db"
+    file: path=/var/lib/grafana/grafana.db state=absent
+- hosts: all
+  sudo: yes
+  tasks:
   - name: "ensure all processes are killed"
     script: roles/common/files/kill.sh
+- hosts: hadoop
+  tasks:
   - name: "wipe hadoop data"
-    file: path=/media/ephemeral{{item}}/hadoop state=absent
-    with_sequence: start=0 end={{ drives-1 }}
-  - name: "wipe other data"
-    file: path={{ item }} state=absent
-    with_items:
-      - "{{ data_dir }}/zookeeper"
-      - "{{ data_dir }}/influxdb"
-  - name: "remove logs"
-    shell: rm -rf {{ item }}
-    with_items:
-      - "{{ hadoop_prefix }}/logs/*"
-      - "{{ accumulo_home }}/logs/*"
-      - "{{ zookeeper_home }}/zookeeper.out"
+    file: path={{item}}/hadoop state=absent
+    with_items: "{{ worker_data_dirs }}"
+  - name: "remove hadoop logs"
+    shell: rm -rf {{ hadoop_prefix }}/logs/*
+- hosts: zookeepers
+  tasks:
+  - name: "wipe zookeeper data"
+    file: path={{ default_data_dirs[0] }}/zookeeper state=absent
+  - name: "remove zookeeper logs"
+    file: path={{ zookeeper_home }}/zookeeper.out state=absent
+- hosts: accumulo
+  tasks:
+  - name: "remove accumulo logs"
+    shell: rm -rf {{ accumulo_home }}/logs/*

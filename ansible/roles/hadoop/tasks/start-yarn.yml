@@ -1,2 +1,4 @@
 - name: "start yarn"
   command: "{{ hadoop_prefix }}/sbin/start-yarn.sh"
+  register: start_yarn_result
+  changed_when: start_yarn_result.stdout | search("starting (:?resource|node)manager")

@@ -9,14 +9,10 @@
   yum: name=/tmp/{{ grafana_rpm }} state=present
 - name: "configure grafana"
   template: src=grafana.ini dest=/etc/grafana/grafana.ini
-  notify:
-    - restart grafana
 - name: "ensure dashboards directory exists"
   file: path=/etc/grafana/dashboards state=directory owner=grafana group=grafana
 - name: "add cluster dashboard configuration"
-  copy: src=cluster-dashboard.json dest=/etc/grafana/dashboards/cluster-dashboard.json owner=grafana group=grafana
-  notify:
-    - restart grafana
+  template: src=cluster-dashboard.json dest=/etc/grafana/dashboards/cluster-dashboard.json owner=grafana group=grafana
 - name: "diff fluo dashboard configuration"
   command: diff {{ fluo_home }}/contrib/grafana/fluo-dashboard.json /etc/grafana/dashboards/fluo-dashboard.json
   register: diff
@@ -24,19 +20,10 @@
   changed_when: diff.rc != 0
 - name: "add fluo dashboard configuration"
   command: cp {{ fluo_home }}/contrib/grafana/fluo-dashboard.json /etc/grafana/dashboards/fluo-dashboard.json
-  notify:
-    - restart grafana
   when: diff|failed
 - name: "ensure owner and group are correct for /etc/grafana"
   file: path=/etc/grafana/ recurse=yes owner=grafana group=grafana
 - name: "ensure grafana is running (and enable it at boot)"
   service: name=grafana-server state=started enabled=yes
-- name: "add datasources"
-  command: "curl http://admin:admin@{{ groups['metrics'][0] }}:3000/api/datasources -X POST -H 'Content-Type: application/json;charset=UTF-8' --data-binary '{{item}}'"
-  register: cresult
-  until: cresult.rc == 0
-  retries: 3
-  delay: 5
-  with_items:
-    - '{"name":"cluster_metrics", "type":"influxdb", "url":"http://{{ groups["metrics"][0] }}:8086", "access":"direct", "isDefault":true, "database":"cluster_metrics", "user":"fluo", "password":"secret"}'
-    - '{"name":"fluo_metrics", "type":"influxdb", "url":"http://{{ groups["metrics"][0] }}:8086", "access":"direct", "isDefault":true, "database":"fluo_metrics", "user":"fluo", "password":"secret"}'
+  notify:
+    - add datasources

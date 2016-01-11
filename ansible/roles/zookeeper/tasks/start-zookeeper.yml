@@ -1,6 +1,8 @@
 - name: "ensure zookeeper data dir exists"
-  file: path={{ data_dir }}/zookeeper state=directory
+  file: path={{ default_data_dirs[0] }}/zookeeper state=directory
 - name: "ensure myid file is set"
-  template: src=myid dest={{ data_dir }}/zookeeper/myid
+  template: src=myid dest={{ default_data_dirs[0] }}/zookeeper/myid
 - name: "start zookeeper"
   shell: "{{ zookeeper_home }}/bin/zkServer.sh start"
+  register: zk_start
+  changed_when: "'STARTED' in zk_start.stdout"

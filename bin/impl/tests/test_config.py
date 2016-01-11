@@ -20,6 +20,12 @@ def test_defaults():
   assert c.get('ec2', 'worker_instance_type') == 'm3.large'
   assert c.num_ephemeral('worker1') == 1
   assert c.num_ephemeral('worker1') == c.worker_num_ephemeral()
+  assert c.max_ephemeral() == 1
+  assert c.mounts(2) == ('/media/ephemeral0', '/media/ephemeral1')
+  assert c.devices(2) == ('/dev/xvdb', '/dev/xvdc')
+  assert c.node_type_map() == {'default': {'mounts': ('/media/ephemeral0',), 'devices': ('/dev/xvdb',)}, 'worker': {'mounts': ('/media/ephemeral0',), 'devices': ('/dev/xvdb',)}}
+  assert c.node_type('worker1') == 'worker'
+  assert c.node_type('leader1') == 'default'
   assert c.get('ec2', 'region') == 'us-east-1'
   assert c.has_option('ec2', 'vpc_id') == False
   assert c.has_option('ec2', 'subnet_id') == False
@@ -41,10 +47,9 @@ def test_defaults():
   assert c.get('general', 'apache_mirror') == 'http://www.gtlib.gatech.edu/pub/apache'
   assert c.version("accumulo") == '1.6.4'
   assert c.version("fluo") == '1.0.0-beta-2-SNAPSHOT'
-  assert c.version("hadoop") == '2.7.0'
+  assert c.version("hadoop") == '2.6.3'
   assert c.version("zookeeper") == '3.4.7'
   assert c.get_service_private_ips("worker") == ['10.0.0.3', '10.0.0.4', '10.0.0.5']
-  assert c.zookeeper_connect() == "leader1,leader2,leader3"
   assert c.get('general', 'proxy_hostname') == "leader1"
   assert c.proxy_public_ip() == "23.0.0.0"
   assert c.proxy_private_ip() == "10.0.0.0"
