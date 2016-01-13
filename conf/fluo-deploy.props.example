@@ -13,6 +13,8 @@
 # limitations under the License.
 
 [general]
+# type of cloud service
+cloud_provider = aws-ec2
 # Cluster user name (install command will SSH to cluster using this user)
 # Leave default below if launching cluster in AWS
 cluster_user = centos
@@ -68,6 +70,12 @@ worker_instance_type = %(default_instance_type)s
 key_name = my_aws_key
 # Tags to add instances
 #instance_tags = key1:value1,key2:value2
+
+[baremetal]
+mount_root = /var/disk
+mounts = /var/disk01,/var/disk02,/var/disk03
+mount_devices = /dev/hdb1,/dev/hdc1,/dev/hdd1
+network_interface=eth0
 
 [performance]
 #Automatically tune Accumulo, Yarn, and Fluo performance setting by selecting or
