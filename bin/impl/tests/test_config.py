@@ -46,9 +46,9 @@ def test_defaults():
   assert c.cluster_name == 'mycluster'
   assert c.get('general', 'apache_mirror') == 'http://www.gtlib.gatech.edu/pub/apache'
   assert c.version("accumulo") == '1.6.4'
-  assert c.version("fluo") == '1.0.0-beta-2-SNAPSHOT'
+  assert c.version("fluo") == '1.0.0-beta-2'
   assert c.version("hadoop") == '2.6.3'
-  assert c.version("zookeeper") == '3.4.7'
+  assert c.version("zookeeper") == '3.4.6'
   assert c.get_service_private_ips("worker") == ['10.0.0.3', '10.0.0.4', '10.0.0.5']
   assert c.get('general', 'proxy_hostname') == "leader1"
   assert c.proxy_public_ip() == "23.0.0.0"
