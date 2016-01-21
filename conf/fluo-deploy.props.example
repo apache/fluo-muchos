@@ -13,8 +13,8 @@
 # limitations under the License.
 
 [general]
-# type of cloud service
-cloud_provider = aws-ec2
+# type of cloud service (ec2 or baremetal)
+cloud_provider = ec2
 # Cluster user name (install command will SSH to cluster using this user)
 # Leave default below if launching cluster in AWS
 cluster_user = centos
@@ -25,6 +25,8 @@ cluster_basedir = /home/centos
 # public IP if launching in EC2.  If not launching in EC2, node must have public IP that can be reached
 # from your machine. Hostname can be chosen from "nodes" section below.
 proxy_hostname = leader1
+# Cluster network interface (leave default if launching in AWS)
+# network_interface=eth0
 # If set, a SOCKS proxy will be created on the specified port when connecting to proxy using 'fluo-deploy ssh <cluster>'
 #proxy_socks_port = 38585
 # Apache mirror to download Hadoop, Zookeeper, Accumulo
@@ -74,8 +76,8 @@ key_name = my_aws_key
 [baremetal]
 mount_root = /var/disk
 mounts = /var/disk01,/var/disk02,/var/disk03
-mount_devices = /dev/hdb1,/dev/hdc1,/dev/hdd1
-network_interface=eth0
+devices = /dev/hdb1,/dev/hdc1,/dev/hdd1
+metrics_drive_ids = media-disk01,media-disk02,media-disk03
 
 [performance]
 #Automatically tune Accumulo, Yarn, and Fluo performance setting by selecting or
