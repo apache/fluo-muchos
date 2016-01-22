@@ -217,10 +217,21 @@ def sync_cluster(config):
     for (name, value) in config.items(section):
       if name not in ('proxy_hostname', 'proxy_socks_port'):
         vars_d[name] = value
-  vars_d["node_type_map"] = str(config.node_type_map())
-  vars_d["cloud_provider"] = "aws-ec2"
-  vars_d["mount_root"] = config.mount_root
-  vars_d["metrics_drive_ids"] = str(config.metrics_drive_ids())
+  cloud_provider = vars_d.get('cloud_provider', 'ec2')
+  if cloud_provider  == 'ec2':
+    vars_d["node_type_map"] = str(config.node_type_map())
+    vars_d["mount_root"] = config.mount_root
+    vars_d["metrics_drive_ids"] = str(config.metrics_drive_ids())
+  if cloud_provider == 'baremetal':
+    for (name, value) in config.items('baremetal'):
+       vars_d[name] = value
+    node_type_map = {}
+    mounts = vars_d['mounts'].split(",")
+    devices = vars_d['devices'].split(",")
+    for node_type in 'default', 'worker':
+        node_type_map[node_type] = {'mounts': mounts, 'devices': devices }
+    vars_d["node_type_map"] = str(node_type_map)
+    vars_d["metrics_drive_ids"] = str(vars_d["metrics_drive_ids"].split(","))
 
   ansible_conf = join(config.deploy_path, "ansible/conf")
   with open(join(ansible_conf, "hosts"), 'w') as hosts_file:
