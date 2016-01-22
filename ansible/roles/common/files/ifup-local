@@ -1,7 +1,3 @@
 #!/bin/bash
-case "$1" in
-eth0)
 /sbin/ethtool -K $1 sg off
 /sbin/ethtool -K $1 tso off
-;;
-esac
