@@ -77,7 +77,7 @@ key_name = my_aws_key
 mount_root = /var/disk
 mounts = /var/disk01,/var/disk02,/var/disk03
 devices = /dev/hdb1,/dev/hdc1,/dev/hdd1
-metrics_drive_ids = media-disk01,media-disk02,media-disk03
+metrics_drive_ids = var-disk01,var-disk02,var-disk03
 
 [performance]
 #Automatically tune Accumulo, Yarn, and Fluo performance setting by selecting or
