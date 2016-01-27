@@ -9,6 +9,8 @@
     - generic_logger.xml
     - monitor_logger.properties
     - monitor_logger.xml
+    - log4j.properties
+    - client.conf 
 - name: "configure accumulo"
   template: src={{ item }} dest={{ accumulo_home }}/conf/{{ item }}
   with_items:
