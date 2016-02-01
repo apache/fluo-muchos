@@ -26,7 +26,7 @@ cluster_basedir = /home/centos
 # from your machine. Hostname can be chosen from "nodes" section below.
 proxy_hostname = leader1
 # Cluster network interface (leave default if launching in AWS)
-# network_interface=eth0
+network_interface=eth0
 # If set, a SOCKS proxy will be created on the specified port when connecting to proxy using 'fluo-deploy ssh <cluster>'
 #proxy_socks_port = 38585
 # Apache mirror to download Hadoop, Zookeeper, Accumulo
