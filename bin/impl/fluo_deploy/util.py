@@ -63,6 +63,7 @@ instance_types = {
   "r3.8xlarge": EC2Type("hvm", 2),
   "r3.large": EC2Type("hvm", 1),
   "r3.xlarge": EC2Type("hvm", 1),
+  "d2.xlarge": EC2Type("hvm", 3),
 }
 
 # AMI given arch & region.  PVM arch currently not supported
