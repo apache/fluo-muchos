@@ -222,6 +222,8 @@ def sync_cluster(config):
     vars_d["node_type_map"] = str(config.node_type_map())
     vars_d["mount_root"] = config.mount_root
     vars_d["metrics_drive_ids"] = str(config.metrics_drive_ids())
+    vars_d["fstype"] = config.fstype()
+    vars_d["force_format"] = config.force_format()
   if cloud_provider == 'baremetal':
     for (name, value) in config.items('baremetal'):
        vars_d[name] = value

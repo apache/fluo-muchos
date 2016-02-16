@@ -70,8 +70,13 @@ worker_instance_type = %(default_instance_type)s
 # You can upload and name your public key using the EC2 Management Console.
 # Only the user with this key will be able to SSH to the cluster.
 key_name = my_aws_key
+#Type of filesystem to format instance storage as.
+fstype = ext3
+#Force formatting of instance devices, even when it has an existing filesystem.
+force_format = no
 # Tags to add instances
 #instance_tags = key1:value1,key2:value2
+
 
 [baremetal]
 mount_root = /var/disk

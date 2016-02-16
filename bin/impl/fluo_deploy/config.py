@@ -107,6 +107,18 @@ class DeployConfig(ConfigParser):
       devices.append(self.device_root + chr(ord('b') + i))
     return tuple(devices)
 
+  def fstype(self):
+    retval = self.get('ec2', 'fstype')
+    if not retval:
+      return 'ext3'
+    return retval
+
+  def force_format(self):
+    retval = self.get('ec2', 'force_format')
+    if not retval:
+      return 'no'
+    return retval
+
   def metrics_drive_ids(self):
     drive_ids = []
     for i in range(0, self.max_ephemeral()):
