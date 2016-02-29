@@ -32,24 +32,24 @@ network_interface=eth0
 # Apache mirror to download Hadoop, Zookeeper, Accumulo
 apache_mirror = http://www.gtlib.gatech.edu/pub/apache
 # Accumulo Instance name
-accumulo_instance = instance16
+accumulo_instance = instance17
 # Accumluo Password
 accumulo_password = secret
 # Software versions
 fluo_version = 1.0.0-beta-2
 hadoop_version = 2.6.3
-zookeeper_version = 3.4.6
+zookeeper_version = 3.4.8
 spark_version = 1.5.1
 spark_bin_version = 1.5.1-bin-hadoop2.6
 maven_version = 3.2.5
-accumulo_version = 1.6.4
+accumulo_version = 1.7.1
 # Software sha256 checksums
 hadoop_sha256 = ada83d8c2ff72d4665ca2d70ce77af79bd57265beb3ce253cd2869b507e32152
-zookeeper_sha256 = 01b3938547cd620dc4c93efe07c0360411f4a66962a70500b163b59014046994
+zookeeper_sha256 = f10a0b51f45c4f64c1fe69ef713abf9eb9571bc7385a82da892e83bb6c965e90
 spark_sha256 = 41ab59b28581b7952e3b0cfd8182980f033d2bf22d0f6a088ee6d120ddf24953
 maven_sha256 = 8c190264bdf591ff9f1268dc0ad940a2726f9e958e367716a09b8aaa7e74a755
 # Accumulo checksum is only checked if not a SNAPSHOT version.
-accumulo_sha256 = 6853be86dbf60a0e1efb1431e78a99fc1fc98c9a8fa1feae655def2ee33b30ff
+accumulo_sha256 = 8312f30fceb2318dcde5ee667e49f060087d9327e015084a51d51cbe5a7e9f95
 
 [ec2]
 # AWS Access & Secret keys

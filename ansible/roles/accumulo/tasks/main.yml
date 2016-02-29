@@ -21,9 +21,6 @@
     - tracers
     - monitor
     - client.conf
-- name: "apply temporary patch to start-server.sh until ACCUMULO-4093 is released"
-  patch: src=start-server.sh.patch dest={{ accumulo_home }}/bin/start-server.sh
-  ignore_errors: yes
 - name: "build accumulo native libraries"
   shell: "{{ accumulo_home }}/bin/build_native_library.sh" 
   args: 
