@@ -128,7 +128,7 @@ def setup_boto(lib_dir):
 
 def parse_args(hosts_dir, input=None):
   parser = OptionParser(
-            usage="fluo-deploy [options] <action>\n\n"
+            usage="zetten [options] <action>\n\n"
             + "where <action> can be:\n"
             + "  launch     Launch cluster in EC2\n"
             + "  status     Check status of EC2 cluster\n"
@@ -136,8 +136,8 @@ def parse_args(hosts_dir, input=None):
             + "  sync       Sync ansible directory on cluster proxy node\n"
             + "  config     Print configuration for that cluster.  Requires '-p' option.  Use '-p all' for all config.\n"
             + "  ssh        SSH to cluster proxy node\n"
-            + "  run        Runs the specified application configured in fluo-deploy.props.  Requires '-a <appName>' to be set.\n"
-            + "             Use --args '<arg1> ...' to pass arguments to the application command configured in fluo-deploy.props\n"
+            + "  run        Runs the specified application configured in zetten.props.  Requires '-a <appName>' to be set.\n"
+            + "             Use --args '<arg1> ...' to pass arguments to the application command configured in zetten.props\n"
             + "  wipe       Wipes cluster data and kills processes\n"
             + "  terminate  Terminate EC2 cluster",
             add_help_option=False)

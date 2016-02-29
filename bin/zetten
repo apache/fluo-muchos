@@ -14,19 +14,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-export FLUO_DEPLOY_BIN="$(dirname $0)"
+export ZETTEN_BIN="$(dirname $0)"
 
-FLUO_DEPLOY="$( cd -P ${FLUO_DEPLOY_BIN}/.. && pwd )"
-export FLUO_DEPLOY
-if [ -z "$FLUO_DEPLOY" -o ! -d "$FLUO_DEPLOY" ]
+ZETTEN="$( cd -P ${ZETTEN_BIN}/.. && pwd )"
+export ZETTEN
+if [ -z "$ZETTEN" -o ! -d "$ZETTEN" ]
 then
-  echo "FLUO_DEPLOY=$FLUO_DEPLOY is not a valid directory.  Please make sure it exists"
+  echo "ZETTEN=$ZETTEN is not a valid directory.  Please make sure it exists"
   exit 1
 fi
 
-if [ ! -f $FLUO_DEPLOY/conf/fluo-deploy.props ]; then
-  echo "Please create a configuration file at $FLUO_DEPLOY/conf/fluo-deploy.props"
+if [ ! -f $ZETTEN/conf/zetten.props ]; then
+  echo "Please create a configuration file at $ZETTEN/conf/zetten.props"
   exit 1
 fi
 
-python -Wdefault "$FLUO_DEPLOY/bin/impl/fluo_deploy/main.py" "$@"
+python -Wdefault "$ZETTEN/bin/impl/zetten/main.py" "$@"

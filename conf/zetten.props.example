@@ -21,13 +21,13 @@ cluster_user = centos
 # Cluster base directory where install/ & tarballs/ directories are created
 # Leave default below if launching cluster in AWS
 cluster_basedir = /home/centos
-# Hostname of proxy node that fluo-deploy will use to direct installation of cluster.  Will be given 
+# Hostname of proxy node that zetten will use to direct installation of cluster.  Will be given 
 # public IP if launching in EC2.  If not launching in EC2, node must have public IP that can be reached
 # from your machine. Hostname can be chosen from "nodes" section below.
 proxy_hostname = leader1
 # Cluster network interface (leave default if launching in AWS)
 network_interface=eth0
-# If set, a SOCKS proxy will be created on the specified port when connecting to proxy using 'fluo-deploy ssh <cluster>'
+# If set, a SOCKS proxy will be created on the specified port when connecting to proxy using 'zetten ssh <cluster>'
 #proxy_socks_port = 38585
 # Apache mirror to download Hadoop, Zookeeper, Accumulo
 apache_mirror = http://www.gtlib.gatech.edu/pub/apache
@@ -140,12 +140,12 @@ yarn_nm_mem_mb=16384
 # <app>_branch              # Branch to checkout in git repo
 # <app>_command             # Test script in repo that starts test
 #
-# Applications can be run using the following command 'fluo-deploy run -a <app>`
+# Applications can be run using the following command 'zetten run -a <app>`
 # Arguments can be added after <app> and will be passed to configured commands for that app.
 # Any files or directories referenced by arguments must exist on leader node.
 
 # Stress test application
-# Usage: fluo-deploy run -a stress
+# Usage: zetten run -a stress
 # Notes: - Stress test can take up to one hour to complete
 # 			 - Status will be output to console
 # 			 - Logs are written to install/tests/stress/logs
@@ -154,7 +154,7 @@ stress_branch=master
 stress_command=bin/run-test.sh
 
 # Phrasecount application
-# Usage: fluo-deploy run -a phrasecount --args <txtDocsDir>
+# Usage: zetten run -a phrasecount --args <txtDocsDir>
 # Notes: - The directory <txtDocsDir> must exist on leader node
 #        - Cluster cannot be set up with multiple zookeepers until FLUO-521 is resolved. 
 phrasecount_repo=https://github.com/fluo-io/phrasecount
@@ -162,7 +162,7 @@ phrasecount_branch=master
 phrasecount_command=bin/run.sh
 
 # Webindex application
-# Usage: fluo-deploy run -a webindex --args <args>
+# Usage: zetten run -a webindex --args <args>
 # Notes: - If setting multiple args, wrap them in quotes
 #        - Set <args> to 'test-id load1 -fg' to load 1 Common Crawl file.
 webindex_repo=https://github.com/fluo-io/webindex
