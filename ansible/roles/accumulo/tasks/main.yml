@@ -5,12 +5,15 @@
   with_items:
     - accumulo-metrics.xml
     - auditLog.xml
-    - generic_logger.properties
-    - generic_logger.xml
     - monitor_logger.properties
     - monitor_logger.xml
     - log4j.properties
-- name: "configure accumulo"
+- name: "configure accumulo using managed files"
+  copy: src={{ item }} dest={{ accumulo_home }}/conf/{{ item }}
+  with_items:
+    - generic_logger.properties
+    - generic_logger.xml
+- name: "configure accumulo using managed templates"
   template: src={{ item }} dest={{ accumulo_home }}/conf/{{ item }}
   with_items:
     - accumulo-env.sh

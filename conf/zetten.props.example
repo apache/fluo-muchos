@@ -164,7 +164,7 @@ phrasecount_command=bin/run.sh
 # Webindex application
 # Usage: zetten run -a webindex --args <args>
 # Notes: - If setting multiple args, wrap them in quotes
-#        - Set <args> to 'test-id load1 -fg' to load 1 Common Crawl file.
+#        - Set <args> to 'test-id load1-s3 -fg' to load 1 Common Crawl file.
 webindex_repo=https://github.com/fluo-io/webindex
 webindex_branch=master
 webindex_command=bin/webindex
