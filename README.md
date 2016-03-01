@@ -55,24 +55,25 @@ You can check the status of the nodes using the EC2 Dashboard or by running the 
 Set up the cluster
 ---------------------------
 
-The `zetten setup` command will set up your cluster and start Hadoop, Zookeeper, & Accumulo.  It will 
-download all necessary releases of Fluo, Accumulo, Hadoop, etc.  Optionally, if you want to use a snapshot 
-distribution of Accumulo or Fluo, place it in the `conf/upload` directory of zetten before running 
-`'zetten setup` and it will be uploaded and installed on the cluster.
+The `zetten setup` command will set up your cluster and start Hadoop, Zookeeper, & Accumulo.  It will
+download all necessary releases of Fluo, Accumulo, Hadoop, etc.  Optionally, if you want to use a snapshot
+version of Accumulo or Fluo, place it in the `conf/upload` directory before running `zetten setup`.
 
 ```bash
+#optional, example commands to build a snapshot version of Fluo
 cd /path/to/fluo
 mvn package
-cp modules/distribution/target/fluo-1.0.0-beta-1-SNAPSHOT-bin.tar.gz /path/to/zetten/conf/upload/
+cp modules/distribution/target/fluo-1.0.0-beta-3-SNAPSHOT-bin.tar.gz /path/to/zetten/conf/upload/
 ```
 
-The `setup` command installs and configures Fluo but does not start it.  This lets you setup Fluo with any 
-observers.  Run the commands below to access your cluster and get to your fluo install:
+The `zetten setup` command installs and configures Fluo but does not start it.  This lets you setup Fluo with any
+observers.  Run the commands below to access your cluster and get to your Fluo and/or Accumulo directories:
 
 ```bash
 zetten ssh
-ssh <FLUO_HOSTNAME>
+ssh <node on cluster where Fluo was installed, determined by Zetten config>
 cdf   # Alias to change directory to Fluo Home
+cda   # Alias to change directory to Accumulo Home
 ```
 
 Manage the cluster
