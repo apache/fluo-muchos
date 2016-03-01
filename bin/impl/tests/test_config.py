@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from fluo_deploy.config import DeployConfig
+from zetten.config import DeployConfig
 
 def test_defaults():
-  c = DeployConfig("fluo-deploy", '../../conf/fluo-deploy.props.example', '../../conf/hosts/example/example_cluster', 'mycluster')
+  c = DeployConfig("zetten", '../../conf/zetten.props.example', '../../conf/hosts/example/example_cluster', 'mycluster')
   assert c.get('ec2', 'default_instance_type') == 'm3.large'
   assert c.get('ec2', 'worker_instance_type') == 'm3.large'
   assert c.num_ephemeral('worker1') == 1
@@ -45,10 +45,10 @@ def test_defaults():
   assert c.get_private_ip('leader1') == '10.0.0.0'
   assert c.cluster_name == 'mycluster'
   assert c.get('general', 'apache_mirror') == 'http://www.gtlib.gatech.edu/pub/apache'
-  assert c.version("accumulo") == '1.6.4'
+  assert c.version("accumulo") == '1.7.1'
   assert c.version("fluo") == '1.0.0-beta-2'
   assert c.version("hadoop") == '2.6.3'
-  assert c.version("zookeeper") == '3.4.6'
+  assert c.version("zookeeper") == '3.4.8'
   assert c.get_service_private_ips("worker") == ['10.0.0.3', '10.0.0.4', '10.0.0.5']
   assert c.get('general', 'proxy_hostname') == "leader1"
   assert c.proxy_public_ip() == "23.0.0.0"

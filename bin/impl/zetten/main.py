@@ -15,7 +15,7 @@
 # limitations under the License.
 
 """
-Script to help deploy Fluo cluster (optionally to AWS EC2)
+Script to help deploy a Fluo or Accumulo cluster (optionally to AWS EC2)
 """
 
 import os, sys
@@ -28,10 +28,10 @@ import time
 import urllib
 import subprocess
 
-FLUO_DEPLOY = os.environ.get('FLUO_DEPLOY')
-if FLUO_DEPLOY is None:
-  exit('ERROR - The env var FLUO_DEPLOY must be set!')
-setup_boto(join(FLUO_DEPLOY, "bin/impl/lib"))
+ZETTEN = os.environ.get('ZETTEN')
+if ZETTEN is None:
+  exit('ERROR - The env var ZETTEN must be set!')
+setup_boto(join(ZETTEN, "bin/impl/lib"))
 
 import boto
 from boto.ec2.blockdevicemapping import BlockDeviceMapping, BlockDeviceType, EBSBlockDeviceType
@@ -44,7 +44,7 @@ def get_or_make_group(conn, name, vpc_id):
     return group[0]
   else:
     print "Creating security group " + name
-    return conn.create_security_group(name, "Security group created by fluo-deploy script", vpc_id)
+    return conn.create_security_group(name, "Security group created by zetten script", vpc_id)
 
 def get_instance(instances, instance_id):
   for instance in instances:
@@ -54,7 +54,7 @@ def get_instance(instances, instance_id):
 def launch_cluster(conn, config):
   key_name = config.get('ec2', 'key_name')
   if not key_name:
-    exit('ERROR - key.name is not set fluo-deploy.props')
+    exit('ERROR - key.name is not set zetten.props')
 
   cur_nodes = get_active_cluster(conn, config)
   if cur_nodes:
@@ -202,7 +202,7 @@ def get_ec2_conn(config):
   access_key = config.get('ec2', 'aws_access_key')
   secret_key = config.get('ec2', 'aws_secret_key')
   if access_key == 'access_key' or secret_key == 'secret_key':
-    exit('ERROR - You must set AWS access & secret keys in fluo-deploy.props')
+    exit('ERROR - You must set AWS access & secret keys in zetten.props')
   region = config.get('ec2', 'region')
   conn = ec2.connect_to_region(region, aws_access_key_id=access_key, aws_secret_access_key=secret_key)
   if not conn:
@@ -304,13 +304,13 @@ def setup_cluster(config):
       
 def main():
 
-  deploy_path = os.environ.get('FLUO_DEPLOY')
+  deploy_path = os.environ.get('ZETTEN')
   if not deploy_path:
-    exit('ERROR - The FLUO_DEPLOY env variable must be set!')
+    exit('ERROR - The ZETTEN env variable must be set!')
   if not os.path.isdir(deploy_path):
-    exit('ERROR - Directory set by FLUO_DEPLOY does not exist: '+deploy_path)
+    exit('ERROR - Directory set by ZETTEN does not exist: '+deploy_path)
 
-  config_path = join(deploy_path, "conf/fluo-deploy.props")
+  config_path = join(deploy_path, "conf/zetten.props")
   if not isfile(config_path):
     exit('ERROR - A config file does not exist at '+config_path)  
 
@@ -319,7 +319,7 @@ def main():
   # parse command line args
   retval = parse_args(hosts_dir)
   if not retval:
-    print "Invalid command line arguments. For help, use 'fluo-deploy -h'"
+    print "Invalid command line arguments. For help, use 'zetten -h'"
     sys.exit(1)
   (opts, action, args) = retval
 
