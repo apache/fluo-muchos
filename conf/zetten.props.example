@@ -69,6 +69,7 @@ worker_instance_type = %(default_instance_type)s
 # Name of public key that will be loaded by Amazon on to your EC2 instances.
 # You can upload and name your public key using the EC2 Management Console.
 # Only the user with this key will be able to SSH to the cluster.
+# Name below should be your 'Key pair name' in EC2 and not name of your public key file.
 key_name = my_aws_key
 #Type of filesystem to format instance storage as.
 fstype = ext3
