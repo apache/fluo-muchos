@@ -36,6 +36,7 @@ setup_boto(join(ZETTEN, "bin/impl/lib"))
 import boto
 from boto.ec2.blockdevicemapping import BlockDeviceMapping, BlockDeviceType, EBSBlockDeviceType
 from boto import ec2
+from boto.exception import EC2ResponseError
 
 def get_or_make_group(conn, name, vpc_id):
   groups = conn.get_all_security_groups()
@@ -93,7 +94,11 @@ def launch_cluster(conn, config):
       instance_type = config.get('ec2', 'default_instance_type')
       num_ephemeral = config.default_num_ephemeral()
 
-    host_ami = config.get_image_id(instance_type)
+    if config.has_option('ec2', 'aws_ami'):
+      host_ami = config.get('ec2', 'aws_ami')
+    else:
+      host_ami = config.get_image_id(instance_type)
+
     if not host_ami:
       exit('ERROR - Image not found for instance type: '+instance_type)
 
@@ -105,14 +110,32 @@ def launch_cluster(conn, config):
       bdt.ephemeral_name=config.ephemeral_root + str(i)
       bdm[config.device_root + chr(ord('b') + i)] = bdt
 
-    resv = conn.run_instances(key_name=key_name,
-                              image_id=host_ami,
-                              security_group_ids=[security_group.id],
-                              instance_type=instance_type,
-                              subnet_id=subnet_id,
-                              min_count=1,
-                              max_count=1,
-                              block_device_map=bdm)
+    try:
+      resv = conn.run_instances(key_name=key_name,
+                                image_id=host_ami,
+                                security_group_ids=[security_group.id],
+                                instance_type=instance_type,
+                                subnet_id=subnet_id,
+                                min_count=1,
+                                max_count=1,
+                                block_device_map=bdm)
+    except EC2ResponseError as e:
+      ami_help = """PLEASE NOTE - If you have accepted the software terms for CentOS 7 and still get an error, 
+this could be due to CentOS releasing new images of CentOS 7.  When this occurs, the old images 
+are no longer available to new users.  If you think this is the case, go to the CentOS 7 product
+page on AWS Marketplace at the URL below to find the latest AMI: 
+
+https://aws.amazon.com/marketplace/ordering?productId=b7ee8a69-ee97-4a49-9e68-afaee216db2e
+
+On the product page, click 'Manual Launch' to find the latest AMI ID for your EC2 region.
+This should be used to set the 'aws_ami' property in your zetten.props which will override
+the default AMI IDs used by Zetten.  After setting the 'aws_ami' property, run the launch 
+command again.
+
+Also, let us know that this has occured by creating an issue on the Zetten's GitHub page 
+and we'll upgrade the defaults AMIs used by Zetten to be the latest CentOS images.
+"""
+      exit("ERROR - Failed to launch EC2 instance due to exception below:\n\n{0}\n\n{1}".format(e, ami_help))
   
     if len(resv.instances) != 1:
       exit('ERROR - Failed to start {0} node'.format(hostname))
@@ -120,7 +143,8 @@ def launch_cluster(conn, config):
     instance = resv.instances[0]
 
     instance_d[hostname] = instance.id
-    print 'Launching {0} node'.format(hostname)
+    print 'Launching {0} node using {1}'.format(hostname, host_ami)
+ 
 
   while True:
     time.sleep(5)
@@ -176,13 +200,16 @@ def exec_on_proxy_verified(config, command, opts=''):
   check_code(retcode, ssh_command)
 
 def wait_until_proxy_ready(config):
+  proxy_host = config.get('general', 'proxy_hostname')
+  cluster_user = config.get('general', 'cluster_user')
+  print "Checking if '{0}' proxy can be reached using: ssh {1}@{2}".format(proxy_host, cluster_user, config.proxy_public_ip())
   while True:
     (retcode, ssh_command) = exec_on_proxy(config, 'pwd > /dev/null')
     if retcode == 0:
-      print "Proxy is ready!"
+      print "Connected to proxy using SSH!"
       time.sleep(1)
       break;
-    print "Proxy is not ready yet.  Will retry in 5 sec..."
+    print "Proxy could not be accessed using SSH.  Will retry in 5 sec..."
     time.sleep(5)  
 
 def execute_playbook(config, playbook):
@@ -347,13 +374,13 @@ def main():
     else:
       config.print_property(opts.property)
   elif action == 'ssh':
-    print "Connecting to proxy: {0} {1}".format(config.get('general', 'proxy_hostname'), config.proxy_public_ip())
     wait_until_proxy_ready(config)
     fwd = ''
     if config.has_option('general', 'proxy_socks_port'):
       fwd = "-D "+config.get('general', 'proxy_socks_port')
     ssh_command = "ssh -C -A -o 'StrictHostKeyChecking no' {fwd} {usr}@{ldr}".format(usr=config.get('general', 'cluster_user'),
       ldr=config.proxy_public_ip(), fwd=fwd)
+    print "Logging into proxy using: {0}".format(ssh_command)
     retcode = subprocess.call(ssh_command, shell=True)
     check_code(retcode, ssh_command)
   elif action == 'wipe':
