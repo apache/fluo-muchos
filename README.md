@@ -36,10 +36,19 @@ on each node to the `~/.ssh/authorized_keys` file for the user set by the `clust
 Launching an EC2 cluster
 ------------------------
 
+When Zetten launches a cluster, it uses a free CentOS 7 image that is hosted in the AWS marketplace but managed
+by the CentOS orginization.  If you have never used this image in EC2 before, you will need to go to the 
+[CentOS 7 product page][centos7] to accept the software terms under the 'Manual Launch' tab.  If this is not 
+done, you will get an error when you try to launch your cluster.  
+
+The CentOS organization periodically updates AMIs and deprecates older AMIs which makes them unavailable to 
+new users.  This can also cause an error when you try to launch your cluster.  If this occurs, you will need to
+find the AMI ID for your EC2 region on the [CentOS 7 product page][centos7] and set the 'aws_ami' property
+in your 'zetten.props' file to override the default AMIs used by Zetten.
+
 Run the following command to launch an EC2 cluster called `mycluster`:
-```
-zetten launch -c mycluster
-```
+
+    zetten launch -c mycluster
 
 After your cluster has launched, you do not have to specify a cluster anymore using `-c` (unless you have 
 multiple clusters running).
@@ -53,28 +62,38 @@ You can check the status of the nodes using the EC2 Dashboard or by running the 
     zetten status
 
 Set up the cluster
----------------------------
+------------------
 
 The `zetten setup` command will set up your cluster and start Hadoop, Zookeeper, & Accumulo.  It will
-download all necessary releases of Fluo, Accumulo, Hadoop, etc.  Optionally, if you want to use a snapshot
-version of Accumulo or Fluo, place it in the `conf/upload` directory before running `zetten setup`.
+download release tarballs of Fluo, Accumulo, Hadoop, etc.  The release versions of these tarballs are 
+specified in `zetten.props`.
+
+Optionally, you can have Zetten use a snapshot version (rather than a released version) of Accumulo or Fluo by 
+building a snapshot tarball and placing it in the `conf/upload` directory before running `zetten setup`.  
+This option is only necessary if you want to run the latest unreleased version of Fluo or Accumulo.
 
 ```bash
-#optional, example commands to build a snapshot version of Fluo
+# optional, example commands to build a snapshot version of Fluo
 cd /path/to/fluo
 mvn package
 cp modules/distribution/target/fluo-1.0.0-beta-3-SNAPSHOT-bin.tar.gz /path/to/zetten/conf/upload/
 ```
 
-The `zetten setup` command installs and configures Fluo but does not start it.  This lets you setup Fluo with any
-observers.  Run the commands below to access your cluster and get to your Fluo and/or Accumulo directories:
+The `zetten setup` command will install and start Accumulo, Hadoop, and Zookeeper.  The optional 
+services below will only be set up if configured in the [nodes] section of `zetten.props`:
 
-```bash
-zetten ssh
-ssh <node on cluster where Fluo was installed, determined by Zetten config>
-cdf   # Alias to change directory to Fluo Home
-cda   # Alias to change directory to Accumulo Home
-```
+1. `fluo` - Fluo only needs to be installed and configured on a single node in your cluster as Fluo
+applications are run in YARN.  If set as a service, `zetten setup` will install and partially configure
+Fluo but not start it.  To finish setup, follow the steps in the 'Run a Fluo application' section below.
+
+2. `metrics` - The Metrics service installs and configures collectd, InfluxDB and Grafana.  Cluster metrics
+are sent to InfluxDB using collectd and are viewable in Grafana.  If Fluo is running, its metrics will also
+be viewable in Grafana.
+
+If you run the `zetten setup` command and a failure occurs, you can run the command again with no issues.
+Any cluster setup that was successfully completed will not be repeated.  While some setup steps can take
+over a minute, you can use `Ctrl-C` to stop setup if it hangs for a long time.  Just remember to run 
+`zetten setup` again to finish setup.
 
 Manage the cluster
 ------------------
@@ -89,8 +108,16 @@ After running the `wipe` command, run the `setup` command to start a fresh clust
 Run a Fluo application
 ----------------------
 
-If you have a Fluo application to run, follow the instructions starting at the [Configure a Fluo application][3] 
-section of the Fluo production setup instructions to configure, initialize, and start your application.
+If you have a Fluo application to run, follow the steps below to access your Fluo install on the cluster:
+
+```bash
+zetten ssh
+ssh <node on cluster where Fluo was installed, determined by Zetten config>
+cdf   # Alias to change directory to Fluo Home
+```
+
+Next, follow the instructions starting at the [Configure a Fluo application][3] section of the Fluo 
+production setup instructions to configure, initialize, and start your application.
 
 If you don't have an application, you can run a Fluo example application.  All example applications are listed
 and configured in [zetten.props][5].  In general applications are run using the following command:
@@ -129,6 +156,7 @@ The following command runs the unit tests:
 
     nosetests -w bin/impl
 
+[centos7]: https://aws.amazon.com/marketplace/ordering?productId=b7ee8a69-ee97-4a49-9e68-afaee216db2e
 [2]: http://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSGettingStartedGuide/AWSCredentials.html
 [3]: https://github.com/fluo-io/fluo/blob/master/docs/prod-fluo-setup.md#configure-a-fluo-application
 [4]: https://github.com/fluo-io/fluo-stress

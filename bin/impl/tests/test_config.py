@@ -58,6 +58,6 @@ def test_defaults():
   assert c.get_non_proxy() == [('10.0.0.1', 'leader2'), ('10.0.0.2', 'leader3'), ('10.0.0.3', 'worker1'), ('10.0.0.4', 'worker2'), ('10.0.0.5', 'worker3')]
   assert c.get_host_services() == [('leader1', 'namenode zookeeper fluo'), ('leader2', 'resourcemanager zookeeper'), ('leader3', 'accumulomaster zookeeper'),
                                    ('metrics', 'metrics'), ('worker1', 'worker'), ('worker2', 'worker'), ('worker3', 'worker')]
-  assert c.get_image_id('m3.large') == 'ami-61bbf104'
+  assert c.get_image_id('m3.large') == 'ami-6d1c2007'
   assert c.get('ec2', 'aws_access_key') == 'access_key'
   assert c.get('ec2', 'aws_secret_key') == 'secret_key'
