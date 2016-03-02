@@ -145,6 +145,15 @@ $ zetten config -p leader.public.ip
 10.10.10.10
 ```
 
+Powered by
+----------
+
+Zetten is powered by the following projects:
+
+ * [boto] - Python library used by `zetten launch` to start a cluster in AWS EC2.
+ * [Ansible] - Cluster management tool that is used by `zetten setup` to install, configure, and start Fluo, Accumulo, 
+Hadoop, etc on an existing EC2 or bare metal cluster.
+
 Running unit tests
 ------------------
 
@@ -161,3 +170,5 @@ The following command runs the unit tests:
 [3]: https://github.com/fluo-io/fluo/blob/master/docs/prod-fluo-setup.md#configure-a-fluo-application
 [4]: https://github.com/fluo-io/fluo-stress
 [5]: conf/zetten.props.example
+[boto]: http://boto.cloudhackers.com/en/latest/
+[Ansible]: https://www.ansible.com/
