@@ -9,22 +9,19 @@ Installation
 ------------
 
 First clone the `zetten` repo:
-```
-git clone https://github.com/fluo-io/zetten.git
-```  
+
+    git clone https://github.com/fluo-io/zetten.git
 
 Now, create and modify your configuration file for zetten:
-```
-cd zetten/
-cp conf/zetten.props.example conf/zetten.props
-```
+
+    cd zetten/
+    cp conf/zetten.props.example conf/zetten.props
 
 In order to run `zetten`, your AWS credentials need to be set in `zetten.props` like this:
-```
-[ec2]
-aws.access.key_id=AKIAIOSFODNN7EXAMPLE
-aws.secret.key=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
-```
+
+    [ec2]
+    aws.access.key_id=AKIAIOSFODNN7EXAMPLE
+    aws.secret.key=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
 
 See [AWS Key ID Documentation][2] for more information.
 
@@ -39,7 +36,7 @@ Launching an EC2 cluster
 When Zetten launches a cluster, it uses a free CentOS 7 image that is hosted in the AWS marketplace but managed
 by the CentOS orginization.  If you have never used this image in EC2 before, you will need to go to the 
 [CentOS 7 product page][centos7] to accept the software terms under the 'Manual Launch' tab.  If this is not 
-done, you will get an error when you try to launch your cluster.  
+done, you will get an error when you try to launch your cluster.
 
 The CentOS organization periodically updates AMIs and deprecates older AMIs which makes them unavailable to 
 new users.  This can also cause an error when you try to launch your cluster.  If this occurs, you will need to
@@ -69,7 +66,7 @@ download release tarballs of Fluo, Accumulo, Hadoop, etc.  The release versions 
 specified in `zetten.props`.
 
 Optionally, you can have Zetten use a snapshot version (rather than a released version) of Accumulo or Fluo by 
-building a snapshot tarball and placing it in the `conf/upload` directory before running `zetten setup`.  
+building a snapshot tarball and placing it in the `conf/upload` directory before running `zetten setup`.
 This option is only necessary if you want to run the latest unreleased version of Fluo or Accumulo.
 
 ```bash
@@ -104,6 +101,18 @@ command will restart the process.
 
 The `zetten wipe` command can be used to wipe all data from the cluster and kill any running processes.
 After running the `wipe` command, run the `setup` command to start a fresh cluster.
+
+If you set `proxy_socks_port` in your `zetten.props`, a SOCKS proxy will be created on that port when you
+use `zetten ssh` to connect to your cluster.  If you add a proxy managment tool to your browser and
+whitelist `http://leader*`, `http://worker*` and `http://metrics*` to redirect traffic to your proxy, you
+can view the monitoring & status pages below in your browser. Please note - The hosts in the URLs below match
+the configuration in [nodes] of `zetten.prop.example` and may be different for your cluster.
+
+ * NameNode status - [http://leader1:50070/](http://leader1:50070/)
+ * ResourceManger status - [http://leader2:8088/cluster](http://leader2:8088/cluster)
+ * Accumulo monitor - [http://leader3:50095/](http://leader3:50095/)
+ * Spark History Server - [http://leader2:18080/](http://leader2:18080/)
+ * Grafana Metrics and Monitoring - [http://metrics:3000/](http://metrics:3000/)
 
 Run a Fluo application
 ----------------------
