@@ -61,3 +61,11 @@ def test_defaults():
   assert c.get_image_id('m3.large') == 'ami-6d1c2007'
   assert c.get('ec2', 'aws_access_key') == 'access_key'
   assert c.get('ec2', 'aws_secret_key') == 'secret_key'
+
+def test_case_sensitive():
+  c = DeployConfig("zetten", '../../conf/zetten.props.example', '../../conf/hosts/example/example_cluster', 'mycluster')
+  assert c.has_option('ec2', 'aws_secret_key') == True
+  assert c.has_option('ec2', 'Aws_secret_key') == False
+  c.set('nodes', 'CamelCaseWorker', 'worker,fluo')
+  c.init_nodes()
+  assert c.get_node('CamelCaseWorker') == ['worker', 'fluo']

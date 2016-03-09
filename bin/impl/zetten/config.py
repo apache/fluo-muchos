@@ -23,6 +23,7 @@ class DeployConfig(ConfigParser):
 
   def __init__(self, deploy_path, config_path, hosts_path, cluster_name):
     ConfigParser.__init__(self)
+    self.optionxform = str
     self.deploy_path = deploy_path
     self.read(config_path)
     self.hosts_path = hosts_path
