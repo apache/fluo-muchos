@@ -1,7 +1,6 @@
-Zetten
-======
-
-[![Build Status](https://travis-ci.org/fluo-io/zetten.svg?branch=master)](https://travis-ci.org/fluo-io/zetten)
+![Zetten][logo]
+---
+[![Build Status][ti]][tl] [![Apache License][li]][ll]
 
 Command-line tool for deploying Fluo or Accumulo to a cluster that can be optionally launched in Amazon EC2.
 
@@ -172,3 +171,8 @@ The following command runs the unit tests:
 [5]: conf/zetten.props.example
 [boto]: http://boto.cloudhackers.com/en/latest/
 [Ansible]: https://www.ansible.com/
+[ti]: https://travis-ci.org/fluo-io/zetten.svg?branch=master
+[tl]: https://travis-ci.org/fluo-io/zetten
+[li]: http://img.shields.io/badge/license-ASL-blue.svg
+[ll]: https://github.com/fluo-io/fluo/blob/master/LICENSE
+[logo]: contrib/zetten-logo.png
