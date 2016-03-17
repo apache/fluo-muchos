@@ -183,5 +183,5 @@ The following command runs the unit tests:
 [ti]: https://travis-ci.org/fluo-io/zetten.svg?branch=master
 [tl]: https://travis-ci.org/fluo-io/zetten
 [li]: http://img.shields.io/badge/license-ASL-blue.svg
-[ll]: https://github.com/fluo-io/fluo/blob/master/LICENSE
+[ll]: https://github.com/fluo-io/zetten/blob/master/LICENSE
 [logo]: contrib/zetten-logo.png
