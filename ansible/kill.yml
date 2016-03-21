@@ -1,0 +1,5 @@
+- hosts: all
+  sudo: yes
+  tasks:
+  - name: "ensure all processes started by zetten are killed"
+    script: roles/common/files/kill.sh

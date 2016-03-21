@@ -10,11 +10,7 @@
     file: path={{ default_data_dirs[0] }}/influxdb state=absent
   - name: "wipe grafana db"
     file: path=/var/lib/grafana/grafana.db state=absent
-- hosts: all
-  sudo: yes
-  tasks:
-  - name: "ensure all processes are killed"
-    script: roles/common/files/kill.sh
+- include: kill.yml
 - hosts: hadoop
   tasks:
   - name: "wipe hadoop data"

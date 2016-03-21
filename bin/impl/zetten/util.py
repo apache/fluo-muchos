@@ -139,6 +139,7 @@ def parse_args(hosts_dir, input=None):
             + "  ssh        SSH to cluster proxy node\n"
             + "  run        Runs the specified application configured in zetten.props.  Requires '-a <appName>' to be set.\n"
             + "             Use --args '<arg1> ...' to pass arguments to the application command configured in zetten.props\n"
+            + "  kill       Kills processes on cluster started by Zetten"
             + "  wipe       Wipes cluster data and kills processes\n"
             + "  terminate  Terminate EC2 cluster",
             add_help_option=False)
