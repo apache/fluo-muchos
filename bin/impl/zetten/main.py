@@ -383,11 +383,14 @@ def main():
     print "Logging into proxy using: {0}".format(ssh_command)
     retcode = subprocess.call(ssh_command, shell=True)
     check_code(retcode, ssh_command)
-  elif action == 'wipe':
+  elif action in ('wipe', 'kill'):
     if not isfile(hosts_path):
       exit("Hosts file does not exist for cluster: "+hosts_path)
-    print "Killing all processes and wiping data from {0} cluster".format(config.cluster_name)
-    execute_playbook(config, "wipe.yml")
+    if action == 'wipe':
+      print "Killing all processes started by Zetten and wiping Zetten data from {0} cluster".format(config.cluster_name)
+    elif action == 'kill':
+      print "Killing all processes started by Zetten on {0} cluster".format(config.cluster_name)
+    execute_playbook(config, action + ".yml")
   elif action == 'run':
     app = opts.application
     repo = config.get('apps', app + '_repo')
