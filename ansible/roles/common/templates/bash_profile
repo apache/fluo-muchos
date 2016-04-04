@@ -1,0 +1,21 @@
+# .bash_profile
+
+# Get the aliases and functions
+if [ -f ~/.bashrc ]; then
+  . ~/.bashrc
+fi
+
+# User specific environment and startup programs
+PATH=$JAVA_HOME/bin:$PATH
+PATH=$PATH:$HOME/.local/bin
+PATH=$PATH:$HOME/bin
+PATH=$PATH:{{ accumulo_home }}/bin
+PATH=$PATH:{{ fluo_home }}/bin
+PATH=$PATH:{{ hadoop_prefix }}/bin
+PATH=$PATH:{{ hadoop_prefix }}/sbin
+PATH=$PATH:{{ hub_home }}/bin
+PATH=$PATH:{{ maven_home }}/bin
+PATH=$PATH:{{ spark_home }}/bin
+PATH=$PATH:{{ zookeeper_home }}/bin
+PATH=$PATH:/opt/influxdb
+export PATH

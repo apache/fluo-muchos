@@ -11,6 +11,16 @@
   - name: "wipe grafana db"
     file: path=/var/lib/grafana/grafana.db state=absent
 - include: kill.yml
+- hosts: all
+  tasks:
+  - name: "wipe software installation dirs"
+    file: path={{ item }} state=absent
+    with_items:
+      - "{{ hadoop_prefix }}"
+      - "{{ zookeeper_home }}"
+      - "{{ accumulo_home }}"
+      - "{{ fluo_home }}"
+      - "{{ spark_home }}"
 - hosts: hadoop
   tasks:
   - name: "wipe hadoop data"
