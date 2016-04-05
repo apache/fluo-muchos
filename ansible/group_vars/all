@@ -6,10 +6,12 @@ fluo_tarball: fluo-{{ fluo_version }}-bin.tar.gz
 hadoop_prefix: "{{ install_dir }}/hadoop-{{ hadoop_version }}"
 hadoop_tarball: hadoop-{{ hadoop_version }}.tar.gz
 hdfs_root: hdfs://{{ groups['namenode'][0] }}:10000
+hub_version: 2.2.3
+hub_home: "{{ install_dir }}/hub-linux-amd64-{{ hub_version }}"
+hub_tarball: hub-linux-amd64-{{ hub_version }}.tgz
+hub_sha256: 54c35a459a4241b7ae4c28bcfea0ceef849dd2f8a9dd2b82ba2ba964a743e6bc
 install_dir: "{{ cluster_basedir }}/install"
-java_home: "{{ install_dir }}/jdk1.8.0_60"
-java_sha256: ebe51554d2f6c617a4ae8fc9a8742276e65af01bd273e96848b262b3c05424e5
-java_tarball: jdk-8u60-linux-x64.tar.gz
+java_home: "/usr/lib/jvm/java-1.8.0-openjdk"
 maven_home: "{{ install_dir }}/apache-maven-{{ maven_version }}"
 maven_tarball: apache-maven-{{ maven_version }}-bin.tar.gz
 spark_home: "{{ install_dir }}/spark-{{ spark_bin_version }}"

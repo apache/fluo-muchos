@@ -10,18 +10,19 @@
     - collectd
     - screen
     - patch
+    - java-1.8.0-openjdk-devel
 - name: "create install directory on all hosts"
   file: path={{ install_dir }} state=directory owner={{ cluster_user }} group={{ cluster_user }}
-- name: "install java & maven"
+- name: "install maven & hub"
   unarchive: src={{ tarballs_dir }}/{{ item.tarball }} dest={{ install_dir }} creates={{ item.install }}
   with_items:
-    - { tarball: "{{ java_tarball }}", install: "{{ java_home }}" } 
     - { tarball: "{{ maven_tarball }}", install: "{{ maven_home }}" } 
-- name: "set correct owner & group for java & maven home"
+    - { tarball: "{{ hub_tarball }}", install: "{{ hub_home }}" } 
+- name: "set correct owner & group for maven & hub home"
   file: path={{ item }} recurse=yes owner={{ cluster_user }} group={{ cluster_user}}
   with_items:
-    - "{{ java_home }}"
     - "{{ maven_home }}"
+    - "{{ hub_home }}"
 - name: "configure collectd"
   template: src=collectd.conf dest=/etc/collectd.conf
   when: "'metrics' in groups"
