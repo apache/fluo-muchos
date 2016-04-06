@@ -17,7 +17,3 @@
   become: yes
 - name: "download fluo"
   script: download-fluo.sh {{ tarballs_dir }} {{ fluo_tarball }} {{ fluo_version }} creates={{ tarballs_dir }}/{{ fluo_tarball }}
-- name: "create apps directory on proxy"
-  file: path={{ cluster_basedir }}/apps state=directory
-- name: "create apps run.sh script"
-  template: src=run.sh dest={{ cluster_basedir }}/apps/run.sh mode=0744

@@ -137,16 +137,12 @@ def parse_args(hosts_dir, input=None):
             + "  sync       Sync ansible directory on cluster proxy node\n"
             + "  config     Print configuration for that cluster.  Requires '-p' option.  Use '-p all' for all config.\n"
             + "  ssh        SSH to cluster proxy node\n"
-            + "  run        Runs the specified application configured in zetten.props.  Requires '-a <appName>' to be set.\n"
-            + "             Use --args '<arg1> ...' to pass arguments to the application command configured in zetten.props\n"
-            + "  kill       Kills processes on cluster started by Zetten"
+            + "  kill       Kills processes on cluster started by Zetten\n"
             + "  wipe       Wipes cluster data and kills processes\n"
             + "  terminate  Terminate EC2 cluster",
             add_help_option=False)
   parser.add_option("-c", "--cluster", dest="cluster", help="Specifies cluster")
   parser.add_option("-p", "--property", dest="property", help="Specifies property to print (if using 'config' action).  Set to 'all' to print every property")
-  parser.add_option("-a", "--application", dest="application", help="Specifies the application name (if using 'run' action)")
-  parser.add_option("--args", dest="app_args", help="Specifies arguments to pass to application command (if using 'run' action)")
   parser.add_option("-h", "--help", action="help", help="Show this help message and exit")
 
   if input:
@@ -177,9 +173,6 @@ def parse_args(hosts_dir, input=None):
 
   if action == 'config' and not opts.property:
     print "ERROR - For config action, you must set -p to a property or 'all'"
-    return
-  elif action == 'run' and not opts.application:
-    print "ERROR - For 'run' action, you must set -a to the name of your application"
     return
 
   return (opts, action, args[1:])

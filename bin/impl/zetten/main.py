@@ -391,18 +391,6 @@ def main():
     elif action == 'kill':
       print "Killing all processes started by Zetten on {0} cluster".format(config.cluster_name)
     execute_playbook(config, action + ".yml")
-  elif action == 'run':
-    app = opts.application
-    repo = config.get('apps', app + '_repo')
-    branch = config.get('apps', app + '_branch')
-    command = config.get('apps', app + '_command')
-
-    run_args = "{0} {1} {2} {3}".format(app, repo, branch, command)
-    if opts.app_args:
-      run_args = "{0} {1}".format(run_args, opts.app_args)
-  
-    basedir = config.get('general', 'cluster_basedir')
-    exec_on_proxy_verified(config, "{0}/apps/run.sh {1}".format(basedir, run_args), opts='-t')
   elif action == 'terminate':
     conn = get_ec2_conn(config)
     nodes = get_active_cluster(conn, config)

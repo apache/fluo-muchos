@@ -46,7 +46,7 @@ def test_defaults():
   assert c.cluster_name == 'mycluster'
   assert c.get('general', 'apache_mirror') == 'http://www.gtlib.gatech.edu/pub/apache'
   assert c.version("accumulo") == '1.7.1'
-  assert c.version("fluo") == '1.0.0-beta-2'
+  assert c.version("fluo") == '1.0.0-beta-3-SNAPSHOT'
   assert c.version("hadoop") == '2.6.3'
   assert c.version("zookeeper") == '3.4.8'
   assert c.get_service_private_ips("worker") == ['10.0.0.3', '10.0.0.4', '10.0.0.5']
