@@ -2,3 +2,7 @@
   service: name=influxdb state=restarted
 - name: "setup influxdb"
   shell: /opt/influxdb/influx -import -path {{ fluo_home }}/contrib/influxdb/fluo_metrics_setup.txt
+  register: cresult
+  until: cresult.rc == 0
+  retries: 5
+  delay: 5

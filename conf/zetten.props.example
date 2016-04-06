@@ -36,7 +36,7 @@ accumulo_instance = instance17
 # Accumluo Password
 accumulo_password = secret
 # Software versions
-fluo_version = 1.0.0-beta-2
+fluo_version = 1.0.0-beta-3-SNAPSHOT
 hadoop_version = 2.6.3
 zookeeper_version = 3.4.8
 spark_version = 1.5.1
@@ -133,44 +133,6 @@ fluo_worker_mem_mb=4096
 fluo_worker_threads=64
 fluo_worker_instances_multiplier=2
 yarn_nm_mem_mb=16384
-
-[apps]
-###
-# This section is used to configure Fluo applications which are indentified by a unique application
-# name (which replaces <app> below).  Each test has the following configuration settings:
-#
-# <app>_repo                # Git repo containing code for test. It is cloned when the test is run.
-# <app>_branch              # Branch to checkout in git repo
-# <app>_command             # Test script in repo that starts test
-#
-# Applications can be run using the following command 'zetten run -a <app>`
-# Arguments can be added after <app> and will be passed to configured commands for that app.
-# Any files or directories referenced by arguments must exist on leader node.
-
-# Stress test application
-# Usage: zetten run -a stress
-# Notes: - Stress test can take up to one hour to complete
-# 			 - Status will be output to console
-# 			 - Logs are written to install/tests/stress/logs
-stress_repo=https://github.com/fluo-io/fluo-stress
-stress_branch=master
-stress_command=bin/run-test.sh
-
-# Phrasecount application
-# Usage: zetten run -a phrasecount --args <txtDocsDir>
-# Notes: - The directory <txtDocsDir> must exist on leader node
-#        - Cluster cannot be set up with multiple zookeepers until FLUO-521 is resolved. 
-phrasecount_repo=https://github.com/fluo-io/phrasecount
-phrasecount_branch=master
-phrasecount_command=bin/run.sh
-
-# Webindex application
-# Usage: zetten run -a webindex --args <args>
-# Notes: - If setting multiple args, wrap them in quotes
-#        - Set <args> to 'test-id load1-s3 -fg' to load 1 Common Crawl file.
-webindex_repo=https://github.com/fluo-io/webindex
-webindex_branch=master
-webindex_command=bin/webindex
 
 [nodes]
 # Describes nodes in cluster in the following format: 

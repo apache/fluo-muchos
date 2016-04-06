@@ -116,24 +116,31 @@ the configuration in [nodes] of `zetten.prop.example` and may be different for y
 Run a Fluo application
 ----------------------
 
-If you have a Fluo application to run, follow the steps below to access your Fluo install on the cluster:
+Running an example Fluo application like [Webindex][4], [Phrasecount][5], or [Fluo-stress][6] is easy with
+Zetten as it configures your shell with common environment variables.  To run an example application, SSH to
+to a node on cluster where Fluo is installed and clone the example repo:
 
 ```bash
-zetten ssh
-ssh <node on cluster where Fluo was installed, determined by Zetten config>
-cdf   # Alias to change directory to Fluo Home
+zetten ssh                            # SSH to cluster proxy node                    
+ssh <node where Fluo is installed>    # Nodes with Fluo installed is determined by Zetten config
+hub clone fluo-io/webindex            # Clone repo of example application.  Press enter for user/password.
 ```
 
-Next, follow the instructions starting at the [Configure a Fluo application][3] section of the Fluo 
-production setup instructions to configure, initialize, and start your application.
+Start the example application using its provided scripts.  To show how simple this can be, commands to run
+the [Webindex][4] application are shown below.  Read the [Webindex][4] README to learn more before running
+these commands.
 
-If you don't have an application, you can run a Fluo example application.  All example applications are listed
-and configured in [zetten.props][5].  In general applications are run using the following command:
+```bash
+cd webindex/      
+./bin/webindex init                   # Initialize and start webindex Fluo application
+./bin/webindex getpaths 2015-18       # Retrieves CommonCrawl paths file for 2015-18 crawl
+./bin/webindex load-s3 2015-18 0-9    # Load 10 files into Fluo in the 0-9 range of 2015-18 crawl
+./bin/webindex ui                     # Runs the WebIndex UI
+```
 
-    zetten run -a <application> [<argument1> <argument2>]
-
-While the application name is required, additional arguments are dependent on the application.  In 
-[zetten.props][5], you can find more documentation on how to run each application.
+If you have your own application to run, you can follow the instructions starting at the 
+[Configure a Fluo application][3] section of the Fluo production setup instructions to configure, initialize, 
+and start your application.  To automate these steps, you can mimic the scripts of example Fluo applicaitons above.
 
 Terminating your EC2 cluster
 ----------------------------
@@ -176,8 +183,10 @@ The following command runs the unit tests:
 [centos7]: https://aws.amazon.com/marketplace/ordering?productId=b7ee8a69-ee97-4a49-9e68-afaee216db2e
 [2]: http://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSGettingStartedGuide/AWSCredentials.html
 [3]: https://github.com/fluo-io/fluo/blob/master/docs/prod-fluo-setup.md#configure-a-fluo-application
-[4]: https://github.com/fluo-io/fluo-stress
-[5]: conf/zetten.props.example
+[4]: https://github.com/fluo-io/webindex
+[5]: https://github.com/fluo-io/phrasecount
+[6]: https://github.com/fluo-io/fluo-stress
+[7]: conf/zetten.props.example
 [boto]: http://boto.cloudhackers.com/en/latest/
 [Ansible]: https://www.ansible.com/
 [ti]: https://travis-ci.org/fluo-io/zetten.svg?branch=master
