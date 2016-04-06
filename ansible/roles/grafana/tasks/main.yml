@@ -13,14 +13,11 @@
   file: path=/etc/grafana/dashboards state=directory owner=grafana group=grafana
 - name: "add cluster dashboard configuration"
   template: src=cluster-dashboard.json dest=/etc/grafana/dashboards/cluster-dashboard.json owner=grafana group=grafana
-- name: "diff fluo dashboard configuration"
-  command: diff {{ fluo_home }}/contrib/grafana/fluo-dashboard.json /etc/grafana/dashboards/fluo-dashboard.json
-  register: diff
-  failed_when: diff.rc < 0 or diff.rc > 2
-  changed_when: diff.rc != 0
-- name: "add fluo dashboard configuration"
-  command: cp {{ fluo_home }}/contrib/grafana/fluo-dashboard.json /etc/grafana/dashboards/fluo-dashboard.json
-  when: diff|failed
+- name: "configure fluo dashboards"
+  command: cp {{ fluo_home }}/contrib/grafana/{{ item }} /etc/grafana/dashboards/
+  with_items:
+    - fluo-recent-dashboard.json
+    - fluo-historical-dashboard.json
 - name: "ensure owner and group are correct for /etc/grafana"
   file: path=/etc/grafana/ recurse=yes owner=grafana group=grafana
 - name: "ensure grafana is running (and enable it at boot)"

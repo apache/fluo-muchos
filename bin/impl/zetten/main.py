@@ -221,7 +221,7 @@ def send_to_proxy(config, path, target, skipIfExists=True):
   print "Copying to proxy: ",path
   cmd = "scp -o 'StrictHostKeyChecking no'"
   if skipIfExists:
-    cmd = "rsync --ignore-existing --progress -e \"ssh -o 'StrictHostKeyChecking no'\""
+    cmd = "rsync --update --progress -e \"ssh -o 'StrictHostKeyChecking no'\""
   subprocess.call("{cmd} {src} {usr}@{ldr}:{tdir}".format(cmd=cmd, src=path, 
           usr=config.get('general', 'cluster_user'), ldr=config.proxy_public_ip(), tdir=target), shell=True)
 

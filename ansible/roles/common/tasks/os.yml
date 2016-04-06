@@ -7,5 +7,8 @@
 - name: "configure network settings for spark"
   copy: src=ifup-local dest=/sbin/ifup-local mode=0755
   notify: "update network settings"
-- name: "configure ~/.bashrc"
-  template: src=bashrc dest=/home/{{ cluster_user }}/.bashrc owner={{ cluster_user }} group={{ cluster_user }} mode=0644
+- name: "configure shell"
+  template: src={{ item }} dest=/home/{{ cluster_user }}/.{{ item }} owner={{ cluster_user }} group={{ cluster_user }} mode=0644
+  with_items:
+    - bashrc
+    - bash_profile

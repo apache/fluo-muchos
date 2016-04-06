@@ -5,18 +5,13 @@ if [ -f /etc/bashrc ]; then
   . /etc/bashrc
 fi
 
-export JAVA_HOME="{{ java_home }}"
-
-PATH="$JAVA_HOME/bin:$PATH"
-PATH="{{ fluo_home }}/bin:$PATH"
-PATH="{{ hadoop_prefix }}/bin:$PATH"
-PATH="{{ hadoop_prefix }}/sbin:$PATH"
-PATH="{{ hub_home }}/bin:$PATH"
-PATH="{{ accumulo_home }}/bin:$PATH"
-PATH="{{ maven_home }}/bin:$PATH"
-PATH="{{ spark_home }}/bin:$PATH"
-PATH="{{ zookeeper_home }}/bin:$PATH"
-export PATH
+export JAVA_HOME={{ java_home }}
+export HADOOP_PREFIX={{ hadoop_prefix }}
+export HADOOP_CONF_DIR=$HADOOP_PREFIX/etc/hadoop
+export ZOOKEEPER_HOME={{ zookeeper_home }}
+export SPARK_HOME={{ spark_home }}
+export ACCUMULO_HOME={{ accumulo_home }}
+export FLUO_HOME={{ fluo_home }}
 
 alias ssh='ssh -A'
 alias cdh='cd {{ hadoop_prefix }}'

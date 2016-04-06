@@ -11,10 +11,10 @@
   template: src=influxdb-9.4.2.conf dest=/etc/opt/influxdb/influxdb.conf
   notify:
     - restart influxdb
-    - create fluo user
+    - setup influxdb
 - name: "create data dir"
   file: path={{ default_data_dirs[0] }}/influxdb state=directory owner=influxdb group=influxdb
 - name: "ensure influxdb is running (and enable it at boot)"
   service: name=influxdb state=started enabled=yes
   notify:
-    - create fluo user
+    - setup influxdb
