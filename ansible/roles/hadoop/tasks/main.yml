@@ -29,3 +29,6 @@
 - name: "set hadoop container exector permisions"
   file: path=/hadoop-ce recurse=yes owner=root group={{ cluster_user }} mode=6050
   become: yes
+- name: "setup hadoop short circuit socket dir"
+  file: path=/var/lib/hadoop-hdfs state=directory owner={{ cluster_user }} group={{ cluster_user }} mode=0755
+  become: yes
