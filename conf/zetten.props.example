@@ -29,8 +29,6 @@ proxy_hostname = leader1
 network_interface=eth0
 # If set, a SOCKS proxy will be created on the specified port when connecting to proxy using 'zetten ssh <cluster>'
 #proxy_socks_port = 38585
-# Apache mirror to download Hadoop, Zookeeper, Accumulo
-apache_mirror = http://www.gtlib.gatech.edu/pub/apache
 # Accumulo Instance name
 accumulo_instance = instance17
 # Accumluo Password
