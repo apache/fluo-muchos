@@ -19,5 +19,6 @@ spark_tarball: spark-{{ spark_bin_version }}.tgz
 tarballs_dir: "{{ cluster_basedir }}/tarballs"
 worker_data_dirs: "{{ node_type_map['worker'].mounts }}"
 zookeeper_connect: "{{ groups['zookeepers']|join(',') }}"
+zookeeper_client_port: '2181'
 zookeeper_home: "{{ install_dir }}/zookeeper-{{ zookeeper_version }}"
 zookeeper_tarball: zookeeper-{{ zookeeper_version }}.tar.gz

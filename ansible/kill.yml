@@ -1,3 +1,15 @@
+- hosts: mesosmaster
+  become: yes
+  tasks:
+    - name: "stop mesos master"
+      service: name=mesos-master state=stopped
+      when: "'mesosmaster' in groups"
+- hosts: workers
+  become: yes
+  tasks:
+    - name: "stop mesos slaves"
+      service: name=mesos-slave state=stopped
+      when: "'mesosmaster' in groups"
 - hosts: all
   become: yes
   tasks:
