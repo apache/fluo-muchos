@@ -105,6 +105,12 @@ accumulo_icache_size=256M
 accumulo_imap_size=512M
 #amount of JVM heap for each Fluo worker
 fluo_worker_mem_mb=2048
+#Determines the gap between the Yarn memory limit and the java -Xmx setting.
+#For example if fluo_worker_mem_mb is set to 2048 and twill_reserve_mem_mb is
+#set to 256, then for workers the java -Xmx setting will be set to 2048-256.
+#If yarn is killing worker processes because they are using too much memory,
+#then consider increasing this setting.
+twill_reserve_mem_mb=256
 #Number of threads for each Flup worker
 fluo_worker_threads=20
 #Number of worker to run per node
@@ -118,6 +124,7 @@ accumulo_dcache_size=1536M
 accumulo_icache_size=512M
 accumulo_imap_size=512M
 fluo_worker_mem_mb=4096
+twill_reserve_mem_mb=512
 fluo_worker_threads=64
 fluo_worker_instances_multiplier=1
 yarn_nm_mem_mb=8192
@@ -128,6 +135,7 @@ accumulo_dcache_size=2G
 accumulo_icache_size=1G
 accumulo_imap_size=512M
 fluo_worker_mem_mb=4096
+twill_reserve_mem_mb=512
 fluo_worker_threads=64
 fluo_worker_instances_multiplier=2
 yarn_nm_mem_mb=16384

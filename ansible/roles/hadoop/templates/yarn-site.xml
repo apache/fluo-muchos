@@ -88,4 +88,8 @@
     <name>yarn.nodemanager.linux-container-executor.nonsecure-mode.local-user</name>
     <value>{{ cluster_user }}</value>
   </property>
+  <property>
+    <name>twill.java.reserved.memory.mb</name>
+    <value>{{ twill_reserve_mem_mb }}</value>
+  </property>
 </configuration>
