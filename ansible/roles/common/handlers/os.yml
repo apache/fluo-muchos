@@ -1,2 +1,0 @@
-- name: "update network settings"
-  command: /sbin/ifup-local {{ network_interface }} 

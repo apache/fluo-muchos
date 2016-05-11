@@ -9,4 +9,4 @@
 - name: "add conf/keys to ~/.ssh/authorized_keys"
   authorized_key: user={{ cluster_user }} key="{{ lookup('file', 'conf/keys') }}"
 - name: "set ssh config"
-  copy: src=ssh_config dest=/home/{{ cluster_user}}/.ssh/config owner={{ cluster_user }} group={{ cluster_user }} mode=0600
+  copy: src=roles/common/files/ssh_config dest=/home/{{ cluster_user}}/.ssh/config owner={{ cluster_user }} group={{ cluster_user }} mode=0600

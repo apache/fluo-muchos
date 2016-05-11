@@ -1,22 +1,23 @@
 - hosts: nodes
-  sudo: yes
+  become: yes
   tasks:
-  - include: roles/common/tasks/hosts.yml
+    - include: roles/common/tasks/hosts.yml
 - hosts: proxy
   roles:
     - proxy
 - hosts: all
-  sudo: yes
+  become: yes
   roles:
     - common
   tasks:
-  - include: roles/common/tasks/ssh.yml
-  - include: roles/common/tasks/os.yml
-  - include: roles/common/tasks/drives.yml
+    - include: roles/common/tasks/ssh.yml
+    - include: roles/common/tasks/os.yml
+    - include: roles/common/tasks/drives.yml
   handlers:
-  - include: roles/common/handlers/os.yml
+    - name: "update network settings"
+      command: /sbin/ifup-local {{ network_interface }} 
 - hosts: metrics
-  sudo: yes
+  become: yes
   roles:
     - influxdb
     - grafana
@@ -40,7 +41,8 @@
   tasks:
     - include: roles/accumulo/tasks/init-accumulo.yml
   handlers:
-    - include: roles/accumulo/handlers/init-accumulo.yml
+    - name: "initialize accumulo"
+      command: "{{ accumulo_home }}/bin/accumulo init --clear-instance-name --instance-name {{ accumulo_instance }} --password {{ accumulo_password }}"
 - hosts: accumulo
   tasks:
     - include: roles/accumulo/tasks/start-accumulo.yml
