@@ -5,6 +5,8 @@
   file: path={{ tarballs_dir }} state=directory
 - name: "determine best apache mirror to use"
   shell: curl -sk https://apache.org/mirrors.cgi?as_json | grep preferred | cut -d \" -f 4
+  args:
+    warn: no
   register: apache_mirror
   failed_when: "'http' not in apache_mirror.stdout"
   changed_when: False

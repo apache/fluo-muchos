@@ -1,5 +1,5 @@
 - hosts: metrics
-  sudo: yes
+  become: yes
   tasks:
   - name: "stop influxdb and grafana"
     service: name={{ item }} state=stopped
