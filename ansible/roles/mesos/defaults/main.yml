@@ -1,0 +1,6 @@
+mesos_version: 0.28.1
+mesosphere_yum_repo: http://repos.mesosphere.io/el/7/noarch/RPMS/mesosphere-el-repo-7-1.noarch.rpm
+mesos_zookeeper_path: "/mesos"
+mesos_zookeeper_hosts: "{{ groups.zookeepers | join(':' + zookeeper_client_port + ',')  }}:{{ zookeeper_client_port  }}"
+mesos_zookeeper_connect: "zk://{{ mesos_zookeeper_hosts }}{{ mesos_zookeeper_path }}"
+mesos_quorum: 1

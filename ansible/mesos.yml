@@ -1,0 +1,14 @@
+- hosts: all
+  become: yes
+  roles:
+    - mesos
+- hosts: mesosmaster
+  become: yes
+  tasks:
+    - name: "mesos master is running"
+      service: name=mesos-master state=started
+- hosts: workers
+  become: yes
+  tasks:
+    - name: "mesos slaves are running"
+      service: name=mesos-slave state=started

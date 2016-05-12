@@ -240,7 +240,7 @@ def sync_cluster(config):
   print 'Syncing ansible directory on {0} cluster proxy node'.format(config.cluster_name)
 
   vars_d = {}
-  for section in ("general", config.get('performance', 'profile')):
+  for section in ("general", "ansible-vars", config.get('performance', 'profile')):
     for (name, value) in config.items(section):
       if name not in ('proxy_hostname', 'proxy_socks_port'):
         vars_d[name] = value
@@ -262,12 +262,24 @@ def sync_cluster(config):
     vars_d["node_type_map"] = str(node_type_map)
     vars_d["metrics_drive_ids"] = str(vars_d["metrics_drive_ids"].split(","))
 
+  with open(join(config.deploy_path, "ansible/site.yml"), 'w') as site_file:
+    print >>site_file, "- include: common.yml"
+    print >>site_file, "- include: accumulo.yml"
+    if config.has_service("mesosmaster"):
+      print >>site_file, "- include: mesos.yml"
+    if config.has_service("metrics"):
+      print >>site_file, "- include: metrics.yml"
+    if config.has_service('fluo'):
+      print >>site_file, "- include: fluo.yml"
+
   ansible_conf = join(config.deploy_path, "ansible/conf")
   with open(join(ansible_conf, "hosts"), 'w') as hosts_file:
     print >>hosts_file, "[proxy]\n{0}".format(config.get('general', 'proxy_hostname'))
     print >>hosts_file, "\n[accumulomaster]\n{0}".format(config.get_service_hostnames("accumulomaster")[0])
     print >>hosts_file, "\n[namenode]\n{0}".format(config.get_service_hostnames("namenode")[0])
     print >>hosts_file, "\n[resourcemanager]\n{0}".format(config.get_service_hostnames("resourcemanager")[0])
+    if config.has_service("mesosmaster"):
+      print >>hosts_file, "\n[mesosmaster]\n{0}".format(config.get_service_hostnames("mesosmaster")[0])
 
     if config.has_service("metrics"):
       print >>hosts_file, "\n[metrics]\n{0}".format(config.get_service_hostnames("metrics")[0])

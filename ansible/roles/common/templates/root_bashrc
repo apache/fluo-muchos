@@ -5,6 +5,7 @@ if [ -f /etc/bashrc ]; then
   . /etc/bashrc
 fi
 
+# User specific aliases and functions
 export JAVA_HOME={{ java_home }}
 export HADOOP_PREFIX={{ hadoop_prefix }}
 export HADOOP_HOME=$HADOOP_PREFIX
@@ -14,9 +15,17 @@ export SPARK_HOME={{ spark_home }}
 export ACCUMULO_HOME={{ accumulo_home }}
 export FLUO_HOME={{ fluo_home }}
 
-alias ssh='ssh -A'
-alias cdh='cd {{ hadoop_prefix }}'
-alias cdz='cd {{ zookeeper_home }}'
-alias cda='cd {{ accumulo_home }}'
-alias cdf='cd {{ fluo_home }}'
-alias ashell='{{ accumulo_home }}/bin/accumulo shell -u root -p {{ accumulo_password }}'
+PATH=$JAVA_HOME/bin:$PATH
+PATH=$PATH:{{ accumulo_home }}/bin
+PATH=$PATH:{{ fluo_home }}/bin
+PATH=$PATH:{{ hadoop_prefix }}/bin
+PATH=$PATH:{{ hadoop_prefix }}/sbin
+PATH=$PATH:{{ hub_home }}/bin
+PATH=$PATH:{{ maven_home }}/bin
+PATH=$PATH:{{ spark_home }}/bin
+PATH=$PATH:{{ zookeeper_home }}/bin
+export PATH
+
+alias rm='rm -i'
+alias cp='cp -i'
+alias mv='mv -i'

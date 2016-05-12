@@ -17,7 +17,7 @@ from util import get_num_ephemeral, exit, get_arch, get_ami
 import os
 from os.path import join
 
-SERVICES = ['zookeeper', 'namenode', 'resourcemanager', 'accumulomaster', 'worker', 'fluo', 'metrics']
+SERVICES = ['zookeeper', 'namenode', 'resourcemanager', 'accumulomaster', 'mesosmaster', 'worker', 'fluo', 'metrics']
 
 class DeployConfig(ConfigParser):
 
@@ -52,7 +52,7 @@ class DeployConfig(ConfigParser):
       self.get_image_id(self.get('ec2', 'worker_instance_type'))
 
       for service in SERVICES:
-        if service not in ['fluo', 'metrics']:
+        if service not in ['fluo', 'metrics', 'mesosmaster']:
           if not self.has_service(service):
             exit("ERROR - Missing '{0}' service from [nodes] section of zetten.props".format(service))
 

@@ -15,18 +15,12 @@
     - include: roles/common/tasks/drives.yml
   handlers:
     - name: "update network settings"
-      command: /sbin/ifup-local {{ network_interface }} 
-- hosts: metrics
-  become: yes
-  roles:
-    - influxdb
-    - grafana
+      command: /sbin/ifup-local {{ network_interface }}
 - hosts: all
   roles:
     - spark
     - hadoop
     - zookeeper
-    - accumulo
 - hosts: namenode
   tasks:
     - include: roles/hadoop/tasks/start-hdfs.yml
@@ -37,15 +31,3 @@
 - hosts: zookeepers
   tasks:
     - include: roles/zookeeper/tasks/start-zookeeper.yml
-- hosts: accumulomaster
-  tasks:
-    - include: roles/accumulo/tasks/init-accumulo.yml
-  handlers:
-    - name: "initialize accumulo"
-      command: "{{ accumulo_home }}/bin/accumulo init --clear-instance-name --instance-name {{ accumulo_instance }} --password {{ accumulo_password }}"
-- hosts: accumulo
-  tasks:
-    - include: roles/accumulo/tasks/start-accumulo.yml
-- hosts: fluo
-  roles:
-    - fluo

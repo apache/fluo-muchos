@@ -140,13 +140,18 @@ fluo_worker_threads=64
 fluo_worker_instances_multiplier=2
 yarn_nm_mem_mb=16384
 
+[ansible-vars]
+# This section is used to override Ansible variables. Any variable set below will be placed in the hosts file created by Zetten.
+# Expected format:  variable = value
+
 [nodes]
 # Describes nodes in cluster in the following format: 
 # <Hostname> = <Service1>[,<Service2>,<Service3>]
 # Where: 
 #   Hostname = Must be unique.  Will be used for hostname in EC2 or should match hostname on your own cluster
-#   Service = Service to run on node (possible values: zookeeper, namenode, resourcemanager, accumulomaster, worker, fluo, metrics)
-#             All services are required below except for fluo & metrics which are optional
+#   Service = Service to run on node (possible values: zookeeper, namenode, resourcemanager, accumulomaster,
+#             mesosmaster, worker, fluo, metrics)
+#   All services are required below except for mesosmaster, fluo & metrics which are optional
 leader1 = namenode,zookeeper,fluo
 leader2 = resourcemanager,zookeeper
 leader3 = accumulomaster,zookeeper

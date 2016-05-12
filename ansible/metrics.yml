@@ -1,0 +1,5 @@
+- hosts: metrics
+  become: yes
+  roles:
+    - influxdb
+    - grafana
