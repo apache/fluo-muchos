@@ -1,9 +1,10 @@
 - name: "add datasources"
-  command: "curl http://admin:admin@{{ groups['metrics'][0] }}:3000/api/datasources -X POST -H 'Content-Type: application/json;charset=UTF-8' --data-binary '{{item}}'"
-  register: cresult
-  until: cresult.rc == 0
-  retries: 6
-  delay: 5
+  uri:
+    url: "http://admin:admin@{{ groups['metrics'][0] }}:3000/api/datasources"
+    method: POST
+    body: "{{ item }}"
+    body_format: json
+    status_code: 200,500
   with_items:
     - '{"name":"cluster_metrics", "type":"influxdb", "url":"http://{{ groups["metrics"][0] }}:8086", "access":"direct", "isDefault":true, "database":"cluster_metrics", "user":"fluo", "password":"secret"}'
     - '{"name":"fluo_metrics", "type":"influxdb", "url":"http://{{ groups["metrics"][0] }}:8086", "access":"direct", "isDefault":true, "database":"fluo_metrics", "user":"fluo", "password":"secret"}'
