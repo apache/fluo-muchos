@@ -88,6 +88,7 @@ be viewable in Grafana.
 
 3. `mesosmaster` - If specified, a Mesos master will be started on this node and Mesos slaves will be
 started on all workers nodes. The Mesos status page will be viewable at `http://<MESOS_MASTER_NODE>:5050/`.
+Marathon will also be started on this node and will be viewable at `http://<MESOS_MASTER_NODE>:8080/`.
 
 If you run the `zetten setup` command and a failure occurs, you can run the command again with no issues.
 Any cluster setup that was successfully completed will not be repeated.  While some setup steps can take
@@ -115,7 +116,8 @@ the configuration in [nodes] of `zetten.prop.example` and may be different for y
  * Accumulo monitor - [http://leader3:50095/](http://leader3:50095/)
  * Spark History Server - [http://leader2:18080/](http://leader2:18080/)
  * Grafana Metrics and Monitoring - [http://metrics:3000/](http://metrics:3000/)
- * Mesos status - [http://leader1:5050/](http://leader1:5050/) (if `mesosmaster` configured on `leader1`)
+ * Mesos status - [http://leader1:5050/](http://leader1:5050/) (if `mesosmaster` configured on leader1)
+ * Marathon status - [http://leader1:8080/](http://leader1:8080/) (if `mesosmaster` configured on leader1)
 
 Run a Fluo application
 ----------------------

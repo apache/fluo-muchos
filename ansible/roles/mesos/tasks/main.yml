@@ -1,9 +1,10 @@
 - name: "add mesosphere repo"
   yum: name={{ mesosphere_yum_repo }} state=present
-- name: "install mesos"
+- name: "install mesos & marathon"
   yum: name={{item}} state=present
   with_items:
     - mesos-{{mesos_version}}
+    - marathon-{{marathon_version}}
 - name: "configure /etc/mesos"
   template: src={{ item }} dest=/etc/mesos/{{ item }}
   with_items:

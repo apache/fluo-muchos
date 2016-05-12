@@ -1,3 +1,4 @@
+marathon_version: 1.1.1
 mesos_version: 0.28.1
 mesosphere_yum_repo: http://repos.mesosphere.io/el/7/noarch/RPMS/mesosphere-el-repo-7-1.noarch.rpm
 mesos_zookeeper_path: "/mesos"
