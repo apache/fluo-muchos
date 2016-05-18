@@ -12,5 +12,6 @@
   with_items:
     - bashrc
     - bash_profile
+    - vimrc
 - name: "configure root shell"
   template: src=roles/common/templates/root_bashrc dest=/root/.bashrc mode=0644
