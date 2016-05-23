@@ -12,6 +12,9 @@
   changed_when: False
 - name: "download tarballs to proxy" 
   get_url: url={{ item.urlp }}/{{ item.fn }} dest={{ tarballs_dir }}/{{ item.fn }} sha256sum={{ item.sum }} force=no
+  register: gresult
+  until: "'OK' in gresult.msg or 'file already exists' in gresult.msg"
+  retries: 3
   with_items:
     - { urlp: "{{ apache_mirror.stdout }}/zookeeper/zookeeper-{{ zookeeper_version }}", fn: "{{ zookeeper_tarball }}", sum: "{{ zookeeper_sha256 }}" }
     - { urlp: "{{ apache_mirror.stdout }}/hadoop/common/hadoop-{{ hadoop_version }}", fn: "{{ hadoop_tarball }}", sum: "{{ hadoop_sha256 }}" }
