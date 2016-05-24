@@ -1,9 +1,12 @@
 - hosts: mesosmaster
   become: yes
   tasks:
-    - name: "stop mesos master"
-      service: name=mesos-master state=stopped
+    - name: "stop mesos-master & marathon"
+      service: name={{ item }} state=stopped
       when: "'mesosmaster' in groups"
+      with_items:
+        - mesos-master
+        - marathon
 - hosts: workers
   become: yes
   tasks:
