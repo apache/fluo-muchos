@@ -148,6 +148,16 @@ If you have your own application to run, you can follow the instructions startin
 [Configure a Fluo application][3] section of the Fluo production setup instructions to configure, initialize, 
 and start your application.  To automate these steps, you can mimic the scripts of example Fluo applicaitons above.
 
+Customize your cluster
+----------------------
+
+After `zetten setup` is run, users can install additional software on the cluster using their own Ansible playbooks. In their
+Ansible playbooks, users can reference any configuration in the Ansible inventory file at `/etc/ansible/hosts` which is set up
+by Zetten on the proxy node. The inventory file lists the hosts for services on the cluster such as the Zookeeper nodes,
+Namenode, Accumulo master, etc. It also has variables in the `[all:vars]` section that contain settings that may be useful in
+user playbooks. It is recommended that any user-defined Ansible playbooks should be managed in their own git repository (see
+[mikewalch/zetten-custom][zc] for an example).
+
 Terminating your EC2 cluster
 ----------------------------
 
@@ -200,3 +210,4 @@ The following command runs the unit tests:
 [li]: http://img.shields.io/badge/license-ASL-blue.svg
 [ll]: https://github.com/fluo-io/zetten/blob/master/LICENSE
 [logo]: contrib/zetten-logo.png
+[zc]: https://github.com/mikewalch/zetten-custom
