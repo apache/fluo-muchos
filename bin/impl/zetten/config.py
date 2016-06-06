@@ -100,13 +100,13 @@ class DeployConfig(ConfigParser):
     mounts = []
     for i in range(0, num_ephemeral):
       mounts.append(self.mount_root + str(i))
-    return tuple(mounts)
+    return mounts
 
   def devices(self, num_ephemeral):
     devices = []
     for i in range(0, num_ephemeral):
       devices.append(self.device_root + chr(ord('b') + i))
-    return tuple(devices)
+    return devices
 
   def fstype(self):
     retval = self.get('ec2', 'fstype')
@@ -257,5 +257,66 @@ class DeployConfig(ConfigParser):
         if self.has_option(section, key):
           print self.get(section, key)
           return
-
     exit("Property '{0}' was not found".format(key))
+
+HOST_VAR_DEFAULTS = {
+'accumulo_home': '"{{ install_dir }}/accumulo-{{ accumulo_version }}"',
+'accumulo_instance': None,
+'accumulo_password': None,
+'accumulo_tarball': 'accumulo-{{ accumulo_version }}-bin.tar.gz',
+'accumulo_version': None,
+'cloud_provider': None,
+'cluster_basedir': None,
+'cluster_user': None,
+'default_data_dirs': None,
+'fluo_home': '"{{ install_dir }}/fluo-{{ fluo_version }}"',
+'fluo_tarball': 'fluo-{{ fluo_version }}-bin.tar.gz',
+'fluo_version': None,
+'hadoop_prefix': '"{{ install_dir }}/hadoop-{{ hadoop_version }}"',
+'hadoop_tarball': 'hadoop-{{ hadoop_version }}.tar.gz',
+'hadoop_version': None,
+'hdfs_root': 'hdfs://{{ groups[\'namenode\'][0] }}:10000',
+'install_dir': '"{{ cluster_basedir }}/install"',
+'java_home': '"/usr/lib/jvm/java-1.8.0-openjdk"',
+'maven_home': '"{{ install_dir }}/apache-maven-{{ maven_version }}"',
+'maven_tarball': 'apache-maven-{{ maven_version }}-bin.tar.gz',
+'maven_version': None,
+'spark_bin_version': None,
+'spark_home': '"{{ install_dir }}/spark-{{ spark_bin_version }}"',
+'spark_tarball': 'spark-{{ spark_bin_version }}.tgz',
+'spark_version': None,
+'tarballs_dir': '"{{ cluster_basedir }}/tarballs"',
+'worker_data_dirs': None,
+'zookeeper_connect': '"{{ groups[\'zookeepers\']|join(\',\') }}"',
+'zookeeper_client_port': '"2181"',
+'zookeeper_home': '"{{ install_dir }}/zookeeper-{{ zookeeper_version }}"',
+'zookeeper_tarball': 'zookeeper-{{ zookeeper_version }}.tar.gz',
+'zookeeper_version': None
+}
+
+PLAY_VAR_DEFAULTS = {
+'accumulo_dcache_size': None,
+'accumulo_icache_size': None,
+'accumulo_imap_size': None,
+'accumulo_sha256': None,
+'accumulo_tserv_mem': None,
+'fluo_worker_instances_multiplier': None,
+'fluo_worker_mem_mb': None,
+'fluo_worker_threads': None,
+'force_format': None,
+'fstype': None,
+'hadoop_sha256': None,
+'hub_version': '2.2.3',
+'hub_home': '"{{ install_dir }}/hub-linux-amd64-{{ hub_version }}"',
+'hub_tarball': 'hub-linux-amd64-{{ hub_version }}.tgz',
+'hub_sha256': '54c35a459a4241b7ae4c28bcfea0ceef849dd2f8a9dd2b82ba2ba964a743e6bc',
+'maven_sha256': None,
+'metrics_drive_ids': None, 
+'mount_root': None,
+'node_type_map': None,
+'network_interface': None,
+'spark_sha256': None,
+'twill_reserve_mem_mb': None,
+'yarn_nm_mem_mb': None,
+'zookeeper_sha256': None
+}

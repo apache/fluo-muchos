@@ -20,9 +20,9 @@ Script to help deploy a Fluo or Accumulo cluster (optionally to AWS EC2)
 
 import os, sys
 import shutil
-from config import DeployConfig
+from config import DeployConfig, HOST_VAR_DEFAULTS, PLAY_VAR_DEFAULTS
 from util import setup_boto, parse_args, exit
-from os.path import isfile, join
+from os.path import isfile, join, isdir
 import random
 import time
 import urllib
@@ -239,28 +239,36 @@ def get_ec2_conn(config):
 def sync_cluster(config):
   print 'Syncing ansible directory on {0} cluster proxy node'.format(config.cluster_name)
 
-  vars_d = {}
+  host_vars = HOST_VAR_DEFAULTS
+  play_vars = PLAY_VAR_DEFAULTS
+  
   for section in ("general", "ansible-vars", config.get('performance', 'profile')):
     for (name, value) in config.items(section):
       if name not in ('proxy_hostname', 'proxy_socks_port'):
-        vars_d[name] = value
-  cloud_provider = vars_d.get('cloud_provider', 'ec2')
+        if name in host_vars:
+          host_vars[name] = value
+        if name in play_vars:
+          play_vars[name] = value
+
+  cloud_provider = host_vars.get('cloud_provider', 'ec2')
+  node_type_map = {}
   if cloud_provider  == 'ec2':
-    vars_d["node_type_map"] = str(config.node_type_map())
-    vars_d["mount_root"] = config.mount_root
-    vars_d["metrics_drive_ids"] = str(config.metrics_drive_ids())
-    vars_d["fstype"] = config.fstype()
-    vars_d["force_format"] = config.force_format()
+    node_type_map = config.node_type_map()
+    play_vars["mount_root"] = config.mount_root
+    play_vars["metrics_drive_ids"] = str(config.metrics_drive_ids())
+    play_vars["fstype"] = config.fstype()
+    play_vars["force_format"] = config.force_format()
   if cloud_provider == 'baremetal':
-    for (name, value) in config.items('baremetal'):
-       vars_d[name] = value
-    node_type_map = {}
-    mounts = vars_d['mounts'].split(",")
-    devices = vars_d['devices'].split(",")
+    play_vars["mount_root"] = config.get("baremetal", "mount_root")
+    play_vars["metrics_drive_ids"] = str(config.get("baremetal", "metrics_drives_ids").split(","))
+    mounts = config.get("baremetal", "mounts").split(",")
+    devices = config.get("baremetal", "devices").split(",")
     for node_type in 'default', 'worker':
-        node_type_map[node_type] = {'mounts': mounts, 'devices': devices }
-    vars_d["node_type_map"] = str(node_type_map)
-    vars_d["metrics_drive_ids"] = str(vars_d["metrics_drive_ids"].split(","))
+      node_type_map[node_type] = {'mounts': mounts, 'devices': devices }
+
+  play_vars["node_type_map"] = node_type_map
+  host_vars['worker_data_dirs'] = str(node_type_map['worker']['mounts'])
+  host_vars['default_data_dirs'] = str(node_type_map['default']['mounts'])
 
   with open(join(config.deploy_path, "ansible/site.yml"), 'w') as site_file:
     print >>site_file, "- include: common.yml"
@@ -305,8 +313,12 @@ def sync_cluster(config):
       print >>hosts_file, "{0} ansible_ssh_host={1} node_type={2}".format(hostname, private_ip, config.node_type(hostname))
 
     print >>hosts_file, "\n[all:vars]"
-    for (name, value) in sorted(vars_d.items()):
+    for (name, value) in sorted(host_vars.items()):
       print >>hosts_file, "{0} = {1}".format(name, value)
+
+  with open(join(config.deploy_path, "ansible/group_vars/all"), 'w') as play_vars_file:
+    for (name, value) in sorted(play_vars.items()):
+      print >>play_vars_file, "{0}: {1}".format(name, value)
 
   # copy keys file to ansible/conf (if it exists)
   conf_keys = join(config.deploy_path, "conf/keys")
