@@ -5,6 +5,9 @@
     body: "{{ item }}"
     body_format: json
     status_code: 200,500
+  register: uresult
+  retries: 3
+  until: "uresult.status == 500 or uresult.status == 200"
   with_items:
     - '{"name":"cluster_metrics", "type":"influxdb", "url":"http://{{ groups["metrics"][0] }}:8086", "access":"direct", "isDefault":true, "database":"cluster_metrics", "user":"fluo", "password":"secret"}'
     - '{"name":"fluo_metrics", "type":"influxdb", "url":"http://{{ groups["metrics"][0] }}:8086", "access":"direct", "isDefault":true, "database":"fluo_metrics", "user":"fluo", "password":"secret"}'
