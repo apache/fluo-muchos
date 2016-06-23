@@ -124,7 +124,7 @@ class DeployConfig(ConfigParser):
     drive_ids = []
     for i in range(0, self.max_ephemeral()):
       drive_ids.append(self.metrics_drive_root + str(i))
-    return tuple(drive_ids)
+    return drive_ids
 
   def version(self, software_id):
     return self.get('general', software_id + '_version')

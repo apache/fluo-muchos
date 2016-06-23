@@ -255,12 +255,12 @@ def sync_cluster(config):
   if cloud_provider  == 'ec2':
     node_type_map = config.node_type_map()
     play_vars["mount_root"] = config.mount_root
-    play_vars["metrics_drive_ids"] = str(config.metrics_drive_ids())
+    play_vars["metrics_drive_ids"] = config.metrics_drive_ids()
     play_vars["fstype"] = config.fstype()
     play_vars["force_format"] = config.force_format()
   if cloud_provider == 'baremetal':
     play_vars["mount_root"] = config.get("baremetal", "mount_root")
-    play_vars["metrics_drive_ids"] = str(config.get("baremetal", "metrics_drives_ids").split(","))
+    play_vars["metrics_drive_ids"] = config.get("baremetal", "metrics_drives_ids").split(",")
     mounts = config.get("baremetal", "mounts").split(",")
     devices = config.get("baremetal", "devices").split(",")
     for node_type in 'default', 'worker':
