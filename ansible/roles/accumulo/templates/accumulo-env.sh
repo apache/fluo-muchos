@@ -32,3 +32,6 @@ export ACCUMULO_GENERAL_OPTS="-XX:+UseConcMarkSweepGC -XX:CMSInitiatingOccupancy
 export ACCUMULO_OTHER_OPTS="-Xmx256m -Xms64m"
 # what do when the JVM runs out of heap memory
 export ACCUMULO_KILL_CMD='kill -9 %p'
+
+#needed for Accumulo 1.8
+export NUM_TSERVERS=1
