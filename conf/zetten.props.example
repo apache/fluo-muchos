@@ -40,14 +40,14 @@ zookeeper_version = 3.4.8
 spark_version = 1.6.1
 spark_bin_version = 1.6.1-bin-hadoop2.6
 maven_version = 3.2.5
-accumulo_version = 1.7.1
+accumulo_version = 1.7.2
 # Software sha256 checksums
 hadoop_sha256 = ada83d8c2ff72d4665ca2d70ce77af79bd57265beb3ce253cd2869b507e32152
 zookeeper_sha256 = f10a0b51f45c4f64c1fe69ef713abf9eb9571bc7385a82da892e83bb6c965e90
 spark_sha256 = 09f3b50676abc9b3d1895773d18976953ee76945afa72fa57e6473ce4e215970
 maven_sha256 = 8c190264bdf591ff9f1268dc0ad940a2726f9e958e367716a09b8aaa7e74a755
 # Accumulo checksum is only checked if not a SNAPSHOT version.
-accumulo_sha256 = 8312f30fceb2318dcde5ee667e49f060087d9327e015084a51d51cbe5a7e9f95
+accumulo_sha256 = aef4ee94885733b9c96bf2c0f3e4c1571e9babda3e69ae5f45f07367d8b17d43
 
 [ec2]
 # AWS Access & Secret keys
