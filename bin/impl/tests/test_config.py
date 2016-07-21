@@ -44,10 +44,10 @@ def test_defaults():
   assert c.get_public_ip('leader1') == '23.0.0.0'
   assert c.get_private_ip('leader1') == '10.0.0.0'
   assert c.cluster_name == 'mycluster'
-  assert c.version("accumulo") == '1.7.1'
-  assert c.version("fluo") == '1.0.0-beta-3-SNAPSHOT'
-  assert c.version("hadoop") == '2.6.3'
-  assert c.version("zookeeper") == '3.4.8'
+  assert c.version("accumulo").startswith('1.')
+  assert c.version("fluo").startswith('1.')
+  assert c.version("hadoop").startswith('2.')
+  assert c.version("zookeeper").startswith('3.')
   assert c.get_service_private_ips("worker") == ['10.0.0.3', '10.0.0.4', '10.0.0.5']
   assert c.get('general', 'proxy_hostname') == "leader1"
   assert c.proxy_public_ip() == "23.0.0.0"
