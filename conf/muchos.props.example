@@ -21,13 +21,13 @@ cluster_user = centos
 # Cluster base directory where install/ & tarballs/ directories are created
 # Leave default below if launching cluster in AWS
 cluster_basedir = /home/centos
-# Hostname of proxy node that zetten will use to direct installation of cluster.  Will be given 
+# Hostname of proxy node that Muchos will use to direct installation of cluster.  Will be given 
 # public IP if launching in EC2.  If not launching in EC2, node must have public IP that can be reached
 # from your machine. Hostname can be chosen from "nodes" section below.
 proxy_hostname = leader1
 # Cluster network interface (leave default if launching in AWS)
 network_interface=eth0
-# If set, a SOCKS proxy will be created on the specified port when connecting to proxy using 'zetten ssh <cluster>'
+# If set, a SOCKS proxy will be created on the specified port when connecting to proxy using 'muchos ssh <cluster>'
 #proxy_socks_port = 38585
 # Accumulo Instance name
 accumulo_instance = instance17
@@ -75,7 +75,7 @@ fstype = ext3
 force_format = no
 # Tags to add instances
 #instance_tags = key1:value1,key2:value2
-# Overrides the default CentOS 7 AWS AMIs used by Zetten
+# Overrides the default CentOS 7 AWS AMIs used by Muchos
 # Only set if you want to use a custom AMI (which should be derived from a CentOS 7 AMI) 
 #aws_ami = ami-xxxxxxxx
 
@@ -141,7 +141,7 @@ fluo_worker_instances_multiplier=2
 yarn_nm_mem_mb=16384
 
 [ansible-vars]
-# This section is used to override Ansible variables. Any variable set below will be placed in the hosts file created by Zetten.
+# This section is used to override Ansible variables. Any variable set below will be placed in the hosts file created by Muchos.
 # Expected format:  variable = value
 
 [nodes]

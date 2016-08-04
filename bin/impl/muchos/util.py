@@ -130,7 +130,7 @@ def setup_boto(lib_dir):
 
 def parse_args(hosts_dir, input=None):
   parser = OptionParser(
-            usage="zetten [options] <action>\n\n"
+            usage="muchos [options] <action>\n\n"
             + "where <action> can be:\n"
             + "  launch     Launch cluster in EC2\n"
             + "  status     Check status of EC2 cluster\n"
@@ -138,7 +138,7 @@ def parse_args(hosts_dir, input=None):
             + "  sync       Sync ansible directory on cluster proxy node\n"
             + "  config     Print configuration for that cluster.  Requires '-p' option.  Use '-p all' for all config.\n"
             + "  ssh        SSH to cluster proxy node\n"
-            + "  kill       Kills processes on cluster started by Zetten\n"
+            + "  kill       Kills processes on cluster started by Muchos\n"
             + "  wipe       Wipes cluster data and kills processes\n"
             + "  terminate  Terminate EC2 cluster",
             add_help_option=False)

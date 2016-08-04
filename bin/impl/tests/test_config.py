@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from zetten.config import DeployConfig
+from muchos.config import DeployConfig
 
 def test_defaults():
-  c = DeployConfig("zetten", '../../conf/zetten.props.example', '../../conf/hosts/example/example_cluster', 'mycluster')
+  c = DeployConfig("muchos", '../../conf/muchos.props.example', '../../conf/hosts/example/example_cluster', 'mycluster')
   assert c.get('ec2', 'default_instance_type') == 'm3.large'
   assert c.get('ec2', 'worker_instance_type') == 'm3.large'
   assert c.num_ephemeral('worker1') == 1
@@ -62,7 +62,7 @@ def test_defaults():
   assert c.get('ec2', 'aws_secret_key') == 'secret_key'
 
 def test_case_sensitive():
-  c = DeployConfig("zetten", '../../conf/zetten.props.example', '../../conf/hosts/example/example_cluster', 'mycluster')
+  c = DeployConfig("muchos", '../../conf/muchos.props.example', '../../conf/hosts/example/example_cluster', 'mycluster')
   assert c.has_option('ec2', 'aws_secret_key') == True
   assert c.has_option('ec2', 'Aws_secret_key') == False
   c.set('nodes', 'CamelCaseWorker', 'worker,fluo')

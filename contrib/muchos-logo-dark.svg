@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!--
-            Copyright 2016 Fluo authors (see AUTHORS)
+            Copyright 2016 Muchos authors (see AUTHORS)
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -34,8 +34,8 @@
    height="1052.3622047"
    id="svg5351"
    version="1.1"
-   inkscape:version="0.47 r22583"
-   sodipodi:docname="zetten-logo-dark.svg">
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="muchos-logo-dark.svg">
   <defs
      id="defs5353">
     <inkscape:perspective
@@ -61,15 +61,15 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1.4"
-     inkscape:cx="389.13147"
+     inkscape:cx="478.13418"
      inkscape:cy="748.57143"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
-     inkscape:window-width="1626"
-     inkscape:window-height="911"
-     inkscape:window-x="114"
-     inkscape:window-y="136"
+     inkscape:window-width="1443"
+     inkscape:window-height="763"
+     inkscape:window-x="-4"
+     inkscape:window-y="0"
      inkscape:window-maximized="0" />
   <metadata
      id="metadata5356">
@@ -90,17 +90,17 @@
     <flowRoot
        xml:space="preserve"
        id="flowRoot2816-90"
-       style="font-size:40px;font-style:normal;font-weight:normal;fill:#5599ff;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
+       style="font-style:normal;font-weight:normal;font-size:40px;font-family:'Bitstream Vera Sans';fill:#5599ff;fill-opacity:1;stroke:none"
        transform="translate(157.83354,-18.394235)"><flowRegion
          id="flowRegion2818-7"><rect
            id="rect2820-0"
-           width="305.14288"
-           height="96.000061"
+           width="331.57144"
+           height="83.857193"
            x="114.28571"
            y="298.07648"
            style="fill:#5599ff" /></flowRegion><flowPara
          id="flowPara2822-1"
-         style="font-size:72px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#80b3ff;font-family:Audiowide;-inkscape-font-specification:Audiowide">Zetten</flowPara></flowRoot>    <path
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:72px;line-height:125%;font-family:Audiowide;-inkscape-font-specification:Audiowide;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#80b3ff">Muchos</flowPara></flowRoot>    <path
        id="path2980"
        d="m 246.02199,352.5501 -43.75984,0 c -8.77583,0 -15.91265,-7.62533 -15.91265,-17.00188 0,-7.91015 5.08012,-14.5749 11.93847,-16.46636 l -0.004,-0.53556 c 0,-14.06481 10.70526,-25.50283 23.869,-25.50283 10.29152,0 19.19069,6.96228 22.47665,17.06565 11.70376,-1.04562 21.28319,8.98124 21.28319,21.18863 0,11.71854 -8.92302,21.25235 -19.89083,21.25235 z m -44.13775,-25.52834 c -4.01,0.0255 -7.57841,3.83818 -7.57841,8.52646 0,4.68827 3.56841,8.50093 7.95632,8.50093 l 43.75984,0 c 6.57988,0 11.93449,-5.72113 11.93449,-12.7514 0,-7.03031 -5.35461,-12.75145 -11.93449,-12.75145 -0.96669,0 -1.98908,0.17429 -3.22232,0.55258 l -4.27652,1.30489 -0.73993,-4.68827 c -1.29291,-8.21192 -7.86483,-14.17108 -15.63023,-14.17108 -8.77585,0 -15.91266,7.62535 -15.91266,17.00188 0,1.15614 0.10736,2.31652 0.3262,3.44716 l 0.97067,5.09629 -5.65296,-0.068 z"
        style="fill:#b3b3b3;stroke:none" />

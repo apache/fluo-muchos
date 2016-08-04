@@ -28,10 +28,10 @@ import time
 import urllib
 import subprocess
 
-ZETTEN = os.environ.get('ZETTEN')
-if ZETTEN is None:
-  exit('ERROR - The env var ZETTEN must be set!')
-setup_boto(join(ZETTEN, "bin/impl/lib"))
+MUCHOS = os.environ.get('MUCHOS')
+if MUCHOS is None:
+  exit('ERROR - The env var MUCHOS must be set!')
+setup_boto(join(MUCHOS, "bin/impl/lib"))
 
 import boto
 from boto.ec2.blockdevicemapping import BlockDeviceMapping, BlockDeviceType, EBSBlockDeviceType
@@ -45,7 +45,7 @@ def get_or_make_group(conn, name, vpc_id):
     return group[0]
   else:
     print "Creating security group " + name
-    return conn.create_security_group(name, "Security group created by zetten script", vpc_id)
+    return conn.create_security_group(name, "Security group created by muchos script", vpc_id)
 
 def get_instance(instances, instance_id):
   for instance in instances:
@@ -55,7 +55,7 @@ def get_instance(instances, instance_id):
 def launch_cluster(conn, config):
   key_name = config.get('ec2', 'key_name')
   if not key_name:
-    exit('ERROR - key.name is not set zetten.props')
+    exit('ERROR - key.name is not set muchos.props')
 
   cur_nodes = get_active_cluster(conn, config)
   if cur_nodes:
@@ -128,12 +128,12 @@ page on AWS Marketplace at the URL below to find the latest AMI:
 https://aws.amazon.com/marketplace/ordering?productId=b7ee8a69-ee97-4a49-9e68-afaee216db2e
 
 On the product page, click 'Manual Launch' to find the latest AMI ID for your EC2 region.
-This should be used to set the 'aws_ami' property in your zetten.props which will override
-the default AMI IDs used by Zetten.  After setting the 'aws_ami' property, run the launch 
+This should be used to set the 'aws_ami' property in your muchos.props which will override
+the default AMI IDs used by Muchos.  After setting the 'aws_ami' property, run the launch 
 command again.
 
-Also, let us know that this has occured by creating an issue on the Zetten's GitHub page 
-and we'll upgrade the defaults AMIs used by Zetten to be the latest CentOS images.
+Also, let us know that this has occured by creating an issue on the Muchos's GitHub page 
+and we'll upgrade the defaults AMIs used by Muchos to be the latest CentOS images.
 """
       exit("ERROR - Failed to launch EC2 instance due to exception below:\n\n{0}\n\n{1}".format(e, ami_help))
   
@@ -229,7 +229,7 @@ def get_ec2_conn(config):
   access_key = config.get('ec2', 'aws_access_key')
   secret_key = config.get('ec2', 'aws_secret_key')
   if access_key == 'access_key' or secret_key == 'secret_key':
-    exit('ERROR - You must set AWS access & secret keys in zetten.props')
+    exit('ERROR - You must set AWS access & secret keys in muchos.props')
   region = config.get('ec2', 'region')
   conn = ec2.connect_to_region(region, aws_access_key_id=access_key, aws_secret_access_key=secret_key)
   if not conn:
@@ -355,13 +355,13 @@ def setup_cluster(config):
       
 def main():
 
-  deploy_path = os.environ.get('ZETTEN')
+  deploy_path = os.environ.get('MUCHOS')
   if not deploy_path:
-    exit('ERROR - The ZETTEN env variable must be set!')
+    exit('ERROR - The MUCHOS env variable must be set!')
   if not os.path.isdir(deploy_path):
-    exit('ERROR - Directory set by ZETTEN does not exist: '+deploy_path)
+    exit('ERROR - Directory set by MUCHOS does not exist: '+deploy_path)
 
-  config_path = join(deploy_path, "conf/zetten.props")
+  config_path = join(deploy_path, "conf/muchos.props")
   if not isfile(config_path):
     exit('ERROR - A config file does not exist at '+config_path)  
 
@@ -370,7 +370,7 @@ def main():
   # parse command line args
   retval = parse_args(hosts_dir)
   if not retval:
-    print "Invalid command line arguments. For help, use 'zetten -h'"
+    print "Invalid command line arguments. For help, use 'muchos -h'"
     sys.exit(1)
   (opts, action, args) = retval
 
@@ -411,9 +411,9 @@ def main():
     if not isfile(hosts_path):
       exit("Hosts file does not exist for cluster: "+hosts_path)
     if action == 'wipe':
-      print "Killing all processes started by Zetten and wiping Zetten data from {0} cluster".format(config.cluster_name)
+      print "Killing all processes started by Muchos and wiping Muchos data from {0} cluster".format(config.cluster_name)
     elif action == 'kill':
-      print "Killing all processes started by Zetten on {0} cluster".format(config.cluster_name)
+      print "Killing all processes started by Muchos on {0} cluster".format(config.cluster_name)
     execute_playbook(config, action + ".yml")
   elif action == 'terminate':
     conn = get_ec2_conn(config)
