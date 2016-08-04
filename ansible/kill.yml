@@ -16,5 +16,5 @@
 - hosts: all
   become: yes
   tasks:
-  - name: "ensure all processes started by zetten are killed"
+  - name: "ensure all processes started by Muchos are killed"
     script: roles/common/files/kill.sh

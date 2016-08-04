@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!--
-            Copyright 2016 Fluo authors (see AUTHORS)
+            Copyright 2016 Muchos authors (see AUTHORS)
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -14,12 +14,14 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
+
 <!-- This logo was created using: 
   - Cloud Icon by Stephen Hutchings (CC BY-SA license)
     https://github.com/stephenhutchings/typicons.font 
   - Audiowide Font (SIL Open Font License 1.1)
     https://www.google.com/fonts/specimen/Audiowide
 -->
+
 <svg
    xmlns:dc="http://purl.org/dc/elements/1.1/"
    xmlns:cc="http://creativecommons.org/ns#"
@@ -32,9 +34,9 @@
    height="1052.3622047"
    id="svg2"
    version="1.1"
-   inkscape:version="0.47 r22583"
-   sodipodi:docname="zetten-logo.svg"
-   inkscape:export-filename="/tmp/zetten-logo.png"
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="muchos-logo.svg"
+   inkscape:export-filename="/tmp/muchos-logo.png"
    inkscape:export-xdpi="107.19607"
    inkscape:export-ydpi="107.19607">
   <defs
@@ -102,10 +104,10 @@
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
-     inkscape:window-width="1597"
-     inkscape:window-height="945"
-     inkscape:window-x="1987"
-     inkscape:window-y="88"
+     inkscape:window-width="1440"
+     inkscape:window-height="856"
+     inkscape:window-x="25"
+     inkscape:window-y="3"
      inkscape:window-maximized="0" />
   <metadata
      id="metadata7">
@@ -115,7 +117,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -126,16 +128,16 @@
     <flowRoot
        xml:space="preserve"
        id="flowRoot2816-9"
-       style="font-size:40px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
+       style="font-style:normal;font-weight:normal;font-size:40px;font-family:'Bitstream Vera Sans';fill:#000000;fill-opacity:1;stroke:none"
        transform="translate(132.39844,73.636932)"><flowRegion
          id="flowRegion2818-8"><rect
            id="rect2820-5"
-           width="305.14288"
-           height="96.000061"
+           width="319.14288"
+           height="90.000061"
            x="114.28571"
            y="298.07648" /></flowRegion><flowPara
          id="flowPara2822-6"
-         style="font-size:72px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#0066ff;font-family:Audiowide;-inkscape-font-specification:Audiowide">Zetten</flowPara></flowRoot>    <path
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:72px;line-height:125%;font-family:Audiowide;-inkscape-font-specification:Audiowide;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#0066ff">Muchos</flowPara></flowRoot>    <path
        id="path2980"
        d="m 218.92644,445.20728 -49.97448,0 c -10.02216,0 -18.17253,-7.53104 -18.17253,-16.79165 0,-7.81234 5.80159,-14.39467 13.63394,-16.26274 l -0.005,-0.52894 c 0,-13.89089 12.22559,-25.18748 27.25882,-25.18748 11.75308,0 21.91609,6.87618 25.66871,16.85462 13.3659,-1.03268 24.30577,8.87019 24.30577,20.92663 0,11.57363 -10.19025,20.98956 -22.71567,20.98956 z M 168.52037,419.9946 c -4.57949,0.0252 -8.65468,3.79073 -8.65468,8.42103 0,4.6303 4.07519,8.39581 9.08627,8.39581 l 49.97448,0 c 7.51434,0 13.6294,-5.65039 13.6294,-12.59372 0,-6.94337 -6.11506,-12.59377 -13.6294,-12.59377 -1.10397,0 -2.27155,0.17213 -3.67994,0.54575 l -4.88387,1.28875 -0.845,-4.6303 c -1.47653,-8.11038 -8.98178,-13.99584 -17.85,-13.99584 -10.02216,0 -18.17253,7.53105 -18.17253,16.79164 0,1.14184 0.12261,2.28788 0.37253,3.40453 l 1.10852,5.03328 -6.45578,-0.0671 z"
        style="fill:#4d4d4d;stroke:none" />

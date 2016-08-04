@@ -39,10 +39,10 @@ class DeployConfig(ConfigParser):
   def verify_config(self, action):
     proxy = self.get('general', 'proxy_hostname')
     if not proxy:
-      exit("ERROR - proxy.hostname must be set in zetten.props")
+      exit("ERROR - proxy.hostname must be set in muchos.props")
 
     if proxy not in self.node_d:
-      exit("ERROR - The proxy (set by property proxy.hostname={0}) cannot be found in 'nodes' section of zetten.props".format(proxy))
+      exit("ERROR - The proxy (set by property proxy.hostname={0}) cannot be found in 'nodes' section of muchos.props".format(proxy))
 
     if action != 'launch':
       self.proxy_public_ip()
@@ -54,7 +54,7 @@ class DeployConfig(ConfigParser):
       for service in SERVICES:
         if service not in ['fluo', 'metrics', 'mesosmaster']:
           if not self.has_service(service):
-            exit("ERROR - Missing '{0}' service from [nodes] section of zetten.props".format(service))
+            exit("ERROR - Missing '{0}' service from [nodes] section of muchos.props".format(service))
 
   def init_nodes(self):
     self.node_d = {}
