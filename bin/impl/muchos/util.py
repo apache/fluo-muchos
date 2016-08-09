@@ -1,4 +1,4 @@
-# Copyright 2014 Fluo authors (see AUTHORS)
+# Copyright 2014 Muchos authors (see AUTHORS)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-Utility methods 
+Utility methods
 """
 
 import os
@@ -165,12 +165,12 @@ def parse_args(hosts_dir, input=None):
   if not opts.cluster:
     if len(clusters) == 0:
       print "ERROR - No clusters found in conf/hosts or specified by --cluster option"
-      return 
+      return
     elif len(clusters) == 1:
       opts.cluster = clusters[0]
     else:
       print "ERROR - Multiple clusters {0} found in conf/hosts/.  Please pick one using --cluster option".format(clusters)
-      return 
+      return
 
   if action == 'config' and not opts.property:
     print "ERROR - For config action, you must set -p to a property or 'all'"

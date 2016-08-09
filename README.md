@@ -139,7 +139,7 @@ the configuration in [nodes] of `muchos.prop.example` and may be different for y
 Run a Fluo application
 ----------------------
 
-Running an example Fluo application like [Webindex][4], [Phrasecount][5], or [Fluo-stress][6] is easy with
+Running an example Fluo application like [Webindex][4], [Phrasecount][5], or [Stresso][6] is easy with
 Muchos as it configures your shell with common environment variables.  To run an example application, SSH to
 to a node on cluster where Fluo is installed and clone the example repo:
 

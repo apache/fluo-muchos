@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright 2014 Fluo authors (see AUTHORS)
+# Copyright 2014 Muchos authors (see AUTHORS)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -120,23 +120,23 @@ def launch_cluster(conn, config):
                                 max_count=1,
                                 block_device_map=bdm)
     except EC2ResponseError as e:
-      ami_help = """PLEASE NOTE - If you have accepted the software terms for CentOS 7 and still get an error, 
-this could be due to CentOS releasing new images of CentOS 7.  When this occurs, the old images 
+      ami_help = """PLEASE NOTE - If you have accepted the software terms for CentOS 7 and still get an error,
+this could be due to CentOS releasing new images of CentOS 7.  When this occurs, the old images
 are no longer available to new users.  If you think this is the case, go to the CentOS 7 product
-page on AWS Marketplace at the URL below to find the latest AMI: 
+page on AWS Marketplace at the URL below to find the latest AMI:
 
 https://aws.amazon.com/marketplace/ordering?productId=b7ee8a69-ee97-4a49-9e68-afaee216db2e
 
 On the product page, click 'Manual Launch' to find the latest AMI ID for your EC2 region.
 This should be used to set the 'aws_ami' property in your muchos.props which will override
-the default AMI IDs used by Muchos.  After setting the 'aws_ami' property, run the launch 
+the default AMI IDs used by Muchos.  After setting the 'aws_ami' property, run the launch
 command again.
 
-Also, let us know that this has occured by creating an issue on the Muchos's GitHub page 
+Also, let us know that this has occured by creating an issue on the Muchos's GitHub page
 and we'll upgrade the defaults AMIs used by Muchos to be the latest CentOS images.
 """
       exit("ERROR - Failed to launch EC2 instance due to exception below:\n\n{0}\n\n{1}".format(e, ami_help))
-  
+
     if len(resv.instances) != 1:
       exit('ERROR - Failed to start {0} node'.format(hostname))
 
@@ -144,7 +144,7 @@ and we'll upgrade the defaults AMIs used by Muchos to be the latest CentOS image
 
     instance_d[hostname] = instance.id
     print 'Launching {0} node using {1}'.format(hostname, host_ami)
- 
+
 
   while True:
     time.sleep(5)
@@ -210,19 +210,19 @@ def wait_until_proxy_ready(config):
       time.sleep(1)
       break;
     print "Proxy could not be accessed using SSH.  Will retry in 5 sec..."
-    time.sleep(5)  
+    time.sleep(5)
 
 def execute_playbook(config, playbook):
   print "Executing '{0}' playbook".format(playbook)
   basedir = config.get('general', 'cluster_basedir')
   exec_on_proxy_verified(config, "time -p ansible-playbook {base}/ansible/{playbook}".format(base=basedir, playbook=playbook), opts='-t')
 
-def send_to_proxy(config, path, target, skipIfExists=True): 
+def send_to_proxy(config, path, target, skipIfExists=True):
   print "Copying to proxy: ",path
   cmd = "scp -o 'StrictHostKeyChecking no'"
   if skipIfExists:
     cmd = "rsync --update --progress -e \"ssh -o 'StrictHostKeyChecking no'\""
-  subprocess.call("{cmd} {src} {usr}@{ldr}:{tdir}".format(cmd=cmd, src=path, 
+  subprocess.call("{cmd} {src} {usr}@{ldr}:{tdir}".format(cmd=cmd, src=path,
           usr=config.get('general', 'cluster_user'), ldr=config.proxy_public_ip(), tdir=target), shell=True)
 
 def get_ec2_conn(config):
@@ -241,7 +241,7 @@ def sync_cluster(config):
 
   host_vars = HOST_VAR_DEFAULTS
   play_vars = PLAY_VAR_DEFAULTS
-  
+
   for section in ("general", "ansible-vars", config.get('performance', 'profile')):
     for (name, value) in config.items(section):
       if name not in ('proxy_hostname', 'proxy_socks_port'):
@@ -330,7 +330,7 @@ def sync_cluster(config):
 
   basedir = config.get('general', 'cluster_basedir')
   cmd = "rsync -az --delete -e \"ssh -o 'StrictHostKeyChecking no'\""
-  subprocess.call("{cmd} {src} {usr}@{ldr}:{tdir}".format(cmd=cmd, src=join(config.deploy_path, "ansible"), 
+  subprocess.call("{cmd} {src} {usr}@{ldr}:{tdir}".format(cmd=cmd, src=join(config.deploy_path, "ansible"),
         usr=config.get('general', 'cluster_user'), ldr=config.proxy_public_ip(), tdir=basedir), shell=True)
 
   exec_on_proxy_verified(config, "{0}/ansible/scripts/install_ansible.sh".format(basedir), opts='-t')
@@ -352,7 +352,7 @@ def setup_cluster(config):
     send_to_proxy(config, fluo_tarball, cluster_tarballs)
 
   execute_playbook(config, "site.yml")
-      
+
 def main():
 
   deploy_path = os.environ.get('MUCHOS')
@@ -363,7 +363,7 @@ def main():
 
   config_path = join(deploy_path, "conf/muchos.props")
   if not isfile(config_path):
-    exit('ERROR - A config file does not exist at '+config_path)  
+    exit('ERROR - A config file does not exist at '+config_path)
 
   hosts_dir = join(deploy_path, "conf/hosts/")
 

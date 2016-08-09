@@ -1,4 +1,4 @@
-# Copyright 2014 Fluo authors (see AUTHORS)
+# Copyright 2014 Muchos authors (see AUTHORS)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -200,9 +200,9 @@ class DeployConfig(ConfigParser):
 
   def parse_hosts(self):
     if not os.path.isfile(self.hosts_path):
-      exit('ERROR - A hosts file does not exist at %s' % self.hosts_path)  
+      exit('ERROR - A hosts file does not exist at %s' % self.hosts_path)
 
-    self.hosts = {} 
+    self.hosts = {}
     with open(self.hosts_path) as f:
       for line in f:
         line = line.strip()
@@ -215,7 +215,7 @@ class DeployConfig(ConfigParser):
           self.hosts[args[0]] = (args[1], args[2])
         else:
           exit('ERROR - Bad line %s in hosts %s' % (line, self.hosts_path))
-        
+
   def get_hosts(self):
     if self.hosts is None:
       self.parse_hosts()
@@ -280,7 +280,7 @@ HOST_VAR_DEFAULTS = {
 'java_home': '"/usr/lib/jvm/java-1.8.0-openjdk"',
 'maven_home': '"{{ install_dir }}/apache-maven-{{ maven_version }}"',
 'maven_tarball': 'apache-maven-{{ maven_version }}-bin.tar.gz',
-'maven_version': None,
+'maven_version': '3.2.5',
 'spark_bin_version': None,
 'spark_home': '"{{ install_dir }}/spark-{{ spark_bin_version }}"',
 'spark_tarball': 'spark-{{ spark_bin_version }}.tgz',
@@ -305,13 +305,14 @@ PLAY_VAR_DEFAULTS = {
 'fluo_worker_threads': None,
 'force_format': None,
 'fstype': None,
+'fluo_sha256': None,
 'hadoop_sha256': None,
 'hub_version': '2.2.3',
 'hub_home': '"{{ install_dir }}/hub-linux-amd64-{{ hub_version }}"',
 'hub_tarball': 'hub-linux-amd64-{{ hub_version }}.tgz',
 'hub_sha256': '54c35a459a4241b7ae4c28bcfea0ceef849dd2f8a9dd2b82ba2ba964a743e6bc',
-'maven_sha256': None,
-'metrics_drive_ids': None, 
+'maven_sha256': '8c190264bdf591ff9f1268dc0ad940a2726f9e958e367716a09b8aaa7e74a755',
+'metrics_drive_ids': None,
 'mount_root': None,
 'node_type_map': None,
 'network_interface': None,
