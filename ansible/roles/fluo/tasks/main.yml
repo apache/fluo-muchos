@@ -5,10 +5,12 @@
   with_items:
     - log4j.xml
     - logback.xml
+    - fluo-env.sh
 - name: "configure fluo"
   template: src={{ item }} dest={{ fluo_home }}/conf/{{ item }}
   with_items:
-    - fluo-env.sh
     - fluo.properties
+- name: "fetch extra fluo dependencies"
+  command: "{{ fluo_home }}/lib/fetch.sh extra"
 - name: "set correct owner & group"
   file: path={{ fluo_home }} recurse=yes owner={{ cluster_user }} group={{ cluster_user}}

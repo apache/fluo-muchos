@@ -1,4 +1,4 @@
-# Copyright 2014 Fluo authors (see AUTHORS)
+# Copyright 2014 Muchos authors (see AUTHORS)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ from muchos.util import get_arch, parse_args, get_ami
 def test_util():
   assert get_arch('m1.large') == 'pvm'
   assert get_arch('m3.large') == 'hvm'
-  
+
   assert get_ami('m3.large', 'us-east-1') == 'ami-6d1c2007'
   assert get_ami('m1.large', 'us-east-1') == None
 

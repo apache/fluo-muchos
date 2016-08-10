@@ -1,4 +1,4 @@
-# Copyright 2014 Fluo authors (see AUTHORS)
+# Copyright 2014 Muchos authors (see AUTHORS)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ cluster_user = centos
 # Cluster base directory where install/ & tarballs/ directories are created
 # Leave default below if launching cluster in AWS
 cluster_basedir = /home/centos
-# Hostname of proxy node that Muchos will use to direct installation of cluster.  Will be given 
+# Hostname of proxy node that Muchos will use to direct installation of cluster.  Will be given
 # public IP if launching in EC2.  If not launching in EC2, node must have public IP that can be reached
 # from your machine. Hostname can be chosen from "nodes" section below.
 proxy_hostname = leader1
@@ -34,19 +34,18 @@ accumulo_instance = instance17
 # Accumluo Password
 accumulo_password = secret
 # Software versions
-fluo_version = 1.0.0-beta-3-SNAPSHOT
 hadoop_version = 2.6.3
 zookeeper_version = 3.4.8
 spark_version = 1.6.1
 spark_bin_version = 1.6.1-bin-hadoop2.6
-maven_version = 3.2.5
+fluo_version = 1.0.0-incubating
 accumulo_version = 1.7.2
 # Software sha256 checksums
 hadoop_sha256 = ada83d8c2ff72d4665ca2d70ce77af79bd57265beb3ce253cd2869b507e32152
 zookeeper_sha256 = f10a0b51f45c4f64c1fe69ef713abf9eb9571bc7385a82da892e83bb6c965e90
 spark_sha256 = 09f3b50676abc9b3d1895773d18976953ee76945afa72fa57e6473ce4e215970
-maven_sha256 = 8c190264bdf591ff9f1268dc0ad940a2726f9e958e367716a09b8aaa7e74a755
-# Accumulo checksum is only checked if not a SNAPSHOT version.
+# Fluo & Accumulo checksums are only checked if not a SNAPSHOT version.
+fluo_sha256 = set_after_first_release
 accumulo_sha256 = aef4ee94885733b9c96bf2c0f3e4c1571e9babda3e69ae5f45f07367d8b17d43
 
 [ec2]
@@ -69,14 +68,14 @@ worker_instance_type = %(default_instance_type)s
 # Only the user with this key will be able to SSH to the cluster.
 # Name below should be your 'Key pair name' in EC2 and not name of your public key file.
 key_name = my_aws_key
-#Type of filesystem to format instance storage as.
+# Type of filesystem to format instance storage as.
 fstype = ext3
-#Force formatting of instance devices, even when it has an existing filesystem.
+# Force formatting of instance devices, even when it has an existing filesystem.
 force_format = no
 # Tags to add instances
 #instance_tags = key1:value1,key2:value2
 # Overrides the default CentOS 7 AWS AMIs used by Muchos
-# Only set if you want to use a custom AMI (which should be derived from a CentOS 7 AMI) 
+# Only set if you want to use a custom AMI (which should be derived from a CentOS 7 AMI)
 #aws_ami = ami-xxxxxxxx
 
 [baremetal]
@@ -86,36 +85,36 @@ devices = /dev/hdb1,/dev/hdc1,/dev/hdd1
 metrics_drive_ids = var-disk01,var-disk02,var-disk03
 
 [performance]
-#Automatically tune Accumulo, Yarn, and Fluo performance setting by selecting or
-#creating a performance profile.  Try not to use more memory than each node has 
-#and leave some space for the OS.
+# Automatically tune Accumulo, Yarn, and Fluo performance setting by selecting or
+# creating a performance profile.  Try not to use more memory than each node has
+# and leave some space for the OS.
 profile=perf-small
 
-#Below are different performance profiles that can be selected.  Each profile
-#has the same properties with different values.
+# Below are different performance profiles that can be selected.  Each profile
+# has the same properties with different values.
 
 [perf-small]
-#amount of JVM heap for each tserver
+# Amount of JVM heap for each tserver
 accumulo_tserv_mem=2G
-#amount of data cache for each tserver
+# Amount of data cache for each tserver
 accumulo_dcache_size=768M
-#amount of index cache for each tserver
+# Amount of index cache for each tserver
 accumulo_icache_size=256M
-#in memory map size for each tserver
+# In memory map size for each tserver
 accumulo_imap_size=512M
-#amount of JVM heap for each Fluo worker
+# Amount of JVM heap for each Fluo worker
 fluo_worker_mem_mb=2048
-#Determines the gap between the Yarn memory limit and the java -Xmx setting.
-#For example if fluo_worker_mem_mb is set to 2048 and twill_reserve_mem_mb is
-#set to 256, then for workers the java -Xmx setting will be set to 2048-256.
-#If yarn is killing worker processes because they are using too much memory,
-#then consider increasing this setting.
+# Determines the gap between the Yarn memory limit and the java -Xmx setting.
+# For example if fluo_worker_mem_mb is set to 2048 and twill_reserve_mem_mb is
+# set to 256, then for workers the java -Xmx setting will be set to 2048-256.
+# If yarn is killing worker processes because they are using too much memory,
+# then consider increasing this setting.
 twill_reserve_mem_mb=256
-#Number of threads for each Flup worker
+# Number of threads for each Flup worker
 fluo_worker_threads=20
-#Number of worker to run per node
+# Number of worker to run per node
 fluo_worker_instances_multiplier=1
-#Max amount of memory for YARN per node
+# Max amount of memory for YARN per node
 yarn_nm_mem_mb=4096
 
 [perf-medium]
@@ -145,9 +144,9 @@ yarn_nm_mem_mb=16384
 # Expected format:  variable = value
 
 [nodes]
-# Describes nodes in cluster in the following format: 
+# Describes nodes in cluster in the following format:
 # <Hostname> = <Service1>[,<Service2>,<Service3>]
-# Where: 
+# Where:
 #   Hostname = Must be unique.  Will be used for hostname in EC2 or should match hostname on your own cluster
 #   Service = Service to run on node (possible values: zookeeper, namenode, resourcemanager, accumulomaster,
 #             mesosmaster, worker, fluo, metrics)

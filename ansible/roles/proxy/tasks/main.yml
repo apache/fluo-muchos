@@ -21,9 +21,6 @@
     - { urlp: "{{ apache_mirror.stdout }}/maven/maven-3/{{ maven_version }}/binaries", fn: "{{ maven_tarball }}", sum: "{{ maven_sha256 }}" }
     - { urlp: "{{ apache_mirror.stdout }}/spark/spark-{{ spark_version }}", fn: "{{ spark_tarball }}", sum: "{{ spark_sha256 }}" }
     - { urlp: "{{ apache_mirror.stdout }}/accumulo/{{ accumulo_version }}", fn: "{{ accumulo_tarball }}", sum: "{{ accumulo_sha256 }}" }
+    # Uncomment after first release of Apache Fluo
+    #- { urlp: "{{ apache_mirror.stdout }}/incubator/fluo/{{ fluo_version }}", fn: "{{ fluo_tarball }}", sum: "{{ fluo_sha256 }}" }
     - { urlp: "https://github.com/github/hub/releases/download/v{{ hub_version }}", fn: "{{ hub_tarball }}", sum: "{{ hub_sha256 }}" } 
-- name: "install wget package"
-  yum: name=wget state=present
-  become: yes
-- name: "download fluo"
-  script: download-fluo.sh {{ tarballs_dir }} {{ fluo_tarball }} {{ fluo_version }} creates={{ tarballs_dir }}/{{ fluo_tarball }}
