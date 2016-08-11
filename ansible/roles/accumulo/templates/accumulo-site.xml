@@ -2,6 +2,18 @@
 <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
 
 <configuration>
+
+  <property>
+    <!-- Work around for ACCUMULO-2388. See Accumulo 1.6.0 release notes -->
+    <name>general.rpc.timeout</name>
+    <value>240s</value>
+  </property>
+
+  <property>
+    <name>instance.secret</name>
+    <value>muchos</value>
+  </property>
+
   <property>
     <name>instance.volumes</name>
     <value>{{ hdfs_root }}/accumulo</value>
@@ -13,33 +25,8 @@
   </property>
 
   <property>
-    <name>logger.dir.walog</name>
-    <value>walogs</value>
-  </property>
-
-  <property>
-    <name>instance.secret</name>
-    <value>DEFAULT</value>
-  </property>
-
-  <property>
-    <name>tserver.wal.sync.method</name>
-    <value>hflush</value>
-  </property>
-
-  <property>
     <name>table.durability</name>
     <value>flush</value>
-  </property>
-
-  <property>
-    <name>tserver.server.threads.minimum</name>
-    <value>64</value>
-  </property>
-
-  <property>
-    <name>tserver.readahead.concurrent.max</name>
-    <value>64</value>
   </property>
 
   <property>
@@ -58,29 +45,28 @@
   </property>
 
   <property>
-    <name>general.rpc.timeout</name>
-    <value>240s</value>
-  </property>
-
-  <property>
     <name>tserver.memory.maps.native.enabled</name>
     <value>true</value>
   </property>
 
   <property>
-    <name>trace.token.property.password</name>
-    <!-- change this to the root user's password, and/or change the user below -->
-    <value>secret</value>
+    <name>tserver.readahead.concurrent.max</name>
+    <value>64</value>
   </property>
 
   <property>
-    <name>trace.user</name>
-    <value>root</value>
+    <name>tserver.server.threads.minimum</name>
+    <value>64</value>
   </property>
 
   <property>
     <name>tserver.sort.buffer.size</name>
     <value>50M</value>
+  </property>
+
+  <property>
+    <name>tserver.wal.sync.method</name>
+    <value>hflush</value>
   </property>
 
   <property>
