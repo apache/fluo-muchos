@@ -34,16 +34,15 @@ accumulo_instance = instance17
 # Accumluo Password
 accumulo_password = secret
 # Software versions
-hadoop_version = 2.6.3
+hadoop_version = 2.7.2
 zookeeper_version = 3.4.8
-spark_version = 1.6.1
-spark_bin_version = 1.6.1-bin-hadoop2.6
+spark_version = 1.6.2
 fluo_version = 1.0.0-incubating
 accumulo_version = 1.7.2
 # Software sha256 checksums
-hadoop_sha256 = ada83d8c2ff72d4665ca2d70ce77af79bd57265beb3ce253cd2869b507e32152
+hadoop_sha256 = 49ad740f85d27fa39e744eb9e3b1d9442ae63d62720f0aabdae7aa9a718b03f7
 zookeeper_sha256 = f10a0b51f45c4f64c1fe69ef713abf9eb9571bc7385a82da892e83bb6c965e90
-spark_sha256 = 09f3b50676abc9b3d1895773d18976953ee76945afa72fa57e6473ce4e215970
+spark_sha256 = f6b43333ca80629bacbbbc2e460d21064f53f50880f3f0a3f68745fdf8b3137e
 # Fluo & Accumulo checksums are only checked if not a SNAPSHOT version.
 fluo_sha256 = set_after_first_release
 accumulo_sha256 = aef4ee94885733b9c96bf2c0f3e4c1571e9babda3e69ae5f45f07367d8b17d43
