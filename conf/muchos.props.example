@@ -30,7 +30,7 @@ network_interface=eth0
 # If set, a SOCKS proxy will be created on the specified port when connecting to proxy using 'muchos ssh <cluster>'
 #proxy_socks_port = 38585
 # Accumulo Instance name
-accumulo_instance = instance17
+accumulo_instance = muchos
 # Accumluo Password
 accumulo_password = secret
 # Software versions

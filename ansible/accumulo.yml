@@ -5,8 +5,6 @@
   tasks:
     - include: roles/accumulo/tasks/init-accumulo.yml
   handlers:
-    - name: "initialize accumulo"
-      command: "{{ accumulo_home }}/bin/accumulo init --clear-instance-name --instance-name {{ accumulo_instance }} --password {{ accumulo_password }}"
     - include: roles/accumulo/handlers/init-accumulo.yml
 - hosts: accumulo
   tasks:
