@@ -3,26 +3,24 @@
 [![Build Status][ti]][tl] [![Apache License][li]][ll]
 
 Muchos supports deploying [Apache Fluo][fluo] and its dependencies to a cluster that can be
-optionally launched in Amazon EC2.  Apache Fluo depends on [Apache Accumulo][accumulo], [Apache
-Zookeeper][zookeeper], and [Apache Hadoop][hadoop].  Setting up these dependencies is time
-consuming.  Muchos provides a set of helper scripts to automate setting up these dependencies on a
-cluster.   This makes it quick for a developer to experiment with Fluo in a realistic environment. 
+optionally launched in Amazon EC2. Apache Fluo depends on [Apache Accumulo][accumulo], [Apache
+Zookeeper][zookeeper], and [Apache Hadoop][hadoop]. Setting up these dependencies is time consuming.
+Muchos provides a set of helper scripts to automate setting up these dependencies on a cluster. This
+makes it quick for a developer to experiment with Fluo in a realistic environment. 
 
-Muchos is intended to help developers experiment with and test Fluo and Fluo applications in a
-realistic environment.  Muchos is not recommended for setting up production environments as it has
-no support for updating and upgrading dependencies.  Also, Muchos has a wipe command thats great for
-testing and very dangerous in production environments.
+Muchos is not recommended at this time for production environments as it has no support for updating
+and upgrading dependencies. It also has a wipe command that is great for testing but dangerous for
+production environments.
 
-Muchos is structured into two high level components :
+Muchos is structured into two high level components:
 
  * [Ansible] scripts that install and configure Fluo and its dependencies on a cluster.
  * Python scripts that push the Ansible scripts from a local development machine to a cluster and
-   run them.  These Python scripts can also optionally launch a cluster in EC2 using [boto].
+   run them. These Python scripts can also optionally launch a cluster in EC2 using [boto].
 
 Checkout [Uno] for setting up Fluo's dependencies on a single machine.
 
-Installation
-------------
+## Installation
 
 First clone the Muchos repo:
 
@@ -33,38 +31,40 @@ Now, create and modify your configuration file for Muchos:
     cd muchos/
     cp conf/muchos.props.example conf/muchos.props
 
-In order to run the `muchos` command, your AWS credentials need to be set in `muchos.props` like this:
+In order to run the `muchos` command, your AWS credentials need to be set in `muchos.props` like
+this:
 
     [ec2]
     aws.access.key_id=AKIAIOSFODNN7EXAMPLE
     aws.secret.key=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
 
-See [AWS Key ID Documentation][2] for more information.
+See the [AWS Credentials Docs][aws-cred] for more information.
 
-You will need to upload your public key to the AWS management console and set `key.name` in `muchos.props`
-to the name of your key pair.  If you want to give others access to your cluster, add their public keys to 
-a file named `keys` in your `conf/` directory.  During the setup of your cluster, this file will be appended 
-on each node to the `~/.ssh/authorized_keys` file for the user set by the `cluster.username` property.
+You will need to upload your public key to the AWS management console and set `key.name` in
+`muchos.props` to the name of your key pair.  If you want to give others access to your cluster, add
+their public keys to a file named `keys` in your `conf/` directory.  During the setup of your
+cluster, this file will be appended on each node to the `~/.ssh/authorized_keys` file for the user
+set by the `cluster.username` property.
 
-Launching an EC2 cluster
-------------------------
+## Launching an EC2 cluster
 
-When Muchos launches a cluster, it uses a free CentOS 7 image that is hosted in the AWS marketplace but managed
-by the CentOS orginization.  If you have never used this image in EC2 before, you will need to go to the 
-[CentOS 7 product page][centos7] to accept the software terms under the 'Manual Launch' tab.  If this is not 
-done, you will get an error when you try to launch your cluster.
+When Muchos launches a cluster, it uses a free CentOS 7 image that is hosted in the AWS marketplace
+but managed by the CentOS organization. If you have never used this image in EC2 before, you will
+need to go to the [CentOS 7 product page][centos7] to accept the software terms under the 'Manual
+Launch' tab. If this is not done, you will get an error when you try to launch your cluster.
 
-The CentOS organization periodically updates AMIs and deprecates older AMIs which makes them unavailable to 
-new users.  This can also cause an error when you try to launch your cluster.  If this occurs, you will need to
-find the AMI ID for your EC2 region on the [CentOS 7 product page][centos7] and set the 'aws_ami' property
-in your 'muchos.props' file to override the default AMIs used by Muchos.
+The CentOS organization periodically updates AMIs and deprecates older AMIs which makes them
+unavailable to new users.  This can also cause an error when you try to launch your cluster. If
+this occurs, you will need to find the AMI ID for your EC2 region on the
+[CentOS 7 product page][centos7] and set the 'aws_ami' property in your 'muchos.props' file to
+override the default AMIs used by Muchos.
 
 Run the following command to launch an EC2 cluster called `mycluster`:
 
     muchos launch -c mycluster
 
-After your cluster has launched, you do not have to specify a cluster anymore using `-c` (unless you have 
-multiple clusters running).
+After your cluster has launched, you do not have to specify a cluster anymore using `-c` (unless you
+have multiple clusters running).
 
 Run the following command to confirm that you can ssh to the leader node:
 
@@ -74,59 +74,55 @@ You can check the status of the nodes using the EC2 Dashboard or by running the 
 
     muchos status
 
-Set up the cluster
-------------------
+## Set up the cluster
 
-The `muchos setup` command will set up your cluster and start Hadoop, Zookeeper, & Accumulo.  It will
-download release tarballs of Fluo, Accumulo, Hadoop, etc.  The release versions of these tarballs are 
-specified in `muchos.props`.
+The `muchos setup` command will set up your cluster and start Hadoop, Zookeeper, & Accumulo.  It
+will download release tarballs of Fluo, Accumulo, Hadoop, etc. The versions of these tarballs are
+specified in `muchos.props` and can be changed if desired.
 
-Optionally, you can have Muchos use a snapshot version (rather than a released version) of Accumulo or Fluo by 
-building a snapshot tarball and placing it in the `conf/upload` directory before running `muchos setup`.
-This option is only necessary if you want to run the latest unreleased version of Fluo or Accumulo.
-
-```bash
-# optional, example commands to build a snapshot version of Fluo
-cd /path/to/fluo
-mvn package
-cp modules/distribution/target/fluo-1.0.0-beta-3-SNAPSHOT-bin.tar.gz /path/to/muchos/conf/upload/
-```
+Optionally, Muchos can setup the cluster using an Accumulo or Fluo tarball that is placed in the
+`conf/upload` directory of Muchos. This option is only necessary if you want to use an unreleased
+version of Fluo or Accumulo. Before running the `muchos setup` command, you should confirm that the
+version and SHA-256 hash of your tarball matches what is set in `conf/muchos.props`. Run the command
+`shasum -a 256 /path/to/tarball` on your tarball to determine its hash.
 
 The `muchos setup` command will install and start Accumulo, Hadoop, and Zookeeper.  The optional 
 services below will only be set up if configured in the [nodes] section of `muchos.props`:
 
 1. `fluo` - Fluo only needs to be installed and configured on a single node in your cluster as Fluo
-applications are run in YARN.  If set as a service, `muchos setup` will install and partially configure
-Fluo but not start it.  To finish setup, follow the steps in the 'Run a Fluo application' section below.
+applications are run in YARN.  If set as a service, `muchos setup` will install and partially
+configure Fluo but not start it.  To finish setup, follow the steps in the 'Run a Fluo application'
+section below.
 
-2. `metrics` - The Metrics service installs and configures collectd, InfluxDB and Grafana.  Cluster metrics
-are sent to InfluxDB using collectd and are viewable in Grafana.  If Fluo is running, its metrics will also
-be viewable in Grafana.
+2. `metrics` - The Metrics service installs and configures collectd, InfluxDB and Grafana.  Cluster
+metrics are sent to InfluxDB using collectd and are viewable in Grafana.  If Fluo is running, its
+metrics will also be viewable in Grafana.
 
-3. `mesosmaster` - If specified, a Mesos master will be started on this node and Mesos slaves will be
-started on all workers nodes. The Mesos status page will be viewable at `http://<MESOS_MASTER_NODE>:5050/`.
-Marathon will also be started on this node and will be viewable at `http://<MESOS_MASTER_NODE>:8080/`.
+3. `mesosmaster` - If specified, a Mesos master will be started on this node and Mesos slaves will
+be started on all workers nodes. The Mesos status page will be viewable at
+`http://<MESOS_MASTER_NODE>:5050/`. Marathon will also be started on this node and will be viewable
+at `http://<MESOS_MASTER_NODE>:8080/`.
 
-If you run the `muchos setup` command and a failure occurs, you can run the command again with no issues.
-Any cluster setup that was successfully completed will not be repeated.  While some setup steps can take
-over a minute, you can use `Ctrl-C` to stop setup if it hangs for a long time.  Just remember to run 
+If you run the `muchos setup` command and a failure occurs, you can repeat the command until setup
+completes. Any work that was successfully completed will not be repeated. While some setup steps can
+take over a minute, use `ctrl-c` to stop setup if it hangs for a long time. Just remember to run
 `muchos setup` again to finish setup.
 
-Manage the cluster
-------------------
+## Manage the cluster
 
-The `setup` command is idempotent.  It can be run again on a working cluster.  It will not change the 
-cluster if everything is configured and running correctly.  If a process has stopped, the `setup` 
+The `setup` command is idempotent. It can be run again on a working cluster. It will not change the
+cluster if everything is configured and running correctly. If a process has stopped, the `setup` 
 command will restart the process.
 
-The `muchos wipe` command can be used to wipe all data from the cluster and kill any running processes.
-After running the `wipe` command, run the `setup` command to start a fresh cluster.
+The `muchos wipe` command can be used to wipe all data from the cluster and kill any running
+processes. After running the `wipe` command, run the `setup` command to start a fresh cluster.
 
-If you set `proxy_socks_port` in your `muchos.props`, a SOCKS proxy will be created on that port when you
-use `muchos ssh` to connect to your cluster.  If you add a proxy managment tool to your browser and
-whitelist `http://leader*`, `http://worker*` and `http://metrics*` to redirect traffic to your proxy, you
-can view the monitoring & status pages below in your browser. Please note - The hosts in the URLs below match
-the configuration in [nodes] of `muchos.prop.example` and may be different for your cluster.
+If you set `proxy_socks_port` in your `muchos.props`, a SOCKS proxy will be created on that port
+when you use `muchos ssh` to connect to your cluster. If you add a proxy management tool to your
+browser and whitelist `http://leader*`, `http://worker*` and `http://metrics*` to redirect traffic
+to your proxy, you can view the monitoring & status pages below in your browser. Please note - The
+hosts in the URLs below match the configuration in [nodes] of `muchos.prop.example` and may be
+different for your cluster.
 
  * NameNode status - [http://leader1:50070/](http://leader1:50070/)
  * ResourceManger status - [http://leader2:8088/cluster](http://leader2:8088/cluster)
@@ -136,22 +132,21 @@ the configuration in [nodes] of `muchos.prop.example` and may be different for y
  * Mesos status - [http://leader1:5050/](http://leader1:5050/) (if `mesosmaster` configured on leader1)
  * Marathon status - [http://leader1:8080/](http://leader1:8080/) (if `mesosmaster` configured on leader1)
 
-Run a Fluo application
-----------------------
+## Run a Fluo application
 
-Running an example Fluo application like [Webindex][4], [Phrasecount][5], or [Stresso][6] is easy with
-Muchos as it configures your shell with common environment variables.  To run an example application, SSH to
-to a node on cluster where Fluo is installed and clone the example repo:
+Running an example Fluo application like [WebIndex], [Phrasecount], or [Stresso] is easy
+with Muchos as it configures your shell with common environment variables. To run an example
+application, SSH to a node on cluster where Fluo is installed and clone the example repo:
 
 ```bash
 muchos ssh                            # SSH to cluster proxy node                    
 ssh <node where Fluo is installed>    # Nodes with Fluo installed is determined by Muchos config
-hub clone astralway/webindex            # Clone repo of example application.  Press enter for user/password.
+hub clone astralway/webindex          # Clone repo of example application.  Press enter for user/password.
 ```
 
-Start the example application using its provided scripts.  To show how simple this can be, commands to run
-the [Webindex][4] application are shown below.  Read the [Webindex][4] README to learn more before running
-these commands.
+Start the example application using its provided scripts.  To show how simple this can be, commands
+to run the [WebIndex] application are shown below.  Read the [WebIndex] README to learn more
+before running these commands.
 
 ```bash
 cd webindex/      
@@ -162,29 +157,28 @@ cd webindex/
 ```
 
 If you have your own application to run, you can follow the instructions starting at the 
-[Configure a Fluo application][3] section of the Fluo production setup instructions to configure, initialize, 
-and start your application.  To automate these steps, you can mimic the scripts of example Fluo applicaitons above.
+[Configure a Fluo application][config-fluo] section of the Fluo production setup instructions to
+configure, initialize, and start your application. To automate these steps, you can mimic the
+scripts of example Fluo applications above.
 
-Customize your cluster
-----------------------
+## Customize your cluster
 
-After `muchos setup` is run, users can install additional software on the cluster using their own Ansible playbooks. In their
-Ansible playbooks, users can reference any configuration in the Ansible inventory file at `/etc/ansible/hosts` which is set up
-by Muchos on the proxy node. The inventory file lists the hosts for services on the cluster such as the Zookeeper nodes,
-Namenode, Accumulo master, etc. It also has variables in the `[all:vars]` section that contain settings that may be useful in
-user playbooks. It is recommended that any user-defined Ansible playbooks should be managed in their own git repository (see
-[mikewalch/muchos-custom][zc] for an example).
+After `muchos setup` is run, users can install additional software on the cluster using their own
+Ansible playbooks. In their own playbooks, users can reference any configuration in the Ansible
+inventory file at `/etc/ansible/hosts` which is set up by Muchos on the proxy node. The inventory
+file lists the hosts for services on the cluster such as the Zookeeper nodes, Namenode, Accumulo
+master, etc. It also has variables in the `[all:vars]` section that contain settings that may be
+useful in user playbooks. It is recommended that any user-defined Ansible playbooks should be
+managed in their own git repository (see [mikewalch/muchos-custom][mc] for an example).
 
-Terminating your EC2 cluster
-----------------------------
+## Terminating your EC2 cluster
 
-If you launched your cluster on EC2, run the following command terminate your cluster.  WARNING - All data on
-your cluster will be lost:
+If you launched your cluster on EC2, run the following command terminate your cluster. WARNING - All
+data on your cluster will be lost:
 
     muchos terminate
 
-Retrieving cluster configuration
---------------------------------
+## Retrieving cluster configuration
 
 The `config` command allows you to retrieve cluster configuration for your own scripts:
 
@@ -193,19 +187,17 @@ $ muchos config -p leader.public.ip
 10.10.10.10
 ```
 
-Powered by
-----------
+## Powered by
 
 Muchos is powered by the following projects:
 
  * [boto] - Python library used by `muchos launch` to start a cluster in AWS EC2.
- * [Ansible] - Cluster management tool that is used by `muchos setup` to install, configure, and start Fluo, Accumulo, 
-Hadoop, etc on an existing EC2 or bare metal cluster.
+ * [Ansible] - Cluster management tool that is used by `muchos setup` to install, configure, and
+   start Fluo, Accumulo, Hadoop, etc on an existing EC2 or bare metal cluster.
 
-Running unit tests
-------------------
+## Muchos Testing
 
-Install nose using pip:
+Muchos has unit tests.  To run them, first install nose using pip:
 
     pip install nose
 
@@ -214,12 +206,11 @@ The following command runs the unit tests:
     nosetests -w bin/impl
 
 [centos7]: https://aws.amazon.com/marketplace/ordering?productId=b7ee8a69-ee97-4a49-9e68-afaee216db2e
-[2]: http://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSGettingStartedGuide/AWSCredentials.html
-[3]: https://github.com/apache/incubator-fluo/blob/master/docs/install.md#configure-a-fluo-application
-[4]: https://github.com/astralway/webindex
-[5]: https://github.com/astralway/phrasecount
-[6]: https://github.com/astralway/stresso
-[7]: conf/muchos.props.example
+[aws-cred]: http://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSGettingStartedGuide/AWSCredentials.html
+[config-fluo]: https://github.com/apache/incubator-fluo/blob/master/docs/install.md#configure-a-fluo-application
+[WebIndex]: https://github.com/astralway/webindex
+[Phrasecount]: https://github.com/astralway/phrasecount
+[Stresso]: https://github.com/astralway/stresso
 [boto]: http://boto.cloudhackers.com/en/latest/
 [Ansible]: https://www.ansible.com/
 [ti]: https://travis-ci.org/astralway/muchos.svg?branch=master
@@ -227,10 +218,9 @@ The following command runs the unit tests:
 [li]: http://img.shields.io/badge/license-ASL-blue.svg
 [ll]: https://github.com/astralway/muchos/blob/master/LICENSE
 [logo]: contrib/muchos-logo.png
-[zc]: https://github.com/mikewalch/muchos-custom
+[mc]: https://github.com/mikewalch/muchos-custom
 [fluo]: http://fluo.apache.org/
 [accumulo]: http://accumulo.apache.org/
 [zookeeper]: http://zookeeper.apache.org/
 [hadoop]: http://hadoop.apache.org/
 [Uno]: https://github.com/astralway/uno
-
