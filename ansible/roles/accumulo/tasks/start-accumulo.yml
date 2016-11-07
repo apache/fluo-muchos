@@ -1,4 +1,0 @@
-- name: "start accumulo"
-  command: "{{ accumulo_home }}/bin/start-here.sh"
-  register: start_result
-  changed_when: "'Starting' in start_result.stdout"

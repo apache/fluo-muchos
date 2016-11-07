@@ -262,6 +262,7 @@ class DeployConfig(ConfigParser):
 HOST_VAR_DEFAULTS = {
 'accumulo_home': '"{{ install_dir }}/accumulo-{{ accumulo_version }}"',
 'accumulo_instance': None,
+'accumulo_major_version': '"{{ accumulo_version.split(\'.\')[0] }}"',
 'accumulo_password': None,
 'accumulo_tarball': 'accumulo-{{ accumulo_version }}-bin.tar.gz',
 'accumulo_version': None,
