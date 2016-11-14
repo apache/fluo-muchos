@@ -20,11 +20,7 @@
 
   <!-- Write out everything at the DEBUG level to the debug log -->
   <appender name="A2" class="org.apache.log4j.RollingFileAppender">
-     {% if accumulo_major_version == '1' %}
-     <param name="File"           value="${org.apache.accumulo.core.dir.log}/${org.apache.accumulo.core.application}_${org.apache.accumulo.core.ip.localhost.hostname}.debug.log"/>
-     {% else %}
      <param name="File"           value="${org.apache.accumulo.core.dir.log}/${org.apache.accumulo.core.application}_${accumulo.service.instance}${org.apache.accumulo.core.ip.localhost.hostname}.debug.log"/>
-     {% endif %}
      <param name="MaxFileSize"    value="100MB"/>
      <param name="MaxBackupIndex" value="5"/>
      <param name="Threshold"      value="DEBUG"/>
@@ -35,11 +31,7 @@
 
   <!--  Write out INFO and higher to the regular log -->
   <appender name="A3" class="org.apache.log4j.RollingFileAppender">
-     {% if accumulo_major_version == '1' %}
-     <param name="File"           value="${org.apache.accumulo.core.dir.log}/${org.apache.accumulo.core.application}_${org.apache.accumulo.core.ip.localhost.hostname}.log"/>
-     {% else %}
      <param name="File"           value="${org.apache.accumulo.core.dir.log}/${org.apache.accumulo.core.application}_${accumulo.service.instance}${org.apache.accumulo.core.ip.localhost.hostname}.log"/>
-     {% endif %}
      <param name="MaxFileSize"    value="100MB"/>
      <param name="MaxBackupIndex" value="5"/>
      <param name="Threshold"      value="INFO"/>
