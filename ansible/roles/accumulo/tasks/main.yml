@@ -3,28 +3,23 @@
 - name: "copy default accumulo configuration"
   command: cp {{ accumulo_home }}/conf/templates/{{ item }} {{ accumulo_home }}/conf/ creates={{ accumulo_home }}/conf/{{ item }}
   with_items:
-    - accumulo-metrics.xml
-    - auditLog.xml
-    - monitor_logger.properties
     - monitor_logger.xml
     - log4j.properties
-- name: "configure accumulo using managed files"
-  copy: src={{ item }} dest={{ accumulo_home }}/conf/{{ item }}
-  with_items:
-    - generic_logger.properties
-    - generic_logger.xml
+  when: accumulo_major_version == '1'
 - name: "configure accumulo using managed templates"
   template: src={{ item }} dest={{ accumulo_home }}/conf/{{ item }}
   with_items:
     - accumulo-env.sh
     - accumulo-site.xml
-    - masters
-    - slaves
+    - client.conf
+    - generic_logger.xml
     - gc
     - tracers
+    - masters
     - monitor
-    - client.conf
+- name: "configure tservers using managed templates"
+  template: src=tservers dest={{ accumulo_home }}/conf/{{ accumulo_tservers_fn[accumulo_major_version] }}
 - name: "build accumulo native libraries"
-  shell: "{{ accumulo_home }}/bin/build_native_library.sh" 
+  shell: "{{ accumulo_build_native_cmd[accumulo_major_version] }}" 
   args: 
     creates: "{{ accumulo_home }}/lib/native/libaccumulo.so"

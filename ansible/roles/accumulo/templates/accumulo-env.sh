@@ -15,23 +15,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+export ACCUMULO_TSERVER_OPTS="-Xmx{{ accumulo_tserv_mem }} -Xms{{ accumulo_tserv_mem }}"
+export ACCUMULO_MASTER_OPTS="-Xmx256m -Xms256m"
+export ACCUMULO_MONITOR_OPTS="-Xmx128m -Xms64m"
+export ACCUMULO_GC_OPTS="-Xmx128m -Xms128m"
+export ACCUMULO_SHELL_OPTS="-Xmx256m -Xms64m"
+export ACCUMULO_GENERAL_OPTS="-XX:+UseConcMarkSweepGC -XX:CMSInitiatingOccupancyFraction=75 -Djava.net.preferIPv4Stack=true -XX:+CMSClassUnloadingEnabled"
+export ACCUMULO_OTHER_OPTS="-Xmx256m -Xms64m"
+
 export JAVA_HOME={{ java_home }}
 export HADOOP_PREFIX={{ hadoop_prefix }}
 export HADOOP_CONF_DIR="$HADOOP_PREFIX/etc/hadoop"
 export ZOOKEEPER_HOME={{ zookeeper_home }}
+
+{% if accumulo_major_version == '1' %}
 export ACCUMULO_LOG_DIR=$ACCUMULO_HOME/logs
-if [ -f ${ACCUMULO_CONF_DIR}/accumulo.policy ]
-then
-   POLICY="-Djava.security.manager -Djava.security.policy=${ACCUMULO_CONF_DIR}/accumulo.policy"
-fi
-export ACCUMULO_TSERVER_OPTS="${POLICY} -Xmx{{ accumulo_tserv_mem }} -Xms{{ accumulo_tserv_mem }}"
-export ACCUMULO_MASTER_OPTS="${POLICY} -Xmx256m -Xms256m"
-export ACCUMULO_MONITOR_OPTS="${POLICY} -Xmx128m -Xms64m"
-export ACCUMULO_GC_OPTS="-Xmx128m -Xms128m"
-export ACCUMULO_GENERAL_OPTS="-XX:+UseConcMarkSweepGC -XX:CMSInitiatingOccupancyFraction=75 -Djava.net.preferIPv4Stack=true"
-export ACCUMULO_OTHER_OPTS="-Xmx256m -Xms64m"
 # what do when the JVM runs out of heap memory
 export ACCUMULO_KILL_CMD='kill -9 %p'
-
 #needed for Accumulo 1.8
 export NUM_TSERVERS=1
+{% endif %}
