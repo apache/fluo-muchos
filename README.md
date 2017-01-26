@@ -2,11 +2,12 @@
 ---
 [![Build Status][ti]][tl] [![Apache License][li]][ll]
 
-Muchos supports deploying [Apache Fluo][fluo] and its dependencies to a cluster that can be
-optionally launched in Amazon EC2. Apache Fluo depends on [Apache Accumulo][accumulo], [Apache
-Zookeeper][zookeeper], and [Apache Hadoop][hadoop]. Setting up these dependencies is time consuming.
-Muchos provides a set of helper scripts to automate setting up these dependencies on a cluster. This
-makes it quick for a developer to experiment with Fluo in a realistic environment. 
+**Muchos automates setting up [Apache Accumulo][accumulo] or [Apache Fluo][fluo] (and their dependencies) on a cluster**
+
+Muchos makes it easy to launch a cluster in Amazon's EC2 and deploy Accumulo or Fluo to it. Muchos
+enables developers to experiment with Accumulo or Fluo in a realistic, distributed environment.
+Muchos installs all Apache software using tarball distributions which makes its easy to experiment
+with the latest version of Accumulo, Hadoop, Zookeeper, etc without waiting for downstream packaging.
 
 Muchos is not recommended at this time for production environments as it has no support for updating
 and upgrading dependencies. It also has a wipe command that is great for testing but dangerous for
@@ -18,7 +19,7 @@ Muchos is structured into two high level components:
  * Python scripts that push the Ansible scripts from a local development machine to a cluster and
    run them. These Python scripts can also optionally launch a cluster in EC2 using [boto].
 
-Checkout [Uno] for setting up Fluo's dependencies on a single machine.
+Checkout [Uno] for setting up Accumulo or Fluo on a single machine.
 
 ## Installation
 
