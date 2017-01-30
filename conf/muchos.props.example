@@ -34,17 +34,17 @@ accumulo_instance = muchos
 # Accumluo Password
 accumulo_password = secret
 # Software versions
-hadoop_version = 2.7.2
-zookeeper_version = 3.4.8
+hadoop_version = 2.7.3
+zookeeper_version = 3.4.9
 spark_version = 1.6.2
 fluo_version = 1.0.0-incubating
-accumulo_version = 1.7.2
+accumulo_version = 1.8.0
 # Software sha256 checksums
-hadoop_sha256 = 49ad740f85d27fa39e744eb9e3b1d9442ae63d62720f0aabdae7aa9a718b03f7
-zookeeper_sha256 = f10a0b51f45c4f64c1fe69ef713abf9eb9571bc7385a82da892e83bb6c965e90
+hadoop_sha256 = d489df3808244b906eb38f4d081ba49e50c4603db03efd5e594a1e98b09259c2
+zookeeper_sha256 = e7f340412a61c7934b5143faef8d13529b29242ebfba2eba48169f4a8392f535
 spark_sha256 = f6b43333ca80629bacbbbc2e460d21064f53f50880f3f0a3f68745fdf8b3137e
 fluo_sha256 = d54b7b7b470b3ebb51ec08b797137f2f1c1ddea1cd7ccab449d5f94129be1635
-accumulo_sha256 = aef4ee94885733b9c96bf2c0f3e4c1571e9babda3e69ae5f45f07367d8b17d43
+accumulo_sha256 = 1e7da05ff71bbfaa79157b3ac5087a50a42e1c6385a21a2fdc5e8ca7a15a4940
 
 [ec2]
 # AWS Access & Secret keys
