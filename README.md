@@ -6,8 +6,8 @@
 
 Muchos makes it easy to launch a cluster in Amazon's EC2 and deploy Accumulo or Fluo to it. Muchos
 enables developers to experiment with Accumulo or Fluo in a realistic, distributed environment.
-Muchos installs all Apache software using tarball distributions which makes its easy to experiment
-with the latest version of Accumulo, Hadoop, Zookeeper, etc without waiting for downstream packaging.
+Muchos installs all software using tarball distributions which makes its easy to experiment
+with the latest versions of Accumulo, Hadoop, Zookeeper, etc without waiting for downstream packaging.
 
 Muchos is not recommended at this time for production environments as it has no support for updating
 and upgrading dependencies. It also has a wipe command that is great for testing but dangerous for
