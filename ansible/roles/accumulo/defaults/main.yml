@@ -1,2 +1,2 @@
-accumulo_build_native_cmd: {'1': '{{ accumulo_home }}/bin/build_native_library.sh', '2': '{{ accumulo_home }}/bin/accumulo build-native'}
+accumulo_build_native_cmd: {'1': '{{ accumulo_home }}/bin/build_native_library.sh', '2': '{{ accumulo_home }}/bin/accumulo-util build-native'}
 accumulo_tservers_fn: {'1': 'slaves', '2': 'tservers'}
