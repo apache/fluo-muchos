@@ -15,7 +15,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+export ACCUMULO_LOG_DIR={{ accumulo_home }}/logs
+export HADOOP_PREFIX={{ hadoop_prefix }}
+export HADOOP_CONF_DIR="$HADOOP_PREFIX/etc/hadoop"
+export ZOOKEEPER_HOME={{ zookeeper_home }}
+export JAVA_HOME={{ java_home }}
+
 {% if accumulo_major_version == '1' %}
+
 export ACCUMULO_TSERVER_OPTS="-Xmx{{ accumulo_tserv_mem }} -Xms{{ accumulo_tserv_mem }}"
 export ACCUMULO_MASTER_OPTS="-Xmx256m -Xms256m"
 export ACCUMULO_MONITOR_OPTS="-Xmx128m -Xms64m"
@@ -25,11 +32,12 @@ export ACCUMULO_GENERAL_OPTS="-XX:+UseConcMarkSweepGC -XX:CMSInitiatingOccupancy
 export ACCUMULO_OTHER_OPTS="-Xmx256m -Xms64m"
 export ACCUMULO_KILL_CMD='kill -9 %p'
 export NUM_TSERVERS=1
+
 {% else %}
+
 JAVA_OPTS=("${ACCUMULO_JAVA_OPTS[@]}" '-XX:+UseConcMarkSweepGC' '-XX:CMSInitiatingOccupancyFraction=75' '-XX:+CMSClassUnloadingEnabled'
 '-XX:OnOutOfMemoryError=kill -9 %p' '-XX:-OmitStackTraceInFastThrow' '-Djava.net.preferIPv4Stack=true' 
 '-Djavax.xml.parsers.DocumentBuilderFactory=com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl')
-
 case "$ACCUMULO_CMD" in
 master)  JAVA_OPTS=("${JAVA_OPTS[@]}" '-Xmx256m' '-Xms256m') ;;
 gc)      JAVA_OPTS=("${JAVA_OPTS[@]}" '-Xmx128m' '-Xms128m') ;;
@@ -38,12 +46,17 @@ monitor) JAVA_OPTS=("${JAVA_OPTS[@]}" '-Xmx128m' '-Xms64m') ;;
 shell)   JAVA_OPTS=("${JAVA_OPTS[@]}" '-Xmx256m' '-Xms64m') ;;
 *)       JAVA_OPTS=("${JAVA_OPTS[@]}" '-Xmx256m' '-Xms64m') ;;
 esac
+JAVA_OPTS=("${JAVA_OPTS[@]}" 
+  "-Daccumulo.log.dir=${ACCUMULO_LOG_DIR}"
+  "-Daccumulo.service.id=${ACCUMULO_CMD}${ACCUMULO_SERVICE_INSTANCE}_$(hostname)"
+  "-Daccumulo.audit.log=$(hostname).audit")
+case "$ACCUMULO_CMD" in
+monitor)                    JAVA_OPTS=("${JAVA_OPTS[@]}" "-Dlog4j.configuration=file:${ACCUMULO_CONF_DIR}/log4j-monitor.properties") ;;
+gc|master|tserver|tracer)   JAVA_OPTS=("${JAVA_OPTS[@]}" "-Dlog4j.configuration=file:${ACCUMULO_CONF_DIR}/log4j-service.properties") ;;
+*)                          JAVA_OPTS=("${JAVA_OPTS[@]}" "-Dlog4j.configuration=file:${ACCUMULO_CONF_DIR}/log4j.properties") ;;
+esac
 export JAVA_OPTS
+
 {% endif %}
 
-export ACCUMULO_LOG_DIR=$ACCUMULO_HOME/logs
-export HADOOP_PREFIX={{ hadoop_prefix }}
-export HADOOP_CONF_DIR="$HADOOP_PREFIX/etc/hadoop"
-export ZOOKEEPER_HOME={{ zookeeper_home }}
-export JAVA_HOME={{ java_home }}
 export MALLOC_ARENA_MAX=${MALLOC_ARENA_MAX:-1}
