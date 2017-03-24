@@ -276,7 +276,7 @@ HOST_VAR_DEFAULTS = {
 'hadoop_prefix': '"{{ install_dir }}/hadoop-{{ hadoop_version }}"',
 'hadoop_tarball': 'hadoop-{{ hadoop_version }}.tar.gz',
 'hadoop_version': None,
-'hdfs_root': 'hdfs://{{ groups[\'namenode\'][0] }}:10000',
+'hdfs_root': 'hdfs://{{ groups[\'namenode\'][0] }}:8020',
 'install_dir': '"{{ cluster_basedir }}/install"',
 'java_home': '"/usr/lib/jvm/java-1.8.0-openjdk"',
 'maven_home': '"{{ install_dir }}/apache-maven-{{ maven_version }}"',

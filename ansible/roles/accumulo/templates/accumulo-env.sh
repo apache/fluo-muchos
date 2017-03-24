@@ -35,28 +35,52 @@ export NUM_TSERVERS=1
 
 {% else %}
 
-JAVA_OPTS=("${ACCUMULO_JAVA_OPTS[@]}" '-XX:+UseConcMarkSweepGC' '-XX:CMSInitiatingOccupancyFraction=75' '-XX:+CMSClassUnloadingEnabled'
-'-XX:OnOutOfMemoryError=kill -9 %p' '-XX:-OmitStackTraceInFastThrow' '-Djava.net.preferIPv4Stack=true' 
-'-Djavax.xml.parsers.DocumentBuilderFactory=com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl')
-case "$ACCUMULO_CMD" in
-master)  JAVA_OPTS=("${JAVA_OPTS[@]}" '-Xmx256m' '-Xms256m') ;;
-gc)      JAVA_OPTS=("${JAVA_OPTS[@]}" '-Xmx128m' '-Xms128m') ;;
-tserver) JAVA_OPTS=("${JAVA_OPTS[@]}" '-Xmx{{ accumulo_tserv_mem }}' '-Xms{{ accumulo_tserv_mem }}') ;;
-monitor) JAVA_OPTS=("${JAVA_OPTS[@]}" '-Xmx128m' '-Xms64m') ;;
-shell)   JAVA_OPTS=("${JAVA_OPTS[@]}" '-Xmx256m' '-Xms64m') ;;
-*)       JAVA_OPTS=("${JAVA_OPTS[@]}" '-Xmx256m' '-Xms64m') ;;
+CLASSPATH="$(find "$ZOOKEEPER_HOME"/ "$HADOOP_PREFIX"/share/hadoop/{common,common/lib,hdfs,mapreduce,yarn} -maxdepth 1 -name '*.jar' \
+  -and -not -name '*slf4j*' \
+  -and -not -name '*fatjar*' \
+  -and -not -name '*-javadoc*' \
+  -and -not -name '*-sources*.jar' \
+  -and -not -name '*-test*.jar' \
+  -print0 | tr '\0' ':')$CLASSPATH"
+CLASSPATH="${conf}:${lib}/*:${HADOOP_CONF_DIR}:${CLASSPATH}"
+export CLASSPATH
+
+JAVA_OPTS=("${ACCUMULO_JAVA_OPTS[@]}"
+  '-XX:+UseConcMarkSweepGC'
+  '-XX:CMSInitiatingOccupancyFraction=75'
+  '-XX:+CMSClassUnloadingEnabled'
+  '-XX:OnOutOfMemoryError=kill -9 %p'
+  '-XX:-OmitStackTraceInFastThrow'
+  '-Djava.net.preferIPv4Stack=true'
+  "-Daccumulo.native.lib.path=${lib}/native")
+
+case "$cmd" in
+  master)  JAVA_OPTS=("${JAVA_OPTS[@]}" '-Xmx512m' '-Xms512m') ;;
+  monitor) JAVA_OPTS=("${JAVA_OPTS[@]}" '-Xmx256m' '-Xms256m') ;;
+  gc)      JAVA_OPTS=("${JAVA_OPTS[@]}" '-Xmx256m' '-Xms256m') ;;
+  tserver) JAVA_OPTS=("${JAVA_OPTS[@]}" '-Xmx{{ accumulo_tserv_mem }}' '-Xms{{ accumulo_tserv_mem }}') ;;
+  *)       JAVA_OPTS=("${JAVA_OPTS[@]}" '-Xmx256m' '-Xms64m') ;;
 esac
-JAVA_OPTS=("${JAVA_OPTS[@]}" 
+
+JAVA_OPTS=("${JAVA_OPTS[@]}"
   "-Daccumulo.log.dir=${ACCUMULO_LOG_DIR}"
-  "-Daccumulo.service.id=${ACCUMULO_CMD}${ACCUMULO_SERVICE_INSTANCE}_$(hostname)"
-  "-Daccumulo.audit.log=$(hostname).audit")
-case "$ACCUMULO_CMD" in
-monitor)                    JAVA_OPTS=("${JAVA_OPTS[@]}" "-Dlog4j.configuration=file:${ACCUMULO_CONF_DIR}/log4j-monitor.properties") ;;
-gc|master|tserver|tracer)   JAVA_OPTS=("${JAVA_OPTS[@]}" "-Dlog4j.configuration=file:${ACCUMULO_CONF_DIR}/log4j-service.properties") ;;
-*)                          JAVA_OPTS=("${JAVA_OPTS[@]}" "-Dlog4j.configuration=file:${ACCUMULO_CONF_DIR}/log4j.properties") ;;
+  "-Daccumulo.application=${cmd}${ACCUMULO_SERVICE_INSTANCE}_$(hostname)")
+
+case "$cmd" in
+  monitor)
+    JAVA_OPTS=("${JAVA_OPTS[@]}" "-Dlog4j.configuration=log4j-monitor.properties")
+    ;;
+  gc|master|tserver|tracer)
+    JAVA_OPTS=("${JAVA_OPTS[@]}" "-Dlog4j.configuration=log4j-service.properties")
+    ;;
+  *)
+    # let log4j use its default behavior (log4j.xml, log4j.properties)
+    true
+    ;;
 esac
 export JAVA_OPTS
 
+export LD_LIBRARY_PATH="${HADOOP_PREFIX}/lib/native:${LD_LIBRARY_PATH}"
 {% endif %}
 
 export MALLOC_ARENA_MAX=${MALLOC_ARENA_MAX:-1}
