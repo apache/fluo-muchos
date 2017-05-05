@@ -38,13 +38,13 @@ hadoop_version = 2.7.3
 zookeeper_version = 3.4.9
 spark_version = 1.6.2
 fluo_version = 1.0.0-incubating
-accumulo_version = 1.8.0
+accumulo_version = 1.8.1
 # Software sha256 checksums
 hadoop_sha256 = d489df3808244b906eb38f4d081ba49e50c4603db03efd5e594a1e98b09259c2
 zookeeper_sha256 = e7f340412a61c7934b5143faef8d13529b29242ebfba2eba48169f4a8392f535
 spark_sha256 = f6b43333ca80629bacbbbc2e460d21064f53f50880f3f0a3f68745fdf8b3137e
 fluo_sha256 = d54b7b7b470b3ebb51ec08b797137f2f1c1ddea1cd7ccab449d5f94129be1635
-accumulo_sha256 = 1e7da05ff71bbfaa79157b3ac5087a50a42e1c6385a21a2fdc5e8ca7a15a4940
+accumulo_sha256 = eba3bfe823935ca7901ea7c2bd59c84a68b9381361699c7e260bbd9191f237f4
 
 [ec2]
 # AWS Access & Secret keys
