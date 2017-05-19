@@ -3,6 +3,7 @@
 - name: "copy default accumulo configuration"
   command: cp {{ accumulo_home }}/conf/templates/{{ item }} {{ accumulo_home }}/conf/ creates={{ accumulo_home }}/conf/{{ item }}
   with_items:
+    - auditLog.xml
     - generic_logger.xml
     - monitor_logger.xml
     - log4j.properties
