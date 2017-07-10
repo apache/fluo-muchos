@@ -42,7 +42,7 @@ class DeployConfig(ConfigParser):
       exit("ERROR - proxy.hostname must be set in muchos.props")
 
     if proxy not in self.node_d:
-      exit("ERROR - The proxy (set by property proxy.hostname={0}) cannot be found in 'nodes' section of muchos.props".format(proxy))
+      exit("ERROR - The proxy (set by property proxy_hostname={0}) cannot be found in 'nodes' section of muchos.props".format(proxy))
 
     if action != 'launch':
       self.proxy_public_ip()
@@ -139,8 +139,8 @@ class DeployConfig(ConfigParser):
 
   def instance_tags(self):
     retd = {}
-    if self.has_option('ec2', 'instance.tags'):
-      value = self.get('ec2', 'instance.tags')
+    if self.has_option('ec2', 'instance_tags'):
+      value = self.get('ec2', 'instance_tags')
       if value:
         for kv in value.split(','):
           (key, val) = kv.split(':')
