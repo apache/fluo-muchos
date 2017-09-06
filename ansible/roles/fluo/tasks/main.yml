@@ -1,15 +1,23 @@
 - name: "install fluo from tarball"
   unarchive: src={{ tarballs_dir }}/{{ fluo_tarball }} dest={{ install_dir }} creates={{ fluo_home }} copy=yes
-- name: "copy default fluo configuration"
+- name: "copy default fluo configuration (<1.2.0)"
   command: cp {{ fluo_home }}/conf/examples/{{ item }} {{ fluo_home }}/conf/ creates={{ fluo_home }}/conf/{{ item }}
   with_items:
     - log4j.xml
     - logback.xml
     - fluo-env.sh
-- name: "configure fluo"
+  when: fluo_version < '1.2.0'
+- name: "configure fluo (<1.2.0)"
   template: src={{ item }} dest={{ fluo_home }}/conf/{{ item }}
   with_items:
     - fluo.properties
+  when: fluo_version < '1.2.0'
+- name: "configure fluo (>=1.2.0)"
+  template: src={{ item }} dest={{ fluo_home }}/conf/{{ item }}
+  with_items:
+    - fluo-conn.properties
+    - fluo-app.properties
+  when: fluo_version >= '1.2.0'
 - name: "fetch extra fluo dependencies"
   command: "{{ fluo_home }}/lib/fetch.sh extra"
 - name: "set correct owner & group"

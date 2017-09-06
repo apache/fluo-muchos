@@ -1,15 +1,23 @@
 - name: "add mesosphere repo"
   yum: name={{ mesosphere_yum_repo }} state=present
-- name: "install mesos & marathon"
+- name: "install mesos, marathon & docker"
   yum: name={{item}} state=present
   with_items:
     - mesos-{{mesos_version}}
     - marathon-{{marathon_version}}
+    - docker
+- name: "docker is running"
+  service: name=docker state=started
 - name: "configure /etc/mesos"
   template: src={{ item }} dest=/etc/mesos/{{ item }}
   with_items:
     - zk
     - quorum
+- name: "configure /etc/mesos-slave"
+  template: src={{ item }} dest=/etc/mesos-slave/{{ item }}
+  with_items:
+    - containerizers
+    - executor_registration_timeout
 - name: "configure /etc/default"
   template: src={{ item }} dest=/etc/default/{{ item }}
   with_items:
