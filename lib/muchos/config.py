@@ -29,6 +29,7 @@ class DeployConfig(ConfigParser):
         self.read(config_path)
         self.hosts_path = hosts_path
         self.cluster_name = cluster_name
+        self.sg_name = cluster_name + '-group'
         self.ephemeral_root = 'ephemeral'
         self.mount_root = '/media/' + self.ephemeral_root
         self.device_root = '/dev/xvd'
@@ -50,13 +51,14 @@ class DeployConfig(ConfigParser):
             self.proxy_public_ip()
 
         if action in ['launch', 'setup']:
-            self.get_image_id(self.get('ec2', 'default_instance_type'))
-            self.get_image_id(self.get('ec2', 'worker_instance_type'))
-
             for service in SERVICES:
                 if service not in ['fluo', 'metrics', 'mesosmaster']:
                     if not self.has_service(service):
                         exit("ERROR - Missing '{0}' service from [nodes] section of muchos.props".format(service))
+
+    def verify_launch(self, region):
+        self.get_image_id(self.get('ec2', 'default_instance_type'), region)
+        self.get_image_id(self.get('ec2', 'worker_instance_type'), region)
 
     def init_nodes(self):
         self.node_d = {}
@@ -134,11 +136,11 @@ class DeployConfig(ConfigParser):
     def sha256(self, software_id):
         return self.get('general', software_id + '_sha256')
 
-    def get_image_id(self, instance_type):
+    def get_image_id(self, instance_type, region):
         if get_arch(instance_type) == 'pvm':
             exit("ERROR - Configuration contains instance type '{0}' that uses pvm architecture."
                  "Only hvm architecture is supported!".format(instance_type))
-        return get_ami(instance_type, self.get('ec2', 'region'))
+        return get_ami(instance_type, region)
 
     def instance_tags(self):
         retd = {}

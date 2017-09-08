@@ -22,12 +22,12 @@ def test_util():
     assert get_ami('m3.large', 'us-east-1') == 'ami-6d1c2007'
     assert get_ami('m1.large', 'us-east-1') is None
 
-    hosts_dir = '../../conf/hosts'
+    hosts_dir = '../conf/hosts'
     assert parse_args(hosts_dir, ['launch']) is None
     assert parse_args(hosts_dir, ['launch', 'mycluster']) is None
     assert parse_args(hosts_dir, ['-c', 'mycluster', 'launch']) is not None
 
-    hosts_dir = '../../conf/hosts/example'
+    hosts_dir = '../conf/hosts/example'
     assert parse_args(hosts_dir, ['setup']) is not None
     assert parse_args(hosts_dir, ['config']) is None
     assert parse_args(hosts_dir, ['-p', 'all', 'config']) is not None

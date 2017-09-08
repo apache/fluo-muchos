@@ -18,11 +18,6 @@ Utility methods
 
 import os
 from os.path import isfile, join
-import hashlib
-import sys
-from sys import stderr
-import tarfile
-import urllib2
 from optparse import OptionParser
 
 
@@ -31,6 +26,22 @@ class EC2Type:
         self.arch = arch
         self.ephemeral = ephemeral
 
+
+AMI_HELP_MSG = """PLEASE NOTE - If you have accepted the software terms for CentOS 7 and still get an error,
+this could be due to CentOS releasing new images of CentOS 7.  When this occurs, the old images
+are no longer available to new users.  If you think this is the case, go to the CentOS 7 product
+page on AWS Marketplace at the URL below to find the latest AMI:
+
+https://aws.amazon.com/marketplace/ordering?productId=b7ee8a69-ee97-4a49-9e68-afaee216db2e
+
+On the product page, click 'Manual Launch' to find the latest AMI ID for your EC2 region.
+This should be used to set the 'aws_ami' property in your muchos.props which will override
+the default AMI IDs used by Muchos.  After setting the 'aws_ami' property, run the launch
+command again.
+
+Also, let us know that this has occured by creating an issue on the Muchos's GitHub page
+and we'll upgrade the defaults AMIs used by Muchos to be the latest CentOS images.
+"""
 
 instance_types = {
   "c1.medium": EC2Type("pvm"),
@@ -103,32 +114,6 @@ def get_num_ephemeral(instance_type):
 
 def get_ami(instance_type, region):
     return ami_lookup.get(get_arch(instance_type)).get(region)
-
-
-def setup_boto(lib_dir):
-    # Download Boto if it's not already present in lib_dir
-    version = "boto-2.34.0"
-    md5 = "5556223d2d0cc4d06dd4829e671dcecd"
-    url = "https://pypi.python.org/packages/source/b/boto/%s.tar.gz" % version
-    if not os.path.exists(lib_dir):
-        os.mkdir(lib_dir)
-    boto_lib_dir = os.path.join(lib_dir, version)
-    if not os.path.isdir(boto_lib_dir):
-        tgz_file_path = os.path.join(lib_dir, "%s.tar.gz" % version)
-        print "Downloading Boto from PyPi"
-        download_stream = urllib2.urlopen(url)
-        with open(tgz_file_path, "wb") as tgz_file:
-            tgz_file.write(download_stream.read())
-        with open(tgz_file_path) as tar:
-            if hashlib.md5(tar.read()).hexdigest() != md5:
-                print >> stderr, "ERROR: Got wrong md5sum for Boto"
-                sys.exit(1)
-        tar = tarfile.open(tgz_file_path)
-        tar.extractall(path=lib_dir)
-        tar.close()
-        os.remove(tgz_file_path)
-        print "Finished downloading Boto"
-    sys.path.insert(0, boto_lib_dir)
 
 
 def parse_args(hosts_dir, input_args=None):

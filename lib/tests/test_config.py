@@ -16,7 +16,7 @@ from muchos.config import DeployConfig
 
 
 def test_defaults():
-    c = DeployConfig("muchos", '../../conf/muchos.props.example', '../../conf/hosts/example/example_cluster',
+    c = DeployConfig("muchos", '../conf/muchos.props.example', '../conf/hosts/example/example_cluster',
                      'mycluster')
     assert c.get('ec2', 'default_instance_type') == 'm3.large'
     assert c.get('ec2', 'worker_instance_type') == 'm3.large'
@@ -69,7 +69,7 @@ def test_defaults():
 
 
 def test_case_sensitive():
-    c = DeployConfig("muchos", '../../conf/muchos.props.example', '../../conf/hosts/example/example_cluster',
+    c = DeployConfig("muchos", '../conf/muchos.props.example', '../conf/hosts/example/example_cluster',
                      'mycluster')
     assert c.has_option('ec2', 'aws_secret_key') == True
     assert c.has_option('ec2', 'Aws_secret_key') == False
