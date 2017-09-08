@@ -18,14 +18,14 @@
 Script to help deploy a Fluo or Accumulo cluster (optionally to AWS EC2)
 """
 
-import os, sys
+import os
+import sys
+from sys import exit
 import shutil
 from config import DeployConfig, HOST_VAR_DEFAULTS, PLAY_VAR_DEFAULTS
-from util import setup_boto, parse_args, exit
-from os.path import isfile, join, isdir
-import random
+from util import setup_boto, parse_args
+from os.path import isfile, join
 import time
-import urllib
 import subprocess
 
 MUCHOS = os.environ.get('MUCHOS')
@@ -33,10 +33,10 @@ if MUCHOS is None:
     exit('ERROR - The env var MUCHOS must be set!')
 setup_boto(join(MUCHOS, "bin/impl/lib"))
 
-import boto
-from boto.ec2.blockdevicemapping import BlockDeviceMapping, BlockDeviceType, EBSBlockDeviceType
+from boto.ec2.blockdevicemapping import BlockDeviceMapping, BlockDeviceType
 from boto import ec2
 from boto.exception import EC2ResponseError
+
 
 def get_or_make_group(conn, name, vpc_id):
     groups = conn.get_all_security_groups()
@@ -47,10 +47,12 @@ def get_or_make_group(conn, name, vpc_id):
         print "Creating security group " + name
         return conn.create_security_group(name, "Security group created by muchos script", vpc_id)
 
+
 def get_instance(instances, instance_id):
     for instance in instances:
         if instance.id == instance_id:
             return instance
+
 
 def launch_cluster(conn, config):
     key_name = config.get('ec2', 'key_name')
@@ -62,7 +64,8 @@ def launch_cluster(conn, config):
         exit('ERROR - There are already instances running for {0} cluster'.format(config.cluster_name))
 
     if isfile(config.hosts_path):
-        exit("ERROR - A hosts file already exists at {0}.  Please delete before running launch again".format(config.hosts_path))
+        exit("ERROR - A hosts file already exists at {0}.  Please delete before running launch again"
+             .format(config.hosts_path))
 
     print "Launching {0} cluster".format(config.cluster_name)
 
@@ -75,7 +78,7 @@ def launch_cluster(conn, config):
         subnet_id = config.get('ec2', 'subnet_id')
 
     security_group = get_or_make_group(conn, config.cluster_name + "-group", vpc_id)
-    if security_group.rules == []: # Group was just now created
+    if len(security_group.rules) == 0:  # Group was just now created
         if vpc_id is None:
             security_group.authorize(src_group=security_group)
         else:
@@ -145,7 +148,6 @@ def launch_cluster(conn, config):
         instance_d[hostname] = instance.id
         print 'Launching {0} node using {1}'.format(hostname, host_ami)
 
-
     while True:
         time.sleep(5)
 
@@ -172,6 +174,7 @@ def launch_cluster(conn, config):
         else:
             print "{0} of {1} nodes have started.  Waiting another 5 sec..".format(num_actual, num_expected)
 
+
 def get_cluster(conn, config, states):
     reservations = conn.get_all_reservations()
     nodes = []
@@ -183,47 +186,58 @@ def get_cluster(conn, config, states):
                 nodes.append(inst)
     return nodes
 
+
 def get_active_cluster(conn, config):
     return get_cluster(conn, config, ['pending', 'running', 'stopping', 'stopped'])
+
 
 def check_code(retcode, command):
     if retcode != 0:
         exit("ERROR - Command failed with return code of {0}: {1}".format(retcode, command))
 
+
 def exec_on_proxy(config, command, opts=''):
-    ssh_command = "ssh -A -o 'StrictHostKeyChecking no' {opts} {usr}@{ldr} '{cmd}'".format(usr=config.get('general', 'cluster_user'),
+    ssh_command = "ssh -A -o 'StrictHostKeyChecking no' {opts} {usr}@{ldr} '{cmd}'".format(
+            usr=config.get('general', 'cluster_user'),
             ldr=config.proxy_public_ip(), cmd=command, opts=opts)
-    return (subprocess.call(ssh_command, shell=True), ssh_command)
+    return subprocess.call(ssh_command, shell=True), ssh_command
+
 
 def exec_on_proxy_verified(config, command, opts=''):
     (retcode, ssh_command) = exec_on_proxy(config, command, opts)
     check_code(retcode, ssh_command)
 
+
 def wait_until_proxy_ready(config):
     proxy_host = config.get('general', 'proxy_hostname')
     cluster_user = config.get('general', 'cluster_user')
-    print "Checking if '{0}' proxy can be reached using: ssh {1}@{2}".format(proxy_host, cluster_user, config.proxy_public_ip())
+    print "Checking if '{0}' proxy can be reached using: ssh {1}@{2}".format(proxy_host, cluster_user,
+                                                                             config.proxy_public_ip())
     while True:
         (retcode, ssh_command) = exec_on_proxy(config, 'pwd > /dev/null')
         if retcode == 0:
             print "Connected to proxy using SSH!"
             time.sleep(1)
-            break;
+            break
         print "Proxy could not be accessed using SSH.  Will retry in 5 sec..."
         time.sleep(5)
+
 
 def execute_playbook(config, playbook):
     print "Executing '{0}' playbook".format(playbook)
     basedir = config.get('general', 'cluster_basedir')
-    exec_on_proxy_verified(config, "time -p ansible-playbook {base}/ansible/{playbook}".format(base=basedir, playbook=playbook), opts='-t')
+    exec_on_proxy_verified(config, "time -p ansible-playbook {base}/ansible/{playbook}"
+                           .format(base=basedir, playbook=playbook), opts='-t')
 
-def send_to_proxy(config, path, target, skipIfExists=True):
-    print "Copying to proxy: ",path
+
+def send_to_proxy(config, path, target, skip_if_exists=True):
+    print "Copying to proxy: ", path
     cmd = "scp -o 'StrictHostKeyChecking no'"
-    if skipIfExists:
+    if skip_if_exists:
         cmd = "rsync --update --progress -e \"ssh -o 'StrictHostKeyChecking no'\""
     subprocess.call("{cmd} {src} {usr}@{ldr}:{tdir}".format(cmd=cmd, src=path,
                     usr=config.get('general', 'cluster_user'), ldr=config.proxy_public_ip(), tdir=target), shell=True)
+
 
 def get_ec2_conn(config):
     access_key = config.get('ec2', 'aws_access_key')
@@ -235,6 +249,7 @@ def get_ec2_conn(config):
     if not conn:
         exit('ERROR - Failed to connect to region ' + region)
     return conn
+
 
 def sync_cluster(config):
     print 'Syncing ansible directory on {0} cluster proxy node'.format(config.cluster_name)
@@ -252,7 +267,7 @@ def sync_cluster(config):
 
     cloud_provider = host_vars.get('cloud_provider', 'ec2')
     node_type_map = {}
-    if cloud_provider  == 'ec2':
+    if cloud_provider == 'ec2':
         node_type_map = config.node_type_map()
         play_vars["mount_root"] = config.mount_root
         play_vars["metrics_drive_ids"] = config.metrics_drive_ids()
@@ -264,7 +279,7 @@ def sync_cluster(config):
         mounts = config.get("baremetal", "mounts").split(",")
         devices = config.get("baremetal", "devices").split(",")
         for node_type in 'default', 'worker':
-            node_type_map[node_type] = {'mounts': mounts, 'devices': devices }
+            node_type_map[node_type] = {'mounts': mounts, 'devices': devices}
 
     play_vars["node_type_map"] = node_type_map
     host_vars['worker_data_dirs'] = str(node_type_map['worker']['mounts'])
@@ -310,7 +325,8 @@ def sync_cluster(config):
 
         print >>hosts_file, "\n[nodes]"
         for (private_ip, hostname) in config.get_private_ip_hostnames():
-            print >>hosts_file, "{0} ansible_ssh_host={1} node_type={2}".format(hostname, private_ip, config.node_type(hostname))
+            print >>hosts_file, "{0} ansible_ssh_host={1} node_type={2}".format(hostname, private_ip,
+                                                                                config.node_type(hostname))
 
         print >>hosts_file, "\n[all:vars]"
         for (name, value) in sorted(host_vars.items()):
@@ -331,9 +347,10 @@ def sync_cluster(config):
     basedir = config.get('general', 'cluster_basedir')
     cmd = "rsync -az --delete -e \"ssh -o 'StrictHostKeyChecking no'\""
     subprocess.call("{cmd} {src} {usr}@{ldr}:{tdir}".format(cmd=cmd, src=join(config.deploy_path, "ansible"),
-          usr=config.get('general', 'cluster_user'), ldr=config.proxy_public_ip(), tdir=basedir), shell=True)
+                    usr=config.get('general', 'cluster_user'), ldr=config.proxy_public_ip(), tdir=basedir), shell=True)
 
     exec_on_proxy_verified(config, "{0}/ansible/scripts/install_ansible.sh".format(basedir), opts='-t')
+
 
 def setup_cluster(config):
     print 'Setting up {0} cluster'.format(config.cluster_name)
@@ -341,7 +358,7 @@ def setup_cluster(config):
     sync_cluster(config)
 
     conf_upload = join(config.deploy_path, "conf/upload")
-    accumulo_tarball =  join(conf_upload, "accumulo-{0}-bin.tar.gz".format(config.version("accumulo")))
+    accumulo_tarball = join(conf_upload, "accumulo-{0}-bin.tar.gz".format(config.version("accumulo")))
     fluo_tarball = join(conf_upload, "fluo-{0}-bin.tar.gz".format(config.version("fluo")))
     basedir = config.get('general', 'cluster_basedir')
     cluster_tarballs = "{0}/tarballs".format(basedir)
@@ -353,8 +370,8 @@ def setup_cluster(config):
 
     execute_playbook(config, "site.yml")
 
-def main():
 
+def main():
     deploy_path = os.environ.get('MUCHOS')
     if not deploy_path:
         exit('ERROR - The MUCHOS env variable must be set!')
@@ -411,7 +428,8 @@ def main():
         if not isfile(hosts_path):
             exit("Hosts file does not exist for cluster: "+hosts_path)
         if action == 'wipe':
-            print "Killing all processes started by Muchos and wiping Muchos data from {0} cluster".format(config.cluster_name)
+            print "Killing all processes started by Muchos and wiping Muchos data from {0} cluster"\
+                .format(config.cluster_name)
         elif action == 'kill':
             print "Killing all processes started by Muchos on {0} cluster".format(config.cluster_name)
         execute_playbook(config, action + ".yml")
@@ -434,10 +452,11 @@ def main():
 
             if isfile(hosts_path):
                 os.remove(hosts_path)
-                print "Removed hosts file at ",hosts_path
+                print "Removed hosts file at ", hosts_path
         else:
             print "Aborted termination"
     else:
         print 'ERROR - Unknown action:', action
+
 
 main()

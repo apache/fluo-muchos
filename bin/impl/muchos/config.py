@@ -13,11 +13,12 @@
 # limitations under the License.
 
 from ConfigParser import ConfigParser
-from util import get_num_ephemeral, exit, get_arch, get_ami
+from sys import exit
+from util import get_num_ephemeral, get_arch, get_ami
 import os
-from os.path import join
 
 SERVICES = ['zookeeper', 'namenode', 'resourcemanager', 'accumulomaster', 'mesosmaster', 'worker', 'fluo', 'metrics']
+
 
 class DeployConfig(ConfigParser):
 
@@ -42,7 +43,8 @@ class DeployConfig(ConfigParser):
             exit("ERROR - proxy.hostname must be set in muchos.props")
 
         if proxy not in self.node_d:
-            exit("ERROR - The proxy (set by property proxy_hostname={0}) cannot be found in 'nodes' section of muchos.props".format(proxy))
+            exit("ERROR - The proxy (set by property proxy_hostname={0}) cannot be found in 'nodes' section of "
+                 "muchos.props".format(proxy))
 
         if action != 'launch':
             self.proxy_public_ip()
@@ -134,7 +136,8 @@ class DeployConfig(ConfigParser):
 
     def get_image_id(self, instance_type):
         if get_arch(instance_type) == 'pvm':
-            exit("ERROR - Configuration contains instance type '{0}' that uses pvm architecture.  Only hvm architecture is supported!".format(instance_type))
+            exit("ERROR - Configuration contains instance type '{0}' that uses pvm architecture."
+                 "Only hvm architecture is supported!".format(instance_type))
         return get_ami(instance_type, self.get('ec2', 'region'))
 
     def instance_tags(self):
@@ -258,6 +261,7 @@ class DeployConfig(ConfigParser):
                     print self.get(section, key)
                     return
         exit("Property '{0}' was not found".format(key))
+
 
 HOST_VAR_DEFAULTS = {
   'accumulo_home': '"{{ install_dir }}/accumulo-{{ accumulo_version }}"',
