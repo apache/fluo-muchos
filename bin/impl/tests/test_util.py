@@ -14,19 +14,20 @@
 
 from muchos.util import get_arch, parse_args, get_ami
 
+
 def test_util():
-  assert get_arch('m1.large') == 'pvm'
-  assert get_arch('m3.large') == 'hvm'
+    assert get_arch('m1.large') == 'pvm'
+    assert get_arch('m3.large') == 'hvm'
 
-  assert get_ami('m3.large', 'us-east-1') == 'ami-6d1c2007'
-  assert get_ami('m1.large', 'us-east-1') == None
+    assert get_ami('m3.large', 'us-east-1') == 'ami-6d1c2007'
+    assert get_ami('m1.large', 'us-east-1') is None
 
-  hosts_dir = '../../conf/hosts'
-  assert parse_args(hosts_dir, ['launch']) == None
-  assert parse_args(hosts_dir, ['launch', 'mycluster']) == None
-  assert parse_args(hosts_dir, ['-c', 'mycluster', 'launch']) != None
+    hosts_dir = '../../conf/hosts'
+    assert parse_args(hosts_dir, ['launch']) is None
+    assert parse_args(hosts_dir, ['launch', 'mycluster']) is None
+    assert parse_args(hosts_dir, ['-c', 'mycluster', 'launch']) is not None
 
-  hosts_dir = '../../conf/hosts/example'
-  assert parse_args(hosts_dir, ['setup']) != None
-  assert parse_args(hosts_dir, ['config']) == None
-  assert parse_args(hosts_dir, ['-p', 'all', 'config']) != None
+    hosts_dir = '../../conf/hosts/example'
+    assert parse_args(hosts_dir, ['setup']) is not None
+    assert parse_args(hosts_dir, ['config']) is None
+    assert parse_args(hosts_dir, ['-p', 'all', 'config']) is not None
