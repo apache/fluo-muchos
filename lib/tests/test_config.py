@@ -29,7 +29,6 @@ def test_defaults():
                                  'worker': {'mounts': ['/media/ephemeral0', ], 'devices': ['/dev/xvdb', ]}}
     assert c.node_type('worker1') == 'worker'
     assert c.node_type('leader1') == 'default'
-    assert c.get('ec2', 'region') == 'us-east-1'
     assert not c.has_option('ec2', 'vpc_id')
     assert not c.has_option('ec2', 'subnet_id')
     assert c.get('ec2', 'key_name') == 'my_aws_key'
@@ -63,16 +62,14 @@ def test_defaults():
     assert c.get_host_services() == [('leader1', 'namenode zookeeper fluo'), ('leader2', 'resourcemanager zookeeper'),
                                      ('leader3', 'accumulomaster zookeeper'), ('metrics', 'metrics'),
                                      ('worker1', 'worker'), ('worker2', 'worker'), ('worker3', 'worker')]
-    assert c.get_image_id('m3.large') == 'ami-6d1c2007'
-    assert c.get('ec2', 'aws_access_key') == 'access_key'
-    assert c.get('ec2', 'aws_secret_key') == 'secret_key'
+    assert c.get_image_id('m3.large', 'us-east-1') == 'ami-6d1c2007'
 
 
 def test_case_sensitive():
     c = DeployConfig("muchos", '../conf/muchos.props.example', '../conf/hosts/example/example_cluster',
                      'mycluster')
-    assert c.has_option('ec2', 'aws_secret_key') == True
-    assert c.has_option('ec2', 'Aws_secret_key') == False
+    assert c.has_option('ec2', 'default_instance_type') == True
+    assert c.has_option('ec2', 'Default_instance_type') == False
     c.set('nodes', 'CamelCaseWorker', 'worker,fluo')
     c.init_nodes()
     assert c.get_node('CamelCaseWorker') == ['worker', 'fluo']
