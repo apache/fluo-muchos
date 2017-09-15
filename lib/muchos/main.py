@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python2
 
 # Copyright 2014 Muchos authors (see AUTHORS)
 #
@@ -40,6 +40,12 @@ class MuchosCluster:
 
         request = {'MinCount': 1, 'MaxCount': 1}
 
+        assoc_public_ip = self.config.get('ec2', 'associate_public_ip_to_non_proxy').lower() == 'true'
+        set_public_ip = assoc_public_ip or hostname == self.config.proxy_hostname()
+
+        request['NetworkInterfaces'] = [{'DeviceIndex': 0, 'AssociatePublicIpAddress': set_public_ip,
+                                         'Groups': [self.config.sg_id]}]
+
         if self.config.has_option('ec2', 'subnet_id'):
             request['SubnetId'] = self.config.get('ec2', 'subnet_id')
 
@@ -68,12 +74,8 @@ class MuchosCluster:
             bdm.append(device)
         request['BlockDeviceMappings'] = bdm
 
-        key_name = self.config.get('ec2', 'key_name')
-        if not key_name:
-            exit('ERROR - key.name is not set muchos.props')
-        request['KeyName'] = key_name
-
-        request['SecurityGroups'] = [self.config.sg_name]
+        if self.config.has_option('ec2', 'key_name'):
+            request['KeyName'] = self.config.get('ec2', 'key_name')
 
         tags = [{'Key': 'Name', 'Value': self.config.cluster_name + '-' + hostname},
                 {'Key': 'Muchos', 'Value': self.config.cluster_name}]
@@ -94,6 +96,48 @@ class MuchosCluster:
         print 'Launching {0} node using {1}'.format(hostname, image_id)
         return response['Instances'][0]
 
+    def create_security_group(self):
+        ec2 = boto3.client('ec2')
+        sg = self.config.sg_name
+        create_group = True
+        group_id = None
+        try:
+            response = ec2.describe_security_groups(Filters=[{'Name': 'group-name', 'Values': [sg]}])
+            if len(response['SecurityGroups']) > 0:
+                group_id = response['SecurityGroups'][0]['GroupId']
+                create_group = False
+        except ClientError:
+            pass
+
+        if create_group:
+            print "Creating security group " + sg
+            request = {'Description': "Security group created by Muchos", 'GroupName': sg}
+            if self.config.has_option('ec2', 'vpc_id'):
+                request['VpcId'] = self.config.get('ec2', 'vpc_id')
+            response = ec2.create_security_group(**request)
+            group_id = response['GroupId']
+            ec2.authorize_security_group_ingress(GroupName=sg, SourceSecurityGroupName=sg)
+            ec2.authorize_security_group_ingress(GroupName=sg, IpProtocol='tcp', FromPort=22, ToPort=22,
+                                                 CidrIp='0.0.0.0/0')
+        return group_id
+
+    def delete_security_group(self):
+        ec2 = boto3.client('ec2')
+        print "Attempting to delete security group '{0}'...".format(self.config.sg_name)
+        sg_exists = True
+        while sg_exists:
+            try:
+                request = {'GroupName': self.config.sg_name}
+                if self.config.has_option('ec2', 'vpc_id'):
+                    request['VpcId'] = self.config.get('ec2', 'vpc_id')
+                ec2.delete_security_group(**request)
+                sg_exists = False
+            except ClientError as e:
+                print "Failed to delete security group '{0}' due exception below:\n{1}\nRetrying in 10 sec..."\
+                    .format(self.config.sg_name, e)
+                time.sleep(10)
+        print "Deleted security group"
+
     def launch(self):
         if self.active_nodes():
             exit('ERROR - There are already instances running for {0} cluster'.format(self.config.cluster_name))
@@ -107,23 +151,10 @@ class MuchosCluster:
 
         print "Launching {0} cluster".format(self.config.cluster_name)
 
-        ec2 = boto3.client('ec2')
-        sg = self.config.sg_name
-        try:
-            response = ec2.describe_security_groups(GroupNames=[sg])
-            create_group = len(response['SecurityGroups']) == 0
-        except ClientError:
-            create_group = True
-
-        if create_group:
-            print "Creating security group " + sg
-            request = {'Description': "Security group created by Muchos", 'GroupName': sg}
-            if self.config.has_option('ec2', 'vpc_id'):
-                request['VpcId'] = self.config.get('ec2', 'vpc_id')
-            ec2.create_security_group(**request)
-            ec2.authorize_security_group_ingress(GroupName=sg, SourceSecurityGroupName=sg)
-            ec2.authorize_security_group_ingress(GroupName=sg, IpProtocol='tcp', FromPort=22, ToPort=22,
-                                                 CidrIp='0.0.0.0/0')
+        if self.config.has_option('ec2', 'security_group_id'):
+            self.config.sg_id = self.config.get('ec2', 'security_group_id')
+        else:
+            self.config.sg_id = self.create_security_group()
 
         instance_d = {}
         for (hostname, services) in self.config.nodes().items():
@@ -195,7 +226,7 @@ class MuchosCluster:
 
         ansible_conf = join(config.deploy_path, "ansible/conf")
         with open(join(ansible_conf, "hosts"), 'w') as hosts_file:
-            print >>hosts_file, "[proxy]\n{0}".format(config.get('general', 'proxy_hostname'))
+            print >>hosts_file, "[proxy]\n{0}".format(config.proxy_hostname())
             print >>hosts_file, "\n[accumulomaster]\n{0}".format(config.get_service_hostnames("accumulomaster")[0])
             print >>hosts_file, "\n[namenode]\n{0}".format(config.get_service_hostnames("namenode")[0])
             print >>hosts_file, "\n[resourcemanager]\n{0}".format(config.get_service_hostnames("resourcemanager")[0])
@@ -245,7 +276,7 @@ class MuchosCluster:
         basedir = config.get('general', 'cluster_basedir')
         cmd = "rsync -az --delete -e \"ssh -o 'StrictHostKeyChecking no'\""
         subprocess.call("{cmd} {src} {usr}@{ldr}:{tdir}".format(cmd=cmd, src=join(config.deploy_path, "ansible"),
-                        usr=config.get('general', 'cluster_user'), ldr=config.proxy_public_ip(), tdir=basedir),
+                        usr=config.get('general', 'cluster_user'), ldr=config.get_proxy_ip(), tdir=basedir),
                         shell=True)
 
         self.exec_on_proxy_verified("{0}/ansible/scripts/install_ansible.sh".format(basedir), opts='-t')
@@ -289,7 +320,7 @@ class MuchosCluster:
             for tag in node['Tags']:
                 if tag['Key'] == 'Name':
                     name = tag['Value']
-            print "  ", name, node['InstanceId'], node['PrivateIpAddress'], node['PublicIpAddress']
+            print "  ", name, node['InstanceId'], node['PrivateIpAddress'], node.get('PublicIpAddress', '')
 
     def terminate(self, hosts_path):
         nodes = self.active_nodes()
@@ -302,17 +333,9 @@ class MuchosCluster:
             for node in nodes:
                 ec2.terminate_instances(InstanceIds=[node['InstanceId']])
 
-            print "Terminated nodes.  Attempting to delete security group '{0}'...".format(self.config.sg_name)
-            sg_exists = True
-            while sg_exists:
-                try:
-                    ec2.delete_security_group(GroupName=self.config.sg_name)
-                    sg_exists = False
-                except ClientError as e:
-                    print "Failed to delete security group '{0}' due exception below. Retrying in 10 sec...\n{1}"\
-                        .format(self.config.sg_name, e)
-                    time.sleep(10)
-            print "Deleted security group"
+            print "Terminated nodes."
+            if not self.config.has_option('ec2', 'security_group_id'):
+                self.delete_security_group()
 
             if isfile(hosts_path):
                 os.remove(hosts_path)
@@ -326,7 +349,7 @@ class MuchosCluster:
         if self.config.has_option('general', 'proxy_socks_port'):
             fwd = "-D " + self.config.get('general', 'proxy_socks_port')
         ssh_command = "ssh -C -A -o 'StrictHostKeyChecking no' {fwd} {usr}@{ldr}".format(
-            usr=self.config.get('general', 'cluster_user'), ldr=self.config.proxy_public_ip(), fwd=fwd)
+            usr=self.config.get('general', 'cluster_user'), ldr=self.config.get_proxy_ip(), fwd=fwd)
         print "Logging into proxy using: {0}".format(ssh_command)
         retcode = subprocess.call(ssh_command, shell=True)
         if retcode != 0:
@@ -335,7 +358,7 @@ class MuchosCluster:
     def exec_on_proxy(self, command, opts=''):
         ssh_command = "ssh -A -o 'StrictHostKeyChecking no' {opts} {usr}@{ldr} '{cmd}'".format(
                 usr=self.config.get('general', 'cluster_user'),
-                ldr=self.config.proxy_public_ip(), cmd=command, opts=opts)
+                ldr=self.config.get_proxy_ip(), cmd=command, opts=opts)
         return subprocess.call(ssh_command, shell=True), ssh_command
 
     def exec_on_proxy_verified(self, command, opts=''):
@@ -344,10 +367,9 @@ class MuchosCluster:
             exit("ERROR - Command failed with return code of {0}: {1}".format(retcode, ssh_command))
 
     def wait_until_proxy_ready(self):
-        proxy_host = self.config.get('general', 'proxy_hostname')
         cluster_user = self.config.get('general', 'cluster_user')
-        print "Checking if '{0}' proxy can be reached using: ssh {1}@{2}".format(proxy_host, cluster_user,
-                                                                                 self.config.proxy_public_ip())
+        print "Checking if '{0}' proxy can be reached using: ssh {1}@{2}"\
+            .format(self.config.proxy_hostname(), cluster_user, self.config.get_proxy_ip())
         while True:
             (retcode, ssh_command) = self.exec_on_proxy('pwd > /dev/null')
             if retcode == 0:
@@ -369,7 +391,7 @@ class MuchosCluster:
         if skip_if_exists:
             cmd = "rsync --update --progress -e \"ssh -o 'StrictHostKeyChecking no'\""
         subprocess.call("{cmd} {src} {usr}@{ldr}:{tdir}".format(
-            cmd=cmd, src=path, usr=self.config.get('general', 'cluster_user'), ldr=self.config.proxy_public_ip(),
+            cmd=cmd, src=path, usr=self.config.get('general', 'cluster_user'), ldr=self.config.get_proxy_ip(),
             tdir=target), shell=True)
 
 
