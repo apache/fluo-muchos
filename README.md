@@ -197,7 +197,7 @@ Muchos has unit tests.  To run them, first install nose using pip:
 
 The following command runs the unit tests:
 
-    nosetests -w bin/impl
+    nosetests -w lib/
 
 [centos7]: https://aws.amazon.com/marketplace/ordering?productId=b7ee8a69-ee97-4a49-9e68-afaee216db2e
 [aws-config]: http://docs.aws.amazon.com/cli/latest/userguide/cli-config-files.html
