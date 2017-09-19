@@ -14,19 +14,50 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-export MUCHOS_BIN="$(dirname $0)"
+bin="$(dirname $0)"
+basedir="$( cd -P ${bin}/.. && pwd )"
+lib="$basedir/lib"
+export MUCHOS_HOME=$basedir
 
-MUCHOS="$( cd -P ${MUCHOS_BIN}/.. && pwd )"
-export MUCHOS
-if [ -z "$MUCHOS" -o ! -d "$MUCHOS" ]
-then
-  echo "MUCHOS=$MUCHOS is not a valid directory.  Please make sure it exists"
+if [ ! -f "$basedir/conf/muchos.props" ]; then
+  echo "Please create a configuration file at $basedir/conf/muchos.props"
   exit 1
 fi
-
-if [ ! -f $MUCHOS/conf/muchos.props ]; then
-  echo "Please create a configuration file at $MUCHOS/conf/muchos.props"
-  exit 1
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  export MD5="md5 -q"
+else
+  export MD5="md5sum"
 fi
 
-python -Wdefault "$MUCHOS/bin/impl/muchos/main.py" "$@"
+function fetch_lib() {
+  version=$1
+  md5=$2
+  url=$3
+  tarball="$version.tar.gz"
+  if [ ! -d "$lib/$version" ]; then
+
+    wget -cq -P "$lib" "$url"
+
+    actual_md5=$($MD5 "$lib/$tarball" | awk '{print $1}')
+    if [[ "$actual_md5" != "$md5" ]]; then
+      echo "The md5 checksum ($actual_md5) of $tarball does not match the expected checksum ($md5)"
+      exit 1
+    fi
+    tar xzf "$lib/$tarball" -C "$lib"
+    rm "$lib/$tarball"
+  fi
+  export PYTHONPATH="$lib/$version:$PYTHONPATH"
+}
+
+boto3_version="boto3-1.4.7"
+boto3_md5="eb95e700fa9e06db6e9ff4ee159adbd9"
+boto3_url="https://pypi.python.org/packages/b6/7c/b9caa157b514e0a456286172862428a83814e4eda114ea1e80267de85378/boto3-1.4.7.tar.gz#md5=eb95e700fa9e06db6e9ff4ee159adbd9"
+
+bc_version="botocore-1.7.8"
+bc_md5="d7e3179b619b936048d763b2f579a896"
+bc_url="https://pypi.python.org/packages/d5/a1/499da39780f26bca1d2e652bd01f115addf57c6509d92f0d35334cbcacea/botocore-1.7.8.tar.gz#md5=d7e3179b619b936048d763b2f579a896"
+
+fetch_lib $boto3_version $boto3_md5 $boto3_url
+fetch_lib $bc_version $bc_md5 $bc_url
+
+python -Wdefault "$lib/muchos/main.py" "$@"

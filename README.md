@@ -32,14 +32,8 @@ Now, create and modify your configuration file for Muchos:
     cd muchos/
     cp conf/muchos.props.example conf/muchos.props
 
-In order to run the `muchos` command, your AWS credentials need to be set in `muchos.props` like
-this:
-
-    [ec2]
-    aws.access.key_id=AKIAIOSFODNN7EXAMPLE
-    aws.secret.key=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
-
-See the [AWS Credentials Docs][aws-cred] for more information.
+In order to run the `muchos` command, you will need to create [AWS configuration and credential files][aws-config]
+in your home directory. These files can be created by hand or by running `aws configure` using the [AWS CLI][aws-cli].
 
 You will need to upload your public key to the AWS management console and set `key.name` in
 `muchos.props` to the name of your key pair.  If you want to give others access to your cluster, add
@@ -157,10 +151,9 @@ cd webindex/
 ./bin/webindex ui                     # Runs the WebIndex UI
 ```
 
-If you have your own application to run, you can follow the instructions starting at the 
-[Configure a Fluo application][config-fluo] section of the Fluo production setup instructions to
-configure, initialize, and start your application. To automate these steps, you can mimic the
-scripts of example Fluo applications above.
+If you have your own application to run, you can follow the [Fluo application](fluo-app)
+instructions to configure, initialize, and start your application. To automate these steps, you can
+mimic the scripts of example Fluo applications above.
 
 ## Customize your cluster
 
@@ -204,11 +197,12 @@ Muchos has unit tests.  To run them, first install nose using pip:
 
 The following command runs the unit tests:
 
-    nosetests -w bin/impl
+    nosetests -w lib/
 
 [centos7]: https://aws.amazon.com/marketplace/ordering?productId=b7ee8a69-ee97-4a49-9e68-afaee216db2e
-[aws-cred]: http://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSGettingStartedGuide/AWSCredentials.html
-[config-fluo]: https://github.com/apache/incubator-fluo/blob/master/docs/install.md#configure-a-fluo-application
+[aws-config]: http://docs.aws.amazon.com/cli/latest/userguide/cli-config-files.html
+[aws-cli]: http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-quick-configuration
+[fluo-app]: https://github.com/apache/fluo/blob/master/docs/applications.md
 [WebIndex]: https://github.com/astralway/webindex
 [Phrasecount]: https://github.com/astralway/phrasecount
 [Stresso]: https://github.com/astralway/stresso

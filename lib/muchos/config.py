@@ -29,6 +29,8 @@ class DeployConfig(ConfigParser):
         self.read(config_path)
         self.hosts_path = hosts_path
         self.cluster_name = cluster_name
+        self.sg_name = cluster_name + '-group'
+        self.sg_id = None
         self.ephemeral_root = 'ephemeral'
         self.mount_root = '/media/' + self.ephemeral_root
         self.device_root = '/dev/xvd'
@@ -46,17 +48,15 @@ class DeployConfig(ConfigParser):
             exit("ERROR - The proxy (set by property proxy_hostname={0}) cannot be found in 'nodes' section of "
                  "muchos.props".format(proxy))
 
-        if action != 'launch':
-            self.proxy_public_ip()
-
         if action in ['launch', 'setup']:
-            self.get_image_id(self.get('ec2', 'default_instance_type'))
-            self.get_image_id(self.get('ec2', 'worker_instance_type'))
-
             for service in SERVICES:
                 if service not in ['fluo', 'metrics', 'mesosmaster']:
                     if not self.has_service(service):
                         exit("ERROR - Missing '{0}' service from [nodes] section of muchos.props".format(service))
+
+    def verify_launch(self, region):
+        self.get_image_id(self.get('ec2', 'default_instance_type'), region)
+        self.get_image_id(self.get('ec2', 'worker_instance_type'), region)
 
     def init_nodes(self):
         self.node_d = {}
@@ -134,11 +134,11 @@ class DeployConfig(ConfigParser):
     def sha256(self, software_id):
         return self.get('general', software_id + '_sha256')
 
-    def get_image_id(self, instance_type):
+    def get_image_id(self, instance_type, region):
         if get_arch(instance_type) == 'pvm':
             exit("ERROR - Configuration contains instance type '{0}' that uses pvm architecture."
                  "Only hvm architecture is supported!".format(instance_type))
-        return get_ami(instance_type, self.get('ec2', 'region'))
+        return get_ami(instance_type, region)
 
     def instance_tags(self):
         retd = {}
@@ -188,7 +188,7 @@ class DeployConfig(ConfigParser):
     def get_non_proxy(self):
         retval = []
         proxy_ip = self.get_private_ip(self.get('general', 'proxy_hostname'))
-        for (hostname, (private_ip, public_ip)) in self.hosts.items():
+        for (hostname, (private_ip, public_ip)) in self.get_hosts().items():
             if private_ip != proxy_ip:
                 retval.append((private_ip, hostname))
         retval.sort()
@@ -196,7 +196,7 @@ class DeployConfig(ConfigParser):
 
     def get_private_ip_hostnames(self):
         retval = []
-        for (hostname, (private_ip, public_ip)) in self.hosts.items():
+        for (hostname, (private_ip, public_ip)) in self.get_hosts().items():
             retval.append((private_ip, hostname))
         retval.sort()
         return retval
@@ -230,14 +230,25 @@ class DeployConfig(ConfigParser):
     def get_public_ip(self, hostname):
         return self.get_hosts()[hostname][1]
 
+    def proxy_hostname(self):
+        return self.get('general', 'proxy_hostname')
+
     def proxy_public_ip(self):
-        retval = self.get_public_ip(self.get('general', 'proxy_hostname'))
+        retval = self.get_public_ip(self.proxy_hostname())
         if not retval:
-            exit("ERROR - Leader {0} does not have a public IP".format(self.get('general', 'proxy_hostname')))
+            exit("ERROR - Proxy '{0}' does not have a public IP".format(self.proxy_hostname()))
         return retval
 
+    def get_proxy_ip(self):
+        proxy_host = self.proxy_hostname()
+        ip = self.get_public_ip(proxy_host)
+        if not ip:
+            print "Proxy '{0}' does not have public IP.  Using private IP.".format(proxy_host)
+            ip = self.get_private_ip(proxy_host)
+        return ip
+
     def proxy_private_ip(self):
-        return self.get_private_ip(self.get('general', 'proxy_hostname'))
+        return self.get_private_ip(self.proxy_hostname())
 
     def get_performance_prop(self, prop):
         profile = self.get('performance', 'profile')
