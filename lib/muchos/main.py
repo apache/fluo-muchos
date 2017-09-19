@@ -38,13 +38,9 @@ class MuchosCluster:
 
     def launch_node(self, hostname, services):
 
-        request = {'MinCount': 1, 'MaxCount': 1}
-
-        assoc_public_ip = self.config.get('ec2', 'associate_public_ip_to_non_proxy').lower() == 'true'
-        set_public_ip = assoc_public_ip or hostname == self.config.proxy_hostname()
-
-        request['NetworkInterfaces'] = [{'DeviceIndex': 0, 'AssociatePublicIpAddress': set_public_ip,
-                                         'Groups': [self.config.sg_id]}]
+        request = {'MinCount': 1, 'MaxCount': 1,
+                   'NetworkInterfaces': [{'DeviceIndex': 0, 'AssociatePublicIpAddress': True,
+                                          'Groups': [self.config.sg_id]}]}
 
         if self.config.has_option('ec2', 'subnet_id'):
             request['SubnetId'] = self.config.get('ec2', 'subnet_id')

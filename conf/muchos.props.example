@@ -58,8 +58,6 @@ worker_instance_type = %(default_instance_type)s
 #subnet_id = subnet-xxxxxx
 # Security group ID to launch in (optional)
 #security_group_id = sg-xxxxxx
-# Associate public IP addresses to non-proxy nodes
-associate_public_ip_to_non_proxy=false
 # Name of public key that will be loaded by Amazon on to your EC2 instances.
 # You can upload and name your public key using the EC2 Management Console.
 # Only the user with this key will be able to SSH to the cluster.
