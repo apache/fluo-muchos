@@ -17,6 +17,7 @@ Utility methods
 """
 
 import os
+import sys
 from os.path import isfile, join
 from optparse import OptionParser
 
@@ -79,14 +80,7 @@ instance_types = {
     "d2.xlarge": EC2Type("hvm", 3),
     "d2.2xlarge": EC2Type("hvm", 6),
     "d2.4xlarge": EC2Type("hvm", 12),
-    "d2.8xlarge": EC2Type("hvm", 24),
-    "t2.nano": EC2Type("hvm"),
-    "t2.micro": EC2Type("hvm"),
-    "t2.small": EC2Type("hvm"),
-    "t2.medium": EC2Type("hvm"),
-    "t2.large": EC2Type("hvm"),
-    "t2.xlarge": EC2Type("hvm"),
-    "t2.2xlarge": EC2Type("hvm")
+    "d2.8xlarge": EC2Type("hvm", 24)
 }
 
 # AMI given arch & region.  PVM arch currently not supported
@@ -113,11 +107,23 @@ ami_lookup = {
 }
 
 
+def verify_type(instance_type):
+    if instance_type not in instance_types:
+        print "ERROR - EC2 instance type '%s' is currently not supported!" % instance_type
+        print "This is probably due to the instance type being EBS-only."
+        print "Below is a list of supported instance types:"
+        for key in instance_types:
+            print key
+        sys.exit(1)
+
+
 def get_arch(instance_type):
+    verify_type(instance_type)
     return instance_types.get(instance_type).arch
 
 
 def get_num_ephemeral(instance_type):
+    verify_type(instance_type)
     return instance_types.get(instance_type).ephemeral
 
 
