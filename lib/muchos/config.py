@@ -30,7 +30,6 @@ class DeployConfig(ConfigParser):
         self.hosts_path = hosts_path
         self.cluster_name = cluster_name
         self.sg_name = cluster_name + '-group'
-        self.sg_id = None
         self.ephemeral_root = 'ephemeral'
         self.mount_root = '/media/' + self.ephemeral_root
         self.device_root = '/dev/xvd'
@@ -243,7 +242,6 @@ class DeployConfig(ConfigParser):
         proxy_host = self.proxy_hostname()
         ip = self.get_public_ip(proxy_host)
         if not ip:
-            print "Proxy '{0}' does not have public IP.  Using private IP.".format(proxy_host)
             ip = self.get_private_ip(proxy_host)
         return ip
 

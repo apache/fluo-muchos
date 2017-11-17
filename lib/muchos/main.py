@@ -36,14 +36,18 @@ class MuchosCluster:
     def __init__(self, config):
         self.config = config
 
-    def launch_node(self, hostname, services):
+    def launch_node(self, hostname, services, sg_id):
+
+        associate_public_ip = True
+        if self.config.has_option('ec2', 'associate_public_ip'):
+            associate_public_ip = self.config.get('ec2', 'associate_public_ip').strip().lower() == 'true'
 
         request = {'MinCount': 1, 'MaxCount': 1,
-                   'NetworkInterfaces': [{'DeviceIndex': 0, 'AssociatePublicIpAddress': True,
-                                          'Groups': [self.config.sg_id]}]}
+                   'NetworkInterfaces': [{'DeviceIndex': 0, 'AssociatePublicIpAddress': associate_public_ip,
+                                          'Groups': [sg_id]}]}
 
         if self.config.has_option('ec2', 'subnet_id'):
-            request['SubnetId'] = self.config.get('ec2', 'subnet_id')
+            request['NetworkInterfaces'][0]['SubnetId'] = self.config.get('ec2', 'subnet_id')
 
         if 'worker' in services:
             instance_type = self.config.get('ec2', 'worker_instance_type')
@@ -78,6 +82,12 @@ class MuchosCluster:
         for key, val in self.config.instance_tags().iteritems():
             tags.append({'Key': key, 'Value': val})
         request['TagSpecifications'] = [{'ResourceType': 'instance', 'Tags': tags}]
+
+        if self.config.has_option('ec2', 'user_data_path'):
+            user_data_path = self.config.get('ec2', 'user_data_path')
+            with open(user_data_path, 'r') as user_data_file:
+                user_data = user_data_file.read()
+            request['UserData'] = user_data
 
         ec2 = boto3.client('ec2')
         response = None
@@ -118,14 +128,24 @@ class MuchosCluster:
         return group_id
 
     def delete_security_group(self):
+        sg_id = None
         ec2 = boto3.client('ec2')
-        print "Attempting to delete security group '{0}'...".format(self.config.sg_name)
+        try:
+            response = ec2.describe_security_groups(Filters=[{'Name': 'group-name', 'Values': [self.config.sg_name]}])
+            if len(response['SecurityGroups']) > 0:
+                sg_id = response['SecurityGroups'][0]['GroupId']
+        except ClientError:
+            pass
+
+        if not sg_id:
+            print "Could not find security group '{0}'".format(self.config.sg_name)
+            return
+
+        print "Attempting to delete security group '{0}' with id '{1}'...".format(self.config.sg_name, sg_id)
         sg_exists = True
         while sg_exists:
             try:
-                request = {'GroupName': self.config.sg_name}
-                if self.config.has_option('ec2', 'vpc_id'):
-                    request['VpcId'] = self.config.get('ec2', 'vpc_id')
+                request = {'GroupId': sg_id}
                 ec2.delete_security_group(**request)
                 sg_exists = False
             except ClientError as e:
@@ -148,13 +168,13 @@ class MuchosCluster:
         print "Launching {0} cluster".format(self.config.cluster_name)
 
         if self.config.has_option('ec2', 'security_group_id'):
-            self.config.sg_id = self.config.get('ec2', 'security_group_id')
+            sg_id = self.config.get('ec2', 'security_group_id')
         else:
-            self.config.sg_id = self.create_security_group()
+            sg_id = self.create_security_group()
 
         instance_d = {}
         for (hostname, services) in self.config.nodes().items():
-            instance = self.launch_node(hostname, services)
+            instance = self.launch_node(hostname, services, sg_id)
             instance_d[instance['InstanceId']] = hostname
 
         num_running = len(self.status(['running']))
