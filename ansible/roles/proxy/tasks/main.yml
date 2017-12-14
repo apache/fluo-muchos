@@ -10,7 +10,7 @@
   register: apache_mirror
   failed_when: "'http' not in apache_mirror.stdout"
   changed_when: False
-- name: "download tarballs to proxy" 
+- name: "download common tarballs to proxy"
   get_url: url={{ item.urlp }}/{{ item.fn }} dest={{ tarballs_dir }}/{{ item.fn }} sha256sum={{ item.sum }} force=no
   register: gresult
   until: "'OK' in gresult.msg or 'file already exists' in gresult.msg"
@@ -20,6 +20,4 @@
     - { urlp: "{{ apache_mirror.stdout }}/hadoop/common/hadoop-{{ hadoop_version }}", fn: "{{ hadoop_tarball }}", sum: "{{ hadoop_sha256 }}" }
     - { urlp: "{{ apache_mirror.stdout }}/maven/maven-3/{{ maven_version }}/binaries", fn: "{{ maven_tarball }}", sum: "{{ maven_sha256 }}" }
     - { urlp: "{{ apache_mirror.stdout }}/spark/spark-{{ spark_version }}", fn: "{{ spark_tarball }}", sum: "{{ spark_sha256 }}" }
-    - { urlp: "{{ apache_mirror.stdout }}/accumulo/{{ accumulo_version }}", fn: "{{ accumulo_tarball }}", sum: "{{ accumulo_sha256 }}" }
-    - { urlp: "{{ apache_mirror.stdout }}/incubator/fluo/fluo/{{ fluo_version }}", fn: "{{ fluo_tarball }}", sum: "{{ fluo_sha256 }}" }
     - { urlp: "https://github.com/github/hub/releases/download/v{{ hub_version }}", fn: "{{ hub_tarball }}", sum: "{{ hub_sha256 }}" } 

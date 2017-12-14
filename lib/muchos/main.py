@@ -231,14 +231,16 @@ class MuchosCluster:
         host_vars['default_data_dirs'] = str(node_type_map['default']['mounts'])
 
         with open(join(config.deploy_path, "ansible/site.yml"), 'w') as site_file:
-            print >>site_file, "- include: common.yml"
-            print >>site_file, "- include: accumulo.yml"
-            if config.has_service("mesosmaster"):
-                print >>site_file, "- include: mesos.yml"
-            if config.has_service("metrics"):
-                print >>site_file, "- include: metrics.yml"
+            print >>site_file, "- import_playbook: common.yml"
+            print >>site_file, "- import_playbook: accumulo.yml"
             if config.has_service('fluo'):
-                print >>site_file, "- include: fluo.yml"
+                print >>site_file, "- import_playbook: fluo.yml"
+            if config.has_service('fluo_yarn'):
+                print >>site_file, "- import_playbook: fluo_yarn.yml"
+            if config.has_service("metrics"):
+                print >>site_file, "- import_playbook: metrics.yml"
+            if config.has_service("mesosmaster"):
+                print >>site_file, "- import_playbook: mesos.yml"
 
         ansible_conf = join(config.deploy_path, "ansible/conf")
         with open(join(ansible_conf, "hosts"), 'w') as hosts_file:
@@ -259,6 +261,11 @@ class MuchosCluster:
             if config.has_service('fluo'):
                 print >>hosts_file, "\n[fluo]"
                 for host in config.get_service_hostnames("fluo"):
+                    print >>hosts_file, host
+
+            if config.has_service('fluo_yarn'):
+                print >>hosts_file, "\n[fluo_yarn]"
+                for host in config.get_service_hostnames("fluo_yarn"):
                     print >>hosts_file, host
 
             print >>hosts_file, "\n[workers]"
@@ -306,6 +313,7 @@ class MuchosCluster:
         conf_upload = join(config.deploy_path, "conf/upload")
         accumulo_tarball = join(conf_upload, "accumulo-{0}-bin.tar.gz".format(config.version("accumulo")))
         fluo_tarball = join(conf_upload, "fluo-{0}-bin.tar.gz".format(config.version("fluo")))
+        fluo_yarn_tarball = join(conf_upload, "fluo-yarn-{0}-bin.tar.gz".format(config.version("fluo_yarn")))
         basedir = config.get('general', 'cluster_basedir')
         cluster_tarballs = "{0}/tarballs".format(basedir)
         self.exec_on_proxy_verified("mkdir -p {0}".format(cluster_tarballs))
@@ -313,6 +321,8 @@ class MuchosCluster:
             self.send_to_proxy(accumulo_tarball, cluster_tarballs)
         if isfile(fluo_tarball) and config.has_service('fluo'):
             self.send_to_proxy(fluo_tarball, cluster_tarballs)
+        if isfile(fluo_yarn_tarball) and config.has_service('fluo_yarn'):
+            self.send_to_proxy(fluo_yarn_tarball, cluster_tarballs)
 
         self.execute_playbook("site.yml")
 

@@ -1,3 +1,6 @@
+- hosts: proxy
+  tasks:
+    - import_tasks: roles/fluo/tasks/download.yml
 - hosts: fluo
   roles:
     - fluo

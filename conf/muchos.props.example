@@ -38,12 +38,14 @@ hadoop_version = 2.7.4
 zookeeper_version = 3.4.11
 spark_version = 1.6.3
 fluo_version = 1.1.0-incubating
+fluo_yarn_version = 1.0.0-SNAPSHOT
 accumulo_version = 1.8.1
 # Software sha256 checksums
 hadoop_sha256 = 8f791bfcfa5bb7c7ccd09910d490c02910dda93b19936ec2aedb8930bc5be111
 zookeeper_sha256 = f6bd68a1c8f7c13ea4c2c99f13082d0d71ac464ffaf3bf7a365879ab6ad10e84
 spark_sha256 = d13358a2d45e78d7c8cf22656d63e5715a5900fab33b3340df9e11ce3747e314
 fluo_sha256 = 9765f48ac2a075129905b1bac96e7ca6c735264ddb9aeeee15282ed5f8bc1062
+fluo_yarn_sha256 = tbd
 accumulo_sha256 = eba3bfe823935ca7901ea7c2bd59c84a68b9381361699c7e260bbd9191f237f4
 
 [ec2]
@@ -151,8 +153,8 @@ yarn_nm_mem_mb=16384
 #   Hostname = Must be unique.  Will be used for hostname in EC2 or should match hostname on your own cluster
 #   Service = Service to run on node (possible values: zookeeper, namenode, resourcemanager, accumulomaster,
 #             mesosmaster, worker, fluo, metrics)
-#   All services are required below except for mesosmaster, fluo & metrics which are optional
-leader1 = namenode,zookeeper,fluo
+#   All services are required below except for mesosmaster, fluo, fluo_yarn & metrics which are optional
+leader1 = namenode,zookeeper,fluo,fluo_yarn
 leader2 = resourcemanager,zookeeper
 leader3 = accumulomaster,zookeeper
 metrics = metrics
