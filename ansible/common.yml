@@ -1,7 +1,7 @@
 - hosts: nodes
   become: yes
   tasks:
-    - include: roles/common/tasks/hosts.yml
+    - import_tasks: roles/common/tasks/hosts.yml
 - hosts: proxy
   roles:
     - proxy
@@ -10,9 +10,9 @@
   roles:
     - common
   tasks:
-    - include: roles/common/tasks/ssh.yml
-    - include: roles/common/tasks/os.yml
-    - include: roles/common/tasks/drives.yml
+    - import_tasks: roles/common/tasks/ssh.yml
+    - import_tasks: roles/common/tasks/os.yml
+    - import_tasks: roles/common/tasks/drives.yml
   handlers:
     - name: "update network settings"
       command: /sbin/ifup-local {{ network_interface }}
@@ -23,11 +23,11 @@
     - zookeeper
 - hosts: namenode
   tasks:
-    - include: roles/hadoop/tasks/start-hdfs.yml
+    - import_tasks: roles/hadoop/tasks/start-hdfs.yml
 - hosts: resourcemanager
   tasks:
-    - include: roles/hadoop/tasks/start-yarn.yml
-    - include: roles/spark/tasks/start-spark-history.yml
+    - import_tasks: roles/hadoop/tasks/start-yarn.yml
+    - import_tasks: roles/spark/tasks/start-spark-history.yml
 - hosts: zookeepers
   tasks:
-    - include: roles/zookeeper/tasks/start-zookeeper.yml
+    - import_tasks: roles/zookeeper/tasks/start-zookeeper.yml

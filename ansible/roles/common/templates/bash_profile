@@ -11,6 +11,7 @@ PATH=$PATH:$HOME/.local/bin
 PATH=$PATH:$HOME/bin
 PATH=$PATH:{{ accumulo_home }}/bin
 PATH=$PATH:{{ fluo_home }}/bin
+PATH=$PATH:{{ fluo_yarn_home }}/bin
 PATH=$PATH:{{ hadoop_prefix }}/bin
 PATH=$PATH:{{ hadoop_prefix }}/sbin
 PATH=$PATH:{{ hub_home }}/bin

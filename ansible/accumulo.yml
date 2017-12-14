@@ -1,11 +1,14 @@
+- hosts: proxy
+  tasks:
+    - import_tasks: roles/accumulo/tasks/download.yml
 - hosts: all
   roles:
     - accumulo
 - hosts: accumulomaster
   tasks:
-    - include: roles/accumulo/tasks/init-accumulo.yml
+    - import_tasks: roles/accumulo/tasks/init-accumulo.yml
   handlers:
-    - include: roles/accumulo/handlers/init-accumulo.yml
+    - import_tasks: roles/accumulo/handlers/init-accumulo.yml
 - hosts: accumulo
   tasks:
     - name: "start accumulo 1.0"

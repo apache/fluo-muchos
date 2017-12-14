@@ -17,7 +17,7 @@ from sys import exit
 from util import get_num_ephemeral, get_arch, get_ami
 import os
 
-SERVICES = ['zookeeper', 'namenode', 'resourcemanager', 'accumulomaster', 'mesosmaster', 'worker', 'fluo', 'metrics']
+SERVICES = ['zookeeper', 'namenode', 'resourcemanager', 'accumulomaster', 'mesosmaster', 'worker', 'fluo', 'fluo_yarn', 'metrics']
 
 
 class DeployConfig(ConfigParser):
@@ -49,7 +49,7 @@ class DeployConfig(ConfigParser):
 
         if action in ['launch', 'setup']:
             for service in SERVICES:
-                if service not in ['fluo', 'metrics', 'mesosmaster']:
+                if service not in ['fluo', 'fluo_yarn', 'metrics', 'mesosmaster']:
                     if not self.has_service(service):
                         exit("ERROR - Missing '{0}' service from [nodes] section of muchos.props".format(service))
 
@@ -286,6 +286,9 @@ HOST_VAR_DEFAULTS = {
   'fluo_home': '"{{ install_dir }}/fluo-{{ fluo_version }}"',
   'fluo_tarball': 'fluo-{{ fluo_version }}-bin.tar.gz',
   'fluo_version': None,
+  'fluo_yarn_home': '"{{ install_dir }}/fluo-yarn-{{ fluo_yarn_version }}"',
+  'fluo_yarn_tarball': 'fluo-yarn-{{ fluo_yarn_version }}-bin.tar.gz',
+  'fluo_yarn_version': None,
   'hadoop_prefix': '"{{ install_dir }}/hadoop-{{ hadoop_version }}"',
   'hadoop_tarball': 'hadoop-{{ hadoop_version }}.tar.gz',
   'hadoop_version': None,

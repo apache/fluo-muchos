@@ -13,6 +13,7 @@ export ZOOKEEPER_HOME={{ zookeeper_home }}
 export SPARK_HOME={{ spark_home }}
 export ACCUMULO_HOME={{ accumulo_home }}
 export FLUO_HOME={{ fluo_home }}
+export FLUO_YARN_HOME={{ fluo_yarn_home }}
 
 alias ssh='ssh -A'
 alias cdh='cd {{ hadoop_prefix }}'
