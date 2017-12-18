@@ -34,7 +34,7 @@ def test_defaults():
     assert c.get('ec2', 'key_name') == 'my_aws_key'
     assert c.instance_tags() == {}
     assert len(c.nodes()) == 7
-    assert c.get_node('leader1') == ['namenode', 'zookeeper', 'fluo']
+    assert c.get_node('leader1') == ['namenode', 'zookeeper', 'fluo', 'fluo_yarn']
     assert c.get_node('worker1') == ['worker']
     assert c.get_node('worker2') == ['worker']
     assert c.get_node('worker3') == ['worker']
@@ -59,7 +59,7 @@ def test_defaults():
     assert c.get('general', 'cluster_user') == "centos"
     assert c.get_non_proxy() == [('10.0.0.1', 'leader2'), ('10.0.0.2', 'leader3'), ('10.0.0.3', 'worker1'),
                                  ('10.0.0.4', 'worker2'), ('10.0.0.5', 'worker3')]
-    assert c.get_host_services() == [('leader1', 'namenode zookeeper fluo'), ('leader2', 'resourcemanager zookeeper'),
+    assert c.get_host_services() == [('leader1', 'namenode zookeeper fluo fluo_yarn'), ('leader2', 'resourcemanager zookeeper'),
                                      ('leader3', 'accumulomaster zookeeper'), ('metrics', 'metrics'),
                                      ('worker1', 'worker'), ('worker2', 'worker'), ('worker3', 'worker')]
     assert c.get_image_id('m3.large', 'us-east-1') == 'ami-6d1c2007'
