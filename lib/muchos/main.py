@@ -24,7 +24,7 @@ from sys import exit
 import shutil
 from botocore.exceptions import ClientError
 from config import DeployConfig, HOST_VAR_DEFAULTS, PLAY_VAR_DEFAULTS
-from util import parse_args, AMI_HELP_MSG
+from util import parse_args, AMI_HELP_MSG, get_block_device_map
 from os.path import isfile, join
 import time
 import subprocess
@@ -51,10 +51,8 @@ class MuchosCluster:
 
         if 'worker' in services:
             instance_type = self.config.get('ec2', 'worker_instance_type')
-            num_ephemeral = self.config.worker_num_ephemeral()
         else:
             instance_type = self.config.get('ec2', 'default_instance_type')
-            num_ephemeral = self.config.default_num_ephemeral()
         request['InstanceType'] = instance_type
 
         if self.config.has_option('ec2', 'aws_ami'):
@@ -66,13 +64,7 @@ class MuchosCluster:
             exit('ERROR - Image not found for instance type: '+instance_type)
         request['ImageId'] = image_id
 
-        bdm = [{'DeviceName': '/dev/sda1',
-                'Ebs': {'DeleteOnTermination': True}}]
-        for i in range(0, num_ephemeral):
-            device = {'DeviceName': self.config.device_root + chr(ord('b') + i),
-                      'VirtualName': self.config.ephemeral_root + str(i)}
-            bdm.append(device)
-        request['BlockDeviceMappings'] = bdm
+        request['BlockDeviceMappings'] = get_block_device_map(instance_type)
 
         if self.config.has_option('ec2', 'key_name'):
             request['KeyName'] = self.config.get('ec2', 'key_name')

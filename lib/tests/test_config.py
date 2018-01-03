@@ -20,11 +20,8 @@ def test_defaults():
                      'mycluster')
     assert c.get('ec2', 'default_instance_type') == 'm3.large'
     assert c.get('ec2', 'worker_instance_type') == 'm3.large'
-    assert c.num_ephemeral('worker1') == 1
-    assert c.num_ephemeral('worker1') == c.worker_num_ephemeral()
     assert c.max_ephemeral() == 1
     assert c.mounts(2) == ['/media/ephemeral0', '/media/ephemeral1']
-    assert c.devices(2) == ['/dev/xvdb', '/dev/xvdc']
     assert c.node_type_map() == {'default': {'mounts': ['/media/ephemeral0', ], 'devices': ['/dev/xvdb', ]},
                                  'worker': {'mounts': ['/media/ephemeral0', ], 'devices': ['/dev/xvdb', ]}}
     assert c.node_type('worker1') == 'worker'

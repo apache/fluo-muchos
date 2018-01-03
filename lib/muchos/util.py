@@ -23,10 +23,10 @@ from optparse import OptionParser
 
 
 class EC2Type:
-    def __init__(self, arch, ephemeral=1):
+    def __init__(self, arch, ephemeral=1, has_nvme=False):
         self.arch = arch
         self.ephemeral = ephemeral
-
+        self.has_nvme = has_nvme
 
 AMI_HELP_MSG = """PLEASE NOTE - If you have accepted the software terms for CentOS 7 and still get an error,
 this could be due to CentOS releasing new images of CentOS 7.  When this occurs, the old images
@@ -61,6 +61,10 @@ instance_types = {
     "i2.4xlarge": EC2Type("hvm", 4),
     "i2.8xlarge": EC2Type("hvm", 8),
     "i2.xlarge": EC2Type("hvm"),
+    "i3.large": EC2Type("hvm", 1, True),
+    "i3.xlarge": EC2Type("hvm", 1, True),
+    "i3.2xlarge": EC2Type("hvm", 1, True),
+    "i3.4xlarge": EC2Type("hvm", 2, True),
     "m1.large": EC2Type("pvm", 2),
     "m1.medium": EC2Type("pvm"),
     "m1.small": EC2Type("pvm"),
@@ -121,15 +125,36 @@ def get_arch(instance_type):
     verify_type(instance_type)
     return instance_types.get(instance_type).arch
 
-
-def get_num_ephemeral(instance_type):
+def get_ephemeral_devices(instance_type):
     verify_type(instance_type)
-    return instance_types.get(instance_type).ephemeral
+    devices = []
+    ec2_type = instance_types.get(instance_type)
 
+    for i in range(0, ec2_type.ephemeral):
+        if ec2_type.has_nvme:
+            devices.append('/dev/nvme' + str(i) + 'n1')
+        else:
+            devices.append('/dev/xvd' + chr(ord('b') + i))
+
+    return devices
+
+def get_block_device_map(instance_type):
+    verify_type(instance_type)
+
+    bdm = [{'DeviceName': '/dev/sda1',
+                'Ebs': {'DeleteOnTermination': True}}]
+
+    ec2_type = instance_types.get(instance_type)
+    if not ec2_type.has_nvme :
+        for i in range(0, ec2_type.ephemeral):
+            device = {'DeviceName':  '/dev/xvd' + chr(ord('b') + i),
+                      'VirtualName': 'ephemeral' + str(i)}
+            bdm.append(device)
+
+    return bdm
 
 def get_ami(instance_type, region):
     return ami_lookup.get(get_arch(instance_type)).get(region)
-
 
 def parse_args(hosts_dir, input_args=None):
     parser = OptionParser(

@@ -14,7 +14,7 @@
 
 from ConfigParser import ConfigParser
 from sys import exit
-from util import get_num_ephemeral, get_arch, get_ami
+from util import get_ephemeral_devices, get_arch, get_ami
 import os
 
 SERVICES = ['zookeeper', 'namenode', 'resourcemanager', 'accumulomaster', 'mesosmaster', 'worker', 'fluo', 'fluo_yarn', 'metrics']
@@ -32,7 +32,6 @@ class DeployConfig(ConfigParser):
         self.sg_name = cluster_name + '-group'
         self.ephemeral_root = 'ephemeral'
         self.mount_root = '/media/' + self.ephemeral_root
-        self.device_root = '/dev/xvd'
         self.metrics_drive_root = 'media-' + self.ephemeral_root
         self.node_d = None
         self.hosts = None
@@ -70,20 +69,21 @@ class DeployConfig(ConfigParser):
                     exit('Unknown service "%s" declared for node %s' % (service, hostname))
             self.node_d[hostname] = service_list
 
-    def default_num_ephemeral(self):
-        return get_num_ephemeral(self.get('ec2', 'default_instance_type'))
+    def default_ephemeral_devices(self):
+        return get_ephemeral_devices(self.get('ec2', 'default_instance_type'))
 
-    def worker_num_ephemeral(self):
-        return get_num_ephemeral(self.get('ec2', 'worker_instance_type'))
+    def worker_ephemeral_devices(self):
+        return get_ephemeral_devices(self.get('ec2', 'worker_instance_type'))
 
     def max_ephemeral(self):
-        return max((self.worker_num_ephemeral(), self.default_num_ephemeral()))
+        return max((len(self.default_ephemeral_devices()), len(self.worker_ephemeral_devices())))
 
     def node_type_map(self):
         node_types = {}
-        node_list = [('default', self.default_num_ephemeral()), ('worker', self.worker_num_ephemeral())]
-        for (ntype, num_ephemeral) in node_list:
-            node_types[ntype] = {'mounts': self.mounts(num_ephemeral), 'devices': self.devices(num_ephemeral)}
+        node_list = [('default', self.default_ephemeral_devices()), ('worker', self.worker_ephemeral_devices())]
+
+        for (ntype, devices) in node_list:
+            node_types[ntype] = {'mounts': self.mounts(len(devices)), 'devices': devices}
         return node_types
 
     def node_type(self, hostname):
@@ -91,23 +91,11 @@ class DeployConfig(ConfigParser):
             return 'worker'
         return 'default'
 
-    def num_ephemeral(self, hostname):
-        if 'worker' in self.node_d[hostname]:
-            return self.worker_num_ephemeral()
-        else:
-            return self.default_num_ephemeral()
-
     def mounts(self, num_ephemeral):
         mounts = []
         for i in range(0, num_ephemeral):
             mounts.append(self.mount_root + str(i))
         return mounts
-
-    def devices(self, num_ephemeral):
-        devices = []
-        for i in range(0, num_ephemeral):
-            devices.append(self.device_root + chr(ord('b') + i))
-        return devices
 
     def fstype(self):
         retval = self.get('ec2', 'fstype')
