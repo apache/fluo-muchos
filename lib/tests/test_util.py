@@ -12,10 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from muchos.util import get_arch, parse_args, get_ami
+from muchos.util import get_arch, parse_args, get_ami, get_ephemeral_devices
 
 
 def test_util():
+    assert set(get_ephemeral_devices('m3.large')) == set(['/dev/xvdb'])
+    assert set(get_ephemeral_devices('m3.xlarge')) == set(['/dev/xvdb', '/dev/xvdc'])
+
+    assert set(get_ephemeral_devices('i3.xlarge')) == set(['/dev/nvme0n1'])
+    assert set(get_ephemeral_devices('i3.4xlarge')) == set(['/dev/nvme0n1','/dev/nvme1n1'])
+
     assert get_arch('m1.large') == 'pvm'
     assert get_arch('m3.large') == 'hvm'
 
