@@ -8,8 +8,6 @@
     - yarn-site.xml
     - mapred-site.xml
     - slaves
-- name: "configure hadoop with files"
-  copy: src=capacity-scheduler.xml dest={{ hadoop_prefix }}/etc/hadoop/capacity-scheduler.xml
 - name: "copy spark yarn shuffle jar to hadoop lib"
   command: cp {{ spark_home }}/lib/spark-{{ spark_version }}-yarn-shuffle.jar {{ hadoop_prefix }}/share/hadoop/yarn/lib/ creates={{ hadoop_prefix }}/share/hadoop/yarn/lib/spark-{{ spark_version }}-yarn-shuffle.jar
 - name: "setup hadoop short circuit socket dir"
