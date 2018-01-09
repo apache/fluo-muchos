@@ -78,6 +78,10 @@ force_format = no
 associate_public_ip = true
 # Path to file containing user data that will be executed at launch
 #user_data_path = /path/to/user_data
+# Shutdown instances after a delay (in minutes). If 0, no shutdown will occur.
+shutdown_delay_minutes = 0
+# Shutdown behavior of EC2 instances: terminate or stop
+shutdown_behavior = stop
 
 [baremetal]
 mount_root = /var/disk

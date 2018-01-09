@@ -11,6 +11,9 @@
     - screen
     - patch
     - java-1.8.0-openjdk-devel
+- name: "configure node shutdown"
+  shell: shutdown +{{ shutdown_delay_minutes }} &> {{ cluster_basedir }}/.shutdown creates={{ cluster_basedir}}/.shutdown
+  when: shutdown_delay_minutes > 0
 - name: "create install directory on all hosts"
   file: path={{ install_dir }} state=directory owner={{ cluster_user }} group={{ cluster_user }}
 - name: "install maven & hub"

@@ -54,6 +54,7 @@ class MuchosCluster:
         else:
             instance_type = self.config.get('ec2', 'default_instance_type')
         request['InstanceType'] = instance_type
+        request['InstanceInitiatedShutdownBehavior'] = self.config.get('ec2', 'shutdown_behavior')
 
         if self.config.has_option('ec2', 'aws_ami'):
             image_id = self.config.get('ec2', 'aws_ami')
@@ -210,6 +211,7 @@ class MuchosCluster:
             play_vars["metrics_drive_ids"] = config.metrics_drive_ids()
             play_vars["fstype"] = config.fstype()
             play_vars["force_format"] = config.force_format()
+            play_vars["shutdown_delay_minutes"] = config.get("ec2", "shutdown_delay_minutes")
         if cloud_provider == 'baremetal':
             play_vars["mount_root"] = config.get("baremetal", "mount_root")
             play_vars["metrics_drive_ids"] = config.get("baremetal", "metrics_drives_ids").split(",")
@@ -457,7 +459,7 @@ def main():
             config.print_property(opts.property)
     elif action == 'ssh':
         cluster.ssh()
-    elif action in ('wipe', 'kill'):
+    elif action in ('wipe', 'kill', 'cancel_shutdown'):
         if not isfile(hosts_path):
             exit("Hosts file does not exist for cluster: "+hosts_path)
         if action == 'wipe':
@@ -465,6 +467,8 @@ def main():
                 .format(config.cluster_name)
         elif action == 'kill':
             print "Killing all processes started by Muchos on {0} cluster".format(config.cluster_name)
+        elif action == 'cancel_shutdown':
+            print "Cancelling automatic shutdown of {0} cluster".format(config.cluster_name)
         cluster.execute_playbook(action + ".yml")
     elif action == 'terminate':
         cluster.terminate(hosts_path)

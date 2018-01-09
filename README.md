@@ -172,6 +172,17 @@ data on your cluster will be lost:
 
     muchos terminate
 
+## Automatic shutdown of EC2 clusters
+
+With the default configuration, EC2 clusters will not shutdown automatically after a delay and the default
+shutdown behavior will be stopping the node.  If you would like your cluster to terminate after 8 hours,
+set the following configuration in `muchos.props`:
+
+```
+shutdown_delay_minutes = 480
+shutdown_behavior = terminate
+```
+
 ## Retrieving cluster configuration
 
 The `config` command allows you to retrieve cluster configuration for your own scripts:

@@ -321,6 +321,7 @@ PLAY_VAR_DEFAULTS = {
   'node_type_map': None,
   'network_interface': None,
   'spark_sha256': None,
+  'shutdown_delay_minutes': None,
   'twill_reserve_mem_mb': None,
   'yarn_nm_mem_mb': None,
   'zookeeper_sha256': None
