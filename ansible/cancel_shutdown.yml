@@ -1,0 +1,5 @@
+- hosts: all
+  become: yes
+  tasks:
+    - name: "cancelling node shutdown"
+      shell: shutdown -c
