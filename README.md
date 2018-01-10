@@ -183,6 +183,8 @@ shutdown_delay_minutes = 480
 shutdown_behavior = terminate
 ```
 
+If you decide later to cancel the shutdown, run `muchos cancel_shutdown`.
+
 ## Retrieving cluster configuration
 
 The `config` command allows you to retrieve cluster configuration for your own scripts:
