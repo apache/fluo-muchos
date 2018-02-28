@@ -25,8 +25,7 @@ def test_util():
     assert get_arch('m1.large') == 'pvm'
     assert get_arch('m3.large') == 'hvm'
 
-    assert get_ami('m3.large', 'us-east-1') == 'ami-6d1c2007'
-    assert get_ami('m1.large', 'us-east-1') is None
+    assert get_ami('us-east-1') == 'ami-4bf3d731'
 
     hosts_dir = '../conf/hosts'
     assert parse_args(hosts_dir, ['launch']) is None

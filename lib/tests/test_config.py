@@ -59,7 +59,7 @@ def test_defaults():
     assert c.get_host_services() == [('leader1', 'namenode zookeeper fluo fluo_yarn'), ('leader2', 'resourcemanager zookeeper'),
                                      ('leader3', 'accumulomaster zookeeper'), ('metrics', 'metrics'),
                                      ('worker1', 'worker'), ('worker2', 'worker'), ('worker3', 'worker')]
-    assert c.get_image_id('m3.large', 'us-east-1') == 'ami-6d1c2007'
+    assert c.get_image_id('m3.large', 'us-east-1') == 'ami-4bf3d731'
 
 
 def test_case_sensitive():

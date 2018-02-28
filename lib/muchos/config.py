@@ -125,7 +125,7 @@ class DeployConfig(ConfigParser):
         if get_arch(instance_type) == 'pvm':
             exit("ERROR - Configuration contains instance type '{0}' that uses pvm architecture."
                  "Only hvm architecture is supported!".format(instance_type))
-        return get_ami(instance_type, region)
+        return get_ami(region)
 
     def instance_tags(self):
         retd = {}

@@ -14,5 +14,5 @@
   until: "'OK' in gresult.msg or 'file already exists' in gresult.msg"
   retries: 3
   with_items:
-    - { urlp: "{{ apache_mirror.stdout }}/incubator/fluo/fluo/{{ fluo_version }}", fn: "{{ fluo_tarball }}", sum: "{{ fluo_sha256 }}" }
+    - { urlp: "{{ apache_mirror.stdout }}/fluo/fluo/{{ fluo_version }}", fn: "{{ fluo_tarball }}", sum: "{{ fluo_sha256 }}" }
   when: fluo.stat.exists == False
