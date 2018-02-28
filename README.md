@@ -212,7 +212,7 @@ The following command runs the unit tests:
 
     nosetests -w lib/
 
-[centos7]: https://aws.amazon.com/marketplace/ordering?productId=b7ee8a69-ee97-4a49-9e68-afaee216db2e
+[centos7]: https://aws.amazon.com/marketplace/seller-profile?id=16cb8b03-256e-4dde-8f34-1b0f377efe89
 [aws-config]: http://docs.aws.amazon.com/cli/latest/userguide/cli-config-files.html
 [aws-cli]: http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-quick-configuration
 [fluo-app]: https://github.com/apache/fluo/blob/master/docs/applications.md
