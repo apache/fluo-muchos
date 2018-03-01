@@ -87,29 +87,24 @@ instance_types = {
     "d2.8xlarge": EC2Type("hvm", 24)
 }
 
-# AMI given arch & region.  PVM arch currently not supported
+# AMI given region for HVM arch.  PVM arch is not supported.
 ami_lookup = {
-    "hvm": {"us-east-1": "ami-6d1c2007",
-            "us-west-1": "ami-af4333cf",
-            "us-west-2": "ami-d2c924b2",
-            "eu-west-1": "ami-7abd0209",
-            "eu-central-1": "ami-9bf712f4",
-            "ap-southeast-1": "ami-f068a193",
-            "ap-southeast-2": "ami-fedafc9d",
-            "ap-northeast-1": "ami-eec1c380",
-            "ap-northeast-2": "ami-c74789a9",
-            "sa-east-1": "ami-26b93b4a"},
-    "pvm": {"us-east-1": None,
-            "us-west-1": None,
-            "us-west-2": None,
-            "eu-west-1": None,
-            "eu-central-1": None,
-            "ap-southeast-1": None,
-            "ap-southeast-2": None,
-            "ap-northeast-1": None,
-            "sa-east-1": None},
+    "us-east-1": "ami-4bf3d731",
+    "us-east-2": "ami-e1496384",
+    "us-west-1": "ami-65e0e305",
+    "us-west-2": "ami-a042f4d8",
+    "ca-central-1": "ami-dcad28b8",
+    "eu-central-1": "ami-337be65c",
+    "eu-west-1": "ami-6e28b517",
+    "eu-west-2": "ami-ee6a718a",
+    "eu-west-3": "ami-bfff49c2",
+    "ap-northeast-1": "ami-25bd2743",
+    "ap-northeast-2": "ami-7248e81c",
+    "ap-southeast-1": "ami-d2fa88ae",
+    "ap-southeast-2": "ami-b6bb47d4",
+    "ap-south-1": "ami-5d99ce32",
+    "sa-east-1": "ami-f9adef95"
 }
-
 
 def verify_type(instance_type):
     if instance_type not in instance_types:
@@ -153,8 +148,8 @@ def get_block_device_map(instance_type):
 
     return bdm
 
-def get_ami(instance_type, region):
-    return ami_lookup.get(get_arch(instance_type)).get(region)
+def get_ami(region):
+    return ami_lookup.get(region)
 
 def parse_args(hosts_dir, input_args=None):
     parser = OptionParser(
