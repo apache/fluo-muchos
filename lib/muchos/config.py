@@ -310,6 +310,7 @@ PLAY_VAR_DEFAULTS = {
   'force_format': None,
   'fstype': None,
   'fluo_sha256': None,
+  'fluo_yarn_sha256': None,
   'hadoop_sha256': None,
   'hub_version': '2.2.3',
   'hub_home': '"{{ install_dir }}/hub-linux-amd64-{{ hub_version }}"',
