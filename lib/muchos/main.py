@@ -226,13 +226,13 @@ class MuchosCluster:
 
         with open(join(config.deploy_path, "ansible/site.yml"), 'w') as site_file:
             print >>site_file, "- import_playbook: common.yml"
+            if config.has_service("metrics"):
+                print >>site_file, "- import_playbook: metrics.yml"
             print >>site_file, "- import_playbook: accumulo.yml"
             if config.has_service('fluo'):
                 print >>site_file, "- import_playbook: fluo.yml"
             if config.has_service('fluo_yarn'):
                 print >>site_file, "- import_playbook: fluo_yarn.yml"
-            if config.has_service("metrics"):
-                print >>site_file, "- import_playbook: metrics.yml"
             if config.has_service("mesosmaster"):
                 print >>site_file, "- import_playbook: mesos.yml"
 
