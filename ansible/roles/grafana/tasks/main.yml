@@ -18,6 +18,8 @@
   with_items:
     - fluo-recent-dashboard.json
     - fluo-historical-dashboard.json
+- name: "configure accumulo dashboards"
+  get_url: url=https://raw.githubusercontent.com/astralway/uno/master/conf/grafana/accumulo-dashboard.json dest=/etc/grafana/dashboards/accumulo-dashboard.json
 - name: "ensure owner and group are correct for /etc/grafana"
   file: path=/etc/grafana/ recurse=yes owner=grafana group=grafana
 - name: "ensure grafana is running (and enable it at boot)"

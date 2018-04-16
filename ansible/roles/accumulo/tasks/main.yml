@@ -18,6 +18,11 @@
     - tracers
     - masters
     - monitor
+- name: "configure accumulo to send metrics (if metrics server exists)"
+  template: src={{ item }} dest={{ accumulo_home }}/conf/{{ item }}
+  with_items:
+    - hadoop-metrics2-accumulo.properties
+  when: "'metrics' in groups"
 - name: "configure tservers using managed templates"
   template: src=tservers dest={{ accumulo_home }}/conf/{{ accumulo_tservers_fn[accumulo_major_version] }}
 - name: "build accumulo native libraries"
