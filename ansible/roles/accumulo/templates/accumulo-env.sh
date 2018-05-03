@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-export ACCUMULO_LOG_DIR={{ accumulo_home }}/logs
+export ACCUMULO_LOG_DIR={{ worker_data_dirs[0] }}/logs/accumulo
 export HADOOP_PREFIX={{ hadoop_prefix }}
 export HADOOP_CONF_DIR="$HADOOP_PREFIX/etc/hadoop"
 export ZOOKEEPER_HOME={{ zookeeper_home }}

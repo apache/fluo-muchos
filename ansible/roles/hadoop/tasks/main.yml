@@ -13,3 +13,11 @@
 - name: "setup hadoop short circuit socket dir"
   file: path=/var/lib/hadoop-hdfs state=directory owner={{ cluster_user }} group={{ cluster_user }} mode=0755
   become: yes
+- name: "Configure hadoop log dir"
+  replace:
+    path: "{{ hadoop_prefix }}/etc/hadoop/hadoop-env.sh"
+    regexp: '.*export\s+HADOOP_LOG_DIR.*'
+    replace: "export HADOOP_LOG_DIR={{ worker_data_dirs[0] }}/logs/hadoop"
+- name: "Create hadoop log dir"
+  file: path={{ worker_data_dirs[0] }}/logs/hadoop state=directory
+
