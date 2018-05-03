@@ -5,3 +5,5 @@
   with_items:
     - zoo.cfg
     - zookeeper-env.sh
+- name: "Create zookeeper log dir"
+  file: path={{ worker_data_dirs[0] }}/logs/zookeeper state=directory

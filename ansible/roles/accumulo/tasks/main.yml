@@ -29,3 +29,5 @@
   shell: "{{ accumulo_build_native_cmd[accumulo_major_version] }}" 
   args: 
     creates: "{{ accumulo_home }}/lib/native/libaccumulo.so"
+- name: "Create accumulo log dir"
+  file: path={{ worker_data_dirs[0] }}/logs/accumulo state=directory
