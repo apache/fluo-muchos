@@ -33,15 +33,10 @@ this could be due to CentOS releasing new images of CentOS 7.  When this occurs,
 are no longer available to new users.  If you think this is the case, go to the CentOS 7 product
 page on AWS Marketplace at the URL below to find the latest AMI:
 
-https://aws.amazon.com/marketplace/ordering?productId=b7ee8a69-ee97-4a49-9e68-afaee216db2e
+    https://aws.amazon.com/marketplace/pp/B00O7WM7QW
 
-On the product page, click 'Manual Launch' to find the latest AMI ID for your EC2 region.
-This should be used to set the 'aws_ami' property in your muchos.props which will override
-the default AMI IDs used by Muchos.  After setting the 'aws_ami' property, run the launch
-command again.
-
-Also, let us know that this has occured by creating an issue on the Muchos's GitHub page
-and we'll upgrade the defaults AMIs used by Muchos to be the latest CentOS images.
+On the product page, find the latest AMI ID for your EC2 region. This should be used to set the 'aws_ami'
+property in your muchos.props.  After setting the 'aws_ami' property, run the launch command again.
 """
 
 instance_types = {
@@ -76,6 +71,12 @@ instance_types = {
     "m3.large": EC2Type("hvm"),
     "m3.medium": EC2Type("hvm"),
     "m3.xlarge": EC2Type("hvm", 2),
+    "m5d.large": EC2Type("hvm", 1, True),
+    "m5d.xlarge": EC2Type("hvm", 1, True),
+    "m5d.2xlarge": EC2Type("hvm", 1, True),
+    "m5d.4xlarge": EC2Type("hvm", 2, True),
+    "m5d.12xlarge": EC2Type("hvm", 2, True),
+    "m5d.24xlarge": EC2Type("hvm", 4, True),
     "r3.2xlarge": EC2Type("hvm", 1),
     "r3.4xlarge": EC2Type("hvm", 1),
     "r3.8xlarge": EC2Type("hvm", 2),
@@ -87,24 +88,6 @@ instance_types = {
     "d2.8xlarge": EC2Type("hvm", 24)
 }
 
-# AMI given region for HVM arch.  PVM arch is not supported.
-ami_lookup = {
-    "us-east-1": "ami-4bf3d731",
-    "us-east-2": "ami-e1496384",
-    "us-west-1": "ami-65e0e305",
-    "us-west-2": "ami-a042f4d8",
-    "ca-central-1": "ami-dcad28b8",
-    "eu-central-1": "ami-337be65c",
-    "eu-west-1": "ami-6e28b517",
-    "eu-west-2": "ami-ee6a718a",
-    "eu-west-3": "ami-bfff49c2",
-    "ap-northeast-1": "ami-25bd2743",
-    "ap-northeast-2": "ami-7248e81c",
-    "ap-southeast-1": "ami-d2fa88ae",
-    "ap-southeast-2": "ami-b6bb47d4",
-    "ap-south-1": "ami-5d99ce32",
-    "sa-east-1": "ami-f9adef95"
-}
 
 def verify_type(instance_type):
     if instance_type not in instance_types:
@@ -125,7 +108,11 @@ def get_ephemeral_devices(instance_type):
     devices = []
     ec2_type = instance_types.get(instance_type)
 
-    for i in range(0, ec2_type.ephemeral):
+    start = 0
+    if instance_type.startswith("m5d"):
+        start = 1
+
+    for i in range(start, ec2_type.ephemeral + start):
         if ec2_type.has_nvme:
             devices.append('/dev/nvme' + str(i) + 'n1')
         else:
@@ -147,9 +134,6 @@ def get_block_device_map(instance_type):
             bdm.append(device)
 
     return bdm
-
-def get_ami(region):
-    return ami_lookup.get(region)
 
 def parse_args(hosts_dir, input_args=None):
     parser = OptionParser(

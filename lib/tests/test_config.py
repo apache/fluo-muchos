@@ -18,12 +18,13 @@ from muchos.config import DeployConfig
 def test_defaults():
     c = DeployConfig("muchos", '../conf/muchos.props.example', '../conf/hosts/example/example_cluster',
                      'mycluster')
-    assert c.get('ec2', 'default_instance_type') == 'm3.large'
-    assert c.get('ec2', 'worker_instance_type') == 'm3.large'
+    assert c.get('ec2', 'default_instance_type') == 'm5d.large'
+    assert c.get('ec2', 'worker_instance_type') == 'm5d.large'
+    assert c.get('ec2', 'aws_ami') == 'ami-9887c6e7'
     assert c.max_ephemeral() == 1
     assert c.mounts(2) == ['/media/ephemeral0', '/media/ephemeral1']
-    assert c.node_type_map() == {'default': {'mounts': ['/media/ephemeral0', ], 'devices': ['/dev/xvdb', ]},
-                                 'worker': {'mounts': ['/media/ephemeral0', ], 'devices': ['/dev/xvdb', ]}}
+    assert c.node_type_map() == {'default': {'mounts': ['/media/ephemeral0', ], 'devices': ['/dev/nvme1n1', ]},
+                                 'worker': {'mounts': ['/media/ephemeral0', ], 'devices': ['/dev/nvme1n1', ]}}
     assert c.node_type('worker1') == 'worker'
     assert c.node_type('leader1') == 'default'
     assert not c.has_option('ec2', 'vpc_id')
@@ -59,7 +60,6 @@ def test_defaults():
     assert c.get_host_services() == [('leader1', 'namenode zookeeper fluo fluo_yarn'), ('leader2', 'resourcemanager zookeeper'),
                                      ('leader3', 'accumulomaster zookeeper'), ('metrics', 'metrics'),
                                      ('worker1', 'worker'), ('worker2', 'worker'), ('worker3', 'worker')]
-    assert c.get_image_id('m3.large', 'us-east-1') == 'ami-4bf3d731'
 
 
 def test_case_sensitive():
