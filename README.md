@@ -79,7 +79,7 @@ version and SHA-256 hash of your tarball matches what is set in [muchos.props]. 
 `shasum -a 256 /path/to/tarball` on your tarball to determine its hash.
 
 The `muchos setup` command will install and start Accumulo, Hadoop, and Zookeeper.  The optional 
-services below will only be set up if configured in the [nodes] section of [muchos.props]:
+services below will only be set up if configured in the `[nodes]` section of [muchos.props]:
 
 1. `fluo` - Fluo only needs to be installed and configured on a single node in your cluster as Fluo
 applications are run in YARN.  If set as a service, `muchos setup` will install and partially
