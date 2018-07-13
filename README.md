@@ -25,7 +25,7 @@ Checkout [Uno] for setting up Accumulo or Fluo on a single machine.
 
 First clone the Muchos repo:
 
-    git clone https://github.com/astralway/muchos.git
+    git clone https://github.com/apache/fluo-muchos.git
 
 Now, create and modify your [muchos.props] configuration file for Muchos:
 
@@ -133,7 +133,7 @@ application, SSH to a node on cluster where Fluo is installed and clone the exam
 ```bash
 muchos ssh                            # SSH to cluster proxy node                    
 ssh <node where Fluo is installed>    # Nodes with Fluo installed is determined by Muchos config
-hub clone astralway/webindex          # Clone repo of example application.  Press enter for user/password.
+hub clone apache/fluo-examples        # Clone repo of Fluo example applications. Press enter for user/password.
 ```
 
 Start the example application using its provided scripts.  To show how simple this can be, commands
@@ -141,7 +141,7 @@ to run the [WebIndex] application are shown below.  Read the [WebIndex] README t
 before running these commands.
 
 ```bash
-cd webindex/      
+cd fluo-examples/webindex
 ./bin/webindex init                   # Initialize and start webindex Fluo application
 ./bin/webindex getpaths 2015-18       # Retrieves CommonCrawl paths file for 2015-18 crawl
 ./bin/webindex load-s3 2015-18 0-9    # Load 10 files into Fluo in the 0-9 range of 2015-18 crawl
@@ -213,20 +213,20 @@ The following command runs the unit tests:
 [aws-config]: http://docs.aws.amazon.com/cli/latest/userguide/cli-config-files.html
 [aws-cli]: http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-quick-configuration
 [fluo-app]: https://github.com/apache/fluo/blob/master/docs/applications.md
-[WebIndex]: https://github.com/astralway/webindex
-[Phrasecount]: https://github.com/astralway/phrasecount
-[Stresso]: https://github.com/astralway/stresso
+[WebIndex]: https://github.com/apache/fluo-examples/tree/master/webindex
+[Phrasecount]: https://github.com/apache/fluo-examples/tree/master/phrasecount
+[Stresso]: https://github.com/apache/fluo-examples/tree/master/stresso
 [boto]: http://boto.cloudhackers.com/en/latest/
 [Ansible]: https://www.ansible.com/
-[ti]: https://travis-ci.org/astralway/muchos.svg?branch=master
-[tl]: https://travis-ci.org/astralway/muchos
+[ti]: https://travis-ci.org/apache/fluo-muchos.svg?branch=master
+[tl]: https://travis-ci.org/apache/fluo-muchos
 [li]: http://img.shields.io/badge/license-ASL-blue.svg
-[ll]: https://github.com/astralway/muchos/blob/master/LICENSE
+[ll]: https://github.com/apache/fluo-muchos/blob/master/LICENSE
 [logo]: contrib/muchos-logo.png
 [mc]: https://github.com/mikewalch/muchos-custom
 [fluo]: http://fluo.apache.org/
 [accumulo]: http://accumulo.apache.org/
 [zookeeper]: http://zookeeper.apache.org/
 [hadoop]: http://hadoop.apache.org/
-[Uno]: https://github.com/astralway/uno
+[Uno]: https://github.com/apache/fluo-uno
 [muchos.props]: conf/muchos.props.example
