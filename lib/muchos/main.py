@@ -56,15 +56,13 @@ class MuchosCluster:
         request['InstanceType'] = instance_type
         request['InstanceInitiatedShutdownBehavior'] = self.config.get('ec2', 'shutdown_behavior')
 
-        if self.config.has_option('ec2', 'aws_ami'):
-            image_id = self.config.get('ec2', 'aws_ami')
-        else:
-            session = boto3.session.Session()
-            image_id = self.config.get_image_id(instance_type, session.region_name)
+        if not self.config.has_option('ec2', 'aws_ami'):
+            exit('aws_ami property must be set!')
+        image_id = self.config.get('ec2', 'aws_ami')
         if not image_id:
-            exit('ERROR - Image not found for instance type: '+instance_type)
-        request['ImageId'] = image_id
+            exit('aws_ami property was not properly')
 
+        request['ImageId'] = image_id
         request['BlockDeviceMappings'] = get_block_device_map(instance_type)
 
         if self.config.has_option('ec2', 'key_name'):
@@ -155,8 +153,7 @@ class MuchosCluster:
             exit("ERROR - A hosts file already exists at {0}.  Please delete before running launch again"
                  .format(self.config.hosts_path))
 
-        session = boto3.session.Session()
-        self.config.verify_launch(session.region_name)
+        self.config.verify_launch()
 
         print "Launching {0} cluster".format(self.config.cluster_name)
 

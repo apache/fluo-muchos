@@ -14,7 +14,7 @@
 
 from ConfigParser import ConfigParser
 from sys import exit
-from util import get_ephemeral_devices, get_arch, get_ami
+from util import get_ephemeral_devices, get_arch
 import os
 
 SERVICES = ['zookeeper', 'namenode', 'resourcemanager', 'accumulomaster', 'mesosmaster', 'worker', 'fluo', 'fluo_yarn', 'metrics']
@@ -52,9 +52,9 @@ class DeployConfig(ConfigParser):
                     if not self.has_service(service):
                         exit("ERROR - Missing '{0}' service from [nodes] section of muchos.props".format(service))
 
-    def verify_launch(self, region):
-        self.get_image_id(self.get('ec2', 'default_instance_type'), region)
-        self.get_image_id(self.get('ec2', 'worker_instance_type'), region)
+    def verify_launch(self):
+        self.verify_instance_type(self.get('ec2', 'default_instance_type'))
+        self.verify_instance_type(self.get('ec2', 'worker_instance_type'))
 
     def init_nodes(self):
         self.node_d = {}
@@ -121,11 +121,10 @@ class DeployConfig(ConfigParser):
     def sha256(self, software_id):
         return self.get('general', software_id + '_sha256')
 
-    def get_image_id(self, instance_type, region):
+    def verify_instance_type(self, instance_type):
         if get_arch(instance_type) == 'pvm':
             exit("ERROR - Configuration contains instance type '{0}' that uses pvm architecture."
                  "Only hvm architecture is supported!".format(instance_type))
-        return get_ami(region)
 
     def instance_tags(self):
         retd = {}

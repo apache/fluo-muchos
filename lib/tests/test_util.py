@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from muchos.util import get_arch, parse_args, get_ami, get_ephemeral_devices
+from muchos.util import get_arch, parse_args, get_ephemeral_devices
 
 
 def test_util():
@@ -24,8 +24,6 @@ def test_util():
 
     assert get_arch('m1.large') == 'pvm'
     assert get_arch('m3.large') == 'hvm'
-
-    assert get_ami('us-east-1') == 'ami-4bf3d731'
 
     hosts_dir = '../conf/hosts'
     assert parse_args(hosts_dir, ['launch']) is None
