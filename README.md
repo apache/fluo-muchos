@@ -27,7 +27,7 @@ First clone the Muchos repo:
 
     git clone https://github.com/astralway/muchos.git
 
-Now, create and modify your configuration file for Muchos:
+Now, create and modify your [muchos.props] configuration file for Muchos:
 
     cd muchos/
     cp conf/muchos.props.example conf/muchos.props
@@ -36,25 +36,22 @@ In order to run the `muchos` command, you will need to create [AWS configuration
 in your home directory. These files can be created by hand or by running `aws configure` using the [AWS CLI][aws-cli].
 
 You will need to upload your public key to the AWS management console and set `key.name` in
-`muchos.props` to the name of your key pair.  If you want to give others access to your cluster, add
+[muchos.props] to the name of your key pair.  If you want to give others access to your cluster, add
 their public keys to a file named `keys` in your `conf/` directory.  During the setup of your
 cluster, this file will be appended on each node to the `~/.ssh/authorized_keys` file for the user
 set by the `cluster.username` property.
 
+You might also need to configure the `aws_ami` property in [muchos.props]. Muchos by default uses a free
+CentOS 7 image that is hosted in the AWS marketplace but managed by the
+CentOS organization. If you have never used this image in EC2 before, you will need to go to the
+[CentOS 7 product page][centos7] to accept the software terms. If this is not done, you will get an
+error when you try to launch your cluster. By default, the `aws_ami` property is set to an AMI in `us-east-1`.
+You will need to changes this value if a newer image has been released or if you are running in different region
+than `us-east-1`.
+
 ## Launching an EC2 cluster
 
-When Muchos launches a cluster, it uses a free CentOS 7 image that is hosted in the AWS marketplace
-but managed by the CentOS organization. If you have never used this image in EC2 before, you will
-need to go to the [CentOS 7 product page][centos7] to accept the software terms under the 'Manual
-Launch' tab. If this is not done, you will get an error when you try to launch your cluster.
-
-The CentOS organization periodically updates AMIs and deprecates older AMIs which makes them
-unavailable to new users.  This can also cause an error when you try to launch your cluster. If
-this occurs, you will need to find the AMI ID for your EC2 region on the
-[CentOS 7 product page][centos7] and set the 'aws_ami' property in your 'muchos.props' file to
-override the default AMIs used by Muchos.
-
-Run the following command to launch an EC2 cluster called `mycluster`:
+After following the installation steps above, run the following command to launch an EC2 cluster called `mycluster`:
 
     muchos launch -c mycluster
 
@@ -73,16 +70,16 @@ You can check the status of the nodes using the EC2 Dashboard or by running the 
 
 The `muchos setup` command will set up your cluster and start Hadoop, Zookeeper, & Accumulo.  It
 will download release tarballs of Fluo, Accumulo, Hadoop, etc. The versions of these tarballs are
-specified in `muchos.props` and can be changed if desired.
+specified in [muchos.props] and can be changed if desired.
 
 Optionally, Muchos can setup the cluster using an Accumulo or Fluo tarball that is placed in the
 `conf/upload` directory of Muchos. This option is only necessary if you want to use an unreleased
 version of Fluo or Accumulo. Before running the `muchos setup` command, you should confirm that the
-version and SHA-256 hash of your tarball matches what is set in `conf/muchos.props`. Run the command
+version and SHA-256 hash of your tarball matches what is set in [muchos.props]. Run the command
 `shasum -a 256 /path/to/tarball` on your tarball to determine its hash.
 
 The `muchos setup` command will install and start Accumulo, Hadoop, and Zookeeper.  The optional 
-services below will only be set up if configured in the [nodes] section of `muchos.props`:
+services below will only be set up if configured in the `[nodes]` section of [muchos.props]:
 
 1. `fluo` - Fluo only needs to be installed and configured on a single node in your cluster as Fluo
 applications are run in YARN.  If set as a service, `muchos setup` will install and partially
@@ -112,7 +109,7 @@ command will restart the process.
 The `muchos wipe` command can be used to wipe all data from the cluster and kill any running
 processes. After running the `wipe` command, run the `setup` command to start a fresh cluster.
 
-If you set `proxy_socks_port` in your `muchos.props`, a SOCKS proxy will be created on that port
+If you set `proxy_socks_port` in your [muchos.props], a SOCKS proxy will be created on that port
 when you use `muchos ssh` to connect to your cluster. If you add a proxy management tool to your
 browser and whitelist `http://leader*`, `http://worker*` and `http://metrics*` to redirect traffic
 to your proxy, you can view the monitoring & status pages below in your browser. Please note - The
@@ -176,7 +173,7 @@ data on your cluster will be lost:
 
 With the default configuration, EC2 clusters will not shutdown automatically after a delay and the default
 shutdown behavior will be stopping the node.  If you would like your cluster to terminate after 8 hours,
-set the following configuration in `muchos.props`:
+set the following configuration in [muchos.props]:
 
 ```
 shutdown_delay_minutes = 480
@@ -212,7 +209,7 @@ The following command runs the unit tests:
 
     nosetests -w lib/
 
-[centos7]: https://aws.amazon.com/marketplace/seller-profile?id=16cb8b03-256e-4dde-8f34-1b0f377efe89
+[centos7]: https://aws.amazon.com/marketplace/pp/B00O7WM7QW
 [aws-config]: http://docs.aws.amazon.com/cli/latest/userguide/cli-config-files.html
 [aws-cli]: http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-quick-configuration
 [fluo-app]: https://github.com/apache/fluo/blob/master/docs/applications.md
@@ -232,3 +229,4 @@ The following command runs the unit tests:
 [zookeeper]: http://zookeeper.apache.org/
 [hadoop]: http://hadoop.apache.org/
 [Uno]: https://github.com/astralway/uno
+[muchos.props]: conf/muchos.props.example
