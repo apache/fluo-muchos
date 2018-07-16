@@ -1,0 +1,18 @@
+- name: "determine best apache mirror to use"
+  shell: curl -sk https://apache.org/mirrors.cgi?as_json | grep preferred | cut -d \" -f 4
+  args:
+    warn: no
+  register: apache_mirror
+  failed_when: "'http' not in apache_mirror.stdout"
+  changed_when: False
+- name: "check if Spark tarball was uploaded to proxy"
+  stat: path={{ tarballs_dir }}/{{ spark_tarball }}
+  register: spark
+- name: "download Spark tarball to proxy"
+  get_url: url={{ item.urlp }}/{{ item.fn }} dest={{ tarballs_dir }}/{{ item.fn }} sha256sum={{ item.sum }} force=no
+  register: gresult
+  until: "'OK' in gresult.msg or 'file already exists' in gresult.msg"
+  retries: 3
+  with_items:
+    - { urlp: "{{ apache_mirror.stdout }}/spark/spark-{{ spark_version }}", fn: "{{ spark_tarball }}", sum: "{{ spark_sha256 }}" }
+  when: spark.stat.exists == False

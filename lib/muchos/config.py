@@ -17,7 +17,7 @@ from sys import exit
 from util import get_ephemeral_devices, get_arch
 import os
 
-SERVICES = ['zookeeper', 'namenode', 'resourcemanager', 'accumulomaster', 'mesosmaster', 'worker', 'fluo', 'fluo_yarn', 'metrics']
+SERVICES = ['zookeeper', 'namenode', 'resourcemanager', 'accumulomaster', 'mesosmaster', 'worker', 'fluo', 'fluo_yarn', 'metrics', 'spark']
 
 
 class DeployConfig(ConfigParser):

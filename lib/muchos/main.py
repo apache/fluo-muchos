@@ -223,6 +223,10 @@ class MuchosCluster:
 
         with open(join(config.deploy_path, "ansible/site.yml"), 'w') as site_file:
             print >>site_file, "- import_playbook: common.yml"
+            if config.has_service("spark"):
+                print >>site_file, "- import_playbook: spark.yml"
+            print >>site_file, "- import_playbook: hadoop.yml"
+            print >>site_file, "- import_playbook: zookeeper.yml"
             if config.has_service("metrics"):
                 print >>site_file, "- import_playbook: metrics.yml"
             print >>site_file, "- import_playbook: accumulo.yml"
@@ -239,9 +243,10 @@ class MuchosCluster:
             print >>hosts_file, "\n[accumulomaster]\n{0}".format(config.get_service_hostnames("accumulomaster")[0])
             print >>hosts_file, "\n[namenode]\n{0}".format(config.get_service_hostnames("namenode")[0])
             print >>hosts_file, "\n[resourcemanager]\n{0}".format(config.get_service_hostnames("resourcemanager")[0])
+            if config.has_service("spark"):
+                print >>hosts_file, "\n[spark]\n{0}".format(config.get_service_hostnames("spark")[0])
             if config.has_service("mesosmaster"):
                 print >>hosts_file, "\n[mesosmaster]\n{0}".format(config.get_service_hostnames("mesosmaster")[0])
-
             if config.has_service("metrics"):
                 print >>hosts_file, "\n[metrics]\n{0}".format(config.get_service_hostnames("metrics")[0])
 

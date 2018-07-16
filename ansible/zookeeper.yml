@@ -1,0 +1,6 @@
+- hosts: all
+  roles:
+    - zookeeper
+- hosts: zookeepers
+  tasks:
+    - import_tasks: roles/zookeeper/tasks/start-zookeeper.yml
