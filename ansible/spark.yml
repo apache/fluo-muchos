@@ -1,0 +1,9 @@
+- hosts: proxy
+  tasks:
+    - import_tasks: roles/spark/tasks/download.yml
+- hosts: all
+  roles:
+    - spark
+- hosts: spark
+  tasks:
+    - import_tasks: roles/spark/tasks/start-spark-history.yml

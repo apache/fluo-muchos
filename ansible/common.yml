@@ -16,18 +16,3 @@
   handlers:
     - name: "update network settings"
       command: /sbin/ifup-local {{ network_interface }}
-- hosts: all
-  roles:
-    - spark
-    - hadoop
-    - zookeeper
-- hosts: namenode
-  tasks:
-    - import_tasks: roles/hadoop/tasks/start-hdfs.yml
-- hosts: resourcemanager
-  tasks:
-    - import_tasks: roles/hadoop/tasks/start-yarn.yml
-    - import_tasks: roles/spark/tasks/start-spark-history.yml
-- hosts: zookeepers
-  tasks:
-    - import_tasks: roles/zookeeper/tasks/start-zookeeper.yml

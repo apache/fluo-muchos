@@ -1,0 +1,9 @@
+- hosts: all
+  roles:
+    - hadoop
+- hosts: namenode
+  tasks:
+    - import_tasks: roles/hadoop/tasks/start-hdfs.yml
+- hosts: resourcemanager
+  tasks:
+    - import_tasks: roles/hadoop/tasks/start-yarn.yml

@@ -90,7 +90,10 @@ section below.
 metrics are sent to InfluxDB using collectd and are viewable in Grafana.  If Fluo is running, its
 metrics will also be viewable in Grafana.
 
-3. `mesosmaster` - If specified, a Mesos master will be started on this node and Mesos slaves will
+3. `spark` - If specified on a node, Apache Spark will be installed on all nodes and the Spark History
+server will be run on this node.
+
+4. `mesosmaster` - If specified, a Mesos master will be started on this node and Mesos slaves will
 be started on all workers nodes. The Mesos status page will be viewable at
 `http://<MESOS_MASTER_NODE>:5050/`. Marathon will also be started on this node and will be viewable
 at `http://<MESOS_MASTER_NODE>:8080/`.
