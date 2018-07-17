@@ -31,17 +31,16 @@ def test_defaults():
     assert not c.has_option('ec2', 'subnet_id')
     assert c.get('ec2', 'key_name') == 'my_aws_key'
     assert c.instance_tags() == {}
-    assert len(c.nodes()) == 7
-    assert c.get_node('leader1') == ['namenode', 'zookeeper', 'fluo', 'fluo_yarn']
+    assert len(c.nodes()) == 6
+    assert c.get_node('leader1') == ['namenode', 'resourcemanager', 'accumulomaster', 'zookeeper']
     assert c.get_node('worker1') == ['worker']
     assert c.get_node('worker2') == ['worker']
     assert c.get_node('worker3') == ['worker']
-    assert c.has_service('fluo')
-    assert c.get_service_hostnames('worker') == ['worker1', 'worker2', 'worker3']
-    assert c.get_service_hostnames('zookeeper') == ['leader1', 'leader2', 'leader3']
-    assert c.get_hosts() == {'leader2': ('10.0.0.1', None), 'leader3': ('10.0.0.2', None),
-                             'leader1': ('10.0.0.0', '23.0.0.0'), 'worker1': ('10.0.0.3', None),
-                             'worker3': ('10.0.0.5', None), 'worker2': ('10.0.0.4', None)}
+    assert c.has_service('accumulomaster')
+    assert not c.has_service('fluo')
+    assert c.get_service_hostnames('worker') == ['worker1', 'worker2', 'worker3', 'worker4']
+    assert c.get_service_hostnames('zookeeper') == ['leader1']
+    assert c.get_hosts() == {'leader2': ('10.0.0.1', None), 'leader1': ('10.0.0.0', '23.0.0.0'), 'worker1': ('10.0.0.2', None), 'worker3': ('10.0.0.4', None), 'worker2': ('10.0.0.3', None), 'worker4': ('10.0.0.5', None)}
     assert c.get_public_ip('leader1') == '23.0.0.0'
     assert c.get_private_ip('leader1') == '10.0.0.0'
     assert c.cluster_name == 'mycluster'
@@ -49,18 +48,16 @@ def test_defaults():
     assert c.version("fluo").startswith('1.')
     assert c.version("hadoop").startswith('2.')
     assert c.version("zookeeper").startswith('3.')
-    assert c.get_service_private_ips("worker") == ['10.0.0.3', '10.0.0.4', '10.0.0.5']
+    assert c.get_service_private_ips("worker") == ['10.0.0.2', '10.0.0.3', '10.0.0.4', '10.0.0.5']
     assert c.get('general', 'proxy_hostname') == "leader1"
     assert c.proxy_public_ip() == "23.0.0.0"
     assert c.proxy_private_ip() == "10.0.0.0"
     assert c.get('general', 'cluster_basedir') == "/home/centos"
     assert c.get('general', 'cluster_user') == "centos"
-    assert c.get_non_proxy() == [('10.0.0.1', 'leader2'), ('10.0.0.2', 'leader3'), ('10.0.0.3', 'worker1'),
-                                 ('10.0.0.4', 'worker2'), ('10.0.0.5', 'worker3')]
-    assert c.get_host_services() == [('leader1', 'namenode zookeeper fluo fluo_yarn'), ('leader2', 'resourcemanager zookeeper'),
-                                     ('leader3', 'accumulomaster zookeeper'), ('metrics', 'metrics'),
-                                     ('worker1', 'worker'), ('worker2', 'worker'), ('worker3', 'worker')]
-
+    assert c.get_non_proxy() == [('10.0.0.1', 'leader2'), ('10.0.0.2', 'worker1'), ('10.0.0.3', 'worker2'),
+                                 ('10.0.0.4', 'worker3'), ('10.0.0.5', 'worker4')]
+    assert c.get_host_services() == [('leader1', 'namenode resourcemanager accumulomaster zookeeper'), ('leader2', 'metrics'),
+            ('worker1', 'worker'), ('worker2', 'worker'), ('worker3', 'worker'), ('worker4', 'worker')]
 
 def test_case_sensitive():
     c = DeployConfig("muchos", '../conf/muchos.props.example', '../conf/hosts/example/example_cluster',

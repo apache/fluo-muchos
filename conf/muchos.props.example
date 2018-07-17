@@ -160,9 +160,9 @@ yarn_nm_mem_mb=16384
 #   Service = Service to run on node (possible values: zookeeper, namenode, resourcemanager, accumulomaster,
 #             mesosmaster, worker, fluo, metrics, spark). The following services are required: namenode, resourcemanager,
 #             accumulomaster, zookeeper & worker
-leader1 = namenode,resourcemanager,zookeeper,accumulomaster,zookeeper
-leader2 = metrics,zookeeper
-worker1 = worker,zookeeper
+leader1 = namenode,resourcemanager,accumulomaster,zookeeper
+leader2 = metrics
+worker1 = worker
 worker2 = worker
 worker3 = worker
 worker4 = worker

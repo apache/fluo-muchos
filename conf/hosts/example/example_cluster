@@ -4,7 +4,7 @@
 # <Hostname> <Private IP> [<Public IP>]
 leader1 10.0.0.0 23.0.0.0
 leader2 10.0.0.1
-leader3 10.0.0.2
-worker1 10.0.0.3
-worker2 10.0.0.4
-worker3 10.0.0.5
+worker1 10.0.0.2
+worker2 10.0.0.3
+worker3 10.0.0.4
+worker4 10.0.0.5
