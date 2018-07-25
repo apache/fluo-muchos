@@ -48,7 +48,7 @@ class DeployConfig(ConfigParser):
 
         if action in ['launch', 'setup']:
             for service in SERVICES:
-                if service not in ['fluo', 'fluo_yarn', 'metrics', 'mesosmaster']:
+                if service not in ['fluo', 'fluo_yarn', 'metrics', 'mesosmaster', 'spark']:
                     if not self.has_service(service):
                         exit("ERROR - Missing '{0}' service from [nodes] section of muchos.props".format(service))
 
