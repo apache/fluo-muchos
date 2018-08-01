@@ -98,6 +98,9 @@ be started on all workers nodes. The Mesos status page will be viewable at
 `http://<MESOS_MASTER_NODE>:5050/`. Marathon will also be started on this node and will be viewable
 at `http://<MESOS_MASTER_NODE>:8080/`.
 
+5. `client` - Used to specify a client node where no services are run but libraries are installed to
+run Accumulo/Hadoop clients.
+
 If you run the `muchos setup` command and a failure occurs, you can repeat the command until setup
 completes. Any work that was successfully completed will not be repeated. While some setup steps can
 take over a minute, use `ctrl-c` to stop setup if it hangs for a long time. Just remember to run
