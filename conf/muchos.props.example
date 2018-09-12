@@ -33,20 +33,13 @@ network_interface=eth0
 accumulo_instance = muchos
 # Accumluo Password
 accumulo_password = secret
-# Software versions
+# Software versions (set sha-256 in conf/checksums)
 hadoop_version = 2.8.4
 zookeeper_version = 3.4.12
 spark_version = 2.2.2
 fluo_version = 1.2.0
 fluo_yarn_version = 1.0.0
 accumulo_version = 1.9.2
-# Software sha256 checksums
-hadoop_sha256 = 6b545972fdd73173887cdbc3e1cbd3cc72068271924edea82a0e7e653199b115
-zookeeper_sha256 = c686f9319050565b58e642149cb9e4c9cc8c7207aacc2cb70c5c0672849594b9
-spark_sha256 = 023b2fea378b3dd0fee2d5d1de6bfaf2d8349aefe7be97a9cbcf03bbacc428d7
-fluo_sha256 = 037f89cd2bfdaf76a1368256c52de46d6b9a85c9c1bfc776ec4447d02c813fb2
-fluo_yarn_sha256 = c6220d35cf23127272f3b5638c44586504dc17a46f5beecdfee5027b5ff874b0
-accumulo_sha256 = c23c147e6abde5e6b851cf27f91b813705dc41d07c2bfea798a86abb144255d5
 
 [ec2]
 # AWS machine image to use. The default below is for a CentOS 7 image (in us-east-1).

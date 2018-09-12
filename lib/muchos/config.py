@@ -22,7 +22,7 @@ SERVICES = ['zookeeper', 'namenode', 'resourcemanager', 'accumulomaster', 'mesos
 
 class DeployConfig(ConfigParser):
 
-    def __init__(self, deploy_path, config_path, hosts_path, cluster_name):
+    def __init__(self, deploy_path, config_path, hosts_path, checksums_path, cluster_name):
         ConfigParser.__init__(self)
         self.optionxform = str
         self.deploy_path = deploy_path
@@ -35,6 +35,8 @@ class DeployConfig(ConfigParser):
         self.metrics_drive_root = 'media-' + self.ephemeral_root
         self.node_d = None
         self.hosts = None
+        self.checksums_path = checksums_path
+        self.checksums_d = None
         self.init_nodes()
 
     def verify_config(self, action):
@@ -118,8 +120,30 @@ class DeployConfig(ConfigParser):
     def version(self, software_id):
         return self.get('general', software_id + '_version')
 
-    def sha256(self, software_id):
-        return self.get('general', software_id + '_sha256')
+    def checksum(self, software):
+        return self.checksum_ver(software, self.version(software))
+
+    def checksum_ver(self, software, version):
+        if not os.path.isfile(self.checksums_path):
+            exit('ERROR - A checksums file does not exist at %s' % self.hosts_path)
+
+        if not self.checksums_d:
+            self.checksums_d = {}
+            with open(self.checksums_path) as f:
+                for line in f:
+                    line = line.strip()
+                    if line.startswith("#") or not line:
+                        continue
+                    args = line.split(':')
+                    if len(args) == 3:
+                        self.checksums_d["{0}:{1}".format(args[0], args[1])] = args[2]
+                    else:
+                        exit('ERROR - Bad line %s in checksums %s' % (line, self.checksums_path))
+
+        key = "{0}:{1}".format(software, version)
+        if key not in self.checksums_d:
+            exit('ERROR - Failed to find checksums for {0} {1} in {2}' % (software, version, self.checksums_path))
+        return self.checksums_d[key]
 
     def verify_instance_type(self, instance_type):
         if get_arch(instance_type) == 'pvm':
@@ -204,6 +228,8 @@ class DeployConfig(ConfigParser):
                     self.hosts[args[0]] = (args[1], args[2])
                 else:
                     exit('ERROR - Bad line %s in hosts %s' % (line, self.hosts_path))
+
+
 
     def get_hosts(self):
         if self.hosts is None:
@@ -303,13 +329,13 @@ PLAY_VAR_DEFAULTS = {
   'accumulo_imap_size': None,
   'accumulo_sha256': None,
   'accumulo_tserv_mem': None,
+  'fluo_sha256': None,
   'fluo_worker_instances_multiplier': None,
   'fluo_worker_mem_mb': None,
   'fluo_worker_threads': None,
+  'fluo_yarn_sha256': None,
   'force_format': None,
   'fstype': None,
-  'fluo_sha256': None,
-  'fluo_yarn_sha256': None,
   'hadoop_sha256': None,
   'hub_version': '2.2.3',
   'hub_home': '"{{ install_dir }}/hub-linux-amd64-{{ hub_version }}"',
