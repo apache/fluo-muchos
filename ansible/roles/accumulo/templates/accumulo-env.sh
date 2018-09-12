@@ -16,13 +16,13 @@
 # limitations under the License.
 
 export ACCUMULO_LOG_DIR={{ worker_data_dirs[0] }}/logs/accumulo
-export HADOOP_PREFIX={{ hadoop_prefix }}
-export HADOOP_CONF_DIR="$HADOOP_PREFIX/etc/hadoop"
 export ZOOKEEPER_HOME={{ zookeeper_home }}
 export JAVA_HOME={{ java_home }}
 
 {% if accumulo_major_version == '1' %}
 
+export HADOOP_PREFIX={{ hadoop_home }}
+export HADOOP_CONF_DIR="$HADOOP_PREFIX/etc/hadoop"
 export ACCUMULO_TSERVER_OPTS="-Xmx{{ accumulo_tserv_mem }} -Xms{{ accumulo_tserv_mem }}"
 export ACCUMULO_MASTER_OPTS="-Xmx256m -Xms256m"
 export ACCUMULO_MONITOR_OPTS="-Xmx128m -Xms64m"
@@ -32,17 +32,14 @@ export ACCUMULO_GENERAL_OPTS="-XX:+UseConcMarkSweepGC -XX:CMSInitiatingOccupancy
 export ACCUMULO_OTHER_OPTS="-Xmx256m -Xms64m"
 export ACCUMULO_KILL_CMD='kill -9 %p'
 export NUM_TSERVERS=1
+export MALLOC_ARENA_MAX=${MALLOC_ARENA_MAX:-1}
 
 {% else %}
 
-CLASSPATH="$(find "$ZOOKEEPER_HOME"/ "$HADOOP_PREFIX"/share/hadoop/{common,common/lib,hdfs,mapreduce,yarn} -maxdepth 1 -name '*.jar' \
-  -and -not -name '*slf4j*' \
-  -and -not -name '*fatjar*' \
-  -and -not -name '*-javadoc*' \
-  -and -not -name '*-sources*.jar' \
-  -and -not -name '*-test*.jar' \
-  -print0 | tr '\0' ':')$CLASSPATH"
-CLASSPATH="${conf}:${lib}/*:${HADOOP_CONF_DIR}:${CLASSPATH}"
+export HADOOP_HOME={{ hadoop_home }}
+export HADOOP_CONF_DIR="$HADOOP_HOME/etc/hadoop"
+
+CLASSPATH="${conf}:${lib}/*:${HADOOP_CONF_DIR}:${ZOOKEEPER_HOME}/*:${HADOOP_HOME}/share/hadoop/client/*"
 export CLASSPATH
 
 JAVA_OPTS=("${ACCUMULO_JAVA_OPTS[@]}"
@@ -80,7 +77,6 @@ case "$cmd" in
 esac
 export JAVA_OPTS
 
+export MALLOC_ARENA_MAX=${MALLOC_ARENA_MAX:-1}
 export LD_LIBRARY_PATH="${HADOOP_PREFIX}/lib/native:${LD_LIBRARY_PATH}"
 {% endif %}
-
-export MALLOC_ARENA_MAX=${MALLOC_ARENA_MAX:-1}

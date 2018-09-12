@@ -1,3 +1,3 @@
 MASTER=`cat /etc/mesos/zk`
-MESOS_HADOOP_HOME={{ hadoop_prefix }}
+MESOS_HADOOP_HOME={{ hadoop_home }}
 JAVA_HOME={{ java_home }}

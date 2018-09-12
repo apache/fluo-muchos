@@ -1,7 +1,7 @@
 - name: "install hadoop tarball"
-  unarchive: src={{ tarballs_dir }}/{{ hadoop_tarball }} dest={{ install_dir }} creates={{ hadoop_prefix }} copy=yes
+  unarchive: src={{ tarballs_dir }}/{{ hadoop_tarball }} dest={{ install_dir }} creates={{ hadoop_home }} copy=yes
 - name: "configure hadoop with templates"
-  template: src={{ item }} dest={{ hadoop_prefix }}/etc/hadoop/{{ item }}
+  template: src={{ item }} dest={{ hadoop_home }}/etc/hadoop/{{ item }}
   with_items:
     - core-site.xml
     - hdfs-site.xml
@@ -9,14 +9,14 @@
     - mapred-site.xml
     - slaves
 - name: "copy spark yarn shuffle jar to hadoop lib"
-  command: cp {{ spark_home }}/yarn/spark-{{ spark_version }}-yarn-shuffle.jar {{ hadoop_prefix }}/share/hadoop/yarn/lib/ creates={{ hadoop_prefix }}/share/hadoop/yarn/lib/spark-{{ spark_version }}-yarn-shuffle.jar
+  command: cp {{ spark_home }}/yarn/spark-{{ spark_version }}-yarn-shuffle.jar {{ hadoop_home }}/share/hadoop/yarn/lib/ creates={{ hadoop_home }}/share/hadoop/yarn/lib/spark-{{ spark_version }}-yarn-shuffle.jar
   when: "'spark' in groups"
 - name: "setup hadoop short circuit socket dir"
   file: path=/var/lib/hadoop-hdfs state=directory owner={{ cluster_user }} group={{ cluster_user }} mode=0755
   become: yes
 - name: "Configure hadoop log dir"
   replace:
-    path: "{{ hadoop_prefix }}/etc/hadoop/hadoop-env.sh"
+    path: "{{ hadoop_home }}/etc/hadoop/hadoop-env.sh"
     regexp: '.*export\s+HADOOP_LOG_DIR.*'
     replace: "export HADOOP_LOG_DIR={{ worker_data_dirs[0] }}/logs/hadoop"
 - name: "Create hadoop log dir"

@@ -16,7 +16,7 @@
   - name: "wipe software installation dirs"
     file: path={{ item }} state=absent
     with_items:
-      - "{{ hadoop_prefix }}"
+      - "{{ hadoop_home }}"
       - "{{ zookeeper_home }}"
       - "{{ accumulo_home }}"
       - "{{ fluo_home }}"
@@ -27,7 +27,7 @@
     file: path={{item}}/hadoop state=absent
     with_items: "{{ worker_data_dirs }}"
   - name: "remove hadoop logs"
-    shell: rm -rf {{ hadoop_prefix }}/logs/*
+    shell: rm -rf {{ hadoop_home }}/logs/*
 - hosts: zookeepers
   tasks:
   - name: "wipe zookeeper data"

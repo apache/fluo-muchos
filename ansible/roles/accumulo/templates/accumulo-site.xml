@@ -40,8 +40,6 @@
     <name>tserver.walog.max.size</name>
     <value>512M</value>
   </property>
-
-{% if accumulo_major_version == '1' %}
   <property>
     <name>tserver.cache.data.size</name>
     <value>{{ accumulo_dcache_size }}</value>
@@ -81,5 +79,4 @@
       $HADOOP_PREFIX/share/hadoop/yarn/lib/jersey.*.jar
     </value>
   </property>
-{% endif %}
 </configuration>

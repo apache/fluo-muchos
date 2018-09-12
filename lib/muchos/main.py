@@ -200,6 +200,13 @@ class MuchosCluster:
                     if name in play_vars:
                         play_vars[name] = value
 
+        play_vars['accumulos_sha256'] = config.checksum('accumulo')
+        play_vars['fluo_sha256'] = config.checksum('fluo')
+        play_vars['fluo_yarn_sha256'] = config.checksum('fluo_yarn')
+        play_vars['hadoop_sha256'] = config.checksum('hadoop')
+        play_vars['spark_sha256'] = config.checksum('spark')
+        play_vars['zookeeper_sha256'] = config.checksum('zookeeper')
+
         cloud_provider = host_vars.get('cloud_provider', 'ec2')
         node_type_map = {}
         if cloud_provider == 'ec2':
@@ -427,6 +434,9 @@ def main():
     config_path = join(deploy_path, "conf/muchos.props")
     if not isfile(config_path):
         exit('ERROR - A config file does not exist at '+config_path)
+    checksums_path = join(deploy_path, "conf/checksums")
+    if not isfile(checksums_path):
+        exit('ERROR - A checksums file does not exist at '+checksums_path)
 
     hosts_dir = join(deploy_path, "conf/hosts/")
 
@@ -439,7 +449,7 @@ def main():
 
     hosts_path = join(hosts_dir, opts.cluster)
 
-    config = DeployConfig(deploy_path, config_path, hosts_path, opts.cluster)
+    config = DeployConfig(deploy_path, config_path, hosts_path, checksums_path, opts.cluster)
     config.verify_config(action)
 
     cluster = MuchosCluster(config)

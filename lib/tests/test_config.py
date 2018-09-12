@@ -17,7 +17,9 @@ from muchos.config import DeployConfig
 
 def test_defaults():
     c = DeployConfig("muchos", '../conf/muchos.props.example', '../conf/hosts/example/example_cluster',
-                     'mycluster')
+                     '../conf/checksums', 'mycluster')
+    assert c.checksum_ver('accumulo', '1.9.0') == 'f68a6145029a9ea843b0305c90a7f5f0334d8a8ceeea94734267ec36421fe7fe'
+    assert c.checksum('accumulo') == 'c23c147e6abde5e6b851cf27f91b813705dc41d07c2bfea798a86abb144255d5'
     assert c.get('ec2', 'default_instance_type') == 'm5d.large'
     assert c.get('ec2', 'worker_instance_type') == 'm5d.large'
     assert c.get('ec2', 'aws_ami') == 'ami-9887c6e7'
@@ -61,7 +63,7 @@ def test_defaults():
 
 def test_case_sensitive():
     c = DeployConfig("muchos", '../conf/muchos.props.example', '../conf/hosts/example/example_cluster',
-                     'mycluster')
+                     '../conf/checksums', 'mycluster')
     assert c.has_option('ec2', 'default_instance_type') == True
     assert c.has_option('ec2', 'Default_instance_type') == False
     c.set('nodes', 'CamelCaseWorker', 'worker,fluo')
