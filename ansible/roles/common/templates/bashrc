@@ -6,9 +6,15 @@ if [ -f /etc/bashrc ]; then
 fi
 
 export JAVA_HOME={{ java_home }}
-export HADOOP_PREFIX={{ hadoop_prefix }}
-export HADOOP_HOME=$HADOOP_PREFIX
+
+{% if hadoop_major_version == '2' %}
+export HADOOP_PREFIX={{ hadoop_home }}
 export HADOOP_CONF_DIR=$HADOOP_PREFIX/etc/hadoop
+{% else %}
+export HADOOP_HOME={{ hadoop_home }}
+export HADOOP_CONF_DIR=$HADOOP_HOME/etc/hadoop
+{% endif %}
+
 export ZOOKEEPER_HOME={{ zookeeper_home }}
 export SPARK_HOME={{ spark_home }}
 export ACCUMULO_HOME={{ accumulo_home }}
@@ -16,7 +22,7 @@ export FLUO_HOME={{ fluo_home }}
 export FLUO_YARN_HOME={{ fluo_yarn_home }}
 
 alias ssh='ssh -A'
-alias cdh='cd {{ hadoop_prefix }}'
+alias cdh='cd {{ hadoop_home }}'
 alias cdz='cd {{ zookeeper_home }}'
 alias cda='cd {{ accumulo_home }}'
 alias cdf='cd {{ fluo_home }}'

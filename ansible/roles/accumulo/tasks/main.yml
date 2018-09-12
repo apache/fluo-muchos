@@ -8,7 +8,18 @@
     - monitor_logger.xml
     - log4j.properties
   when: accumulo_major_version == '1'
-- name: "configure accumulo using managed templates"
+- name: "configure accumulo 2.0 configuration"
+  template: src={{ item }} dest={{ accumulo_home }}/conf/{{ item }}
+  with_items:
+    - accumulo-env.sh
+    - accumulo.properties
+    - accumulo-client.properties
+    - gc
+    - tracers
+    - masters
+    - monitor
+  when: accumulo_major_version == '2'
+- name: "configure accumulo 1.0 configuration"
   template: src={{ item }} dest={{ accumulo_home }}/conf/{{ item }}
   with_items:
     - accumulo-env.sh
@@ -18,6 +29,7 @@
     - tracers
     - masters
     - monitor
+  when: accumulo_major_version == '1'
 - name: "configure accumulo to send metrics (if metrics server exists)"
   template: src={{ item }} dest={{ accumulo_home }}/conf/{{ item }}
   with_items:
