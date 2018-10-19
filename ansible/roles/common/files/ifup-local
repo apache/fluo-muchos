@@ -1,3 +1,0 @@
-#!/bin/bash
-/sbin/ethtool -K $1 sg off
-/sbin/ethtool -K $1 tso off
