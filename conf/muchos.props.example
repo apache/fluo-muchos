@@ -25,8 +25,6 @@ cluster_basedir = /home/centos
 # public IP if launching in EC2.  If not launching in EC2, node must have public IP that can be reached
 # from your machine. Hostname can be chosen from "nodes" section below.
 proxy_hostname = leader1
-# Cluster network interface (leave default if launching in AWS)
-network_interface=eth0
 # If set, a SOCKS proxy will be created on the specified port when connecting to proxy using 'muchos ssh <cluster>'
 #proxy_socks_port = 38585
 # Accumulo Instance name
@@ -34,12 +32,12 @@ accumulo_instance = muchos
 # Accumluo Password
 accumulo_password = secret
 # Software versions (set sha-256 in conf/checksums)
-hadoop_version = 2.8.4
-zookeeper_version = 3.4.12
-spark_version = 2.2.2
+hadoop_version = 3.1.1
+zookeeper_version = 3.4.13
+spark_version = 2.3.2
 fluo_version = 1.2.0
 fluo_yarn_version = 1.0.0
-accumulo_version = 1.9.2
+accumulo_version = 2.0.0-alpha-1
 
 [ec2]
 # AWS machine image to use. The default below is for a CentOS 7 image (in us-east-1).

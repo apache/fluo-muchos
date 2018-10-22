@@ -4,9 +4,6 @@
   file: path=/etc/security/limits.d/20-nproc.conf state=absent
 - name: "copy new limits.conf"
   copy: src=roles/common/files/limits.conf dest=/etc/security/limits.conf
-- name: "configure network settings for spark"
-  copy: src=roles/common/files/ifup-local dest=/sbin/ifup-local mode=0755
-  notify: "update network settings"
 - name: "configure user shell"
   template: src=roles/common/templates/{{ item }} dest=/home/{{ cluster_user }}/.{{ item }} owner={{ cluster_user }} group={{ cluster_user }} mode=0644
   with_items:

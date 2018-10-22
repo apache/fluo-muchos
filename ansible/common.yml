@@ -13,6 +13,3 @@
     - import_tasks: roles/common/tasks/ssh.yml
     - import_tasks: roles/common/tasks/os.yml
     - import_tasks: roles/common/tasks/drives.yml
-  handlers:
-    - name: "update network settings"
-      command: /sbin/ifup-local {{ network_interface }}
