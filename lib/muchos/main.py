@@ -200,7 +200,7 @@ class MuchosCluster:
                     if name in play_vars:
                         play_vars[name] = value
 
-        play_vars['accumulos_sha256'] = config.checksum('accumulo')
+        play_vars['accumulo_sha256'] = config.checksum('accumulo')
         play_vars['fluo_sha256'] = config.checksum('fluo')
         play_vars['fluo_yarn_sha256'] = config.checksum('fluo_yarn')
         play_vars['hadoop_sha256'] = config.checksum('hadoop')

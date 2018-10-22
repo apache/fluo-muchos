@@ -1,16 +1,17 @@
 - name: "enable epel yum repo" 
   yum: name=epel-release state=present
 - name: "install packages"
-  yum: name={{ item }} state=present
-  with_items:
-    - vim
-    - git
-    - wget
-    - gcc-c++
-    - collectd
-    - screen
-    - patch
-    - java-1.8.0-openjdk-devel
+  yum:
+    name:
+      - vim
+      - git
+      - wget
+      - gcc-c++
+      - collectd
+      - screen
+      - patch
+      - java-1.8.0-openjdk-devel
+    state: present
 - name: "configure node shutdown"
   shell: shutdown +{{ shutdown_delay_minutes }} &> {{ cluster_basedir }}/.shutdown creates={{ cluster_basedir}}/.shutdown
   when: shutdown_delay_minutes > 0

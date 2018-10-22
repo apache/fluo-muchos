@@ -7,7 +7,16 @@
     - hdfs-site.xml
     - yarn-site.xml
     - mapred-site.xml
+- name: "configure hadoop 2"
+  template: src={{ item }} dest={{ hadoop_home }}/etc/hadoop/{{ item }}
+  with_items:
     - slaves
+  when: hadoop_major_version == '2'
+- name: "configure hadoop 3"
+  template: src={{ item }} dest={{ hadoop_home }}/etc/hadoop/{{ item }}
+  with_items:
+    - workers
+  when: hadoop_major_version == '3'
 - name: "copy spark yarn shuffle jar to hadoop lib"
   command: cp {{ spark_home }}/yarn/spark-{{ spark_version }}-yarn-shuffle.jar {{ hadoop_home }}/share/hadoop/yarn/lib/ creates={{ hadoop_home }}/share/hadoop/yarn/lib/spark-{{ spark_version }}-yarn-shuffle.jar
   when: "'spark' in groups"
