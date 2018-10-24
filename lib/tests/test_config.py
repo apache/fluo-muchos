@@ -19,7 +19,7 @@ def test_defaults():
     c = DeployConfig("muchos", '../conf/muchos.props.example', '../conf/hosts/example/example_cluster',
                      '../conf/checksums', 'mycluster')
     assert c.checksum_ver('accumulo', '1.9.0') == 'f68a6145029a9ea843b0305c90a7f5f0334d8a8ceeea94734267ec36421fe7fe'
-    assert c.checksum('accumulo') == 'c23c147e6abde5e6b851cf27f91b813705dc41d07c2bfea798a86abb144255d5'
+    assert c.checksum('accumulo') == 'baa5e0929248ff0d96355bc7fb42a5b75d183a83364519296e07b0adbb089180'
     assert c.get('ec2', 'default_instance_type') == 'm5d.large'
     assert c.get('ec2', 'worker_instance_type') == 'm5d.large'
     assert c.get('ec2', 'aws_ami') == 'ami-9887c6e7'
@@ -46,9 +46,9 @@ def test_defaults():
     assert c.get_public_ip('leader1') == '23.0.0.0'
     assert c.get_private_ip('leader1') == '10.0.0.0'
     assert c.cluster_name == 'mycluster'
-    assert c.version("accumulo").startswith('1.')
+    assert c.version("accumulo").startswith('2.')
     assert c.version("fluo").startswith('1.')
-    assert c.version("hadoop").startswith('2.')
+    assert c.version("hadoop").startswith('3.')
     assert c.version("zookeeper").startswith('3.')
     assert c.get_service_private_ips("worker") == ['10.0.0.2', '10.0.0.3', '10.0.0.4', '10.0.0.5']
     assert c.get('general', 'proxy_hostname') == "leader1"
