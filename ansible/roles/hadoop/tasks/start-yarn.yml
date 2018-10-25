@@ -1,4 +1,11 @@
-- name: "start yarn"
+- name: "start hadoop yarn 2.x"
   command: "{{ hadoop_home }}/sbin/start-yarn.sh"
   register: start_yarn_result
   changed_when: start_yarn_result.stdout | search("starting (:?resource|node)manager")
+  when: hadoop_major_version == '2'
+- name: "start hadoop yarn 3.x"
+  command: "nohup {{ hadoop_home }}/sbin/start-yarn.sh"
+  register: start_yarn_result
+  changed_when: start_yarn_result.rc == 0
+  failed_when: start_yarn_result.rc >= 2
+  when: hadoop_major_version == '3'
