@@ -35,4 +35,18 @@
               {%- if not loop.last -%} , {%- endif -%}
            {%- endfor %}</value>
   </property>
+{% if hadoop_major_version == '3' %}
+  <property>
+    <name>yarn.app.mapreduce.am.env</name>
+    <value>HADOOP_MAPRED_HOME={{ hadoop_home }}</value>
+  </property>
+  <property>
+    <name>mapreduce.map.env</name>
+    <value>HADOOP_MAPRED_HOME={{ hadoop_home }}</value>
+  </property>
+  <property>
+    <name>mapreduce.reduce.env</name>
+    <value>HADOOP_MAPRED_HOME={{ hadoop_home }}</value>
+  </property>
+{% endif %}
 </configuration>
