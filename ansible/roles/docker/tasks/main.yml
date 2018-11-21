@@ -1,0 +1,37 @@
+- name: install required packages for docker
+  yum:
+    name: "{{ packages }}"
+  vars:
+    packages:
+    - yum-utils
+    - device-mapper-persistent-data
+    - lvm2
+- name: add docker repo
+  yum_repository:
+    name: docker-ce-stable
+    description: "Docker CE Stable - $basearch"
+    baseurl: "{{ docker_repo_baseurl }}"
+    gpgcheck: yes
+    gpgkey: https://download.docker.com/linux/centos/gpg
+- name: install docker
+  yum:
+    name: docker-ce
+- name: create docker directory in data dir
+  file:
+    path: "{{ default_data_dirs[0] }}/docker"
+    state: directory
+    mode: 0755
+- name: link /var/lib/docker
+  file:
+    src: "{{ default_data_dirs[0] }}/docker"
+    dest: /var/lib/docker
+    state: link
+- name: "add {{ cluster_user }} to docker group"
+  user:
+    name: "{{ cluster_user }}"
+    groups: docker
+    append: yes
+- name: "start docker service"
+  service:
+    name: docker
+    state: started

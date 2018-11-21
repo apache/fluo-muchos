@@ -35,7 +35,7 @@ def test_defaults():
     assert c.instance_tags() == {}
     assert len(c.nodes()) == 6
     assert c.get_node('leader1') == ['namenode', 'resourcemanager', 'accumulomaster', 'zookeeper']
-    assert c.get_node('worker1') == ['worker']
+    assert c.get_node('worker1') == ['worker', 'swarmmanager']
     assert c.get_node('worker2') == ['worker']
     assert c.get_node('worker3') == ['worker']
     assert c.has_service('accumulomaster')
@@ -59,7 +59,7 @@ def test_defaults():
     assert c.get_non_proxy() == [('10.0.0.1', 'leader2'), ('10.0.0.2', 'worker1'), ('10.0.0.3', 'worker2'),
                                  ('10.0.0.4', 'worker3'), ('10.0.0.5', 'worker4')]
     assert c.get_host_services() == [('leader1', 'namenode resourcemanager accumulomaster zookeeper'), ('leader2', 'metrics'),
-            ('worker1', 'worker'), ('worker2', 'worker'), ('worker3', 'worker'), ('worker4', 'worker')]
+            ('worker1', 'worker swarmmanager'), ('worker2', 'worker'), ('worker3', 'worker'), ('worker4', 'worker')]
 
 def test_case_sensitive():
     c = DeployConfig("muchos", '../conf/muchos.props.example', '../conf/hosts/example/example_cluster',

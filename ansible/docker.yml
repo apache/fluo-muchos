@@ -1,0 +1,35 @@
+- hosts: all
+  become: yes
+  roles:
+    - docker
+- hosts: swarmmanager
+  become: yes
+  tasks:
+    - name: get swarm status
+      shell: >
+        docker info | egrep '^Swarm: ' | cut -d ' ' -f 2
+      register: swarm_status
+      changed_when: "'active' not in swarm_status.stdout_lines"
+    - name: initialize swarm
+      shell: >
+        docker swarm init --advertise-addr={{ ansible_default_ipv4.address }}:2377
+      when: "'active' not in swarm_status.stdout_lines"
+    - name: get swarm token
+      shell: docker swarm join-token -q worker
+      register: swarm_token
+      changed_when: "'active' not in swarm_status.stdout_lines"
+- hosts: workers
+  become: yes
+  vars:
+    swarm_token: "{{ hostvars[groups['swarmmanager'][0]]['swarm_token']['stdout'] }}"
+    manager_ip: "{{ hostvars[groups['swarmmanager'][0]]['ansible_default_ipv4']['address'] }}"
+  tasks:
+    - name: get swarm status
+      shell: >
+        docker info | egrep '^Swarm: ' | cut -d ' ' -f 2
+      register: swarm_status
+      changed_when: "'active' not in swarm_status.stdout_lines"
+    - name: join worker to swarm
+      shell: >
+        docker swarm join --token={{ swarm_token }} {{ manager_ip }}:2377
+      when: "'active' not in swarm_status.stdout_lines"

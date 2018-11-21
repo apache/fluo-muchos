@@ -101,6 +101,11 @@ at `http://<MESOS_MASTER_NODE>:8080/`.
 5. `client` - Used to specify a client node where no services are run but libraries are installed to
 run Accumulo/Hadoop clients.
 
+6. `swarmmanager` - Sets up [Docker swarm] with the manager on this node and joins all worker nodes
+to this swarm. When this is set, docker will be installed on all nodes of the cluster. It is
+recommended that the swarm manager is specified on a worker node as it runs docker containers. Check
+out [Portainer] if you want to run a management UI for your swarm cluster.
+
 If you run the `muchos setup` command and a failure occurs, you can repeat the command until setup
 completes. Any work that was successfully completed will not be repeated. While some setup steps can
 take over a minute, use `ctrl-c` to stop setup if it hangs for a long time. Just remember to run
@@ -236,3 +241,5 @@ The following command runs the unit tests:
 [hadoop]: http://hadoop.apache.org/
 [Uno]: https://github.com/apache/fluo-uno
 [muchos.props]: conf/muchos.props.example
+[Docker swarm]: https://docs.docker.com/engine/swarm/
+[Portainer]: https://github.com/portainer/portainer
