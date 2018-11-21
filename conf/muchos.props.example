@@ -148,12 +148,12 @@ yarn_nm_mem_mb=16384
 # <Hostname> = <Service1>[,<Service2>,<Service3>]
 # Where:
 #   Hostname = Must be unique.  Will be used for hostname in EC2 or should match hostname on your own cluster
-#   Service = Service to run on node (possible values: zookeeper, namenode, resourcemanager, accumulomaster, client,
+#   Service = Service to run on node (possible values: zookeeper, namenode, resourcemanager, accumulomaster, client, swarmmanager,
 #             mesosmaster, worker, fluo, metrics, spark). The following services are required: namenode, resourcemanager,
 #             accumulomaster, zookeeper & worker
 leader1 = namenode,resourcemanager,accumulomaster,zookeeper
 leader2 = metrics
-worker1 = worker
+worker1 = worker,swarmmanager
 worker2 = worker
 worker3 = worker
 worker4 = worker

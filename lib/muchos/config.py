@@ -17,7 +17,9 @@ from sys import exit
 from util import get_ephemeral_devices, get_arch
 import os
 
-SERVICES = ['zookeeper', 'namenode', 'resourcemanager', 'accumulomaster', 'mesosmaster', 'worker', 'fluo', 'fluo_yarn', 'metrics', 'spark', 'client']
+SERVICES = ['zookeeper', 'namenode', 'resourcemanager', 'accumulomaster', 'mesosmaster', 'worker', 'fluo', 'fluo_yarn', 'metrics', 'spark', 'client', 'swarmmanager']
+
+OPTIONAL_SERVICES = ['fluo', 'fluo_yarn', 'metrics', 'mesosmaster', 'spark', 'client', 'swarmmanager']
 
 
 class DeployConfig(ConfigParser):
@@ -50,7 +52,7 @@ class DeployConfig(ConfigParser):
 
         if action in ['launch', 'setup']:
             for service in SERVICES:
-                if service not in ['fluo', 'fluo_yarn', 'metrics', 'mesosmaster', 'spark', 'client']:
+                if service not in OPTIONAL_SERVICES:
                     if not self.has_service(service):
                         exit("ERROR - Missing '{0}' service from [nodes] section of muchos.props".format(service))
 

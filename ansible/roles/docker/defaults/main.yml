@@ -1,0 +1,1 @@
+docker_repo_baseurl: https://download.docker.com/linux/centos/7/$basearch/stable

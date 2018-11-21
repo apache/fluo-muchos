@@ -243,6 +243,8 @@ class MuchosCluster:
                 print >>site_file, "- import_playbook: fluo_yarn.yml"
             if config.has_service("mesosmaster"):
                 print >>site_file, "- import_playbook: mesos.yml"
+            if config.has_service("swarmmanager"):
+                print >>site_file, "- import_playbook: docker.yml"
 
         ansible_conf = join(config.deploy_path, "ansible/conf")
         with open(join(ansible_conf, "hosts"), 'w') as hosts_file:
@@ -256,6 +258,8 @@ class MuchosCluster:
                 print >>hosts_file, "\n[mesosmaster]\n{0}".format(config.get_service_hostnames("mesosmaster")[0])
             if config.has_service("metrics"):
                 print >>hosts_file, "\n[metrics]\n{0}".format(config.get_service_hostnames("metrics")[0])
+            if config.has_service("swarmmanager"):
+                print >>hosts_file, "\n[swarmmanager]\n{0}".format(config.get_service_hostnames("swarmmanager")[0])
 
             print >>hosts_file, "\n[zookeepers]"
             for (index, zk_host) in enumerate(config.get_service_hostnames("zookeeper"), start=1):
