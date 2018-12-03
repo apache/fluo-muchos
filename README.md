@@ -21,6 +21,44 @@ Muchos is structured into two high level components:
 
 Checkout [Uno] for setting up Accumulo or Fluo on a single machine.
 
+## Requirements
+
+Muchos requires the following:
+
+* Python 2
+* [awscli] & [boto3] libraries - Install using `pip install awscli boto3 --upgrade --user`
+* `~/.aws` [configured][aws-config] on your machine. Can be done using [aws configure][awscli-config].
+* `ssh-agent` installed and running
+
+## Quickstart
+
+The following commands will install Muchos, launch an EC2 cluster, and setup/run Accumulo:
+
+```bash
+git clone https://github.com/apache/fluo-muchos.git
+cd fluo-muchos/
+cp conf/muchos.props.example conf/muchos.props
+vim conf/muchos.props                                   # Edit to configure Muchos cluster
+./bin/muchos launch -c mycluster                        # Launches Muchos cluster in EC2
+./bin/muchos setup                                      # Set up cluster and start Accumulo
+```
+
+The `setup` command can be run repeatedly to fix any failures and will not repeat successful operations.
+
+After your cluster is launched, SSH to it using the following command:
+
+```bash
+./bin/muchos ssh
+```
+
+Run the following command to terminate your cluster. WARNING: All cluster data will be lost.
+
+```bash
+./bin/muchos terminate
+```
+
+Please continue reading for more detailed Muchos instructions.
+
 ## Installation
 
 First clone the Muchos repo:
@@ -29,11 +67,11 @@ First clone the Muchos repo:
 
 Now, create and modify your [muchos.props] configuration file for Muchos:
 
-    cd muchos/
+    cd fluo-muchos/
     cp conf/muchos.props.example conf/muchos.props
 
 In order to run the `muchos` command, you will need to create [AWS configuration and credential files][aws-config]
-in your home directory. These files can be created by hand or by running `aws configure` using the [AWS CLI][aws-cli].
+in your home directory. These files can be created by hand or by running `aws configure` using the [AWS CLI][awscli-config].
 
 You will need to upload your public key to the AWS management console and set `key.name` in
 [muchos.props] to the name of your key pair.  If you want to give others access to your cluster, add
@@ -53,22 +91,22 @@ than `us-east-1`.
 
 After following the installation steps above, run the following command to launch an EC2 cluster called `mycluster`:
 
-    muchos launch -c mycluster
+    ./bin/muchos launch -c mycluster
 
 After your cluster has launched, you do not have to specify a cluster anymore using `-c` (unless you
 have multiple clusters running).
 
 Run the following command to confirm that you can ssh to the leader node:
 
-    muchos ssh
+    ./bin/muchos ssh
 
 You can check the status of the nodes using the EC2 Dashboard or by running the following command:
 
-    muchos status
+    ./bin/muchos status
 
 ## Set up the cluster
 
-The `muchos setup` command will set up your cluster and start Hadoop, Zookeeper, & Accumulo.  It
+The `./bin/muchos setup` command will set up your cluster and start Hadoop, Zookeeper, & Accumulo.  It
 will download release tarballs of Fluo, Accumulo, Hadoop, etc. The versions of these tarballs are
 specified in [muchos.props] and can be changed if desired.
 
@@ -78,7 +116,7 @@ version of Fluo or Accumulo. Before running the `muchos setup` command, you shou
 version and SHA-256 hash of your tarball matches what is set in [muchos.props]. Run the command
 `shasum -a 256 /path/to/tarball` on your tarball to determine its hash.
 
-The `muchos setup` command will install and start Accumulo, Hadoop, and Zookeeper.  The optional 
+The `muchos setup` command will install and start Accumulo, Hadoop, and Zookeeper.  The optional
 services below will only be set up if configured in the `[nodes]` section of [muchos.props]:
 
 1. `fluo` - Fluo only needs to be installed and configured on a single node in your cluster as Fluo
@@ -114,10 +152,10 @@ take over a minute, use `ctrl-c` to stop setup if it hangs for a long time. Just
 ## Manage the cluster
 
 The `setup` command is idempotent. It can be run again on a working cluster. It will not change the
-cluster if everything is configured and running correctly. If a process has stopped, the `setup` 
+cluster if everything is configured and running correctly. If a process has stopped, the `setup`
 command will restart the process.
 
-The `muchos wipe` command can be used to wipe all data from the cluster and kill any running
+The `./bin/muchos wipe` command can be used to wipe all data from the cluster and kill any running
 processes. After running the `wipe` command, run the `setup` command to start a fresh cluster.
 
 If you set `proxy_socks_port` in your [muchos.props], a SOCKS proxy will be created on that port
@@ -142,7 +180,7 @@ with Muchos as it configures your shell with common environment variables. To ru
 application, SSH to a node on cluster where Fluo is installed and clone the example repo:
 
 ```bash
-muchos ssh                            # SSH to cluster proxy node                    
+./bin/muchos ssh                      # SSH to cluster proxy node
 ssh <node where Fluo is installed>    # Nodes with Fluo installed is determined by Muchos config
 hub clone apache/fluo-examples        # Clone repo of Fluo example applications. Press enter for user/password.
 ```
@@ -165,7 +203,7 @@ mimic the scripts of example Fluo applications above.
 
 ## Customize your cluster
 
-After `muchos setup` is run, users can install additional software on the cluster using their own
+After `./bin/muchos setup` is run, users can install additional software on the cluster using their own
 Ansible playbooks. In their own playbooks, users can reference any configuration in the Ansible
 inventory file at `/etc/ansible/hosts` which is set up by Muchos on the proxy node. The inventory
 file lists the hosts for services on the cluster such as the Zookeeper nodes, Namenode, Accumulo
@@ -178,7 +216,7 @@ managed in their own git repository (see [mikewalch/muchos-custom][mc] for an ex
 If you launched your cluster on EC2, run the following command terminate your cluster. WARNING - All
 data on your cluster will be lost:
 
-    muchos terminate
+    ./bin/muchos terminate
 
 ## Automatic shutdown of EC2 clusters
 
@@ -198,7 +236,7 @@ If you decide later to cancel the shutdown, run `muchos cancel_shutdown`.
 The `config` command allows you to retrieve cluster configuration for your own scripts:
 
 ```bash
-$ muchos config -p leader.public.ip
+$ ./bin/muchos config -p leader.public.ip
 10.10.10.10
 ```
 
@@ -222,12 +260,14 @@ The following command runs the unit tests:
 
 [centos7]: https://aws.amazon.com/marketplace/pp/B00O7WM7QW
 [aws-config]: http://docs.aws.amazon.com/cli/latest/userguide/cli-config-files.html
-[aws-cli]: http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-quick-configuration
+[awscli]: https://docs.aws.amazon.com/cli/latest/userguide/installing.html
+[awscli-config]: http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-quick-configuration
 [fluo-app]: https://github.com/apache/fluo/blob/master/docs/applications.md
 [WebIndex]: https://github.com/apache/fluo-examples/tree/master/webindex
 [Phrasecount]: https://github.com/apache/fluo-examples/tree/master/phrasecount
 [Stresso]: https://github.com/apache/fluo-examples/tree/master/stresso
 [boto]: http://boto.cloudhackers.com/en/latest/
+[boto3]: https://github.com/boto/boto3
 [Ansible]: https://www.ansible.com/
 [ti]: https://travis-ci.org/apache/fluo-muchos.svg?branch=master
 [tl]: https://travis-ci.org/apache/fluo-muchos
