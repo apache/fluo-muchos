@@ -63,7 +63,7 @@ Please continue reading for more detailed Muchos instructions.
 
 ## Launching an EC2 cluster
 
-Before launching a cluster, you will need to complete the requirements above, clone the Muchos repo, and 
+Before launching a cluster, you will need to complete the requirements above, clone the Muchos repo, and
 create [muchos.props]. If you want to give others access to your cluster, add
 their public keys to a file named `keys` in your `conf/` directory.  During the setup of your
 cluster, this file will be appended on each node to the `~/.ssh/authorized_keys` file for the user
