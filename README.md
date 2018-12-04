@@ -27,8 +27,10 @@ Muchos requires the following:
 
 * Python 2
 * [awscli] & [boto3] libraries - Install using `pip install awscli boto3 --upgrade --user`
-* `~/.aws` [configured][aws-config] on your machine. Can be done using [aws configure][awscli-config].
 * `ssh-agent` installed and running
+* An AWS account with your SSH public key uploaded. When you configure [muchos.props], set `key.name`
+  to name of your key pair in AWS.
+* `~/.aws` [configured][aws-config] on your machine. Can be created manually or using [aws configure][awscli-config].
 
 ## Quickstart
 
@@ -59,22 +61,10 @@ Run the following command to terminate your cluster. WARNING: All cluster data w
 
 Please continue reading for more detailed Muchos instructions.
 
-## Installation
+## Launching an EC2 cluster
 
-First clone the Muchos repo:
-
-    git clone https://github.com/apache/fluo-muchos.git
-
-Now, create and modify your [muchos.props] configuration file for Muchos:
-
-    cd fluo-muchos/
-    cp conf/muchos.props.example conf/muchos.props
-
-In order to run the `muchos` command, you will need to create [AWS configuration and credential files][aws-config]
-in your home directory. These files can be created by hand or by running `aws configure` using the [AWS CLI][awscli-config].
-
-You will need to upload your public key to the AWS management console and set `key.name` in
-[muchos.props] to the name of your key pair.  If you want to give others access to your cluster, add
+Before launching a cluster, you will need to complete the requirements above, clone the Muchos repo, and 
+create [muchos.props]. If you want to give others access to your cluster, add
 their public keys to a file named `keys` in your `conf/` directory.  During the setup of your
 cluster, this file will be appended on each node to the `~/.ssh/authorized_keys` file for the user
 set by the `cluster.username` property.
@@ -87,9 +77,7 @@ error when you try to launch your cluster. By default, the `aws_ami` property is
 You will need to changes this value if a newer image has been released or if you are running in different region
 than `us-east-1`.
 
-## Launching an EC2 cluster
-
-After following the installation steps above, run the following command to launch an EC2 cluster called `mycluster`:
+After following the steps above, run the following command to launch an EC2 cluster called `mycluster`:
 
     ./bin/muchos launch -c mycluster
 
