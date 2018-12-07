@@ -25,8 +25,8 @@ Checkout [Uno] for setting up Accumulo or Fluo on a single machine.
 
 Muchos requires the following:
 
-* Python 2
-* [awscli] & [boto3] libraries - Install using `pip install awscli boto3 --upgrade --user`
+* Python 3
+* [awscli] & [boto3] libraries - Install using `pip3 install awscli boto3 --upgrade --user`
 * `ssh-agent` installed and running
 * An AWS account with your SSH public key uploaded. When you configure [muchos.props], set `key.name`
   to name of your key pair in AWS.

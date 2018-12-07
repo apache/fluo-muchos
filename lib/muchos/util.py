@@ -92,11 +92,11 @@ instance_types = {
 
 def verify_type(instance_type):
     if instance_type not in instance_types:
-        print "ERROR - EC2 instance type '%s' is currently not supported!" % instance_type
-        print "This is probably due to the instance type being EBS-only."
-        print "Below is a list of supported instance types:"
+        print("ERROR - EC2 instance type '%s' is currently not supported!" % instance_type)
+        print("This is probably due to the instance type being EBS-only.")
+        print("Below is a list of supported instance types:")
         for key in instance_types:
-            print key
+            print(key)
         sys.exit(1)
 
 
@@ -162,29 +162,29 @@ def parse_args(hosts_dir, input_args=None):
         (opts, args) = parser.parse_args()
 
     if len(args) == 0:
-        print "ERROR - You must specify on action"
+        print("ERROR - You must specify on action")
         return
     action = args[0]
 
     if action == 'launch' and not opts.cluster:
-        print "ERROR - You must specify a cluster if using launch command"
+        print("ERROR - You must specify a cluster if using launch command")
         return
 
     clusters = [f for f in os.listdir(hosts_dir) if isfile(join(hosts_dir, f))]
 
     if not opts.cluster:
         if len(clusters) == 0:
-            print "ERROR - No clusters found in conf/hosts or specified by --cluster option"
+            print("ERROR - No clusters found in conf/hosts or specified by --cluster option")
             return
         elif len(clusters) == 1:
             opts.cluster = clusters[0]
         else:
-            print "ERROR - Multiple clusters {0} found in conf/hosts/. " \
-                  "Please pick one using --cluster option".format(clusters)
+            print("ERROR - Multiple clusters {0} found in conf/hosts/. " \
+                  "Please pick one using --cluster option".format(clusters))
             return
 
     if action == 'config' and not opts.property:
-        print "ERROR - For config action, you must set -p to a property or 'all'"
+        print("ERROR - For config action, you must set -p to a property or 'all'")
         return
 
     return opts, action, args[1:]

@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -24,8 +24,8 @@ import sys
 from sys import exit
 import shutil
 from botocore.exceptions import ClientError
-from config import DeployConfig, HOST_VAR_DEFAULTS, PLAY_VAR_DEFAULTS
-from util import parse_args, AMI_HELP_MSG, get_block_device_map
+from muchos.config import DeployConfig, HOST_VAR_DEFAULTS, PLAY_VAR_DEFAULTS
+from muchos.util import parse_args, AMI_HELP_MSG, get_block_device_map
 from os.path import isfile, join
 import time
 import subprocess
@@ -71,7 +71,7 @@ class MuchosCluster:
 
         tags = [{'Key': 'Name', 'Value': self.config.cluster_name + '-' + hostname},
                 {'Key': 'Muchos', 'Value': self.config.cluster_name}]
-        for key, val in self.config.instance_tags().iteritems():
+        for key, val in self.config.instance_tags().items():
             tags.append({'Key': key, 'Value': val})
         request['TagSpecifications'] = [{'ResourceType': 'instance', 'Tags': tags}]
 
@@ -91,7 +91,7 @@ class MuchosCluster:
         if response is None or len(response['Instances']) != 1:
             exit('ERROR - Failed to start {0} node'.format(hostname))
 
-        print 'Launching {0} node using {1}'.format(hostname, image_id)
+        print('Launching {0} node using {1}'.format(hostname, image_id))
         return response['Instances'][0]
 
     def create_security_group(self):
@@ -108,7 +108,7 @@ class MuchosCluster:
             pass
 
         if create_group:
-            print "Creating security group " + sg
+            print("Creating security group " + sg)
             request = {'Description': "Security group created by Muchos", 'GroupName': sg}
             if self.config.has_option('ec2', 'vpc_id'):
                 request['VpcId'] = self.config.get('ec2', 'vpc_id')
@@ -130,10 +130,10 @@ class MuchosCluster:
             pass
 
         if not sg_id:
-            print "Could not find security group '{0}'".format(self.config.sg_name)
+            print("Could not find security group '{0}'".format(self.config.sg_name))
             return
 
-        print "Attempting to delete security group '{0}' with id '{1}'...".format(self.config.sg_name, sg_id)
+        print("Attempting to delete security group '{0}' with id '{1}'...".format(self.config.sg_name, sg_id))
         sg_exists = True
         while sg_exists:
             try:
@@ -141,10 +141,10 @@ class MuchosCluster:
                 ec2.delete_security_group(**request)
                 sg_exists = False
             except ClientError as e:
-                print "Failed to delete security group '{0}' due exception below:\n{1}\nRetrying in 10 sec..."\
-                    .format(self.config.sg_name, e)
+                print("Failed to delete security group '{0}' due exception below:\n{1}\nRetrying in 10 sec..."\
+                    .format(self.config.sg_name, e))
                 time.sleep(10)
-        print "Deleted security group"
+        print("Deleted security group")
 
     def launch(self):
         if self.active_nodes():
@@ -156,7 +156,7 @@ class MuchosCluster:
 
         self.config.verify_launch()
 
-        print "Launching {0} cluster".format(self.config.cluster_name)
+        print("Launching {0} cluster".format(self.config.cluster_name))
 
         if self.config.has_option('ec2', 'security_group_id'):
             sg_id = self.config.get('ec2', 'security_group_id')
@@ -164,14 +164,14 @@ class MuchosCluster:
             sg_id = self.create_security_group()
 
         instance_d = {}
-        for (hostname, services) in self.config.nodes().items():
+        for (hostname, services) in list(self.config.nodes().items()):
             instance = self.launch_node(hostname, services, sg_id)
             instance_d[instance['InstanceId']] = hostname
 
         num_running = len(self.status(['running']))
         num_expected = len(self.config.nodes())
         while num_running != num_expected:
-            print "{0} of {1} nodes have started.  Waiting another 5 sec..".format(num_running, num_expected)
+            print("{0} of {1} nodes have started.  Waiting another 5 sec..".format(num_running, num_expected))
             time.sleep(5)
             num_running = len(self.status(['running']))
 
@@ -182,13 +182,13 @@ class MuchosCluster:
                     public_ip = instance['PublicIpAddress']
                 private_ip = instance['PrivateIpAddress']
                 hostname = instance_d[instance['InstanceId']]
-                print >>hosts_file, hostname, private_ip, public_ip
+                print("{0} {1} {2}".format(hostname, private_ip, public_ip), file=hosts_file)
 
-        print "All {0} nodes have started. Created hosts file at {1}".format(num_expected, self.config.hosts_path)
+        print("All {0} nodes have started. Created hosts file at {1}".format(num_expected, self.config.hosts_path))
 
     def sync(self):
         config = self.config
-        print 'Syncing ansible directory on {0} cluster proxy node'.format(config.cluster_name)
+        print('Syncing ansible directory on {0} cluster proxy node'.format(config.cluster_name))
 
         host_vars = HOST_VAR_DEFAULTS
         play_vars = PLAY_VAR_DEFAULTS
@@ -230,71 +230,71 @@ class MuchosCluster:
         host_vars['default_data_dirs'] = str(node_type_map['default']['mounts'])
 
         with open(join(config.deploy_path, "ansible/site.yml"), 'w') as site_file:
-            print >>site_file, "- import_playbook: common.yml"
+            print("- import_playbook: common.yml", file=site_file)
             if config.has_service("spark"):
-                print >>site_file, "- import_playbook: spark.yml"
-            print >>site_file, "- import_playbook: hadoop.yml"
-            print >>site_file, "- import_playbook: zookeeper.yml"
+                print("- import_playbook: spark.yml", file=site_file)
+            print("- import_playbook: hadoop.yml", file=site_file)
+            print("- import_playbook: zookeeper.yml", file=site_file)
             if config.has_service("metrics"):
-                print >>site_file, "- import_playbook: metrics.yml"
-            print >>site_file, "- import_playbook: accumulo.yml"
+                print("- import_playbook: metrics.yml", file=site_file)
+            print("- import_playbook: accumulo.yml", file=site_file)
             if config.has_service('fluo'):
-                print >>site_file, "- import_playbook: fluo.yml"
+                print("- import_playbook: fluo.yml", file=site_file)
             if config.has_service('fluo_yarn'):
-                print >>site_file, "- import_playbook: fluo_yarn.yml"
+                print("- import_playbook: fluo_yarn.yml", file=site_file)
             if config.has_service("mesosmaster"):
-                print >>site_file, "- import_playbook: mesos.yml"
+                print("- import_playbook: mesos.yml", file=site_file)
             if config.has_service("swarmmanager"):
-                print >>site_file, "- import_playbook: docker.yml"
+                print("- import_playbook: docker.yml", file=site_file)
 
         ansible_conf = join(config.deploy_path, "ansible/conf")
         with open(join(ansible_conf, "hosts"), 'w') as hosts_file:
-            print >>hosts_file, "[proxy]\n{0}".format(config.proxy_hostname())
-            print >>hosts_file, "\n[accumulomaster]\n{0}".format(config.get_service_hostnames("accumulomaster")[0])
-            print >>hosts_file, "\n[namenode]\n{0}".format(config.get_service_hostnames("namenode")[0])
-            print >>hosts_file, "\n[resourcemanager]\n{0}".format(config.get_service_hostnames("resourcemanager")[0])
+            print("[proxy]\n{0}".format(config.proxy_hostname()), file=hosts_file)
+            print("\n[accumulomaster]\n{0}".format(config.get_service_hostnames("accumulomaster")[0]), file=hosts_file)
+            print("\n[namenode]\n{0}".format(config.get_service_hostnames("namenode")[0]), file=hosts_file)
+            print("\n[resourcemanager]\n{0}".format(config.get_service_hostnames("resourcemanager")[0]), file=hosts_file)
             if config.has_service("spark"):
-                print >>hosts_file, "\n[spark]\n{0}".format(config.get_service_hostnames("spark")[0])
+                print("\n[spark]\n{0}".format(config.get_service_hostnames("spark")[0]), file=hosts_file)
             if config.has_service("mesosmaster"):
-                print >>hosts_file, "\n[mesosmaster]\n{0}".format(config.get_service_hostnames("mesosmaster")[0])
+                print("\n[mesosmaster]\n{0}".format(config.get_service_hostnames("mesosmaster")[0]), file=hosts_file)
             if config.has_service("metrics"):
-                print >>hosts_file, "\n[metrics]\n{0}".format(config.get_service_hostnames("metrics")[0])
+                print("\n[metrics]\n{0}".format(config.get_service_hostnames("metrics")[0]), file=hosts_file)
             if config.has_service("swarmmanager"):
-                print >>hosts_file, "\n[swarmmanager]\n{0}".format(config.get_service_hostnames("swarmmanager")[0])
+                print("\n[swarmmanager]\n{0}".format(config.get_service_hostnames("swarmmanager")[0]), file=hosts_file)
 
-            print >>hosts_file, "\n[zookeepers]"
+            print("\n[zookeepers]", file=hosts_file)
             for (index, zk_host) in enumerate(config.get_service_hostnames("zookeeper"), start=1):
-                print >>hosts_file, "{0} id={1}".format(zk_host, index)
+                print("{0} id={1}".format(zk_host, index), file=hosts_file)
 
             if config.has_service('fluo'):
-                print >>hosts_file, "\n[fluo]"
+                print("\n[fluo]", file=hosts_file)
                 for host in config.get_service_hostnames("fluo"):
-                    print >>hosts_file, host
+                    print(host, file=hosts_file)
 
             if config.has_service('fluo_yarn'):
-                print >>hosts_file, "\n[fluo_yarn]"
+                print("\n[fluo_yarn]", file=hosts_file)
                 for host in config.get_service_hostnames("fluo_yarn"):
-                    print >>hosts_file, host
+                    print(host, file=hosts_file)
 
-            print >>hosts_file, "\n[workers]"
+            print("\n[workers]", file=hosts_file)
             for worker_host in config.get_service_hostnames("worker"):
-                print >>hosts_file, worker_host
+                print(worker_host, file=hosts_file)
 
-            print >>hosts_file, "\n[accumulo:children]\naccumulomaster\nworkers"
-            print >>hosts_file, "\n[hadoop:children]\nnamenode\nresourcemanager\nworkers"
+            print("\n[accumulo:children]\naccumulomaster\nworkers", file=hosts_file)
+            print("\n[hadoop:children]\nnamenode\nresourcemanager\nworkers", file=hosts_file)
 
-            print >>hosts_file, "\n[nodes]"
+            print("\n[nodes]", file=hosts_file)
             for (private_ip, hostname) in config.get_private_ip_hostnames():
-                print >>hosts_file, "{0} ansible_ssh_host={1} node_type={2}".format(hostname, private_ip,
-                                                                                    config.node_type(hostname))
+                print("{0} ansible_ssh_host={1} node_type={2}".format(hostname, private_ip,
+                                                                                    config.node_type(hostname)), file=hosts_file)
 
-            print >>hosts_file, "\n[all:vars]"
+            print("\n[all:vars]", file=hosts_file)
             for (name, value) in sorted(host_vars.items()):
-                print >>hosts_file, "{0} = {1}".format(name, value)
+                print("{0} = {1}".format(name, value), file=hosts_file)
 
         with open(join(config.deploy_path, "ansible/group_vars/all"), 'w') as play_vars_file:
             for (name, value) in sorted(play_vars.items()):
-                print >>play_vars_file, "{0}: {1}".format(name, value)
+                print("{0}: {1}".format(name, value), file=play_vars_file)
 
         # copy keys file to ansible/conf (if it exists)
         conf_keys = join(config.deploy_path, "conf/keys")
@@ -314,7 +314,7 @@ class MuchosCluster:
 
     def setup(self):
         config = self.config
-        print 'Setting up {0} cluster'.format(config.cluster_name)
+        print('Setting up {0} cluster'.format(config.cluster_name))
 
         self.sync()
 
@@ -354,28 +354,28 @@ class MuchosCluster:
             for tag in node['Tags']:
                 if tag['Key'] == 'Name':
                     name = tag['Value']
-            print "  ", name, node['InstanceId'], node['PrivateIpAddress'], node.get('PublicIpAddress', '')
+            print("  ", name, node['InstanceId'], node['PrivateIpAddress'], node.get('PublicIpAddress', ''))
 
     def terminate(self, hosts_path):
         nodes = self.active_nodes()
-        print "The following {0} nodes in {1} cluster will be terminated:".format(len(nodes), self.config.cluster_name)
+        print("The following {0} nodes in {1} cluster will be terminated:".format(len(nodes), self.config.cluster_name))
         self.print_nodes(nodes)
 
-        response = raw_input("Do you want to continue? (y/n) ")
+        response = input("Do you want to continue? (y/n) ")
         if response == "y":
             ec2 = boto3.client('ec2')
             for node in nodes:
                 ec2.terminate_instances(InstanceIds=[node['InstanceId']])
 
-            print "Terminated nodes."
+            print("Terminated nodes.")
             if not self.config.has_option('ec2', 'security_group_id'):
                 self.delete_security_group()
 
             if isfile(hosts_path):
                 os.remove(hosts_path)
-                print "Removed hosts file at ", hosts_path
+                print("Removed hosts file at ", hosts_path)
         else:
-            print "Aborted termination"
+            print("Aborted termination")
 
     def ssh(self):
         self.wait_until_proxy_ready()
@@ -384,7 +384,7 @@ class MuchosCluster:
             fwd = "-D " + self.config.get('general', 'proxy_socks_port')
         ssh_command = "ssh -C -A -o 'StrictHostKeyChecking no' {fwd} {usr}@{ldr}".format(
             usr=self.config.get('general', 'cluster_user'), ldr=self.config.get_proxy_ip(), fwd=fwd)
-        print "Logging into proxy using: {0}".format(ssh_command)
+        print("Logging into proxy using: {0}".format(ssh_command))
         retcode = subprocess.call(ssh_command, shell=True)
         if retcode != 0:
             exit("ERROR - Command failed with return code of {0}: {1}".format(retcode, ssh_command))
@@ -402,25 +402,25 @@ class MuchosCluster:
 
     def wait_until_proxy_ready(self):
         cluster_user = self.config.get('general', 'cluster_user')
-        print "Checking if '{0}' proxy can be reached using: ssh {1}@{2}"\
-            .format(self.config.proxy_hostname(), cluster_user, self.config.get_proxy_ip())
+        print("Checking if '{0}' proxy can be reached using: ssh {1}@{2}"\
+            .format(self.config.proxy_hostname(), cluster_user, self.config.get_proxy_ip()))
         while True:
             (retcode, ssh_command) = self.exec_on_proxy('pwd > /dev/null')
             if retcode == 0:
-                print "Connected to proxy using SSH!"
+                print("Connected to proxy using SSH!")
                 time.sleep(1)
                 break
-            print "Proxy could not be accessed using SSH.  Will retry in 5 sec..."
+            print("Proxy could not be accessed using SSH.  Will retry in 5 sec...")
             time.sleep(5)
 
     def execute_playbook(self, playbook):
-        print "Executing '{0}' playbook".format(playbook)
+        print("Executing '{0}' playbook".format(playbook))
         basedir = self.config.get('general', 'cluster_basedir')
         self.exec_on_proxy_verified("time -p ansible-playbook {base}/ansible/{playbook}"
                                     .format(base=basedir, playbook=playbook), opts='-t')
 
     def send_to_proxy(self, path, target, skip_if_exists=True):
-        print "Copying to proxy: ", path
+        print("Copying to proxy: ", path)
         cmd = "scp -o 'StrictHostKeyChecking no'"
         if skip_if_exists:
             cmd = "rsync --update --progress -e \"ssh -o 'StrictHostKeyChecking no'\""
@@ -448,7 +448,7 @@ def main():
     # parse command line args
     retval = parse_args(hosts_dir)
     if not retval:
-        print "Invalid command line arguments. For help, use 'muchos -h'"
+        print("Invalid command line arguments. For help, use 'muchos -h'")
         sys.exit(1)
     (opts, action, args) = retval
 
@@ -463,7 +463,7 @@ def main():
         cluster.launch()
     elif action == 'status':
         nodes = cluster.status(['running'])
-        print "Found {0} nodes in {1} cluster".format(len(nodes), config.cluster_name)
+        print("Found {0} nodes in {1} cluster".format(len(nodes), config.cluster_name))
         cluster.print_nodes(nodes)
     elif action == 'sync':
         cluster.sync()
@@ -480,17 +480,17 @@ def main():
         if not isfile(hosts_path):
             exit("Hosts file does not exist for cluster: "+hosts_path)
         if action == 'wipe':
-            print "Killing all processes started by Muchos and wiping Muchos data from {0} cluster"\
-                .format(config.cluster_name)
+            print("Killing all processes started by Muchos and wiping Muchos data from {0} cluster"\
+                .format(config.cluster_name))
         elif action == 'kill':
-            print "Killing all processes started by Muchos on {0} cluster".format(config.cluster_name)
+            print("Killing all processes started by Muchos on {0} cluster".format(config.cluster_name))
         elif action == 'cancel_shutdown':
-            print "Cancelling automatic shutdown of {0} cluster".format(config.cluster_name)
+            print("Cancelling automatic shutdown of {0} cluster".format(config.cluster_name))
         cluster.execute_playbook(action + ".yml")
     elif action == 'terminate':
         cluster.terminate(hosts_path)
     else:
-        print 'ERROR - Unknown action:', action
+        print('ERROR - Unknown action:', action)
 
 
 main()
