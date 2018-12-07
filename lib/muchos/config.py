@@ -13,9 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ConfigParser import ConfigParser
+from configparser import ConfigParser
 from sys import exit
-from util import get_ephemeral_devices, get_arch
+from .util import get_ephemeral_devices, get_arch
 import os
 
 SERVICES = ['zookeeper', 'namenode', 'resourcemanager', 'accumulomaster', 'mesosmaster', 'worker', 'fluo', 'fluo_yarn', 'metrics', 'spark', 'client', 'swarmmanager']
@@ -170,21 +170,21 @@ class DeployConfig(ConfigParser):
         return self.node_d[hostname]
 
     def has_service(self, service):
-        for (hostname, service_list) in self.node_d.items():
+        for (hostname, service_list) in list(self.node_d.items()):
             if service in service_list:
                 return True
         return False
 
     def get_host_services(self):
         retval = []
-        for (hostname, service_list) in self.node_d.items():
+        for (hostname, service_list) in list(self.node_d.items()):
             retval.append((hostname, ' '.join(service_list)))
         retval.sort()
         return retval
 
     def get_service_private_ips(self, service):
         retval = []
-        for (hostname, service_list) in self.node_d.items():
+        for (hostname, service_list) in list(self.node_d.items()):
             if service in service_list:
                 retval.append(self.get_private_ip(hostname))
         retval.sort()
@@ -192,7 +192,7 @@ class DeployConfig(ConfigParser):
 
     def get_service_hostnames(self, service):
         retval = []
-        for (hostname, service_list) in self.node_d.items():
+        for (hostname, service_list) in list(self.node_d.items()):
             if service in service_list:
                 retval.append(hostname)
         retval.sort()
@@ -201,7 +201,7 @@ class DeployConfig(ConfigParser):
     def get_non_proxy(self):
         retval = []
         proxy_ip = self.get_private_ip(self.get('general', 'proxy_hostname'))
-        for (hostname, (private_ip, public_ip)) in self.get_hosts().items():
+        for (hostname, (private_ip, public_ip)) in list(self.get_hosts().items()):
             if private_ip != proxy_ip:
                 retval.append((private_ip, hostname))
         retval.sort()
@@ -209,7 +209,7 @@ class DeployConfig(ConfigParser):
 
     def get_private_ip_hostnames(self):
         retval = []
-        for (hostname, (private_ip, public_ip)) in self.get_hosts().items():
+        for (hostname, (private_ip, public_ip)) in list(self.get_hosts().items()):
             retval.append((private_ip, hostname))
         retval.sort()
         return retval
@@ -269,21 +269,21 @@ class DeployConfig(ConfigParser):
         return self.get(profile, prop)
 
     def print_all(self):
-        print 'proxy_public_ip = ', self.proxy_public_ip()
+        print('proxy_public_ip = ', self.proxy_public_ip())
         for (name, val) in self.items('general'):
-            print name, '=', val
+            print(name, '=', val)
 
         for (name, val) in self.items('ec2'):
-            print name, '=', val
+            print(name, '=', val)
 
     def print_property(self, key):
         if key == 'proxy.public.ip':
-            print self.proxy_public_ip()
+            print(self.proxy_public_ip())
             return
         else:
             for section in self.sections():
                 if self.has_option(section, key):
-                    print self.get(section, key)
+                    print(self.get(section, key))
                     return
         exit("Property '{0}' was not found".format(key))
 
