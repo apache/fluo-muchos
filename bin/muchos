@@ -24,4 +24,4 @@ if [ ! -f "$basedir/conf/muchos.props" ]; then
   exit 1
 fi
 
-python "$basedir/lib/muchos/main.py" "$@"
+python3 "$basedir/lib/main.py" "$@"

@@ -24,8 +24,8 @@ import sys
 from sys import exit
 import shutil
 from botocore.exceptions import ClientError
-from .config import DeployConfig, HOST_VAR_DEFAULTS, PLAY_VAR_DEFAULTS
-from .util import parse_args, AMI_HELP_MSG, get_block_device_map
+from muchos.config import DeployConfig, HOST_VAR_DEFAULTS, PLAY_VAR_DEFAULTS
+from muchos.util import parse_args, AMI_HELP_MSG, get_block_device_map
 from os.path import isfile, join
 import time
 import subprocess
@@ -182,7 +182,7 @@ class MuchosCluster:
                     public_ip = instance['PublicIpAddress']
                 private_ip = instance['PrivateIpAddress']
                 hostname = instance_d[instance['InstanceId']]
-                print(hostname, private_ip, public_ip, file=hosts_file)
+                print("{0} {1} {2}".format(hostname, private_ip, public_ip), file=hosts_file)
 
         print("All {0} nodes have started. Created hosts file at {1}".format(num_expected, self.config.hosts_path))
 
