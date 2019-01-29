@@ -78,10 +78,12 @@ shutdown_delay_minutes = 0
 shutdown_behavior = stop
 
 [existing]
-mount_root = /var/disk
-mounts = /var/disk01,/var/disk02,/var/disk03
-devices = /dev/hdb1,/dev/hdc1,/dev/hdd1
-metrics_drive_ids = var-disk01,var-disk02,var-disk03
+# Root of data dirs
+mount_root = /var/data
+# Data directories on all nodes
+data_dirs = /var/data1,/var/data2,/var/data3
+# Identifies drives for metrics
+metrics_drive_ids = var-data1,var-data2,var-data3
 
 [performance]
 # Automatically tune Accumulo, Yarn, and Fluo performance setting by selecting or

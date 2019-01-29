@@ -18,7 +18,7 @@
 from muchos.config import DeployConfig
 
 
-def test_defaults():
+def test_ec2_cluster():
     c = DeployConfig("muchos", '../conf/muchos.props.example', '../conf/hosts/example/example_cluster',
                      '../conf/checksums', 'mycluster')
     assert c.checksum_ver('accumulo', '1.9.0') == 'f68a6145029a9ea843b0305c90a7f5f0334d8a8ceeea94734267ec36421fe7fe'
@@ -27,6 +27,13 @@ def test_defaults():
     assert c.get('ec2', 'worker_instance_type') == 'm5d.large'
     assert c.get('ec2', 'aws_ami') == 'ami-9887c6e7'
     assert c.max_ephemeral() == 1
+    assert c.mount_root() == '/media/ephemeral'
+    assert c.fstype() == 'ext3'
+    assert c.force_format() == 'no'
+    assert c.worker_data_dirs() == ['/media/ephemeral0']
+    assert c.default_data_dirs() == ['/media/ephemeral0']
+    assert c.metrics_drive_ids() == ['media-ephemeral0']
+    assert c.shutdown_delay_minutes() == '0'
     assert c.mounts(2) == ['/media/ephemeral0', '/media/ephemeral1']
     assert c.node_type_map() == {'default': {'mounts': ['/media/ephemeral0', ], 'devices': ['/dev/nvme1n1', ]},
                                  'worker': {'mounts': ['/media/ephemeral0', ], 'devices': ['/dev/nvme1n1', ]}}
@@ -45,10 +52,13 @@ def test_defaults():
     assert not c.has_service('fluo')
     assert c.get_service_hostnames('worker') == ['worker1', 'worker2', 'worker3', 'worker4']
     assert c.get_service_hostnames('zookeeper') == ['leader1']
-    assert c.get_hosts() == {'leader2': ('10.0.0.1', None), 'leader1': ('10.0.0.0', '23.0.0.0'), 'worker1': ('10.0.0.2', None), 'worker3': ('10.0.0.4', None), 'worker2': ('10.0.0.3', None), 'worker4': ('10.0.0.5', None)}
+    assert c.get_hosts() == {'leader2': ('10.0.0.1', None), 'leader1': ('10.0.0.0', '23.0.0.0'),
+                             'worker1': ('10.0.0.2', None), 'worker3': ('10.0.0.4', None),
+                             'worker2': ('10.0.0.3', None), 'worker4': ('10.0.0.5', None)}
     assert c.get_public_ip('leader1') == '23.0.0.0'
     assert c.get_private_ip('leader1') == '10.0.0.0'
     assert c.cluster_name == 'mycluster'
+    assert c.get_cluster_type() == 'ec2'
     assert c.version("accumulo").startswith('2.')
     assert c.version("fluo").startswith('1.')
     assert c.version("hadoop").startswith('3.')
@@ -61,8 +71,26 @@ def test_defaults():
     assert c.get('general', 'cluster_user') == "centos"
     assert c.get_non_proxy() == [('10.0.0.1', 'leader2'), ('10.0.0.2', 'worker1'), ('10.0.0.3', 'worker2'),
                                  ('10.0.0.4', 'worker3'), ('10.0.0.5', 'worker4')]
-    assert c.get_host_services() == [('leader1', 'namenode resourcemanager accumulomaster zookeeper'), ('leader2', 'metrics'),
-            ('worker1', 'worker swarmmanager'), ('worker2', 'worker'), ('worker3', 'worker'), ('worker4', 'worker')]
+    assert c.get_host_services() == [('leader1', 'namenode resourcemanager accumulomaster zookeeper'),
+                                     ('leader2', 'metrics'),
+                                     ('worker1', 'worker swarmmanager'), ('worker2', 'worker'), ('worker3', 'worker'),
+                                     ('worker4', 'worker')]
+
+
+def test_existing_cluster():
+    c = DeployConfig("muchos", '../conf/muchos.props.example', '../conf/hosts/example/example_cluster',
+                     '../conf/checksums', 'mycluster')
+    c.cluster_type = 'existing'
+    assert c.get_cluster_type() == 'existing'
+    assert c.node_type_map() == {}
+    assert c.mount_root() == '/var/data'
+    assert c.fstype() is None
+    assert c.force_format() == 'no'
+    assert c.worker_data_dirs() == ['/var/data1', '/var/data2', '/var/data3']
+    assert c.default_data_dirs() == ['/var/data1', '/var/data2', '/var/data3']
+    assert c.metrics_drive_ids() == ['var-data1', 'var-data2', 'var-data3']
+    assert c.shutdown_delay_minutes() == '0'
+
 
 def test_case_sensitive():
     c = DeployConfig("muchos", '../conf/muchos.props.example', '../conf/hosts/example/example_cluster',

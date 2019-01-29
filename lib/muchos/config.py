@@ -36,7 +36,7 @@ class DeployConfig(ConfigParser):
         self.cluster_name = cluster_name
         self.sg_name = cluster_name + '-group'
         self.ephemeral_root = 'ephemeral'
-        self.mount_root = '/media/' + self.ephemeral_root
+        self.cluster_type = self.get('general', 'cluster_type')
         self.metrics_drive_root = 'media-' + self.ephemeral_root
         self.node_d = None
         self.hosts = None
@@ -87,10 +87,11 @@ class DeployConfig(ConfigParser):
 
     def node_type_map(self):
         node_types = {}
-        node_list = [('default', self.default_ephemeral_devices()), ('worker', self.worker_ephemeral_devices())]
+        if self.get_cluster_type() == 'ec2':
+            node_list = [('default', self.default_ephemeral_devices()), ('worker', self.worker_ephemeral_devices())]
 
-        for (ntype, devices) in node_list:
-            node_types[ntype] = {'mounts': self.mounts(len(devices)), 'devices': devices}
+            for (ntype, devices) in node_list:
+                node_types[ntype] = {'mounts': self.mounts(len(devices)), 'devices': devices}
         return node_types
 
     def node_type(self, hostname):
@@ -101,26 +102,57 @@ class DeployConfig(ConfigParser):
     def mounts(self, num_ephemeral):
         mounts = []
         for i in range(0, num_ephemeral):
-            mounts.append(self.mount_root + str(i))
+            mounts.append(self.mount_root() + str(i))
         return mounts
 
+    def mount_root(self):
+        if self.get_cluster_type() == 'ec2':
+            return '/media/' + self.ephemeral_root
+        elif self.get_cluster_type() == 'existing':
+            return self.get('existing', 'mount_root')
+
     def fstype(self):
-        retval = self.get('ec2', 'fstype')
-        if not retval:
-            return 'ext3'
+        retval = None
+        if self.get_cluster_type() == 'ec2':
+            retval = self.get('ec2', 'fstype')
+            if not retval:
+                return 'ext3'
         return retval
 
     def force_format(self):
-        retval = self.get('ec2', 'force_format')
-        if not retval:
-            return 'no'
+        retval = 'no'
+        if self.get_cluster_type() == 'ec2':
+            retval = self.get('ec2', 'force_format')
+            if not retval:
+                return 'no'
         return retval
 
+    def worker_data_dirs(self):
+        if self.get_cluster_type() == 'ec2':
+            return self.node_type_map()['worker']['mounts']
+        elif self.get_cluster_type() == 'existing':
+            return self.get('existing', 'data_dirs').split(",")
+
+    def default_data_dirs(self):
+        if self.get_cluster_type() == 'ec2':
+            return self.node_type_map()['default']['mounts']
+        elif self.get_cluster_type() == 'existing':
+            return self.get('existing', 'data_dirs').split(",")
+
     def metrics_drive_ids(self):
-        drive_ids = []
-        for i in range(0, self.max_ephemeral()):
-            drive_ids.append(self.metrics_drive_root + str(i))
-        return drive_ids
+        if self.get_cluster_type() == 'ec2':
+            drive_ids = []
+            for i in range(0, self.max_ephemeral()):
+                drive_ids.append(self.metrics_drive_root + str(i))
+            return drive_ids
+        elif self.get_cluster_type() == 'existing':
+            return self.get("existing", "metrics_drive_ids").split(",")
+
+    def shutdown_delay_minutes(self):
+        retval = '0'
+        if self.get_cluster_type() == 'ec2':
+            retval = self.get("ec2", "shutdown_delay_minutes")
+        return retval
 
     def version(self, software_id):
         return self.get('general', software_id + '_version')
@@ -246,6 +278,11 @@ class DeployConfig(ConfigParser):
 
     def get_public_ip(self, hostname):
         return self.get_hosts()[hostname][1]
+
+    def get_cluster_type(self):
+        if self.cluster_type not in ('ec2', 'existing'):
+            exit('ERROR - Unknown cluster type' + self.cluster_type)
+        return self.cluster_type
 
     def proxy_hostname(self):
         return self.get('general', 'proxy_hostname')
