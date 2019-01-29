@@ -17,21 +17,21 @@
 
 - name: "unmount default drive at /mnt"
   mount: name=/mnt src=/dev/xvdb fstype=auto state=unmounted
-  when: cloud_provider == 'ec2'
+  when: cluster_type == 'ec2'
 - name: "unmount all ephemeral"
   mount: name={{ item.0 }} src={{ item.1 }} fstype=auto state=unmounted
-  when: cloud_provider == 'ec2' and force_format == 'yes'
+  when: cluster_type == 'ec2' and force_format == 'yes'
   with_together: 
     - "{{ node_type_map[node_type].mounts }}"
     - "{{ node_type_map[node_type].devices }}"
 - name: "format drives"
   filesystem: fstype={{ fstype }} dev={{ item }} force={{ force_format }}
-  when: cloud_provider == 'ec2'
+  when: cluster_type == 'ec2'
   with_items: "{{ node_type_map[node_type].devices }}"
 - name: "mount drives"
   mount: name={{ item.0 }} src={{ item.1 }} fstype=auto state=mounted
     opts=defaults,nofail,noatime,nodiratime,comment=cloudconfig passno=2
-  when: cloud_provider == 'ec2'
+  when: cluster_type == 'ec2'
   with_together: 
     - "{{ node_type_map[node_type].mounts }}"
     - "{{ node_type_map[node_type].devices }}"

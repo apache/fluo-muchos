@@ -297,7 +297,7 @@ HOST_VAR_DEFAULTS = {
   'accumulo_password': None,
   'accumulo_tarball': 'accumulo-{{ accumulo_version }}-bin.tar.gz',
   'accumulo_version': None,
-  'cloud_provider': None,
+  'cluster_type': None,
   'cluster_basedir': None,
   'cluster_user': None,
   'default_data_dirs': None,

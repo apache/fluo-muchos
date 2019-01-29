@@ -14,8 +14,8 @@
 # limitations under the License.
 
 [general]
-# Type of cloud service (ec2 or baremetal)
-cloud_provider = ec2
+# Cluster type (ec2 or existing)
+cluster_type = ec2
 # Cluster user name (install command will SSH to cluster using this user)
 # Leave default below if launching cluster in AWS
 cluster_user = centos
@@ -77,7 +77,7 @@ shutdown_delay_minutes = 0
 # Shutdown behavior of EC2 instances: terminate or stop
 shutdown_behavior = stop
 
-[baremetal]
+[existing]
 mount_root = /var/disk
 mounts = /var/disk01,/var/disk02,/var/disk03
 devices = /dev/hdb1,/dev/hdc1,/dev/hdd1
