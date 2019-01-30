@@ -22,6 +22,9 @@
 - hosts: proxy
   roles:
     - proxy
+  tasks:
+    - import_tasks: roles/proxy/tasks/download.yml
+      when: download_software
 - hosts: all
   become: yes
   roles:

@@ -1,0 +1,34 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+- name: "determine best apache mirror to use"
+  shell: curl -sk https://apache.org/mirrors.cgi?as_json | grep preferred | cut -d \" -f 4
+  args:
+    warn: no
+  register: apache_mirror
+  failed_when: "'http' not in apache_mirror.stdout"
+  changed_when: False
+- name: "download common tarballs to proxy"
+  get_url: url={{ item.urlp }}/{{ item.fn }} dest={{ tarballs_dir }}/{{ item.fn }} sha256sum={{ item.sum }} force=no
+  register: gresult
+  until: "'OK' in gresult.msg or 'file already exists' in gresult.msg"
+  retries: 3
+  with_items:
+    - { urlp: "{{ apache_mirror.stdout }}/zookeeper/zookeeper-{{ zookeeper_version }}", fn: "{{ zookeeper_tarball }}", sum: "{{ zookeeper_sha256 }}" }
+    - { urlp: "{{ apache_mirror.stdout }}/hadoop/common/hadoop-{{ hadoop_version }}", fn: "{{ hadoop_tarball }}", sum: "{{ hadoop_sha256 }}" }
+    - { urlp: "{{ apache_mirror.stdout }}/maven/maven-3/{{ maven_version }}/binaries", fn: "{{ maven_tarball }}", sum: "{{ maven_sha256 }}" }
+    - { urlp: "https://github.com/github/hub/releases/download/v{{ hub_version }}", fn: "{{ hub_tarball }}", sum: "{{ hub_sha256 }}" } 

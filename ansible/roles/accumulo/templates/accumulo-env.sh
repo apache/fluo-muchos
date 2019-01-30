@@ -79,5 +79,5 @@ esac
 export JAVA_OPTS
 
 export MALLOC_ARENA_MAX=${MALLOC_ARENA_MAX:-1}
-export LD_LIBRARY_PATH="${HADOOP_PREFIX}/lib/native:${LD_LIBRARY_PATH}"
+export LD_LIBRARY_PATH="${HADOOP_HOME}/lib/native:${LD_LIBRARY_PATH}"
 {% endif %}

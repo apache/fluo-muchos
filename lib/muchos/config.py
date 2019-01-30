@@ -301,6 +301,7 @@ HOST_VAR_DEFAULTS = {
   'cluster_basedir': None,
   'cluster_user': None,
   'default_data_dirs': None,
+  'download_software': None,
   'fluo_home': '"{{ install_dir }}/fluo-{{ fluo_version }}"',
   'fluo_tarball': 'fluo-{{ fluo_version }}-bin.tar.gz',
   'fluo_version': None,
