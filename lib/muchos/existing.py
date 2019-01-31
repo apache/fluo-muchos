@@ -55,27 +55,14 @@ class ExistingCluster:
         play_vars['hadoop_sha256'] = config.checksum('hadoop')
         play_vars['spark_sha256'] = config.checksum('spark')
         play_vars['zookeeper_sha256'] = config.checksum('zookeeper')
-
-        cluster_type = host_vars.get('cluster_type', 'ec2')
-        node_type_map = {}
-        if cluster_type == 'ec2':
-            node_type_map = config.node_type_map()
-            play_vars["mount_root"] = config.mount_root
-            play_vars["metrics_drive_ids"] = config.metrics_drive_ids()
-            play_vars["fstype"] = config.fstype()
-            play_vars["force_format"] = config.force_format()
-            play_vars["shutdown_delay_minutes"] = config.get("ec2", "shutdown_delay_minutes")
-        if cluster_type == 'existing':
-            play_vars["mount_root"] = config.get("existing", "mount_root")
-            play_vars["metrics_drive_ids"] = config.get("existing", "metrics_drives_ids").split(",")
-            mounts = config.get("existing", "mounts").split(",")
-            devices = config.get("existing", "devices").split(",")
-            for node_type in 'default', 'worker':
-                node_type_map[node_type] = {'mounts': mounts, 'devices': devices}
-
-        play_vars["node_type_map"] = node_type_map
-        host_vars['worker_data_dirs'] = str(node_type_map['worker']['mounts'])
-        host_vars['default_data_dirs'] = str(node_type_map['default']['mounts'])
+        play_vars["shutdown_delay_minutes"] = config.shutdown_delay_minutes()
+        play_vars["metrics_drive_ids"] = config.metrics_drive_ids()
+        play_vars["mount_root"] = config.mount_root()
+        play_vars["node_type_map"] = config.node_type_map()
+        play_vars["fstype"] = config.fstype()
+        play_vars["force_format"] = config.force_format()
+        host_vars['worker_data_dirs'] = str(config.worker_data_dirs())
+        host_vars['default_data_dirs'] = str(config.default_data_dirs())
 
         with open(join(config.deploy_path, "ansible/site.yml"), 'w') as site_file:
             print("- import_playbook: common.yml", file=site_file)
