@@ -18,6 +18,7 @@
 - hosts: proxy
   tasks:
     - import_tasks: roles/spark/tasks/download.yml
+      when: download_software
 - hosts: all
   roles:
     - spark

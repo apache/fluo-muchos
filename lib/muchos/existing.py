@@ -21,6 +21,7 @@ import subprocess
 import time
 from os.path import isfile, join
 from sys import exit
+from os import listdir
 
 from .config import HOST_VAR_DEFAULTS, PLAY_VAR_DEFAULTS
 
@@ -168,18 +169,13 @@ class ExistingCluster:
         self.sync()
 
         conf_upload = join(config.deploy_path, "conf/upload")
-        accumulo_tarball = join(conf_upload, "accumulo-{0}-bin.tar.gz".format(config.version("accumulo")))
-        fluo_tarball = join(conf_upload, "fluo-{0}-bin.tar.gz".format(config.version("fluo")))
-        fluo_yarn_tarball = join(conf_upload, "fluo-yarn-{0}-bin.tar.gz".format(config.version("fluo_yarn")))
         basedir = config.get('general', 'cluster_basedir')
         cluster_tarballs = "{0}/tarballs".format(basedir)
         self.exec_on_proxy_verified("mkdir -p {0}".format(cluster_tarballs))
-        if isfile(accumulo_tarball):
-            self.send_to_proxy(accumulo_tarball, cluster_tarballs)
-        if isfile(fluo_tarball) and config.has_service('fluo'):
-            self.send_to_proxy(fluo_tarball, cluster_tarballs)
-        if isfile(fluo_yarn_tarball) and config.has_service('fluo_yarn'):
-            self.send_to_proxy(fluo_yarn_tarball, cluster_tarballs)
+        for f in listdir(conf_upload):
+            tarball_path = join(conf_upload, f)
+            if isfile(tarball_path) and tarball_path.endswith("gz"):
+                self.send_to_proxy(tarball_path, cluster_tarballs)
 
         self.execute_playbook("site.yml")
 
