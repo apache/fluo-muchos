@@ -26,6 +26,7 @@ def test_ec2_cluster():
     assert c.get('ec2', 'default_instance_type') == 'm5d.large'
     assert c.get('ec2', 'worker_instance_type') == 'm5d.large'
     assert c.get('ec2', 'aws_ami') == 'ami-9887c6e7'
+    assert c.user_home() == '/home/centos'
     assert c.max_ephemeral() == 1
     assert c.mount_root() == '/media/ephemeral'
     assert c.fstype() == 'ext3'
@@ -67,8 +68,8 @@ def test_ec2_cluster():
     assert c.get('general', 'proxy_hostname') == "leader1"
     assert c.proxy_public_ip() == "23.0.0.0"
     assert c.proxy_private_ip() == "10.0.0.0"
-    assert c.get('general', 'cluster_basedir') == "/home/centos"
     assert c.get('general', 'cluster_user') == "centos"
+    assert c.get('general', 'cluster_group') == "centos"
     assert c.get_non_proxy() == [('10.0.0.1', 'leader2'), ('10.0.0.2', 'worker1'), ('10.0.0.3', 'worker2'),
                                  ('10.0.0.4', 'worker3'), ('10.0.0.5', 'worker4')]
     assert c.get_host_services() == [('leader1', 'namenode resourcemanager accumulomaster zookeeper'),

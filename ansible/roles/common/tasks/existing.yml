@@ -15,11 +15,6 @@
 # limitations under the License.
 #
 
-- name: "install fluo-yarn from tarball"
-  unarchive: src={{ tarballs_dir }}/{{ fluo_yarn_tarball }} dest={{ install_dir }} creates={{ fluo_yarn_home }} copy=yes
-- name: "configure fluo-yarn"
-  template: src=fluo-yarn.properties dest={{ fluo_yarn_home }}/conf/fluo-yarn.properties
-- name: "fetch extra fluo-yarn dependencies"
-  command: "{{ fluo_yarn_home }}/lib/fetch.sh extra"
-- name: "set correct owner & group"
-  file: path={{ fluo_yarn_home }} recurse=yes owner={{ cluster_user }} group={{ cluster_group }}
+- name: "existing - verify data dirs exist and are owned by cluster user"
+  file: path={{ item }} state=directory owner={{ cluster_user }} group={{ cluster_group }}
+  with_items: "{{ default_data_dirs }}"

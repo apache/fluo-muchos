@@ -19,9 +19,12 @@ cluster_type = ec2
 # Cluster user name (install command will SSH to cluster using this user)
 # Leave default below if launching cluster in AWS
 cluster_user = centos
-# Cluster base directory where install/ & tarballs/ directories are created
-# Leave default below if launching cluster in AWS
-cluster_basedir = /home/centos
+# Cluster user group
+cluster_group = %(cluster_user)s
+# Cluster user home directory
+user_home = /home/%(cluster_user)s
+# Install directory where Hadoop, Accumulo, etc will be installed
+install_dir = %(user_home)s/install
 # Hostname of proxy node that Muchos will use to direct installation of cluster.  Will be given
 # public IP if launching in EC2.  If not launching in EC2, node must have public IP that can be reached
 # from your machine. Hostname can be chosen from "nodes" section below.
@@ -41,6 +44,8 @@ fluo_yarn_version = 1.0.0
 accumulo_version = 2.0.0-alpha-1
 # Specifies if software should be downloaded. If 'False', tarballs of the software above should be in conf/upload/
 download_software = True
+# Install Hub (for GitHub)
+install_hub = True
 
 [ec2]
 # AWS machine image to use. The default below is for a CentOS 7 image (in us-east-1).

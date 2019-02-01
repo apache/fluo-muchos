@@ -15,26 +15,23 @@
 # limitations under the License.
 #
 
-- name: "unmount default drive at /mnt"
+- name: "ec2 - unmount default drive at /mnt"
   mount: name=/mnt src=/dev/xvdb fstype=auto state=unmounted
-  when: cluster_type == 'ec2'
-- name: "unmount all ephemeral"
+- name: "ec2 - unmount all ephemeral"
   mount: name={{ item.0 }} src={{ item.1 }} fstype=auto state=unmounted
-  when: cluster_type == 'ec2' and force_format == 'yes'
-  with_together: 
+  when: force_format == 'yes'
+  with_together:
     - "{{ node_type_map[node_type].mounts }}"
     - "{{ node_type_map[node_type].devices }}"
-- name: "format drives"
+- name: "ec2 - format drives"
   filesystem: fstype={{ fstype }} dev={{ item }} force={{ force_format }}
-  when: cluster_type == 'ec2'
   with_items: "{{ node_type_map[node_type].devices }}"
-- name: "mount drives"
+- name: "ec2 - mount drives"
   mount: name={{ item.0 }} src={{ item.1 }} fstype=auto state=mounted
     opts=defaults,nofail,noatime,nodiratime,comment=cloudconfig passno=2
-  when: cluster_type == 'ec2'
-  with_together: 
+  with_together:
     - "{{ node_type_map[node_type].mounts }}"
     - "{{ node_type_map[node_type].devices }}"
-- name: "ensure drives are owned by cluster user"
-  file: path={{ item }} state=directory owner={{ cluster_user }} group={{ cluster_user }} 
+- name: "ec2 - ensure drives are owned by cluster user"
+  file: path={{ item }} state=directory owner={{ cluster_user }} group={{ cluster_group }}
   with_items: "{{ node_type_map[node_type].mounts }}"
