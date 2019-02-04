@@ -32,4 +32,7 @@
   tasks:
     - import_tasks: roles/common/tasks/ssh.yml
     - import_tasks: roles/common/tasks/os.yml
-    - import_tasks: roles/common/tasks/drives.yml
+    - import_tasks: roles/common/tasks/ec2.yml
+      when: cluster_type == 'ec2'
+    - import_tasks: roles/common/tasks/existing.yml
+      when: cluster_type == 'existing'

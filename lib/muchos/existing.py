@@ -140,14 +140,13 @@ class ExistingCluster:
         else:
             open(ansible_keys, 'w').close()
 
-        basedir = config.get('general', 'cluster_basedir')
         cmd = "rsync -az --delete -e \"ssh -o 'StrictHostKeyChecking no'\""
         subprocess.call("{cmd} {src} {usr}@{ldr}:{tdir}".format(cmd=cmd, src=join(config.deploy_path, "ansible"),
                                                                 usr=config.get('general', 'cluster_user'),
-                                                                ldr=config.get_proxy_ip(), tdir=basedir),
+                                                                ldr=config.get_proxy_ip(), tdir=config.user_home()),
                         shell=True)
 
-        self.exec_on_proxy_verified("{0}/ansible/scripts/install_ansible.sh".format(basedir), opts='-t')
+        self.exec_on_proxy_verified("{0}/ansible/scripts/install_ansible.sh".format(config.user_home()), opts='-t')
 
     def setup(self):
         config = self.config
@@ -156,8 +155,7 @@ class ExistingCluster:
         self.sync()
 
         conf_upload = join(config.deploy_path, "conf/upload")
-        basedir = config.get('general', 'cluster_basedir')
-        cluster_tarballs = "{0}/tarballs".format(basedir)
+        cluster_tarballs = "{0}/tarballs".format(config.user_home())
         self.exec_on_proxy_verified("mkdir -p {0}".format(cluster_tarballs))
         for f in listdir(conf_upload):
             tarball_path = join(conf_upload, f)
@@ -212,15 +210,14 @@ class ExistingCluster:
 
     def execute_playbook(self, playbook):
         print("Executing '{0}' playbook".format(playbook))
-        basedir = self.config.get('general', 'cluster_basedir')
         self.exec_on_proxy_verified("time -p ansible-playbook {base}/ansible/{playbook}"
-                                    .format(base=basedir, playbook=playbook), opts='-t')
+                                    .format(base=self.config.user_home(), playbook=playbook), opts='-t')
 
     def send_to_proxy(self, path, target, skip_if_exists=True):
         print("Copying to proxy: ", path)
         cmd = "scp -o 'StrictHostKeyChecking no'"
         if skip_if_exists:
-            cmd = "rsync --update --progress -e \"ssh -o 'StrictHostKeyChecking no'\""
+            cmd = "rsync --update --progress -e \"ssh -q -o 'StrictHostKeyChecking no'\""
         subprocess.call("{cmd} {src} {usr}@{ldr}:{tdir}".format(
             cmd=cmd, src=path, usr=self.config.get('general', 'cluster_user'), ldr=self.config.get_proxy_ip(),
             tdir=target), shell=True)

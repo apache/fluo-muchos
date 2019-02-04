@@ -38,7 +38,7 @@
   command: cp {{ spark_home }}/yarn/spark-{{ spark_version }}-yarn-shuffle.jar {{ hadoop_home }}/share/hadoop/yarn/lib/ creates={{ hadoop_home }}/share/hadoop/yarn/lib/spark-{{ spark_version }}-yarn-shuffle.jar
   when: "'spark' in groups"
 - name: "setup hadoop short circuit socket dir"
-  file: path=/var/lib/hadoop-hdfs state=directory owner={{ cluster_user }} group={{ cluster_user }} mode=0755
+  file: path=/var/lib/hadoop-hdfs state=directory owner={{ cluster_user }} group={{ cluster_group }} mode=0755
   become: yes
 - name: "Configure hadoop log dir"
   replace:

@@ -99,6 +99,9 @@ class DeployConfig(ConfigParser):
             return 'worker'
         return 'default'
 
+    def user_home(self):
+        return self.get('general', 'user_home')
+
     def mounts(self, num_ephemeral):
         mounts = []
         for i in range(0, num_ephemeral):
@@ -335,7 +338,7 @@ HOST_VAR_DEFAULTS = {
   'accumulo_tarball': 'accumulo-{{ accumulo_version }}-bin.tar.gz',
   'accumulo_version': None,
   'cluster_type': None,
-  'cluster_basedir': None,
+  'cluster_group': None,
   'cluster_user': None,
   'default_data_dirs': None,
   'download_software': None,
@@ -350,7 +353,8 @@ HOST_VAR_DEFAULTS = {
   'hadoop_version': None,
   'hadoop_major_version': '"{{ hadoop_version.split(\'.\')[0] }}"',
   'hdfs_root': 'hdfs://{{ groups[\'namenode\'][0] }}:8020',
-  'install_dir': '"{{ cluster_basedir }}/install"',
+  'install_dir': None,
+  'install_hub': None,
   'java_home': '"/usr/lib/jvm/java-1.8.0-openjdk"',
   'maven_home': '"{{ install_dir }}/apache-maven-{{ maven_version }}"',
   'maven_tarball': 'apache-maven-{{ maven_version }}-bin.tar.gz',
@@ -358,7 +362,8 @@ HOST_VAR_DEFAULTS = {
   'spark_home': '"{{ install_dir }}/spark-{{ spark_version }}-bin-without-hadoop"',
   'spark_tarball': 'spark-{{ spark_version }}-bin-without-hadoop.tgz',
   'spark_version': None,
-  'tarballs_dir': '"{{ cluster_basedir }}/tarballs"',
+  'tarballs_dir': '"{{ user_home }}/tarballs"',
+  'user_home': None,
   'worker_data_dirs': None,
   'zookeeper_connect': '"{{ groups[\'zookeepers\']|join(\',\') }}"',
   'zookeeper_client_port': '"2181"',

@@ -18,7 +18,7 @@
 - name: "install spark tarball"
   unarchive: src={{ tarballs_dir }}/{{ spark_tarball }} dest={{ install_dir }} creates={{ spark_home }} copy=yes
 - name: "configure spark"
-  template: src={{ item }} dest={{ spark_home }}/conf/{{ item }} owner={{ cluster_user }} group={{ cluster_user }}
+  template: src={{ item }} dest={{ spark_home }}/conf/{{ item }} owner={{ cluster_user }} group={{ cluster_group }}
   with_items:
     - spark-defaults.conf
     - spark-env.sh
