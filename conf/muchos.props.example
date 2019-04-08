@@ -37,7 +37,7 @@ accumulo_instance = muchos
 accumulo_password = secret
 # Software versions (set sha-256 in conf/checksums)
 hadoop_version = 3.1.1
-zookeeper_version = 3.4.13
+zookeeper_version = 3.4.14
 spark_version = 2.3.2
 fluo_version = 1.2.0
 fluo_yarn_version = 1.0.0
