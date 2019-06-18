@@ -182,7 +182,7 @@ class DeployConfig(ConfigParser):
 
         key = "{0}:{1}".format(software, version)
         if key not in self.checksums_d:
-            exit('ERROR - Failed to find checksums for {0} {1} in {2}' % (software, version, self.checksums_path))
+            exit('ERROR - Failed to find checksums for %s %s in %s' % (software, version, self.checksums_path))
         return self.checksums_d[key]
 
     def verify_instance_type(self, instance_type):
