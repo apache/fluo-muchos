@@ -271,4 +271,4 @@ The following command runs the unit tests:
 [muchos.props]: conf/muchos.props.example
 [Docker swarm]: https://docs.docker.com/engine/swarm/
 [Portainer]: https://github.com/portainer/portainer
-[checksums]: https://github.com/apache/fluo-muchos/blob/master/conf/checksums
+[checksums]: conf/checksums
