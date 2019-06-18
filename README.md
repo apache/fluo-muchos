@@ -101,7 +101,7 @@ specified in [muchos.props] and can be changed if desired.
 Optionally, Muchos can setup the cluster using an Accumulo or Fluo tarball that is placed in the
 `conf/upload` directory of Muchos. This option is only necessary if you want to use an unreleased
 version of Fluo or Accumulo. Before running the `muchos setup` command, you should confirm that the
-version and SHA-256 hash of your tarball matches what is set in [muchos.props]. Run the command
+version and SHA-256 hash of your tarball matches what is set in [conf/checksums][checksums]. Run the command
 `shasum -a 256 /path/to/tarball` on your tarball to determine its hash.
 
 The `muchos setup` command will install and start Accumulo, Hadoop, and Zookeeper.  The optional
@@ -271,3 +271,4 @@ The following command runs the unit tests:
 [muchos.props]: conf/muchos.props.example
 [Docker swarm]: https://docs.docker.com/engine/swarm/
 [Portainer]: https://github.com/portainer/portainer
+[checksums]: conf/checksums
