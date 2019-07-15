@@ -167,6 +167,9 @@ class DeployConfig(ConfigParser):
         if not os.path.isfile(self.checksums_path):
             exit('ERROR - A checksums file does not exist at %s' % self.hosts_path)
 
+        if "SNAPSHOT" in version:
+            return ""
+
         if not self.checksums_d:
             self.checksums_d = {}
             with open(self.checksums_path) as f:
