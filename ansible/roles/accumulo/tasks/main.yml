@@ -35,6 +35,7 @@
     - tracers
     - masters
     - monitor
+    - log4j-service.properties
   when: accumulo_major_version == '2'
 - name: "configure accumulo 1.0 configuration"
   template: src={{ item }} dest={{ accumulo_home }}/conf/{{ item }}
