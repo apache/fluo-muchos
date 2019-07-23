@@ -46,6 +46,10 @@ accumulo_version = 2.0.0-alpha-1
 download_software = True
 # Install Hub (for GitHub)
 install_hub = True
+# The java package to install
+java_package=java-1.8.0-openjdk-devel
+# The package to use for java 11
+# java_package=java-11-openjdk-devel
 
 [ec2]
 # AWS machine image to use. The default below is for a CentOS 7 image (in us-east-1).
