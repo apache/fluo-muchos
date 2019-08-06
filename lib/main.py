@@ -49,7 +49,9 @@ def main():
 
     hosts_path = join(hosts_dir, opts.cluster)
 
-    config = DeployConfig(deploy_path, config_path, hosts_path, checksums_path, opts.cluster)
+    templates_path = join(deploy_path, "conf/templates/")
+
+    config = DeployConfig(deploy_path, config_path, hosts_path, checksums_path, templates_path, opts.cluster)
     config.verify_config(action)
 
     if action == 'config':
@@ -64,8 +66,11 @@ def main():
             cluster = ExistingCluster(config)
             cluster.perform(action)
         elif cluster_type == 'ec2':
-            from muchos.ec2 import Ec2Cluster
-            cluster = Ec2Cluster(config)
+            from muchos.ec2 import Ec2Cluster, Ec2ClusterTemplate
+            if config.has_option('ec2', 'cluster_template'):
+                cluster = Ec2ClusterTemplate(config)
+            else:
+                cluster = Ec2Cluster(config)
             cluster.perform(action)
         else:
             exit('Unknown cluster_type: ' + cluster_type)

@@ -24,6 +24,8 @@ from os.path import isfile
 import time
 import boto3
 from .existing import ExistingCluster
+import json
+from string import Template
 
 
 class Ec2Cluster(ExistingCluster):
@@ -33,40 +35,17 @@ class Ec2Cluster(ExistingCluster):
 
     def launch_node(self, hostname, services, sg_id):
 
-        associate_public_ip = True
-        if self.config.has_option('ec2', 'associate_public_ip'):
-            associate_public_ip = self.config.get('ec2', 'associate_public_ip').strip().lower() == 'true'
+        request = self.init_request(hostname, services, sg_id)
 
-        request = {'MinCount': 1, 'MaxCount': 1,
-                   'NetworkInterfaces': [{'DeviceIndex': 0, 'AssociatePublicIpAddress': associate_public_ip,
-                                          'Groups': [sg_id]}]}
-
-        if self.config.has_option('ec2', 'subnet_id'):
-            request['NetworkInterfaces'][0]['SubnetId'] = self.config.get('ec2', 'subnet_id')
-
-        if 'worker' in services:
-            instance_type = self.config.get('ec2', 'worker_instance_type')
-        else:
-            instance_type = self.config.get('ec2', 'default_instance_type')
-        request['InstanceType'] = instance_type
-        request['InstanceInitiatedShutdownBehavior'] = self.config.get('ec2', 'shutdown_behavior')
-
-        if not self.config.has_option('ec2', 'aws_ami'):
-            exit('aws_ami property must be set!')
-        image_id = self.config.get('ec2', 'aws_ami')
-        if not image_id:
-            exit('aws_ami property was not properly')
-
-        request['ImageId'] = image_id
-        request['BlockDeviceMappings'] = get_block_device_map(instance_type)
-
-        if self.config.has_option('ec2', 'key_name'):
-            request['KeyName'] = self.config.get('ec2', 'key_name')
+        request['MinCount'] = 1
+        request['MaxCount'] = 1
 
         tags = [{'Key': 'Name', 'Value': self.config.cluster_name + '-' + hostname},
                 {'Key': 'Muchos', 'Value': self.config.cluster_name}]
+
         for key, val in self.config.instance_tags().items():
             tags.append({'Key': key, 'Value': val})
+
         request['TagSpecifications'] = [{'ResourceType': 'instance', 'Tags': tags}]
 
         if self.config.has_option('ec2', 'user_data_path'):
@@ -85,7 +64,7 @@ class Ec2Cluster(ExistingCluster):
         if response is None or len(response['Instances']) != 1:
             exit('ERROR - Failed to start {0} node'.format(hostname))
 
-        print('Launching {0} node using {1}'.format(hostname, image_id))
+        print('Launching {0} node using {1}'.format(hostname, request['ImageId']))
         return response['Instances'][0]
 
     def create_security_group(self):
@@ -139,6 +118,39 @@ class Ec2Cluster(ExistingCluster):
                       .format(self.config.sg_name, e))
                 time.sleep(10)
         print("Deleted security group")
+
+    def init_request(self, hostname, services, sg_id):
+        associate_public_ip = True
+        if self.config.has_option('ec2', 'associate_public_ip'):
+            associate_public_ip = self.config.get('ec2', 'associate_public_ip').strip().lower() == 'true'
+
+        request = {'MinCount': 1, 'MaxCount': 1,
+                   'NetworkInterfaces': [{'DeviceIndex': 0, 'AssociatePublicIpAddress': associate_public_ip,
+                                          'Groups': [sg_id]}]}
+
+        if self.config.has_option('ec2', 'subnet_id'):
+            request['NetworkInterfaces'][0]['SubnetId'] = self.config.get('ec2', 'subnet_id')
+
+        if 'worker' in services:
+            instance_type = self.config.get('ec2', 'worker_instance_type')
+        else:
+            instance_type = self.config.get('ec2', 'default_instance_type')
+        request['InstanceType'] = instance_type
+        request['InstanceInitiatedShutdownBehavior'] = self.config.get('ec2', 'shutdown_behavior')
+
+        if not self.config.has_option('ec2', 'aws_ami'):
+            exit('aws_ami property must be set!')
+        image_id = self.config.get('ec2', 'aws_ami')
+        if not image_id:
+            exit('aws_ami property was not properly')
+
+        request['ImageId'] = image_id
+        request['BlockDeviceMappings'] = get_block_device_map(instance_type)
+
+        if self.config.has_option('ec2', 'key_name'):
+            request['KeyName'] = self.config.get('ec2', 'key_name')
+
+        return request
 
     def launch(self):
         if self.active_nodes():
@@ -227,3 +239,21 @@ class Ec2Cluster(ExistingCluster):
                 print("Removed hosts file at ", self.config.hosts_path)
         else:
             print("Aborted termination")
+
+
+class Ec2ClusterTemplate(Ec2Cluster):
+
+    def __init__(self, config):
+        Ec2Cluster.__init__(self, config)
+
+    def launch(self):
+        print("Using cluster template '{0}' to launch nodes".format(self.config.get('ec2', 'cluster_template')))
+        super().launch()
+
+    def init_request(self, hostname, services, sg_id):
+        # the first service in the list denotes the node's target template
+        print("Template '{0}' selected for {1}".format(services[0], hostname))
+        # interpolate any values from the ec2 config section and create request
+        ec2_d = dict(self.config.items('ec2'))
+        ec2_d['security_group_id'] = sg_id
+        return json.loads(Template(self.config.cluster_template[services[0]]).substitute(ec2_d))

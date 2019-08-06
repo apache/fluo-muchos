@@ -19,6 +19,8 @@ from configparser import ConfigParser
 from sys import exit
 from .util import get_ephemeral_devices, get_arch
 import os
+import json
+import glob
 
 SERVICES = ['zookeeper', 'namenode', 'resourcemanager', 'accumulomaster', 'mesosmaster', 'worker', 'fluo', 'fluo_yarn', 'metrics', 'spark', 'client', 'swarmmanager']
 
@@ -27,7 +29,7 @@ OPTIONAL_SERVICES = ['fluo', 'fluo_yarn', 'metrics', 'mesosmaster', 'spark', 'cl
 
 class DeployConfig(ConfigParser):
 
-    def __init__(self, deploy_path, config_path, hosts_path, checksums_path, cluster_name):
+    def __init__(self, deploy_path, config_path, hosts_path, checksums_path, templates_path, cluster_name):
         ConfigParser.__init__(self)
         self.optionxform = str
         self.deploy_path = deploy_path
@@ -43,6 +45,9 @@ class DeployConfig(ConfigParser):
         self.checksums_path = checksums_path
         self.checksums_d = None
         self.init_nodes()
+        self.cluster_template = None
+        self.cluster_template_id = None
+        self.init_template(templates_path)
 
     def verify_config(self, action):
         proxy = self.get('general', 'proxy_hostname')
@@ -86,6 +91,9 @@ class DeployConfig(ConfigParser):
         return max((len(self.default_ephemeral_devices()), len(self.worker_ephemeral_devices())))
 
     def node_type_map(self):
+        if self.cluster_template:
+            return self.cluster_template['devices']
+
         node_types = {}
         if self.get_cluster_type() == 'ec2':
             node_list = [('default', self.default_ephemeral_devices()), ('worker', self.worker_ephemeral_devices())]
@@ -189,9 +197,10 @@ class DeployConfig(ConfigParser):
         return self.checksums_d[key]
 
     def verify_instance_type(self, instance_type):
-        if get_arch(instance_type) == 'pvm':
-            exit("ERROR - Configuration contains instance type '{0}' that uses pvm architecture."
-                 "Only hvm architecture is supported!".format(instance_type))
+        if not self.cluster_template:
+            if get_arch(instance_type) == 'pvm':
+                exit("ERROR - Configuration contains instance type '{0}' that uses pvm architecture."
+                     "Only hvm architecture is supported!".format(instance_type))
 
     def instance_tags(self):
         retd = {}
@@ -272,8 +281,6 @@ class DeployConfig(ConfigParser):
                 else:
                     exit('ERROR - Bad line %s in hosts %s' % (line, self.hosts_path))
 
-
-
     def get_hosts(self):
         if self.hosts is None:
             self.parse_hosts()
@@ -331,6 +338,78 @@ class DeployConfig(ConfigParser):
                     print(self.get(section, key))
                     return
         exit("Property '{0}' was not found".format(key))
+
+    def init_template(self, templates_path):
+        if not self.has_option('ec2', 'cluster_template'):
+            return
+
+        self.cluster_template_id = self.get('ec2', 'cluster_template')
+        for root, dirs, files in os.walk(templates_path):
+            for dir_name in dirs:
+                if dir_name == self.cluster_template_id:
+                    self.cluster_template = {}
+                    template_dir = os.path.join(root, dir_name)
+                    self.load_template_ec2_requests(template_dir)
+                    self.load_template_device_map(template_dir)
+                    break
+            break
+
+        self.validate_template()
+
+    def load_template_ec2_requests(self, template_dir):
+        for json_path in glob.glob(os.path.join(template_dir, '*.json')):
+            service = os.path.basename(json_path).rsplit('.', 1)[0]
+            if service not in SERVICES:
+                exit("ERROR - Template '{0}' has unrecognized option '{1}'. Must be one of {2}".format(
+                    self.cluster_template_id, service, str(SERVICES)))
+            with open(json_path, 'r') as json_file:
+                # load as string, so we can use string.Template to inject config values
+                self.cluster_template[service] = json_file.read()
+
+    def load_template_device_map(self, template_dir):
+        device_map_path = os.path.join(template_dir, '.devices')
+        if not os.path.isfile(device_map_path):
+            exit("ERROR - template '{0}' is missing '.devices' config".format(
+                self.cluster_template_id))
+        with open(device_map_path, 'r') as json_file:
+            self.cluster_template['devices'] = json.load(json_file)
+
+    def validate_template(self):
+        if not self.cluster_template:
+            exit("ERROR - Template '{0}' is not defined!".format(self.cluster_template_id))
+
+        if 'worker' not in self.cluster_template:
+            exit("ERROR - '{0}' template config is invalid. No 'worker' launch request is defined".format(
+                self.cluster_template_id))
+
+        if 'worker' not in self.cluster_template['devices']:
+            exit("ERROR - '{0}' template is invalid. The .devices file must have a 'worker' device map".format(
+                self.cluster_template_id))
+
+        if 'default' not in self.cluster_template['devices']:
+            exit("ERROR - '{0}' template is invalid. The .devices file must have a 'default' device map".format(
+                self.cluster_template_id))
+
+        # Validate the selected launch template for each host
+
+        worker_count = 0
+        for hostname in self.node_d:
+            # first service listed denotes the selected template
+            selected_ec2_request = self.node_d[hostname][0]
+            if 'worker' == selected_ec2_request:
+                worker_count = worker_count + 1
+            else:
+                if 'worker' in self.node_d[hostname]:
+                    exit("ERROR - '{0}' node config is invalid. The 'worker' service should be listed first".format(
+                        hostname))
+            if selected_ec2_request not in self.cluster_template:
+                if len(self.node_d[hostname]) > 1:
+                    print('Hint: In template mode, the first service listed for a host denotes its EC2 template')
+                exit("ERROR - '{0}' node config is invalid. No EC2 template defined for the '{1}' service".format(
+                    hostname, selected_ec2_request))
+
+        if worker_count == 0:
+            exit("ERROR - No worker instances are defined for template '{0}'".format(self.cluster_template_id))
 
 
 HOST_VAR_DEFAULTS = {
