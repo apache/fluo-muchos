@@ -19,7 +19,7 @@
   tasks:
     - import_tasks: roles/accumulo/tasks/download.yml
       when: download_software
-- hosts: all
+- hosts: all:!{{ azure_proxy_host }}
   roles:
     - accumulo
 - hosts: accumulomaster

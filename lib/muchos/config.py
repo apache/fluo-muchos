@@ -50,11 +50,13 @@ class DeployConfig(ConfigParser):
 
     def verify_config(self, action):
         proxy = self.get('general', 'proxy_hostname')
-        if not proxy:
-            exit("ERROR - proxy.hostname must be set in muchos.props")
+        cluster_type = self.get('general', 'cluster_type')
+        if cluster_type not in ['azure']:
+           if not proxy:
+              exit("ERROR - proxy.hostname must be set in muchos.props")
 
-        if proxy not in self.node_d:
-            exit("ERROR - The proxy (set by property proxy_hostname={0}) cannot be found in 'nodes' section of "
+           if proxy not in self.node_d:
+              exit("ERROR - The proxy (set by property proxy_hostname={0}) cannot be found in 'nodes' section of "
                  "muchos.props".format(proxy))
 
         if action in ['launch', 'setup']:
@@ -120,6 +122,8 @@ class DeployConfig(ConfigParser):
             return '/media/' + self.ephemeral_root
         elif self.get_cluster_type() == 'existing':
             return self.get('existing', 'mount_root')
+        elif self.get_cluster_type() == 'azure':
+            return self.get('azure', 'mount_root')
 
     def fstype(self):
         retval = None
@@ -137,17 +141,27 @@ class DeployConfig(ConfigParser):
                 return 'no'
         return retval
 
-    def worker_data_dirs(self):
+    def data_dirs_common(self, nodeType):
+        data_dirs = []
+
         if self.get_cluster_type() == 'ec2':
-            return self.node_type_map()['worker']['mounts']
+            data_dirs = self.node_type_map()[nodeType]['mounts']
         elif self.get_cluster_type() == 'existing':
-            return self.get('existing', 'data_dirs').split(",")
+            data_dirs = self.get('existing', 'data_dirs').split(",")
+        elif self.get_cluster_type() == 'azure':
+            num_disks = int(self.get("azure","numdisks"))
+            range_var = num_disks + 1
+            for diskNum in range(1, range_var):
+                data_dirs.append(self.get("azure","mount_root") + str(diskNum))
+
+
+        return data_dirs
+
+    def worker_data_dirs(self):
+        return self.data_dirs_common("worker")
 
     def default_data_dirs(self):
-        if self.get_cluster_type() == 'ec2':
-            return self.node_type_map()['default']['mounts']
-        elif self.get_cluster_type() == 'existing':
-            return self.get('existing', 'data_dirs').split(",")
+        return self.data_dirs_common("default")
 
     def metrics_drive_ids(self):
         if self.get_cluster_type() == 'ec2':
@@ -157,6 +171,12 @@ class DeployConfig(ConfigParser):
             return drive_ids
         elif self.get_cluster_type() == 'existing':
             return self.get("existing", "metrics_drive_ids").split(",")
+        elif self.get_cluster_type() == 'azure':
+            drive_ids = []
+            range_var = int(self.get("azure","numdisks")) + 1
+            for i in range(1, range_var):
+                drive_ids.append(self.get("azure","metrics_drive_root") + str(i))
+            return drive_ids
 
     def shutdown_delay_minutes(self):
         retval = '0'
@@ -292,7 +312,7 @@ class DeployConfig(ConfigParser):
         return self.get_hosts()[hostname][1]
 
     def get_cluster_type(self):
-        if self.cluster_type not in ('ec2', 'existing'):
+        if self.cluster_type not in ('azure', 'ec2', 'existing'):
             exit('ERROR - Unknown cluster type' + self.cluster_type)
         return self.cluster_type
 
@@ -325,6 +345,9 @@ class DeployConfig(ConfigParser):
             print(name, '=', val)
 
         for (name, val) in self.items('ec2'):
+            print(name, '=', val)
+
+        for (name, val) in self.items('azure'):
             print(name, '=', val)
 
     def print_property(self, key):
@@ -473,4 +496,11 @@ PLAY_VAR_DEFAULTS = {
   'twill_reserve_mem_mb': None,
   'yarn_nm_mem_mb': None,
   'zookeeper_sha256': None
+}
+
+AZURE_VAR_DEFAULTS = {
+  'azure_fileshare_mount': None,
+  'azure_fileshare': None,
+  'azure_fileshare_username': None,
+  'azure_fileshare_password': None,
 }

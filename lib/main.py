@@ -72,6 +72,10 @@ def main():
             else:
                 cluster = Ec2Cluster(config)
             cluster.perform(action)
+        elif cluster_type == 'azure':
+            from muchos.azure import VmssCluster
+            cluster = VmssCluster(config)
+            cluster.perform(action)
         else:
             exit('Unknown cluster_type: ' + cluster_type)
 

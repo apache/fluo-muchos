@@ -23,7 +23,7 @@ from os.path import isfile, join
 from sys import exit
 from os import listdir
 
-from .config import HOST_VAR_DEFAULTS, PLAY_VAR_DEFAULTS
+from .config import HOST_VAR_DEFAULTS, PLAY_VAR_DEFAULTS, AZURE_VAR_DEFAULTS
 
 
 class ExistingCluster:
@@ -41,13 +41,17 @@ class ExistingCluster:
         host_vars = HOST_VAR_DEFAULTS
         play_vars = PLAY_VAR_DEFAULTS
 
-        for section in ("general", "ansible-vars", config.get('performance', 'profile')):
+        azure_vars = AZURE_VAR_DEFAULTS
+
+        for section in ("general", "ansible-vars", config.get('performance', 'profile'), "azure"):
             for (name, value) in config.items(section):
                 if name not in ('proxy_hostname', 'proxy_socks_port'):
                     if name in host_vars:
                         host_vars[name] = value
                     if name in play_vars:
                         play_vars[name] = value
+                    if name in azure_vars:
+                        azure_vars[name] = value
 
         play_vars['accumulo_sha256'] = config.checksum('accumulo')
         play_vars['fluo_sha256'] = config.checksum('fluo')
@@ -66,10 +70,13 @@ class ExistingCluster:
 
         with open(join(config.deploy_path, "ansible/site.yml"), 'w') as site_file:
             print("- import_playbook: common.yml", file=site_file)
+
+            print("- import_playbook: zookeeper.yml", file=site_file)
+            print("- import_playbook: hadoop.yml", file=site_file)
+
             if config.has_service("spark"):
                 print("- import_playbook: spark.yml", file=site_file)
-            print("- import_playbook: hadoop.yml", file=site_file)
-            print("- import_playbook: zookeeper.yml", file=site_file)
+
             if config.has_service("metrics"):
                 print("- import_playbook: metrics.yml", file=site_file)
             print("- import_playbook: accumulo.yml", file=site_file)
@@ -126,6 +133,8 @@ class ExistingCluster:
 
             print("\n[all:vars]", file=hosts_file)
             for (name, value) in sorted(host_vars.items()):
+                print("{0} = {1}".format(name, value), file=hosts_file)
+            for (name, value) in sorted(azure_vars.items()):
                 print("{0} = {1}".format(name, value), file=hosts_file)
 
         with open(join(config.deploy_path, "ansible/group_vars/all"), 'w') as play_vars_file:
@@ -210,8 +219,10 @@ class ExistingCluster:
 
     def execute_playbook(self, playbook):
         print("Executing '{0}' playbook".format(playbook))
-        self.exec_on_proxy_verified("time -p ansible-playbook {base}/ansible/{playbook}"
-                                    .format(base=self.config.user_home(), playbook=playbook), opts='-t')
+        azure_proxy_host = self.config.get("azure","azure_proxy_host")
+        var_azure_proxy_host = "_" if (azure_proxy_host==None or azure_proxy_host.strip()=='') else azure_proxy_host
+        self.exec_on_proxy_verified("time -p ansible-playbook {base}/ansible/{playbook} --extra-vars \"azure_proxy_host={var_azure_proxy_host}\""
+                                    .format(base=self.config.user_home(), playbook=playbook, var_azure_proxy_host=var_azure_proxy_host), opts='-t')
 
     def send_to_proxy(self, path, target, skip_if_exists=True):
         print("Copying to proxy: ", path)
