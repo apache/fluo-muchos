@@ -124,8 +124,7 @@ class Ec2Cluster(ExistingCluster):
         if self.config.has_option('ec2', 'associate_public_ip'):
             associate_public_ip = self.config.get('ec2', 'associate_public_ip').strip().lower() == 'true'
 
-        request = {'MinCount': 1, 'MaxCount': 1,
-                   'NetworkInterfaces': [{'DeviceIndex': 0, 'AssociatePublicIpAddress': associate_public_ip,
+        request = {'NetworkInterfaces': [{'DeviceIndex': 0, 'AssociatePublicIpAddress': associate_public_ip,
                                           'Groups': [sg_id]}]}
 
         if self.config.has_option('ec2', 'subnet_id'):

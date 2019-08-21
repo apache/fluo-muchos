@@ -57,14 +57,14 @@ java_package=java-1.8.0-openjdk-devel
 # Before using this AMI, subscribe to it on the CentOS product page below or launching will fail:
 #   https://aws.amazon.com/marketplace/pp/B00O7WM7QW
 aws_ami = ami-9887c6e7
-# Select a template from conf/templates to leverage user-defined instance types (optional)
-# See conf/templates/README.md for instructions
-#cluster_template = example
 # Type of AWS instance launched by default
 default_instance_type = m5d.large
 # Type of AWS instance launched for any node running 'worker' service
 # Leave default below to use same instance type set by 'default_instance_type' property
 worker_instance_type = %(default_instance_type)s
+# Enable template mode by selecting a template from conf/templates, in order to leverage your own
+# custom EC2 launch requests (optional). See conf/templates/README.md for more information
+#cluster_template = example
 # VPC to launch instances in (optional)
 #vpc_id = vpc-xxxxx
 # VPC Subnet to launch instances in (optional)
