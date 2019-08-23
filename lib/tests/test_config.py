@@ -111,11 +111,11 @@ def test_ec2_cluster_template():
     c.init_template('../conf/templates')
     # init_template already calls validate_template, so just ensure that
     # we've loaded all the expected dictionary items from the example
-    assert 'accumulomaster' in c.cluster_template
-    assert 'client' in c.cluster_template
-    assert 'metrics' in c.cluster_template
-    assert 'namenode' in c.cluster_template
-    assert 'resourcemanager' in c.cluster_template
-    assert 'worker' in c.cluster_template
-    assert 'zookeeper' in c.cluster_template
-    assert 'devices' in c.cluster_template
+    assert 'accumulomaster' in c.cluster_template_d
+    assert 'client' in c.cluster_template_d
+    assert 'metrics' in c.cluster_template_d
+    assert 'namenode' in c.cluster_template_d
+    assert 'resourcemanager' in c.cluster_template_d
+    assert 'worker' in c.cluster_template_d
+    assert 'zookeeper' in c.cluster_template_d
+    assert 'devices' in c.cluster_template_d

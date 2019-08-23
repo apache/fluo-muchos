@@ -45,8 +45,7 @@ class DeployConfig(ConfigParser):
         self.checksums_path = checksums_path
         self.checksums_d = None
         self.init_nodes()
-        self.cluster_template = None
-        self.cluster_template_id = None
+        self.cluster_template_d = None
         self.init_template(templates_path)
 
     def verify_config(self, action):
@@ -91,8 +90,8 @@ class DeployConfig(ConfigParser):
         return max((len(self.default_ephemeral_devices()), len(self.worker_ephemeral_devices())))
 
     def node_type_map(self):
-        if self.cluster_template:
-            return self.cluster_template['devices']
+        if self.cluster_template_d:
+            return self.cluster_template_d['devices']
 
         node_types = {}
         if self.get_cluster_type() == 'ec2':
@@ -197,7 +196,7 @@ class DeployConfig(ConfigParser):
         return self.checksums_d[key]
 
     def verify_instance_type(self, instance_type):
-        if not self.cluster_template:
+        if not self.cluster_template_d:
             if get_arch(instance_type) == 'pvm':
                 exit("ERROR - Configuration contains instance type '{0}' that uses pvm architecture."
                      "Only hvm architecture is supported!".format(instance_type))
@@ -343,11 +342,11 @@ class DeployConfig(ConfigParser):
         if not self.has_option('ec2', 'cluster_template'):
             return
 
-        self.cluster_template_id = self.get('ec2', 'cluster_template')
+        template_id = self.get('ec2', 'cluster_template')
         for root, dirs, files in os.walk(templates_path):
             for dir_name in dirs:
-                if dir_name == self.cluster_template_id:
-                    self.cluster_template = {}
+                if dir_name == template_id:
+                    self.cluster_template_d = {'id': template_id}
                     template_dir = os.path.join(root, dir_name)
                     self.load_template_ec2_requests(template_dir)
                     self.load_template_device_map(template_dir)
@@ -361,34 +360,33 @@ class DeployConfig(ConfigParser):
             service = os.path.basename(json_path).rsplit('.', 1)[0]
             if service not in SERVICES:
                 exit("ERROR - Template '{0}' has unrecognized option '{1}'. Must be one of {2}".format(
-                    self.cluster_template_id, service, str(SERVICES)))
+                    self.cluster_template_d['id'], service, str(SERVICES)))
             with open(json_path, 'r') as json_file:
                 # load as string, so we can use string.Template to inject config values
-                self.cluster_template[service] = json_file.read()
+                self.cluster_template_d[service] = json_file.read()
 
     def load_template_device_map(self, template_dir):
-        device_map_path = os.path.join(template_dir, '.devices')
+        device_map_path = os.path.join(template_dir, 'devices')
         if not os.path.isfile(device_map_path):
-            exit("ERROR - template '{0}' is missing '.devices' config".format(
-                self.cluster_template_id))
+            exit("ERROR - template '{0}' is missing 'devices' config".format(self.cluster_template_d['id']))
         with open(device_map_path, 'r') as json_file:
-            self.cluster_template['devices'] = json.load(json_file)
+            self.cluster_template_d['devices'] = json.load(json_file)
 
     def validate_template(self):
-        if not self.cluster_template:
-            exit("ERROR - Template '{0}' is not defined!".format(self.cluster_template_id))
+        if not self.cluster_template_d:
+            exit("ERROR - Template '{0}' is not defined!".format(self.cluster_template_d['id']))
 
-        if 'worker' not in self.cluster_template:
+        if 'worker' not in self.cluster_template_d:
             exit("ERROR - '{0}' template config is invalid. No 'worker' launch request is defined".format(
-                self.cluster_template_id))
+                self.cluster_template_d['id']))
 
-        if 'worker' not in self.cluster_template['devices']:
-            exit("ERROR - '{0}' template is invalid. The .devices file must have a 'worker' device map".format(
-                self.cluster_template_id))
+        if 'worker' not in self.cluster_template_d['devices']:
+            exit("ERROR - '{0}' template is invalid. The devices file must have a 'worker' device map".format(
+                self.cluster_template_d['id']))
 
-        if 'default' not in self.cluster_template['devices']:
-            exit("ERROR - '{0}' template is invalid. The .devices file must have a 'default' device map".format(
-                self.cluster_template_id))
+        if 'default' not in self.cluster_template_d['devices']:
+            exit("ERROR - '{0}' template is invalid. The devices file must have a 'default' device map".format(
+                self.cluster_template_d['id']))
 
         # Validate the selected launch template for each host
 
@@ -402,14 +400,14 @@ class DeployConfig(ConfigParser):
                 if 'worker' in self.node_d[hostname]:
                     exit("ERROR - '{0}' node config is invalid. The 'worker' service should be listed first".format(
                         hostname))
-            if selected_ec2_request not in self.cluster_template:
+            if selected_ec2_request not in self.cluster_template_d:
                 if len(self.node_d[hostname]) > 1:
                     print('Hint: In template mode, the first service listed for a host denotes its EC2 template')
                 exit("ERROR - '{0}' node config is invalid. No EC2 template defined for the '{1}' service".format(
                     hostname, selected_ec2_request))
 
         if worker_count == 0:
-            exit("ERROR - No worker instances are defined for template '{0}'".format(self.cluster_template_id))
+            exit("ERROR - No worker instances are defined for template '{0}'".format(self.cluster_template_d['id']))
 
 
 HOST_VAR_DEFAULTS = {

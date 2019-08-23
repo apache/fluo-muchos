@@ -246,7 +246,7 @@ class Ec2ClusterTemplate(Ec2Cluster):
         Ec2Cluster.__init__(self, config)
 
     def launch(self):
-        print("Using cluster template '{0}' to launch nodes".format(self.config.get('ec2', 'cluster_template')))
+        print("Using cluster template '{0}' to launch nodes".format(self.config.cluster_template_d['id']))
         super().launch()
 
     def init_request(self, hostname, services, sg_id):
@@ -255,4 +255,4 @@ class Ec2ClusterTemplate(Ec2Cluster):
         # interpolate any values from the ec2 config section and create request
         ec2_d = dict(self.config.items('ec2'))
         ec2_d['security_group_id'] = sg_id
-        return json.loads(Template(self.config.cluster_template[services[0]]).substitute(ec2_d))
+        return json.loads(Template(self.config.cluster_template_d[services[0]]).substitute(ec2_d))

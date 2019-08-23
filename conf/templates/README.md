@@ -2,7 +2,7 @@
 
 Cluster templates are intended to provide greater flexibility, if needed,
 with respect to instance type selection and launch configuration for
-your EC2 hosts. For example, cluster templates may be ideal for uses
+your EC2 hosts. For example, cluster templates may be ideal for use
 cases that require distinct, per-host launch configurations, and
 for use cases that require hosts to have persistent, EBS-backed data
 volumes (rather than ephemeral volumes, the muchos default for EC2
@@ -31,7 +31,7 @@ The configured value must match the name of a subdirectory under
 ~$ ls -1a fluo-muchos/conf/templates/example
 .
 ..
-.devices
+devices
 metrics.json
 namenode.json
 resourcemanager.json
@@ -40,13 +40,13 @@ worker.json
 ```
 The subdirectory will contain one or more user-defined EC2 launch
 templates (*\*.json*) for your various host types, and it will
-include a *.devices* file specifying the desired mount points for all
+include a *devices* file specifying the desired mount points for all
 data volumes (excluding root volumes, as they are mounted
 automatically)
 
 ### Defining EC2 launch templates and device mounts for your hosts
 
-#### Launch Templates: *{service-name}.json*
+#### Launch Templates: *{service-name}.json* files
 
 Each JSON file represents a standard EC2 launch request, and each file
 name must match one of the predefined muchos service names, as
@@ -118,18 +118,18 @@ If needed, you may also define your own custom properties and have them be injec
 automatically by simply adding them to the **ec2** section of
 *muchos.props* and to your templates
 
-#### Device Mounts: *.devices*
+#### Device Mounts: *devices* file
 
-The *.devices* file contains the user-defined mapping of storage
+The *devices* file contains the user-defined mapping of storage
 devices and mount points for all data (i.e., non-root) volumes in your
 cluster.
 
-Two (and only two) device mappings should exist within *.devices*:
+Two (and only two) device mappings should exist within *devices*:
 * One map to represent your **worker** device mounts, and
 * One map to represent the device mounts on all other hosts, i.e., the
   **default** map
   
-For example, the *.devices* file below specifies 4 mount points for all
+For example, the *devices* file below specifies 4 mount points for all
 `worker` instance types, and specifies 1 mount point for all
 other hosts via the `default` map.
 ```
@@ -162,7 +162,7 @@ Naturally, you should take care to ensure that your **BlockDeviceMappings**
 also align to *default* vs *worker* node type semantics. As you
 explore the example files, you should observe the implicit link betweeen
 a data volume denoted by *BlockDeviceMappings\[N].DeviceName* and its
-respective device map entry in the *.devices* file.
+respective device map entry in the *devices* file.
 
 * **Note**: While *DeviceName* mount profiles should not vary among
   your default (non-worker) nodes, other attributes within *BlockDeviceMappings*,
@@ -177,7 +177,7 @@ respective device map entry in the *.devices* file.
 
 * **Note**: Root EBS volumes may be configured as desired in your JSON
   launch templates, but only non-root, "data" storage devices should be
-  specified in *.devices*, as root devices are mounted automatically
+  specified in *devices*, as root devices are mounted automatically
   
     
 ## Beyond the Launch Phase: *Setup*, *Terminate*, *Etc*
