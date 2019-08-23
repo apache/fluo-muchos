@@ -184,5 +184,5 @@ respective device map entry in the *devices* file.
 
 Aside from the configuration differences described above, which impact
 the `launch` phase, all other muchos operations behave the same in
-template mode as is in default mode
+template mode as in default mode
  
