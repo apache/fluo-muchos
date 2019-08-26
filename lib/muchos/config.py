@@ -339,21 +339,14 @@ class DeployConfig(ConfigParser):
         exit("Property '{0}' was not found".format(key))
 
     def init_template(self, templates_path):
-        if not self.has_option('ec2', 'cluster_template'):
-            return
-
-        template_id = self.get('ec2', 'cluster_template')
-        for root, dirs, files in os.walk(templates_path):
-            for dir_name in dirs:
-                if dir_name == template_id:
-                    self.cluster_template_d = {'id': template_id}
-                    template_dir = os.path.join(root, dir_name)
-                    self.load_template_ec2_requests(template_dir)
-                    self.load_template_device_map(template_dir)
-                    break
-            break
-
-        self.validate_template()
+        if self.has_option('ec2', 'cluster_template'):
+            template_id = self.get('ec2', 'cluster_template')
+            template_path = os.path.join(templates_path, template_id)
+            if os.path.exists(template_path):
+                self.cluster_template_d = {'id': template_id}
+                self.load_template_ec2_requests(template_path)
+                self.load_template_device_map(template_path)
+            self.validate_template()
 
     def load_template_ec2_requests(self, template_dir):
         for json_path in glob.glob(os.path.join(template_dir, '*.json')):
@@ -374,7 +367,7 @@ class DeployConfig(ConfigParser):
 
     def validate_template(self):
         if not self.cluster_template_d:
-            exit("ERROR - Template '{0}' is not defined!".format(self.cluster_template_d['id']))
+            exit("ERROR - Template '{0}' is not defined!".format(self.get('ec2', 'cluster_template')))
 
         if 'worker' not in self.cluster_template_d:
             exit("ERROR - '{0}' template config is invalid. No 'worker' launch request is defined".format(
