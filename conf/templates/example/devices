@@ -1,0 +1,24 @@
+{
+    "default": {
+        "mounts": [
+            "/data0"
+        ],
+        "devices": [
+            "/dev/xvdf"
+        ]
+    },
+    "worker": {
+        "mounts": [
+            "/data0",
+            "/data1",
+            "/data2",
+            "/data3"
+        ],
+        "devices": [
+            "/dev/xvdf",
+            "/dev/xvdg",
+            "/dev/xvdh",
+            "/dev/xvdi"
+        ]
+    }
+}

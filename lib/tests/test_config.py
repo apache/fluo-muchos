@@ -20,7 +20,7 @@ from muchos.config import DeployConfig
 
 def test_ec2_cluster():
     c = DeployConfig("muchos", '../conf/muchos.props.example', '../conf/hosts/example/example_cluster',
-                     '../conf/checksums', 'mycluster')
+                     '../conf/checksums', '../conf/templates', 'mycluster')
     assert c.checksum_ver('accumulo', '1.9.0') == 'f68a6145029a9ea843b0305c90a7f5f0334d8a8ceeea94734267ec36421fe7fe'
     assert c.checksum('accumulo') == 'df172111698c7a73aa031de09bd5589263a6b824482fbb9b4f0440a16602ed47'
     assert c.get('ec2', 'default_instance_type') == 'm5d.large'
@@ -80,7 +80,7 @@ def test_ec2_cluster():
 
 def test_existing_cluster():
     c = DeployConfig("muchos", '../conf/muchos.props.example', '../conf/hosts/example/example_cluster',
-                     '../conf/checksums', 'mycluster')
+                     '../conf/checksums', '../conf/templates', 'mycluster')
     c.cluster_type = 'existing'
     assert c.get_cluster_type() == 'existing'
     assert c.node_type_map() == {}
@@ -95,9 +95,27 @@ def test_existing_cluster():
 
 def test_case_sensitive():
     c = DeployConfig("muchos", '../conf/muchos.props.example', '../conf/hosts/example/example_cluster',
-                     '../conf/checksums', 'mycluster')
+                     '../conf/checksums', '../conf/templates', 'mycluster')
     assert c.has_option('ec2', 'default_instance_type') == True
     assert c.has_option('ec2', 'Default_instance_type') == False
     c.set('nodes', 'CamelCaseWorker', 'worker,fluo')
     c.init_nodes()
     assert c.get_node('CamelCaseWorker') == ['worker', 'fluo']
+
+
+def test_ec2_cluster_template():
+    c = DeployConfig("muchos", '../conf/muchos.props.example', '../conf/hosts/example/example_cluster',
+                     '../conf/checksums', '../conf/templates', 'mycluster')
+
+    c.set('ec2', 'cluster_template', 'example')
+    c.init_template('../conf/templates')
+    # init_template already calls validate_template, so just ensure that
+    # we've loaded all the expected dictionary items from the example
+    assert 'accumulomaster' in c.cluster_template_d
+    assert 'client' in c.cluster_template_d
+    assert 'metrics' in c.cluster_template_d
+    assert 'namenode' in c.cluster_template_d
+    assert 'resourcemanager' in c.cluster_template_d
+    assert 'worker' in c.cluster_template_d
+    assert 'zookeeper' in c.cluster_template_d
+    assert 'devices' in c.cluster_template_d

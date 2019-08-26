@@ -62,6 +62,9 @@ default_instance_type = m5d.large
 # Type of AWS instance launched for any node running 'worker' service
 # Leave default below to use same instance type set by 'default_instance_type' property
 worker_instance_type = %(default_instance_type)s
+# Enable template mode by selecting a template from conf/templates, in order to leverage your own
+# custom EC2 launch requests (optional). See conf/templates/README.md for more information
+#cluster_template = example
 # VPC to launch instances in (optional)
 #vpc_id = vpc-xxxxx
 # VPC Subnet to launch instances in (optional)
