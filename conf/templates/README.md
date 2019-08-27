@@ -122,7 +122,8 @@ automatically by simply adding them to the **ec2** section of
 
 The *devices* file contains the user-defined mapping of storage
 devices and mount points for all data (i.e., non-root) volumes in your
-cluster.
+cluster. Muchos Ansible scripts leverage this information to prepare
+all data volumes during the cluster `setup` phase.
 
 Two (and only two) device mappings should exist within *devices*:
 * One map to represent your **worker** device mounts, and
