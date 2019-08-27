@@ -16,8 +16,8 @@
 #
 
 - name: "download grafana rpm"
-  get_url: 
-  args: 
+  get_url:
+  args:
     url: https://grafanarel.s3.amazonaws.com/builds/{{ grafana_rpm }}
     dest: /tmp/{{ grafana_rpm }}
     sha256sum: "{{ grafana_sha256 }}"

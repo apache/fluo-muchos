@@ -31,4 +31,4 @@
     - { urlp: "{{ apache_mirror.stdout }}/zookeeper/zookeeper-{{ zookeeper_version }}", fn: "{{ zookeeper_tarball }}", sum: "{{ zookeeper_sha256 }}" }
     - { urlp: "{{ apache_mirror.stdout }}/hadoop/common/hadoop-{{ hadoop_version }}", fn: "{{ hadoop_tarball }}", sum: "{{ hadoop_sha256 }}" }
     - { urlp: "{{ apache_mirror.stdout }}/maven/maven-3/{{ maven_version }}/binaries", fn: "{{ maven_tarball }}", sum: "{{ maven_sha256 }}" }
-    - { urlp: "https://github.com/github/hub/releases/download/v{{ hub_version }}", fn: "{{ hub_tarball }}", sum: "{{ hub_sha256 }}" } 
+    - { urlp: "https://github.com/github/hub/releases/download/v{{ hub_version }}", fn: "{{ hub_tarball }}", sum: "{{ hub_sha256 }}" }

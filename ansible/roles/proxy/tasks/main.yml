@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-- name: "ensure cluster user exists and generate ssh key" 
+- name: "ensure cluster user exists and generate ssh key"
   user: name={{ cluster_user }} generate_ssh_key=yes ssh_key_bits=4096 state=present
   become: yes
 - name: "create tarball directory on proxy"

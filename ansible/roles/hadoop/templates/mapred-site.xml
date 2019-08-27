@@ -28,14 +28,14 @@
   </property>
   <property>
     <name>mapreduce.cluster.temp.dir</name>
-    <value>{% for dir in worker_data_dirs -%} 
+    <value>{% for dir in worker_data_dirs -%}
               {{ dir }}/hadoop/mapred/temp
               {%- if not loop.last -%} , {%- endif -%}
            {%- endfor %}</value>
   </property>
   <property>
     <name>mapreduce.cluster.local.dir</name>
-    <value>{% for dir in worker_data_dirs -%} 
+    <value>{% for dir in worker_data_dirs -%}
               {{ dir }}/hadoop/mapred/local
               {%- if not loop.last -%} , {%- endif -%}
            {%- endfor %}</value>

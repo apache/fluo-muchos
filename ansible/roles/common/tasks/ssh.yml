@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-- name: "ensure cluster user exists but don't generate ssh key" 
+- name: "ensure cluster user exists but don't generate ssh key"
   user: name={{ cluster_user }} generate_ssh_key=no state=present
 - name: "copy cluster private key to all nodes"
   copy: src=/home/{{ cluster_user }}/.ssh/id_rsa dest=/home/{{ cluster_user }}/.ssh/id_rsa owner={{ cluster_user }} group={{ cluster_group }} mode=0600
