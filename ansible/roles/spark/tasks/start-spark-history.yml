@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-- name: "ensure spark history directory exists in hdfs" 
+- name: "ensure spark history directory exists in hdfs"
   command: "{{ hadoop_home}}/bin/hdfs dfs -mkdir -p /spark/history"
   register: mk_hist_dir
   changed_when: mk_hist_dir.rc != 0

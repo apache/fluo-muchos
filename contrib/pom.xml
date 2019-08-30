@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
 <!--
 
     Licensed to the Apache Software Foundation (ASF) under one or more
@@ -18,20 +17,12 @@
     limitations under the License.
 
 -->
-
-<!-- Put site-specific property overrides in this file. -->
-
-<configuration>
-  <property>
-    <name>fs.defaultFS</name>
-    <value>{{ hdfs_root }}</value>
-  </property>
-  <property>
-    <name>dfs.client.read.shortcircuit</name>
-    <value>true</value>
-  </property>
-  <property>
-    <name>dfs.domain.socket.path</name>
-    <value>/var/lib/hadoop-hdfs/dn_socket</value>
-  </property>
-</configuration>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.apache.fluo</groupId>
+  <artifactId>muchos</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  <name>Apache Fluo Muchos</name>
+  <description>This is a dummy POM for use with contrib/add-license-headers.md</description>
+</project>

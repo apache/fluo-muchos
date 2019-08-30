@@ -17,7 +17,7 @@
 
 - name: "download influxdb rpm"
   get_url:
-  args: 
+  args:
     url: https://influxdb.s3.amazonaws.com/{{ influxdb_rpm }}
     dest: /tmp/{{ influxdb_rpm }}
     sha256sum: "{{ influxdb_sha256 }}"

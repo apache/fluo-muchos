@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-- name: "enable epel yum repo" 
+- name: "enable epel yum repo"
   yum: name=epel-release state=present
 - name: "install packages"
   yum:

@@ -36,7 +36,7 @@ Muchos requires the following:
 
 The following commands will install Muchos, launch an EC2 cluster, and setup/run Accumulo:
 
-```bash
+```sh
 git clone https://github.com/apache/fluo-muchos.git
 cd fluo-muchos/
 cp conf/muchos.props.example conf/muchos.props
@@ -49,13 +49,13 @@ The `setup` command can be run repeatedly to fix any failures and will not repea
 
 After your cluster is launched, SSH to it using the following command:
 
-```bash
+```sh
 ./bin/muchos ssh
 ```
 
 Run the following command to terminate your cluster. WARNING: All cluster data will be lost.
 
-```bash
+```sh
 ./bin/muchos terminate
 ```
 
@@ -167,7 +167,7 @@ Running an example Fluo application like [WebIndex], [Phrasecount], or [Stresso]
 with Muchos as it configures your shell with common environment variables. To run an example
 application, SSH to a node on cluster where Fluo is installed and clone the example repo:
 
-```bash
+```sh
 ./bin/muchos ssh                      # SSH to cluster proxy node
 ssh <node where Fluo is installed>    # Nodes with Fluo installed is determined by Muchos config
 hub clone apache/fluo-examples        # Clone repo of Fluo example applications. Press enter for user/password.
@@ -177,7 +177,7 @@ Start the example application using its provided scripts.  To show how simple th
 to run the [WebIndex] application are shown below.  Read the [WebIndex] README to learn more
 before running these commands.
 
-```bash
+```sh
 cd fluo-examples/webindex
 ./bin/webindex init                   # Initialize and start webindex Fluo application
 ./bin/webindex getpaths 2015-18       # Retrieves CommonCrawl paths file for 2015-18 crawl
@@ -212,7 +212,7 @@ With the default configuration, EC2 clusters will not shutdown automatically aft
 shutdown behavior will be stopping the node.  If you would like your cluster to terminate after 8 hours,
 set the following configuration in [muchos.props]:
 
-```
+```ini
 shutdown_delay_minutes = 480
 shutdown_behavior = terminate
 ```
@@ -223,7 +223,7 @@ If you decide later to cancel the shutdown, run `muchos cancel_shutdown`.
 
 The `config` command allows you to retrieve cluster configuration for your own scripts:
 
-```bash
+```sh
 $ ./bin/muchos config -p leader.public.ip
 10.10.10.10
 ```
