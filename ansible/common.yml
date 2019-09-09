@@ -15,16 +15,18 @@
 # limitations under the License.
 #
 
+- hosts: proxy
+  become: yes
+  roles:
+    - proxy
+  tasks:
+    - import_tasks: roles/proxy/tasks/main.yml
+    - import_tasks: roles/proxy/tasks/download.yml
+      when: download_software
 - hosts: nodes
   become: yes
   tasks:
     - import_tasks: roles/common/tasks/hosts.yml
-- hosts: proxy
-  roles:
-    - proxy
-  tasks:
-    - import_tasks: roles/proxy/tasks/download.yml
-      when: download_software
 - hosts: all
   become: yes
   roles:
@@ -32,6 +34,8 @@
   tasks:
     - import_tasks: roles/common/tasks/ssh.yml
     - import_tasks: roles/common/tasks/os.yml
+    - import_tasks: roles/common/tasks/azure.yml
+      when: cluster_type == 'azure'
     - import_tasks: roles/common/tasks/ec2.yml
       when: cluster_type == 'ec2'
     - import_tasks: roles/common/tasks/existing.yml

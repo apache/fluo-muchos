@@ -142,8 +142,8 @@ def parse_args(hosts_dir, input_args=None):
     parser = OptionParser(
               usage="muchos [options] <action>\n\n"
               + "where <action> can be:\n"
-              + "  launch           Launch cluster in EC2\n"
-              + "  status           Check status of EC2 cluster\n"
+              + "  launch           Launch cluster in Azure or EC2\n"
+              + "  status           Check status of Azure or EC2 cluster\n"
               + "  setup            Set up cluster\n"
               + "  sync             Sync ansible directory on cluster proxy node\n"
               + "  config           Print configuration for that cluster. Requires '-p'. Use '-p all' for all config.\n"

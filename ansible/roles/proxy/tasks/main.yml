@@ -20,3 +20,5 @@
   become: yes
 - name: "create tarball directory on proxy"
   file: path={{ tarballs_dir }} state=directory
+- name: "copy /etc/hosts to proxy"
+  template: src=roles/proxy/templates/etc_hosts dest=/etc/etc_hosts owner=root group=root mode=0644
