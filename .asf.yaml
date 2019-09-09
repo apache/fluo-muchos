@@ -1,0 +1,13 @@
+github:
+  description: "Muchos (an Apache Fluo project) sets up Apache Accumulo or Apache Fluo on a cluster (optionally launched in Amazon EC2 or Microsoft Azure) for development"
+  homepage: https://fluo.apache.org/
+  labels:
+    - fluo
+    - java
+    - accumulo
+    - hadoop
+    - apache
+    - big-data
+    - aws
+    - azure
+    - ansible
