@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-- name: Find luns 
+- name: Find luns
   find:
     paths: "/dev/disk/azure/scsi1"
     patterns: "lun*"
@@ -41,14 +41,14 @@
     fstype: xfs
     state: mounted
   with_indexed_items: "{{ disk_uuids.results }}"
-- name: Set mount point ownership 
+- name: Set mount point ownership
   file:
     path: '{{ mount_root }}{{ item.0 + 1 }}'
     state: directory
     owner: "{{ cluster_user }}"
     group: "{{ cluster_group }}"
   with_indexed_items: "{{ files_matched.files }}"
-- name: Create directry to mount Azure File share
+- name: Create directory to mount Azure File share
   file:
     path: "{{ azure_fileshare_mount }}"
     state: directory

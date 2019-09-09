@@ -52,12 +52,12 @@ class DeployConfig(ConfigParser):
         proxy = self.get('general', 'proxy_hostname')
         cluster_type = self.get('general', 'cluster_type')
         if cluster_type not in ['azure']:
-           if not proxy:
-              exit("ERROR - proxy.hostname must be set in muchos.props")
+            if not proxy:
+                exit("ERROR - proxy.hostname must be set in muchos.props")
 
-           if proxy not in self.node_d:
-              exit("ERROR - The proxy (set by property proxy_hostname={0}) cannot be found in 'nodes' section of "
-                 "muchos.props".format(proxy))
+            if proxy not in self.node_d:
+                exit("ERROR - The proxy (set by property proxy_hostname={0}) cannot be found in 'nodes' section of "
+                     "muchos.props".format(proxy))
 
         if action in ['launch', 'setup']:
             for service in SERVICES:
@@ -149,11 +149,11 @@ class DeployConfig(ConfigParser):
         elif self.get_cluster_type() == 'existing':
             data_dirs = self.get('existing', 'data_dirs').split(",")
         elif self.get_cluster_type() == 'azure':
-            num_disks = int(self.get("azure","numdisks"))
+            num_disks = int(self.get("azure", "numdisks"))
             range_var = num_disks + 1
             for diskNum in range(1, range_var):
-                data_dirs.append(self.get("azure","mount_root") + str(diskNum))
-
+                data_dirs.append(self.get("azure", "mount_root") +
+                                 str(diskNum))
 
         return data_dirs
 
@@ -173,9 +173,10 @@ class DeployConfig(ConfigParser):
             return self.get("existing", "metrics_drive_ids").split(",")
         elif self.get_cluster_type() == 'azure':
             drive_ids = []
-            range_var = int(self.get("azure","numdisks")) + 1
+            range_var = int(self.get("azure", "numdisks")) + 1
             for i in range(1, range_var):
-                drive_ids.append(self.get("azure","metrics_drive_root") + str(i))
+                drive_ids.append(self.get("azure", "metrics_drive_root") +
+                                 str(i))
             return drive_ids
 
     def shutdown_delay_minutes(self):

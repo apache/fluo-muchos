@@ -91,6 +91,47 @@ shutdown_delay_minutes = 0
 # Shutdown behavior of EC2 instances: terminate or stop
 shutdown_behavior = stop
 
+[azure]
+# Name of the Azure resource group to use. All resources are created within this
+# resource group. If a resource group with this name already exists, it will be
+# used, otherwise a new resource group with this name will be created and used.
+resource_group = accumulo-rg
+# Name of the Azure Virtual Network (VNET) to use. If a VNET with this name
+# already exists, it will be used; else a new VNET with this name will be created.
+vnet = vnet1
+# The CIDR prefix used to create the virtual network (VNET).
+vnet_cidr = "10.0.0.0/8"
+# A single subnet is created within the VNET and given the following name.
+subnet = subnet1
+# The CIDR prefix used for the single subnet within the virtual network.
+subnet_cidr = "10.1.0.0/16"
+# Size of the cluster to provision.
+# A virtual machine scale set (VMSS) with these many VMs will be created.
+# The minimum allowed size for this is 3 nodes.
+numnodes = 8
+# The size of each virtual machine. See the following link for other sizes:
+# https://docs.microsoft.com/en-us/azure/virtual-machines/linux/sizes-general
+vm_sku = Standard_D8s_v3
+# Each VM will be provisioned with the following type of managed disk
+managed_disk_type = Standard_LRS
+# Number of managed disks provisioned on each VM
+numdisks = 3
+# The size of each managed disk provisioned
+disk_size_gb = 128
+# Location to mount managed disks in each VM
+mount_root = /var/data
+# Location where the metrics data will be written
+metrics_drive_root = var-data
+# Optional proxy VM. If not set, the first node of the cluster will be selected as the proxy.
+azure_proxy_host =
+location = westus2
+# Optional Azure fileshare to mount on all nodes.
+# Path and credentials must be updated to enable this.
+#azure_fileshare_mount = /mnt/azure-fileshare
+#azure_fileshare = //fileshare-to-mount.file.core.windows.net/path
+#azure_fileshare_username = fs_username
+#azure_fileshare_password = fs_password
+
 [existing]
 # Root of data dirs
 mount_root = /var/data
@@ -107,29 +148,6 @@ profile=perf-small
 
 # Below are different performance profiles that can be selected.  Each profile
 # has the same properties with different values.
-
-[azure]
-resource_group = accumulo-rg
-vnet = vnet1
-vnet_cidr = "10.0.0.0/8"
-subnet = subnet1
-subnet_cidr = "10.1.0.0/16"
-numnodes = 8
-vm_sku = Standard_D8s_v3
-managed_disk_type = Standard_LRS
-numdisks = 3
-disk_size_gb = 128
-mount_root = /var/data
-metrics_drive_root = var-data
-# Optional proxy VM. If not set, the first node of the cluster will be selected as the proxy.
-azure_proxy_host =
-location = westus2
-# Optional Azure fileshare to mount on all nodes.
-# Path and credentials must be updated to enable this.
-#azure_fileshare_mount = /mnt/azure-fileshare
-#azure_fileshare = //fileshare-to-mount.file.core.windows.net/path
-#azure_fileshare_username = fs_username
-#azure_fileshare_password = fs_password
 
 [perf-small]
 # Amount of JVM heap for each tserver

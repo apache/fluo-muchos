@@ -156,11 +156,14 @@ Under the `general` section, edit following values as per your configuration
 * `proxy_hostname` (optional) is the name of the machine which has access to the cluster VNET
 
 Under the `azure` section, edit following values as per your configuration
-* `resource_group` and provide the same created in your Azure subscription for the cluster deployment
-* `vnet` and provide the same created in your Azure subscription for the cluster deployment
-* `subnet` and provide the same created in your Azure subscription for the cluster deployment
-* `numnodes` can be changed as per the cluster size
-* `vm_sku` can be specified from the available skus in the [selected Azure region](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/cli-ps-findimage)
+* `resource_group` to provide the resource-group name for the cluster deployment. A new resource group with
+  this name will be created if it doesn't already exist
+* `vnet` to provide the name of the VNET that your cluster nodes should use. A new VNET with this name will be
+  created if it doesn't already exist
+* `subnet` to provide a name for the subnet within which the cluster resources will be deployed
+* `numnodes` to change the cluster size in terms of number of nodes deployed
+* `vm_sku` to specify the VM size to use. You can choose from the
+  [available VM sizes](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/sizes-general).
 
 Within Azure the `nodes` section is auto populated with the hostnames and their default roles.
 
@@ -333,7 +336,7 @@ The following command runs the unit tests:
 [aws-config]: http://docs.aws.amazon.com/cli/latest/userguide/cli-config-files.html
 [awscli]: https://docs.aws.amazon.com/cli/latest/userguide/installing.html
 [awscli-config]: http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-quick-configuration
-[azure-cli]: https://packages.microsoft.com/yumrepos/azure-cli/azure-cli-2.0.69-1.el7.x86_64.rpm
+[azure-cli]: https://docs.microsoft.com/en-us/cli/azure/?view=azure-cli-latest
 [ansible-azure]: https://docs.ansible.com/ansible/latest/scenario_guides/guide_azure.html
 [fluo-app]: https://github.com/apache/fluo/blob/master/docs/applications.md
 [WebIndex]: https://github.com/apache/fluo-examples/tree/master/webindex
