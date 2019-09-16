@@ -37,14 +37,14 @@
 - hosts: workers
   tasks:
     - name: "start accumulo 2.0 tablet servers"
-      command: "{{ accumulo_home }}/bin/accumulo-service tserver start"
+      command: "nohup {{ accumulo_home }}/bin/accumulo-service tserver start"
       register: start_result
       changed_when: "'Starting' in start_result.stdout"
       when: accumulo_major_version == '2'
 - hosts: accumulomaster
   tasks:
     - name: "start accumulo 2.0 master, monitor, gc & tracer"
-      command: "{{ accumulo_home }}/bin/accumulo-service {{ item }} start"
+      command: "nohup {{ accumulo_home }}/bin/accumulo-service {{ item }} start"
       register: start_result
       changed_when: "'Starting' in start_result.stdout"
       with_items:
