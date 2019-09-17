@@ -37,7 +37,7 @@ class VmssCluster(ExistingCluster):
         azure_config["admin_username"] = config.get("general", "cluster_user")
         azure_config["vmss_name"] = config.cluster_name
         azure_config["deploy_path"] = config.deploy_path
-        azure_config = {k: int(v) if v.isdigit() else v
+        azure_config = {k: VmssCluster._parse_config_value(v)
                         for k, v in azure_config.items()}
         subprocess.call(["ansible-playbook",
                          join(config.deploy_path, "ansible/azure.yml"),
@@ -52,3 +52,12 @@ class VmssCluster(ExistingCluster):
             self.config.cluster_name)
         print('name:', vmss_status.name,
               '\nprovisioning_state:', vmss_status.provisioning_state)
+
+    def _parse_config_value(v):
+        if v.isdigit():
+            return int(v)
+        if v.lower() in ('true', 'yes'):
+            return True
+        if v.lower() in ('false', 'no'):
+            return False
+        return v
