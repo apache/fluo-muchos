@@ -35,6 +35,7 @@ class VmssCluster(ExistingCluster):
         config = self.config
         azure_config = dict(config.items("azure"))
         azure_config["admin_username"] = config.get("general", "cluster_user")
+        azure_config["hdfs_ha"] = config.get("general", "hdfs_ha")
         azure_config["vmss_name"] = config.cluster_name
         azure_config["deploy_path"] = config.deploy_path
         azure_config = {k: int(v) if v.isdigit() else v
