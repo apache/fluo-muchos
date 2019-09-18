@@ -133,6 +133,8 @@ location = westus2
 #azure_fileshare_password = fs_password
 # Optional integration with Azure Log Analytics
 # Workspace ID and key must be updated to enable this.
+# For details on how to get a workspace ID and key, see the link below
+# https://docs.microsoft.com/en-us/azure/azure-monitor/learn/quick-collect-linux-computer#obtain-workspace-id-and-key
 az_omsIntegrationNeeded = False
 #az_logs_id = 
 #az_logs_key = 
