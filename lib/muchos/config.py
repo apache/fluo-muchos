@@ -504,4 +504,7 @@ AZURE_VAR_DEFAULTS = {
   'azure_fileshare': None,
   'azure_fileshare_username': None,
   'azure_fileshare_password': None,
+  'az_omsIntegrationNeeded': None,
+  'az_logs_id': None,
+  'az_logs_key': None
 }
