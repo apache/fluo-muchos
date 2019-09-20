@@ -15,9 +15,11 @@
 # limitations under the License.
 #
 
+from abc import ABCMeta, abstractmethod
+
 from configparser import ConfigParser
 from sys import exit
-from .util import get_ephemeral_devices, get_arch
+from muchos.util import get_ephemeral_devices, get_arch
 import os
 import json
 import glob
@@ -28,10 +30,10 @@ SERVICES = ['zookeeper', 'namenode', 'resourcemanager', 'accumulomaster', 'mesos
 OPTIONAL_SERVICES = ['fluo', 'fluo_yarn', 'metrics', 'mesosmaster', 'spark', 'client', 'swarmmanager', 'journalnode', 'zkfc']
 
 
-class DeployConfig(ConfigParser):
+class DeployConfig(ConfigParser, metaclass=ABCMeta):
 
     def __init__(self, deploy_path, config_path, hosts_path, checksums_path, templates_path, cluster_name):
-        ConfigParser.__init__(self)
+        super(DeployConfig, self).__init__()
         self.optionxform = str
         self.deploy_path = deploy_path
         self.read(config_path)
@@ -46,20 +48,13 @@ class DeployConfig(ConfigParser):
         self.checksums_path = checksums_path
         self.checksums_d = None
         self.init_nodes()
-        self.cluster_template_d = None
-        self.init_template(templates_path)
 
+    @abstractmethod
     def verify_config(self, action):
-        proxy = self.get('general', 'proxy_hostname')
-        cluster_type = self.get('general', 'cluster_type')
-        if cluster_type not in ['azure']:
-            if not proxy:
-                exit("ERROR - proxy.hostname must be set in muchos.props")
+        raise NotImplementedError()
 
-            if proxy not in self.node_d:
-                exit("ERROR - The proxy (set by property proxy_hostname={0}) cannot be found in 'nodes' section of "
-                     "muchos.props".format(proxy))
-
+    # helper for verify_config to call for common checks
+    def _verify_config(self, action):
         if action in ['launch', 'setup']:
             for service in SERVICES:
                 if service not in OPTIONAL_SERVICES:
@@ -71,9 +66,9 @@ class DeployConfig(ConfigParser):
             if self.java_product_version() >= 11 and StrictVersion(self.version('accumulo')) <= StrictVersion("1.9.3"):
                 exit("ERROR - Java 11 is not supported with Accumulo version '{0}'".format(self.version('accumulo')))
 
+    @abstractmethod
     def verify_launch(self):
-        self.verify_instance_type(self.get('ec2', 'default_instance_type'))
-        self.verify_instance_type(self.get('ec2', 'worker_instance_type'))
+        raise NotImplementedError()
 
     def init_nodes(self):
         self.node_d = {}
@@ -88,26 +83,9 @@ class DeployConfig(ConfigParser):
                     exit('Unknown service "%s" declared for node %s' % (service, hostname))
             self.node_d[hostname] = service_list
 
-    def default_ephemeral_devices(self):
-        return get_ephemeral_devices(self.get('ec2', 'default_instance_type'))
-
-    def worker_ephemeral_devices(self):
-        return get_ephemeral_devices(self.get('ec2', 'worker_instance_type'))
-
-    def max_ephemeral(self):
-        return max((len(self.default_ephemeral_devices()), len(self.worker_ephemeral_devices())))
-
+    @abstractmethod
     def node_type_map(self):
-        if self.cluster_template_d:
-            return self.cluster_template_d['devices']
-
-        node_types = {}
-        if self.get_cluster_type() == 'ec2':
-            node_list = [('default', self.default_ephemeral_devices()), ('worker', self.worker_ephemeral_devices())]
-
-            for (ntype, devices) in node_list:
-                node_types[ntype] = {'mounts': self.mounts(len(devices)), 'devices': devices}
-        return node_types
+        raise NotImplementedError()
 
     def node_type(self, hostname):
         if 'worker' in self.node_d[hostname]:
@@ -123,45 +101,21 @@ class DeployConfig(ConfigParser):
             mounts.append(self.mount_root() + str(i))
         return mounts
 
+    @abstractmethod
     def mount_root(self):
-        if self.get_cluster_type() == 'ec2':
-            return '/media/' + self.ephemeral_root
-        elif self.get_cluster_type() == 'existing':
-            return self.get('existing', 'mount_root')
-        elif self.get_cluster_type() == 'azure':
-            return self.get('azure', 'mount_root')
+        raise NotImplementedError()
 
+    @abstractmethod
     def fstype(self):
-        retval = None
-        if self.get_cluster_type() == 'ec2':
-            retval = self.get('ec2', 'fstype')
-            if not retval:
-                return 'ext3'
-        return retval
+        raise NotImplementedError()
 
+    @abstractmethod
     def force_format(self):
-        retval = 'no'
-        if self.get_cluster_type() == 'ec2':
-            retval = self.get('ec2', 'force_format')
-            if not retval:
-                return 'no'
-        return retval
+        raise NotImplementedError()
 
+    @abstractmethod
     def data_dirs_common(self, nodeType):
-        data_dirs = []
-
-        if self.get_cluster_type() == 'ec2':
-            data_dirs = self.node_type_map()[nodeType]['mounts']
-        elif self.get_cluster_type() == 'existing':
-            data_dirs = self.get('existing', 'data_dirs').split(",")
-        elif self.get_cluster_type() == 'azure':
-            num_disks = int(self.get("azure", "numdisks"))
-            range_var = num_disks + 1
-            for diskNum in range(1, range_var):
-                data_dirs.append(self.get("azure", "mount_root") +
-                                 str(diskNum))
-
-        return data_dirs
+        raise NotImplementedError()
 
     def worker_data_dirs(self):
         return self.data_dirs_common("worker")
@@ -169,27 +123,13 @@ class DeployConfig(ConfigParser):
     def default_data_dirs(self):
         return self.data_dirs_common("default")
 
+    @abstractmethod
     def metrics_drive_ids(self):
-        if self.get_cluster_type() == 'ec2':
-            drive_ids = []
-            for i in range(0, self.max_ephemeral()):
-                drive_ids.append(self.metrics_drive_root + str(i))
-            return drive_ids
-        elif self.get_cluster_type() == 'existing':
-            return self.get("existing", "metrics_drive_ids").split(",")
-        elif self.get_cluster_type() == 'azure':
-            drive_ids = []
-            range_var = int(self.get("azure", "numdisks")) + 1
-            for i in range(1, range_var):
-                drive_ids.append(self.get("azure", "metrics_drive_root") +
-                                 str(i))
-            return drive_ids
+        raise NotImplementedError()
 
+    @abstractmethod
     def shutdown_delay_minutes(self):
-        retval = '0'
-        if self.get_cluster_type() == 'ec2':
-            retval = self.get("ec2", "shutdown_delay_minutes")
-        return retval
+        return '0'
 
     def version(self, software_id):
         return self.get('general', software_id + '_version')
@@ -238,21 +178,9 @@ class DeployConfig(ConfigParser):
             exit('ERROR - Failed to find checksums for %s %s in %s' % (software, version, self.checksums_path))
         return self.checksums_d[key]
 
-    def verify_instance_type(self, instance_type):
-        if not self.cluster_template_d:
-            if get_arch(instance_type) == 'pvm':
-                exit("ERROR - Configuration contains instance type '{0}' that uses pvm architecture."
-                     "Only hvm architecture is supported!".format(instance_type))
-
+    @abstractmethod
     def instance_tags(self):
-        retd = {}
-        if self.has_option('ec2', 'instance_tags'):
-            value = self.get('ec2', 'instance_tags')
-            if value:
-                for kv in value.split(','):
-                    (key, val) = kv.split(':')
-                    retd[key] = val
-        return retd
+        return NotImplementedError()
 
     def nodes(self):
         return self.node_d
@@ -266,6 +194,7 @@ class DeployConfig(ConfigParser):
                 return True
         return False
 
+    # test method, might want to make private or just move to test module
     def get_host_services(self):
         retval = []
         for (hostname, service_list) in list(self.node_d.items()):
@@ -273,6 +202,7 @@ class DeployConfig(ConfigParser):
         retval.sort()
         return retval
 
+    # test method, might want to make private or just move to test module
     def get_service_private_ips(self, service):
         retval = []
         for (hostname, service_list) in list(self.node_d.items()):
@@ -289,6 +219,7 @@ class DeployConfig(ConfigParser):
         retval.sort()
         return retval
 
+    # test method, might want to make private or just move to test module
     def get_non_proxy(self):
         retval = []
         proxy_ip = self.get_private_ip(self.get('general', 'proxy_hostname'))
@@ -384,70 +315,6 @@ class DeployConfig(ConfigParser):
                     return
         exit("Property '{0}' was not found".format(key))
 
-    def init_template(self, templates_path):
-        if self.has_option('ec2', 'cluster_template'):
-            template_id = self.get('ec2', 'cluster_template')
-            template_path = os.path.join(templates_path, template_id)
-            if os.path.exists(template_path):
-                self.cluster_template_d = {'id': template_id}
-                self.load_template_ec2_requests(template_path)
-                self.load_template_device_map(template_path)
-            self.validate_template()
-
-    def load_template_ec2_requests(self, template_dir):
-        for json_path in glob.glob(os.path.join(template_dir, '*.json')):
-            service = os.path.basename(json_path).rsplit('.', 1)[0]
-            if service not in SERVICES:
-                exit("ERROR - Template '{0}' has unrecognized option '{1}'. Must be one of {2}".format(
-                    self.cluster_template_d['id'], service, str(SERVICES)))
-            with open(json_path, 'r') as json_file:
-                # load as string, so we can use string.Template to inject config values
-                self.cluster_template_d[service] = json_file.read()
-
-    def load_template_device_map(self, template_dir):
-        device_map_path = os.path.join(template_dir, 'devices')
-        if not os.path.isfile(device_map_path):
-            exit("ERROR - template '{0}' is missing 'devices' config".format(self.cluster_template_d['id']))
-        with open(device_map_path, 'r') as json_file:
-            self.cluster_template_d['devices'] = json.load(json_file)
-
-    def validate_template(self):
-        if not self.cluster_template_d:
-            exit("ERROR - Template '{0}' is not defined!".format(self.get('ec2', 'cluster_template')))
-
-        if 'worker' not in self.cluster_template_d:
-            exit("ERROR - '{0}' template config is invalid. No 'worker' launch request is defined".format(
-                self.cluster_template_d['id']))
-
-        if 'worker' not in self.cluster_template_d['devices']:
-            exit("ERROR - '{0}' template is invalid. The devices file must have a 'worker' device map".format(
-                self.cluster_template_d['id']))
-
-        if 'default' not in self.cluster_template_d['devices']:
-            exit("ERROR - '{0}' template is invalid. The devices file must have a 'default' device map".format(
-                self.cluster_template_d['id']))
-
-        # Validate the selected launch template for each host
-
-        worker_count = 0
-        for hostname in self.node_d:
-            # first service listed denotes the selected template
-            selected_ec2_request = self.node_d[hostname][0]
-            if 'worker' == selected_ec2_request:
-                worker_count = worker_count + 1
-            else:
-                if 'worker' in self.node_d[hostname]:
-                    exit("ERROR - '{0}' node config is invalid. The 'worker' service should be listed first".format(
-                        hostname))
-            if selected_ec2_request not in self.cluster_template_d:
-                if len(self.node_d[hostname]) > 1:
-                    print('Hint: In template mode, the first service listed for a host denotes its EC2 template')
-                exit("ERROR - '{0}' node config is invalid. No EC2 template defined for the '{1}' service".format(
-                    hostname, selected_ec2_request))
-
-        if worker_count == 0:
-            exit("ERROR - No worker instances are defined for template '{0}'".format(self.cluster_template_d['id']))
-
 
 HOST_VAR_DEFAULTS = {
   'accumulo_home': '"{{ install_dir }}/accumulo-{{ accumulo_version }}"',
@@ -522,14 +389,4 @@ PLAY_VAR_DEFAULTS = {
   'twill_reserve_mem_mb': None,
   'yarn_nm_mem_mb': None,
   'zookeeper_sha256': None
-}
-
-AZURE_VAR_DEFAULTS = {
-  'azure_fileshare_mount': None,
-  'azure_fileshare': None,
-  'azure_fileshare_username': None,
-  'azure_fileshare_password': None,
-  'az_omsIntegrationNeeded': None,
-  'az_logs_id': None,
-  'az_logs_key': None
 }

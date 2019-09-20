@@ -15,11 +15,11 @@
 # limitations under the License.
 #
 
-from muchos.config import DeployConfig
+from muchos.config import DeployConfig, ExistingDeployConfig, Ec2DeployConfig, AzureDeployConfig
 
 
 def test_ec2_cluster():
-    c = DeployConfig("muchos", '../conf/muchos.props.example', '../conf/hosts/example/example_cluster',
+    c = Ec2DeployConfig("muchos", '../conf/muchos.props.example', '../conf/hosts/example/example_cluster',
                      '../conf/checksums', '../conf/templates', 'mycluster')
     assert c.checksum_ver('accumulo', '1.9.0') == 'f68a6145029a9ea843b0305c90a7f5f0334d8a8ceeea94734267ec36421fe7fe'
     assert c.checksum('accumulo') == 'df172111698c7a73aa031de09bd5589263a6b824482fbb9b4f0440a16602ed47'
@@ -82,7 +82,7 @@ def test_ec2_cluster():
 
 
 def test_azure_cluster():
-    c = DeployConfig("muchos", '../conf/muchos.props.example', '../conf/hosts/example/example_cluster',
+    c = AzureDeployConfig("muchos", '../conf/muchos.props.example', '../conf/hosts/example/example_cluster',
                      '../conf/checksums', '../conf/templates', 'mycluster')
 
     # since we are sharing a single muchos.props.example file, we need
@@ -150,7 +150,7 @@ def test_azure_cluster():
 
 
 def test_existing_cluster():
-    c = DeployConfig("muchos", '../conf/muchos.props.example', '../conf/hosts/example/example_cluster',
+    c = ExistingDeployConfig("muchos", '../conf/muchos.props.example', '../conf/hosts/example/example_cluster',
                      '../conf/checksums', '../conf/templates', 'mycluster')
     c.cluster_type = 'existing'
     assert c.get_cluster_type() == 'existing'
@@ -165,7 +165,7 @@ def test_existing_cluster():
 
 
 def test_case_sensitive():
-    c = DeployConfig("muchos", '../conf/muchos.props.example', '../conf/hosts/example/example_cluster',
+    c = Ec2DeployConfig("muchos", '../conf/muchos.props.example', '../conf/hosts/example/example_cluster',
                      '../conf/checksums', '../conf/templates', 'mycluster')
     assert c.has_option('ec2', 'default_instance_type') == True
     assert c.has_option('ec2', 'Default_instance_type') == False
@@ -175,7 +175,7 @@ def test_case_sensitive():
 
 
 def test_ec2_cluster_template():
-    c = DeployConfig("muchos", '../conf/muchos.props.example', '../conf/hosts/example/example_cluster',
+    c = Ec2DeployConfig("muchos", '../conf/muchos.props.example', '../conf/hosts/example/example_cluster',
                      '../conf/checksums', '../conf/templates', 'mycluster')
 
     c.set('ec2', 'cluster_template', 'example')
