@@ -21,6 +21,8 @@
 
 <!-- Put site-specific property overrides in this file. -->
 
+<!-- when editing this file please consider if changes are also needed in roles/hadoop-ha/templates -->
+
 <configuration>
   <property>
     <name>yarn.resourcemanager.hostname</name>

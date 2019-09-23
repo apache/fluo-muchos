@@ -293,6 +293,8 @@ nameservice_id = muchoshacluster      # Logical name for the cluster, no special
 
 Before enabling HA, it is strongly recommended you read the Apache doc for [HDFS HA] & [Accumulo HA] 
 
+Also in the `[nodes]` section of [muchos.props] ensure the `journalnode` and `zkfc` service are configured to run.
+
 ## Terminating your cluster
 
 If you launched your cluster, run the following command to terminate your cluster. WARNING - All

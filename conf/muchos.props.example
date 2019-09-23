@@ -104,14 +104,14 @@ resource_group = accumulo-rg
 # already exists, it will be used; else a new VNET with this name will be created.
 vnet = vnet1
 # The CIDR prefix used to create the virtual network (VNET).
-vnet_cidr = "10.0.0.0/8"
+vnet_cidr = 10.0.0.0/8
 # A single subnet is created within the VNET and given the following name.
 subnet = subnet1
 # The CIDR prefix used for the single subnet within the virtual network.
-subnet_cidr = "10.1.0.0/16"
+subnet_cidr = 10.1.0.0/16
 # Size of the cluster to provision.
 # A virtual machine scale set (VMSS) with these many VMs will be created.
-# The minimum allowed size for this is 3 nodes.
+# The minimum allowed size for this is 3 nodes for non-HA & 4 nodes for HA setup
 numnodes = 8
 # The size of each virtual machine. See the following link for other sizes:
 # https://docs.microsoft.com/en-us/azure/virtual-machines/linux/sizes-general
@@ -135,6 +135,13 @@ location = westus2
 #azure_fileshare = //fileshare-to-mount.file.core.windows.net/path
 #azure_fileshare_username = fs_username
 #azure_fileshare_password = fs_password
+# Optional integration with Azure Log Analytics
+# Workspace ID and key must be updated to enable this.
+# For details on how to get a workspace ID and key, see the link below
+# https://docs.microsoft.com/en-us/azure/azure-monitor/learn/quick-collect-linux-computer#obtain-workspace-id-and-key
+az_omsIntegrationNeeded = False
+#az_logs_id = 
+#az_logs_key = 
 
 [existing]
 # Root of data dirs
