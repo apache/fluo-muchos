@@ -50,6 +50,10 @@ install_hub = True
 java_package=java-1.8.0-openjdk-devel
 # The package to use for java 11
 # java_package=java-11-openjdk-devel
+# Please read the High-Availability section of the README before switching to 'True' 
+hdfs_ha = False
+# Give a logical name for the cluster, all one word no special characters. Required to support HDFS HA.
+nameservice_id = muchoshacluster
 
 [ec2]
 # AWS machine image to use. The default below is for a CentOS 7 image (in us-east-1).
@@ -107,7 +111,7 @@ subnet = subnet1
 subnet_cidr = 10.1.0.0/16
 # Size of the cluster to provision.
 # A virtual machine scale set (VMSS) with these many VMs will be created.
-# The minimum allowed size for this is 3 nodes.
+# The minimum allowed size for this is 3 nodes for non-HA & 4 nodes for HA setup
 numnodes = 8
 # The size of each virtual machine. See the following link for other sizes:
 # https://docs.microsoft.com/en-us/azure/virtual-machines/linux/sizes-general

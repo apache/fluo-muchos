@@ -22,9 +22,9 @@ import os
 import json
 import glob
 
-SERVICES = ['zookeeper', 'namenode', 'resourcemanager', 'accumulomaster', 'mesosmaster', 'worker', 'fluo', 'fluo_yarn', 'metrics', 'spark', 'client', 'swarmmanager']
+SERVICES = ['zookeeper', 'namenode', 'resourcemanager', 'accumulomaster', 'mesosmaster', 'worker', 'fluo', 'fluo_yarn', 'metrics', 'spark', 'client', 'swarmmanager', 'journalnode', 'zkfc']
 
-OPTIONAL_SERVICES = ['fluo', 'fluo_yarn', 'metrics', 'mesosmaster', 'spark', 'client', 'swarmmanager']
+OPTIONAL_SERVICES = ['fluo', 'fluo_yarn', 'metrics', 'mesosmaster', 'spark', 'client', 'swarmmanager', 'journalnode', 'zkfc']
 
 
 class DeployConfig(ConfigParser):
@@ -449,11 +449,14 @@ HOST_VAR_DEFAULTS = {
   'hadoop_tarball': 'hadoop-{{ hadoop_version }}.tar.gz',
   'hadoop_version': None,
   'hadoop_major_version': '"{{ hadoop_version.split(\'.\')[0] }}"',
-  'hdfs_root': 'hdfs://{{ groups[\'namenode\'][0] }}:8020',
+  'hdfs_root': "{% if hdfs_ha %}hdfs://{{ nameservice_id }}{% else %}hdfs://{{ groups[\'namenode\'][0] }}:8020{% endif %}",
+  'hdfs_ha': None,
+  'nameservice_id': None,
   'install_dir': None,
   'install_hub': None,
   'java_home': '"/usr/lib/jvm/java"',
   'java_package': '"java-1.8.0-openjdk-devel"',
+  'journal_quorum': "{% for host in groups['journalnode'] %}{{ host }}:8485{% if not loop.last %};{% endif %}{% endfor %}",
   'maven_home': '"{{ install_dir }}/apache-maven-{{ maven_version }}"',
   'maven_tarball': 'apache-maven-{{ maven_version }}-bin.tar.gz',
   'maven_version': '3.6.1',
@@ -463,7 +466,7 @@ HOST_VAR_DEFAULTS = {
   'tarballs_dir': '"{{ user_home }}/tarballs"',
   'user_home': None,
   'worker_data_dirs': None,
-  'zookeeper_connect': '"{{ groups[\'zookeepers\']|join(\',\') }}"',
+  'zookeeper_connect': "{% for host in groups['zookeepers'] %}{{ host }}:2181{% if not loop.last %},{% endif %}{% endfor %}",
   'zookeeper_client_port': '"2181"',
   'zookeeper_home': '"{{ install_dir }}/zookeeper-{{ zookeeper_version }}"',
   'zookeeper_tarball': 'zookeeper-{{ zookeeper_version }}.tar.gz',

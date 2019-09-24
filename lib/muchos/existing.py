@@ -72,7 +72,10 @@ class ExistingCluster:
             print("- import_playbook: common.yml", file=site_file)
 
             print("- import_playbook: zookeeper.yml", file=site_file)
-            print("- import_playbook: hadoop.yml", file=site_file)
+            if config.get("general","hdfs_ha") == 'True':
+                print("- import_playbook: hadoop-ha.yml", file=site_file)
+            else:
+                print("- import_playbook: hadoop.yml", file=site_file)
 
             if config.has_service("spark"):
                 print("- import_playbook: spark.yml", file=site_file)
@@ -92,8 +95,18 @@ class ExistingCluster:
         ansible_conf = join(config.deploy_path, "ansible/conf")
         with open(join(ansible_conf, "hosts"), 'w') as hosts_file:
             print("[proxy]\n{0}".format(config.proxy_hostname()), file=hosts_file)
-            print("\n[accumulomaster]\n{0}".format(config.get_service_hostnames("accumulomaster")[0]), file=hosts_file)
-            print("\n[namenode]\n{0}".format(config.get_service_hostnames("namenode")[0]), file=hosts_file)
+            print("\n[accumulomaster]", file=hosts_file)
+            for (index, accu_host) in enumerate(config.get_service_hostnames("accumulomaster"), start=1):
+                print("{0}".format(accu_host,index), file=hosts_file)
+            print("\n[namenode]",file=hosts_file)
+            for (index, nn_host) in enumerate(config.get_service_hostnames("namenode"), start=1):
+                print("{0}".format(nn_host,index), file=hosts_file)
+            print("\n[journalnode]",file=hosts_file)
+            for (index, jn_host) in enumerate(config.get_service_hostnames("journalnode"), start=1):
+                print("{0}".format(jn_host,index), file=hosts_file)
+            print("\n[zkfc]",file=hosts_file)
+            for (index, zkfc_host) in enumerate(config.get_service_hostnames("zkfc"), start=1):
+                print("{0}".format(zkfc_host,index), file=hosts_file)
             print("\n[resourcemanager]\n{0}".format(config.get_service_hostnames("resourcemanager")[0]),
                   file=hosts_file)
             if config.has_service("spark"):

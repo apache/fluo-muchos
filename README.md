@@ -280,6 +280,21 @@ master, etc. It also has variables in the `[all:vars]` section that contain sett
 useful in user playbooks. It is recommended that any user-defined Ansible playbooks should be
 managed in their own git repository (see [mikewalch/muchos-custom][mc] for an example).
 
+## High-Availability (optional)
+
+Additionally, Muchos can be configured to provide High-Availability for HDFS & Accumulo components. By default,
+this feature is off, however it can be turned on by editing the following settings in [muchos.props] 
+under the `general` section as shown below:
+
+```ini
+hdfs_ha = True                        # default is False
+nameservice_id = muchoshacluster      # Logical name for the cluster, no special characters
+```
+
+Before enabling HA, it is strongly recommended you read the Apache doc for [HDFS HA] & [Accumulo HA] 
+
+Also in the `[nodes]` section of [muchos.props] ensure the `journalnode` and `zkfc` service are configured to run.
+
 ## Terminating your cluster
 
 If you launched your cluster, run the following command to terminate your cluster. WARNING - All
@@ -360,3 +375,5 @@ The following command runs the unit tests:
 [Docker swarm]: https://docs.docker.com/engine/swarm/
 [Portainer]: https://github.com/portainer/portainer
 [checksums]: conf/checksums
+[HDFS HA]: https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HDFSHighAvailabilityWithQJM.html
+[Accumulo HA]: https://accumulo.apache.org/1.9/accumulo_user_manual.html#_components

@@ -21,38 +21,21 @@
 
 <!-- Put site-specific property overrides in this file. -->
 
-<!-- when editing this file please consider if changes are also needed in roles/hadoop-ha/templates -->
-
 <configuration>
   <property>
-    <name>dfs.datanode.synconclose</name>
-    <value>true</value>
+    <name>fs.defaultFS</name> 
+    <value>{{ hdfs_root }}</value>
   </property>
   <property>
-    <name>dfs.namenode.name.dir</name>
-    <value>{{ worker_data_dirs[0] }}/hadoop/name</value>
-  </property>
-  <property>
-    <name>dfs.datanode.data.dir</name>
-    <value>{% for dir in worker_data_dirs -%}
-              {{ dir }}/hadoop/data
-              {%- if not loop.last -%} , {%- endif -%}
-           {%- endfor %}</value>
-  </property>
-  <property>
-    <name>dfs.namenode.secondary.http-address</name>
-    <value>{{ groups['namenode'][0] }}:50090</value>
-  </property>
-  <property>
-    <name>dfs.namenode.secondary.https-address</name>
-    <value>{{ groups['namenode'][0] }}:50091</value>
-  </property>
-    <property>
     <name>dfs.client.read.shortcircuit</name>
     <value>true</value>
   </property>
   <property>
     <name>dfs.domain.socket.path</name>
     <value>/var/lib/hadoop-hdfs/dn_socket</value>
+  </property>
+  <property>
+    <name>ha.zookeeper.quorum</name>
+    <value>{{ zookeeper_connect }}</value>
   </property>
 </configuration>
