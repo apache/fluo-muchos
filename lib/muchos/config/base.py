@@ -17,6 +17,7 @@
 
 from abc import ABCMeta, abstractmethod
 
+from functools import wraps
 from configparser import ConfigParser
 from sys import exit
 from muchos.util import get_ephemeral_devices, get_arch
@@ -29,25 +30,105 @@ SERVICES = ['zookeeper', 'namenode', 'resourcemanager', 'accumulomaster', 'mesos
 
 OPTIONAL_SERVICES = ['fluo', 'fluo_yarn', 'metrics', 'mesosmaster', 'spark', 'client', 'swarmmanager', 'journalnode', 'zkfc']
 
+_host_vars = []
+_play_vars = []
+_extra_vars = []
+_ansible_vars = dict(
+    host=[],
+    play=[],
+    extra=[]
+)
 
-class DeployConfig(ConfigParser, metaclass=ABCMeta):
+# ansible hosts inventory variables
+def host_var(name=None):
+    return ansible_var_decorator('host', name)
 
+# ansible group/all variables
+def play_var(name=None):
+    return ansible_var_decorator('play', name)
+
+# ansible extra variables
+def extra_var(name=None):
+    return ansible_var_decorator('extra', name)
+
+def ansible_var_decorator(type, name):
+    def _decorator(func):
+        if getattr(func, '__isabstractmethod__', False):
+            raise Exception("{}: cannot decorate an abstract method as play_var".format(func.__qualname__))
+
+        _ansible_vars[type].append((name if isinstance(name, str) else func.__name__, func.__qualname__.split('.')[0], func.__name__))
+        return func
+
+    if callable(name):
+        return _decorator(name)
+    return _decorator
+
+def default(val):
+    def _default(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            res = func(*args, **kwargs)
+            if res in [None, 0, ''] or len(res) == 0:
+                return val
+            return res
+        return wrapper
+    return _default
+
+def required(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        res = func(*args, **kwargs)
+        if res in [None, 0, ''] or len(res) == 0:
+            raise ConfigMissingError(func.__name__)
+        return res
+    return wrapper
+
+class ConfigMissingError(Exception):
+    def __init__(self, name):
+        super(ConfigMissingError, self).__init__("{} is missing from the configuration".format(name))
+
+
+class BaseConfig(ConfigParser, metaclass=ABCMeta):
     def __init__(self, deploy_path, config_path, hosts_path, checksums_path, templates_path, cluster_name):
-        super(DeployConfig, self).__init__()
+        super(BaseConfig, self).__init__()
         self.optionxform = str
         self.deploy_path = deploy_path
         self.read(config_path)
         self.hosts_path = hosts_path
         self.cluster_name = cluster_name
-        self.sg_name = cluster_name + '-group'
-        self.ephemeral_root = 'ephemeral'
         self.cluster_type = self.get('general', 'cluster_type')
-        self.metrics_drive_root = 'media-' + self.ephemeral_root
         self.node_d = None
         self.hosts = None
         self.checksums_path = checksums_path
         self.checksums_d = None
-        self.init_nodes()
+        self._init_nodes()
+
+    def host_vars(self):
+        vars = HOST_VAR_DEFAULTS.copy()
+
+        # only render host_vars for base and cluster specific config
+        f = ["{}deployconfig".format(self.get_cluster_type()), "baseconfig"]
+        vars.update({
+            v[0]: getattr(self, v[2])() for v in
+                  filter(lambda t: t[1].lower() in f,
+                  _ansible_vars['host'])})
+        return vars
+
+    def play_vars(self):
+        vars = PLAY_VAR_DEFAULTS.copy()
+
+        # populate common software checksums
+        vars.update({
+            '{}_sha256'.format(k): self.checksum(k) for
+            k in ['accumulo', 'fluo', 'fluo_yarn', 'hadoop', 'spark', 'zookeeper']
+        })
+        # only render play_vars for base and cluster specific config
+        f = ["{}deployconfig".format(self.get_cluster_type()), "baseconfig"]
+        vars.update({
+            v[0]: getattr(self, v[2])() for v in
+                  filter(lambda t: t[1].lower() in f,
+                  _ansible_vars['play'])})
+        return vars
 
     @abstractmethod
     def verify_config(self, action):
@@ -70,7 +151,7 @@ class DeployConfig(ConfigParser, metaclass=ABCMeta):
     def verify_launch(self):
         raise NotImplementedError()
 
-    def init_nodes(self):
+    def _init_nodes(self):
         self.node_d = {}
         for (hostname, value) in self.items('nodes'):
             if hostname in self.node_d:
@@ -390,3 +471,5 @@ PLAY_VAR_DEFAULTS = {
   'yarn_nm_mem_mb': None,
   'zookeeper_sha256': None
 }
+
+        # vars = PLAY_VAR_DEFAULTS.copy()

@@ -15,7 +15,8 @@
 # limitations under the License.
 #
 
-from muchos.config import DeployConfig, SERVICES, OPTIONAL_SERVICES
+from muchos.config import SERVICES, OPTIONAL_SERVICES
+from muchos.config import BaseConfig, host_var, play_var, extra_var, default
 from sys import exit
 from muchos.util import get_ephemeral_devices, get_arch
 import os
@@ -23,11 +24,14 @@ import json
 import glob
 
 
-class Ec2DeployConfig(DeployConfig):
+class Ec2DeployConfig(BaseConfig):
 
     def __init__(self, deploy_path, config_path, hosts_path, checksums_path, templates_path, cluster_name):
         super(Ec2DeployConfig, self).__init__(deploy_path, config_path, hosts_path, checksums_path, templates_path, cluster_name)
+        self.sg_name = cluster_name + '-group'
+        self.ephemeral_root = 'ephemeral'
         self.cluster_template_d = None
+        self.metrics_drive_root = 'media-' + self.ephemeral_root
         self.init_template(templates_path)
 
     def verify_config(self, action):
@@ -59,6 +63,7 @@ class Ec2DeployConfig(DeployConfig):
     def max_ephemeral(self):
         return max((len(self.default_ephemeral_devices()), len(self.worker_ephemeral_devices())))
 
+    @host_var(name='ec2_node_type_map')
     def node_type_map(self):
         if self.cluster_template_d:
             return self.cluster_template_d['devices']

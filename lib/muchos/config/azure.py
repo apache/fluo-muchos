@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-from muchos.config import DeployConfig
+from muchos.config import BaseConfig, host_var, play_var, extra_var, default
 from sys import exit
 from muchos.util import get_ephemeral_devices, get_arch
 import os
@@ -23,7 +23,7 @@ import json
 import glob
 
 
-class AzureDeployConfig(DeployConfig):
+class AzureDeployConfig(BaseConfig):
 
     def __init__(self, deploy_path, config_path, hosts_path, checksums_path, templates_path, cluster_name):
         super(AzureDeployConfig, self).__init__(deploy_path, config_path, hosts_path, checksums_path, templates_path, cluster_name)
