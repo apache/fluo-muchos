@@ -17,6 +17,7 @@
 
 from abc import ABCMeta, abstractmethod
 
+from collections import ChainMap
 from configparser import ConfigParser
 from sys import exit
 from muchos.config.decorators import *
@@ -30,6 +31,81 @@ from distutils.version import StrictVersion
 SERVICES = ['zookeeper', 'namenode', 'resourcemanager', 'accumulomaster', 'mesosmaster', 'worker', 'fluo', 'fluo_yarn', 'metrics', 'spark', 'client', 'swarmmanager', 'journalnode', 'zkfc']
 
 OPTIONAL_SERVICES = ['fluo', 'fluo_yarn', 'metrics', 'mesosmaster', 'spark', 'client', 'swarmmanager', 'journalnode', 'zkfc']
+
+HOST_VAR_DEFAULTS = {
+  'accumulo_home': '"{{ install_dir }}/accumulo-{{ accumulo_version }}"',
+  'accumulo_instance': None,
+  'accumulo_major_version': '"{{ accumulo_version.split(\'.\')[0] }}"',
+  'accumulo_password': None,
+  'accumulo_tarball': 'accumulo-{{ accumulo_version }}-bin.tar.gz',
+  'accumulo_version': None,
+  'cluster_type': None,
+  'cluster_group': None,
+  'cluster_user': None,
+  'default_data_dirs': None,
+  'download_software': None,
+  'fluo_home': '"{{ install_dir }}/fluo-{{ fluo_version }}"',
+  'fluo_tarball': 'fluo-{{ fluo_version }}-bin.tar.gz',
+  'fluo_version': None,
+  'fluo_yarn_home': '"{{ install_dir }}/fluo-yarn-{{ fluo_yarn_version }}"',
+  'fluo_yarn_tarball': 'fluo-yarn-{{ fluo_yarn_version }}-bin.tar.gz',
+  'fluo_yarn_version': None,
+  'hadoop_home': '"{{ install_dir }}/hadoop-{{ hadoop_version }}"',
+  'hadoop_tarball': 'hadoop-{{ hadoop_version }}.tar.gz',
+  'hadoop_version': None,
+  'hadoop_major_version': '"{{ hadoop_version.split(\'.\')[0] }}"',
+  'hdfs_root': "{% if hdfs_ha %}hdfs://{{ nameservice_id }}{% else %}hdfs://{{ groups[\'namenode\'][0] }}:8020{% endif %}",
+  'hdfs_ha': None,
+  'nameservice_id': None,
+  'install_dir': None,
+  'install_hub': None,
+  'java_home': '"/usr/lib/jvm/java"',
+  'java_package': '"java-1.8.0-openjdk-devel"',
+  'journal_quorum': "{% for host in groups['journalnode'] %}{{ host }}:8485{% if not loop.last %};{% endif %}{% endfor %}",
+  'maven_home': '"{{ install_dir }}/apache-maven-{{ maven_version }}"',
+  'maven_tarball': 'apache-maven-{{ maven_version }}-bin.tar.gz',
+  'maven_version': '3.6.1',
+  'spark_home': '"{{ install_dir }}/spark-{{ spark_version }}-bin-without-hadoop"',
+  'spark_tarball': 'spark-{{ spark_version }}-bin-without-hadoop.tgz',
+  'spark_version': None,
+  'tarballs_dir': '"{{ user_home }}/tarballs"',
+  'user_home': None,
+  'worker_data_dirs': None,
+  'zookeeper_connect': "{% for host in groups['zookeepers'] %}{{ host }}:2181{% if not loop.last %},{% endif %}{% endfor %}",
+  'zookeeper_client_port': '"2181"',
+  'zookeeper_home': '"{{ install_dir }}/zookeeper-{{ zookeeper_version }}"',
+  'zookeeper_tarball': 'zookeeper-{{ zookeeper_version }}.tar.gz',
+  'zookeeper_version': None
+}
+
+PLAY_VAR_DEFAULTS = {
+  'accumulo_dcache_size': None,
+  'accumulo_icache_size': None,
+  'accumulo_imap_size': None,
+  'accumulo_sha256': None,
+  'accumulo_tserv_mem': None,
+  'fluo_sha256': None,
+  'fluo_worker_instances_multiplier': None,
+  'fluo_worker_mem_mb': None,
+  'fluo_worker_threads': None,
+  'fluo_yarn_sha256': None,
+  'force_format': None,
+  'fstype': None,
+  'hadoop_sha256': None,
+  'hub_version': '2.2.3',
+  'hub_home': '"{{ install_dir }}/hub-linux-amd64-{{ hub_version }}"',
+  'hub_tarball': 'hub-linux-amd64-{{ hub_version }}.tgz',
+  'hub_sha256': '54c35a459a4241b7ae4c28bcfea0ceef849dd2f8a9dd2b82ba2ba964a743e6bc',
+  'maven_sha256': '2528c35a99c30f8940cc599ba15d34359d58bec57af58c1075519b8cd33b69e7',
+  'metrics_drive_ids': None,
+  'mount_root': None,
+  'node_type_map': None,
+  'spark_sha256': None,
+  'shutdown_delay_minutes': None,
+  'twill_reserve_mem_mb': None,
+  'yarn_nm_mem_mb': None,
+  'zookeeper_sha256': None
+}
 
 
 class BaseConfig(ConfigParser, metaclass=ABCMeta):
@@ -47,32 +123,33 @@ class BaseConfig(ConfigParser, metaclass=ABCMeta):
         self.checksums_d = None
         self._init_nodes()
 
-    def ansible_host_vars(self):
-        vars = HOST_VAR_DEFAULTS.copy()
-
-        # only render host_vars for base and cluster specific config
-        f = ["{}deployconfig".format(self.get_cluster_type()), "baseconfig"]
-        vars.update({
-            v[0]: getattr(self, v[2])() for v in
-                  filter(lambda t: t[1].lower() in f,
-                  get_ansible_vars('host'))})
+    def ansible_host_vars(self, default_map=HOST_VAR_DEFAULTS, apply_overrides=True):
+        vars = {} if default_map is None else default_map.copy()
+        vars.update(self._ansible_vars_from_decorators('host'))
         return vars
 
-    def ansible_play_vars(self):
-        vars = PLAY_VAR_DEFAULTS.copy()
-
+    def ansible_play_vars(self, default_map=PLAY_VAR_DEFAULTS, apply_overrides=True):
+        vars = {} if default_map is None else default_map.copy()
         # populate common software checksums
         vars.update({
             '{}_sha256'.format(k): self.checksum(k) for
             k in ['accumulo', 'fluo', 'fluo_yarn', 'hadoop', 'spark', 'zookeeper']
         })
+        vars.update(self._ansible_vars_from_decorators('play'))
+        return vars
+
+    def ansible_extra_vars(self, default_map=None, apply_overrides=True):
+        vars = {} if default_map is None else default_map.copy()
+        vars.update(self._ansible_vars_from_decorators('extra'))
+        return vars
+
+    def _ansible_vars_from_decorators(self, var_type):
         # only render play_vars for base and cluster specific config
         f = ["{}deployconfig".format(self.get_cluster_type()), "baseconfig"]
-        vars.update({
+        return {
             v[0]: getattr(self, v[2])() for v in
                   filter(lambda t: t[1].lower() in f,
-                  get_ansible_vars('play'))})
-        return vars
+                  get_ansible_vars(var_type))}
 
     @abstractmethod
     def verify_config(self, action):
@@ -109,6 +186,7 @@ class BaseConfig(ConfigParser, metaclass=ABCMeta):
             self.node_d[hostname] = service_list
 
     @abstractmethod
+    @ansible_play_var
     def node_type_map(self):
         raise NotImplementedError()
 
@@ -128,14 +206,17 @@ class BaseConfig(ConfigParser, metaclass=ABCMeta):
         return mounts
 
     @abstractmethod
+    @ansible_play_var
     def mount_root(self):
         raise NotImplementedError()
 
     @abstractmethod
+    @ansible_play_var
     def fstype(self):
         raise NotImplementedError()
 
     @abstractmethod
+    @ansible_play_var
     def force_format(self):
         raise NotImplementedError()
 
@@ -143,23 +224,28 @@ class BaseConfig(ConfigParser, metaclass=ABCMeta):
     def data_dirs_common(self, nodeType):
         raise NotImplementedError()
 
+    @ansible_host_var
     def worker_data_dirs(self):
         return self.data_dirs_common("worker")
 
+    @ansible_host_var
     def default_data_dirs(self):
         return self.data_dirs_common("default")
 
     @abstractmethod
+    @ansible_play_var
     def metrics_drive_ids(self):
         raise NotImplementedError()
 
     @abstractmethod
+    @ansible_play_var
     def shutdown_delay_minutes(self):
-        return '0'
+        raise NotImplementedError()
 
     def version(self, software_id):
         return self.get('general', software_id + '_version')
 
+    @ansible_host_var
     def java_product_version(self):
         java_version_map = {
                 "java-1.8.0-openjdk": 8,
@@ -340,81 +426,13 @@ class BaseConfig(ConfigParser, metaclass=ABCMeta):
                     print(self.get(section, key))
                     return
         exit("Property '{0}' was not found".format(key))
-
-
-HOST_VAR_DEFAULTS = {
-  'accumulo_home': '"{{ install_dir }}/accumulo-{{ accumulo_version }}"',
-  'accumulo_instance': None,
-  'accumulo_major_version': '"{{ accumulo_version.split(\'.\')[0] }}"',
-  'accumulo_password': None,
-  'accumulo_tarball': 'accumulo-{{ accumulo_version }}-bin.tar.gz',
-  'accumulo_version': None,
-  'cluster_type': None,
-  'cluster_group': None,
-  'cluster_user': None,
-  'default_data_dirs': None,
-  'download_software': None,
-  'fluo_home': '"{{ install_dir }}/fluo-{{ fluo_version }}"',
-  'fluo_tarball': 'fluo-{{ fluo_version }}-bin.tar.gz',
-  'fluo_version': None,
-  'fluo_yarn_home': '"{{ install_dir }}/fluo-yarn-{{ fluo_yarn_version }}"',
-  'fluo_yarn_tarball': 'fluo-yarn-{{ fluo_yarn_version }}-bin.tar.gz',
-  'fluo_yarn_version': None,
-  'hadoop_home': '"{{ install_dir }}/hadoop-{{ hadoop_version }}"',
-  'hadoop_tarball': 'hadoop-{{ hadoop_version }}.tar.gz',
-  'hadoop_version': None,
-  'hadoop_major_version': '"{{ hadoop_version.split(\'.\')[0] }}"',
-  'hdfs_root': "{% if hdfs_ha %}hdfs://{{ nameservice_id }}{% else %}hdfs://{{ groups[\'namenode\'][0] }}:8020{% endif %}",
-  'hdfs_ha': None,
-  'nameservice_id': None,
-  'install_dir': None,
-  'install_hub': None,
-  'java_home': '"/usr/lib/jvm/java"',
-  'java_package': '"java-1.8.0-openjdk-devel"',
-  'journal_quorum': "{% for host in groups['journalnode'] %}{{ host }}:8485{% if not loop.last %};{% endif %}{% endfor %}",
-  'maven_home': '"{{ install_dir }}/apache-maven-{{ maven_version }}"',
-  'maven_tarball': 'apache-maven-{{ maven_version }}-bin.tar.gz',
-  'maven_version': '3.6.1',
-  'spark_home': '"{{ install_dir }}/spark-{{ spark_version }}-bin-without-hadoop"',
-  'spark_tarball': 'spark-{{ spark_version }}-bin-without-hadoop.tgz',
-  'spark_version': None,
-  'tarballs_dir': '"{{ user_home }}/tarballs"',
-  'user_home': None,
-  'worker_data_dirs': None,
-  'zookeeper_connect': "{% for host in groups['zookeepers'] %}{{ host }}:2181{% if not loop.last %},{% endif %}{% endfor %}",
-  'zookeeper_client_port': '"2181"',
-  'zookeeper_home': '"{{ install_dir }}/zookeeper-{{ zookeeper_version }}"',
-  'zookeeper_tarball': 'zookeeper-{{ zookeeper_version }}.tar.gz',
-  'zookeeper_version': None
-}
-
-PLAY_VAR_DEFAULTS = {
-  'accumulo_dcache_size': None,
-  'accumulo_icache_size': None,
-  'accumulo_imap_size': None,
-  'accumulo_sha256': None,
-  'accumulo_tserv_mem': None,
-  'fluo_sha256': None,
-  'fluo_worker_instances_multiplier': None,
-  'fluo_worker_mem_mb': None,
-  'fluo_worker_threads': None,
-  'fluo_yarn_sha256': None,
-  'force_format': None,
-  'fstype': None,
-  'hadoop_sha256': None,
-  'hub_version': '2.2.3',
-  'hub_home': '"{{ install_dir }}/hub-linux-amd64-{{ hub_version }}"',
-  'hub_tarball': 'hub-linux-amd64-{{ hub_version }}.tgz',
-  'hub_sha256': '54c35a459a4241b7ae4c28bcfea0ceef849dd2f8a9dd2b82ba2ba964a743e6bc',
-  'maven_sha256': '2528c35a99c30f8940cc599ba15d34359d58bec57af58c1075519b8cd33b69e7',
-  'metrics_drive_ids': None,
-  'mount_root': None,
-  'node_type_map': None,
-  'spark_sha256': None,
-  'shutdown_delay_minutes': None,
-  'twill_reserve_mem_mb': None,
-  'yarn_nm_mem_mb': None,
-  'zookeeper_sha256': None
-}
-
-        # vars = PLAY_VAR_DEFAULTS.copy()
+    
+    def resolve_value(self, config_name, default=None):
+        # listed low to high priority
+        section_priority = ['general', 'ansible-vars', self.get('performance', 'profile')]
+        all_values = [self.get(section, config_name, fallback=None) for section in section_priority]
+        try:
+            *_, val = filter(None, all_values)
+        except ValueError:
+            return default
+        return val

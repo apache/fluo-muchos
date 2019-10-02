@@ -38,36 +38,15 @@ class ExistingCluster:
         config = self.config
         print('Syncing ansible directory on {0} cluster proxy node'.format(config.cluster_name))
 
-        host_vars = HOST_VAR_DEFAULTS
-        play_vars = PLAY_VAR_DEFAULTS
+        host_vars = config.ansible_host_vars()
+        play_vars = config.ansible_play_vars()
 
-        azure_vars = AZURE_VAR_DEFAULTS
+        azure_vars = config.ansible_extra_vars(default_map=AZURE_VAR_DEFAULTS)
 
-        for section in ("general", "ansible-vars", config.get('performance', 'profile'), "azure"):
-            for (name, value) in config.items(section):
-                if name not in ('proxy_hostname', 'proxy_socks_port'):
-                    if name in host_vars:
-                        host_vars[name] = value
-                    if name in play_vars:
-                        play_vars[name] = value
-                    if name in azure_vars:
-                        azure_vars[name] = value
-
-        play_vars['accumulo_sha256'] = config.checksum('accumulo')
-        play_vars['fluo_sha256'] = config.checksum('fluo')
-        play_vars['fluo_yarn_sha256'] = config.checksum('fluo_yarn')
-        play_vars['hadoop_sha256'] = config.checksum('hadoop')
-        play_vars['spark_sha256'] = config.checksum('spark')
-        play_vars['zookeeper_sha256'] = config.checksum('zookeeper')
-        play_vars["shutdown_delay_minutes"] = config.shutdown_delay_minutes()
-        play_vars["metrics_drive_ids"] = config.metrics_drive_ids()
-        play_vars["mount_root"] = config.mount_root()
-        play_vars["node_type_map"] = config.node_type_map()
-        play_vars["fstype"] = config.fstype()
-        play_vars["force_format"] = config.force_format()
-        host_vars['worker_data_dirs'] = str(config.worker_data_dirs())
-        host_vars['default_data_dirs'] = str(config.default_data_dirs())
-        host_vars['java_product_version'] = str(config.java_product_version())
+        for k,v in host_vars.items():
+            host_vars[k] = self.config.resolve_value(k, default=v)
+        for k,v in play_vars.items():
+            play_vars[k] = self.config.resolve_value(k, default=v)
 
         with open(join(config.deploy_path, "ansible/site.yml"), 'w') as site_file:
             print("- import_playbook: common.yml", file=site_file)

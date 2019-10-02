@@ -45,9 +45,6 @@ def ansible_extra_var(name=None):
 
 def ansible_var_decorator(var_type, name):
     def _decorator(func):
-        if getattr(func, '__isabstractmethod__', False):
-            raise Exception("{}: cannot decorate an abstract method as play_var".format(func.__qualname__))
-
         _ansible_vars[var_type].append((name if isinstance(name, str) else func.__name__, func.__qualname__.split('.')[0], func.__name__))
         return func
 
