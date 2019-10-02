@@ -47,7 +47,7 @@ class BaseConfig(ConfigParser, metaclass=ABCMeta):
         self.checksums_d = None
         self._init_nodes()
 
-    def host_vars(self):
+    def ansible_host_vars(self):
         vars = HOST_VAR_DEFAULTS.copy()
 
         # only render host_vars for base and cluster specific config
@@ -58,7 +58,7 @@ class BaseConfig(ConfigParser, metaclass=ABCMeta):
                   get_ansible_vars('host'))})
         return vars
 
-    def play_vars(self):
+    def ansible_play_vars(self):
         vars = PLAY_VAR_DEFAULTS.copy()
 
         # populate common software checksums

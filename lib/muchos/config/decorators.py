@@ -32,15 +32,15 @@ def get_ansible_vars(var_type):
     return _ansible_vars.get(var_type)
 
 # ansible hosts inventory variables
-def host_var(name=None):
+def ansible_host_var(name=None):
     return ansible_var_decorator('host', name)
 
 # ansible group/all variables
-def play_var(name=None):
+def ansible_play_var(name=None):
     return ansible_var_decorator('play', name)
 
 # ansible extra variables
-def extra_var(name=None):
+def ansible_extra_var(name=None):
     return ansible_var_decorator('extra', name)
 
 def ansible_var_decorator(var_type, name):
