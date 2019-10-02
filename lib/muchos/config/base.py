@@ -17,9 +17,10 @@
 
 from abc import ABCMeta, abstractmethod
 
-from functools import wraps
 from configparser import ConfigParser
 from sys import exit
+from muchos.config.decorators import *
+from muchos.config.validators import *
 from muchos.util import get_ephemeral_devices, get_arch
 import os
 import json
@@ -29,63 +30,6 @@ from distutils.version import StrictVersion
 SERVICES = ['zookeeper', 'namenode', 'resourcemanager', 'accumulomaster', 'mesosmaster', 'worker', 'fluo', 'fluo_yarn', 'metrics', 'spark', 'client', 'swarmmanager', 'journalnode', 'zkfc']
 
 OPTIONAL_SERVICES = ['fluo', 'fluo_yarn', 'metrics', 'mesosmaster', 'spark', 'client', 'swarmmanager', 'journalnode', 'zkfc']
-
-_host_vars = []
-_play_vars = []
-_extra_vars = []
-_ansible_vars = dict(
-    host=[],
-    play=[],
-    extra=[]
-)
-
-# ansible hosts inventory variables
-def host_var(name=None):
-    return ansible_var_decorator('host', name)
-
-# ansible group/all variables
-def play_var(name=None):
-    return ansible_var_decorator('play', name)
-
-# ansible extra variables
-def extra_var(name=None):
-    return ansible_var_decorator('extra', name)
-
-def ansible_var_decorator(type, name):
-    def _decorator(func):
-        if getattr(func, '__isabstractmethod__', False):
-            raise Exception("{}: cannot decorate an abstract method as play_var".format(func.__qualname__))
-
-        _ansible_vars[type].append((name if isinstance(name, str) else func.__name__, func.__qualname__.split('.')[0], func.__name__))
-        return func
-
-    if callable(name):
-        return _decorator(name)
-    return _decorator
-
-def default(val):
-    def _default(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            res = func(*args, **kwargs)
-            if res in [None, 0, ''] or len(res) == 0:
-                return val
-            return res
-        return wrapper
-    return _default
-
-def required(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        res = func(*args, **kwargs)
-        if res in [None, 0, ''] or len(res) == 0:
-            raise ConfigMissingError(func.__name__)
-        return res
-    return wrapper
-
-class ConfigMissingError(Exception):
-    def __init__(self, name):
-        super(ConfigMissingError, self).__init__("{} is missing from the configuration".format(name))
 
 
 class BaseConfig(ConfigParser, metaclass=ABCMeta):
@@ -111,7 +55,7 @@ class BaseConfig(ConfigParser, metaclass=ABCMeta):
         vars.update({
             v[0]: getattr(self, v[2])() for v in
                   filter(lambda t: t[1].lower() in f,
-                  _ansible_vars['host'])})
+                  get_ansible_vars('host'))})
         return vars
 
     def play_vars(self):
@@ -127,7 +71,7 @@ class BaseConfig(ConfigParser, metaclass=ABCMeta):
         vars.update({
             v[0]: getattr(self, v[2])() for v in
                   filter(lambda t: t[1].lower() in f,
-                  _ansible_vars['play'])})
+                  get_ansible_vars('play'))})
         return vars
 
     @abstractmethod
@@ -168,6 +112,7 @@ class BaseConfig(ConfigParser, metaclass=ABCMeta):
     def node_type_map(self):
         raise NotImplementedError()
 
+    @is_valid(is_in(['default', 'worker']))
     def node_type(self, hostname):
         if 'worker' in self.node_d[hostname]:
             return 'worker'

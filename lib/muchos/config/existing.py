@@ -15,8 +15,10 @@
 # limitations under the License.
 #
 
-from muchos.config import BaseConfig, host_var, play_var, extra_var, default
+from muchos.config import BaseConfig
 from sys import exit
+from muchos.config.decorators import *
+from muchos.config.validators import *
 from muchos.util import get_ephemeral_devices, get_arch
 import os
 import json

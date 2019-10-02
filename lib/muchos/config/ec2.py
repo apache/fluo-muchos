@@ -16,8 +16,10 @@
 #
 
 from muchos.config import SERVICES, OPTIONAL_SERVICES
-from muchos.config import BaseConfig, host_var, play_var, extra_var, default
+from muchos.config.base import BaseConfig
 from sys import exit
+from muchos.config.decorators import *
+from muchos.config.validators import *
 from muchos.util import get_ephemeral_devices, get_arch
 import os
 import json
@@ -63,7 +65,6 @@ class Ec2DeployConfig(BaseConfig):
     def max_ephemeral(self):
         return max((len(self.default_ephemeral_devices()), len(self.worker_ephemeral_devices())))
 
-    @host_var(name='ec2_node_type_map')
     def node_type_map(self):
         if self.cluster_template_d:
             return self.cluster_template_d['devices']
