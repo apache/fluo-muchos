@@ -25,8 +25,6 @@ def test_existing_cluster():
     assert c.get_cluster_type() == 'existing'
     assert c.node_type_map() == {}
     assert c.mount_root() == '/var/data'
-    assert c.fstype() is None
-    assert c.force_format() == 'no'
     assert c.worker_data_dirs() == ['/var/data1', '/var/data2', '/var/data3']
     assert c.default_data_dirs() == ['/var/data1', '/var/data2', '/var/data3']
     assert c.metrics_drive_ids() == ['var-data1', 'var-data2', 'var-data3']
