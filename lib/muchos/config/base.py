@@ -89,8 +89,6 @@ _PLAY_VAR_DEFAULTS = {
   'fluo_worker_mem_mb': None,
   'fluo_worker_threads': None,
   'fluo_yarn_sha256': None,
-  'force_format': None,
-  'fstype': None,
   'hadoop_sha256': None,
   'hub_version': '2.2.3',
   'hub_home': '"{{ install_dir }}/hub-linux-amd64-{{ hub_version }}"',
@@ -213,16 +211,6 @@ class BaseConfig(ConfigParser, metaclass=ABCMeta):
     @abstractmethod
     @ansible_play_var
     def mount_root(self):
-        raise NotImplementedError()
-
-    @abstractmethod
-    @ansible_play_var
-    def fstype(self):
-        raise NotImplementedError()
-
-    @abstractmethod
-    @ansible_play_var
-    def force_format(self):
         raise NotImplementedError()
 
     @abstractmethod

@@ -43,14 +43,6 @@ class ExistingDeployConfig(BaseConfig):
     def mount_root(self):
         return self.get('existing', 'mount_root')
 
-    def fstype(self):
-        retval = None
-        return retval
-
-    def force_format(self):
-        retval = 'no'
-        return retval
-
     def data_dirs_common(self, nodeType):
         return self.get('existing', 'data_dirs').split(",")
 

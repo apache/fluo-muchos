@@ -81,11 +81,15 @@ class Ec2DeployConfig(BaseConfig):
     def mount_root(self):
         return '/media/' + self.ephemeral_root
 
+    @ansible_play_var
+    @default('ext3')
     def fstype(self):
-        return self.get('ec2', 'fstype', fallback='ext3')
+        return self.get('ec2', 'fstype')
 
+    @ansible_play_var
+    @default('no')
     def force_format(self):
-        return self.get('ec2', 'force_format', fallback='no')
+        return self.get('ec2', 'force_format')
 
     def data_dirs_common(self, nodeType):
         return self.node_type_map()[nodeType]['mounts']

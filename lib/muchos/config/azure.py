@@ -51,14 +51,6 @@ class AzureDeployConfig(BaseConfig):
     def mount_root(self):
         return self.get('azure', 'mount_root')
 
-    def fstype(self):
-        retval = None
-        return retval
-
-    def force_format(self):
-        retval = 'no'
-        return retval
-
     def data_dirs_common(self, nodeType):
         data_dirs = []
 
