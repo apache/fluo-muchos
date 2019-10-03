@@ -32,7 +32,7 @@ SERVICES = ['zookeeper', 'namenode', 'resourcemanager', 'accumulomaster', 'mesos
 
 OPTIONAL_SERVICES = ['fluo', 'fluo_yarn', 'metrics', 'mesosmaster', 'spark', 'client', 'swarmmanager', 'journalnode', 'zkfc']
 
-HOST_VAR_DEFAULTS = {
+_HOST_VAR_DEFAULTS = {
   'accumulo_home': '"{{ install_dir }}/accumulo-{{ accumulo_version }}"',
   'accumulo_instance': None,
   'accumulo_major_version': '"{{ accumulo_version.split(\'.\')[0] }}"',
@@ -78,7 +78,7 @@ HOST_VAR_DEFAULTS = {
   'zookeeper_version': None
 }
 
-PLAY_VAR_DEFAULTS = {
+_PLAY_VAR_DEFAULTS = {
   'accumulo_dcache_size': None,
   'accumulo_icache_size': None,
   'accumulo_imap_size': None,
@@ -107,6 +107,8 @@ PLAY_VAR_DEFAULTS = {
   'zookeeper_sha256': None
 }
 
+_EXTRA_VAR_DEFAULTS = {}
+
 
 class BaseConfig(ConfigParser, metaclass=ABCMeta):
     def __init__(self, deploy_path, config_path, hosts_path, checksums_path, templates_path, cluster_name):
@@ -123,25 +125,28 @@ class BaseConfig(ConfigParser, metaclass=ABCMeta):
         self.checksums_d = None
         self._init_nodes()
 
-    def ansible_host_vars(self, default_map=HOST_VAR_DEFAULTS, apply_overrides=True):
-        vars = {} if default_map is None else default_map.copy()
-        vars.update(self._ansible_vars_from_decorators('host'))
-        return vars
+    def ansible_host_vars(self):
+        return dict(
+            ChainMap(self._ansible_vars_from_decorators('host'),
+                     getattr(self, 'HOST_VAR_DEFAULTS', {}),
+                     _HOST_VAR_DEFAULTS))
 
-    def ansible_play_vars(self, default_map=PLAY_VAR_DEFAULTS, apply_overrides=True):
-        vars = {} if default_map is None else default_map.copy()
-        # populate common software checksums
-        vars.update({
+    def ansible_play_vars(self):
+        software_checksums = {
             '{}_sha256'.format(k): self.checksum(k) for
             k in ['accumulo', 'fluo', 'fluo_yarn', 'hadoop', 'spark', 'zookeeper']
-        })
-        vars.update(self._ansible_vars_from_decorators('play'))
-        return vars
+        }
+        return dict(
+            ChainMap(self._ansible_vars_from_decorators('play'),
+                     software_checksums,
+                     getattr(self, 'PLAY_VAR_DEFAULTS', {}),
+                     _PLAY_VAR_DEFAULTS))
 
-    def ansible_extra_vars(self, default_map=None, apply_overrides=True):
-        vars = {} if default_map is None else default_map.copy()
-        vars.update(self._ansible_vars_from_decorators('extra'))
-        return vars
+    def ansible_extra_vars(self):
+        return dict(
+            ChainMap(self._ansible_vars_from_decorators('extra'),
+                     getattr(self, 'EXTRA_VAR_DEFAULTS', {}),
+                     _EXTRA_VAR_DEFAULTS))
 
     def _ansible_vars_from_decorators(self, var_type):
         # only render play_vars for base and cluster specific config

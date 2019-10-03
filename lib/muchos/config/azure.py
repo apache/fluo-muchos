@@ -26,7 +26,6 @@ import glob
 
 
 class AzureDeployConfig(BaseConfig):
-
     def __init__(self, deploy_path, config_path, hosts_path, checksums_path, templates_path, cluster_name):
         super(AzureDeployConfig, self).__init__(deploy_path, config_path, hosts_path, checksums_path, templates_path, cluster_name)
 
@@ -47,7 +46,7 @@ class AzureDeployConfig(BaseConfig):
         pass
 
     def node_type_map(self):
-        node_types = {}
+        return {}
 
     def mount_root(self):
         return self.get('azure', 'mount_root')
@@ -86,13 +85,38 @@ class AzureDeployConfig(BaseConfig):
     def instance_tags(self):
         return {}
 
+    @ansible_host_var
+    @default(None)
+    def azure_fileshare_mount(self):
+        return self.get('azure', 'azure_fileshare_mount')
 
-AZURE_VAR_DEFAULTS = {
-  'azure_fileshare_mount': None,
-  'azure_fileshare': None,
-  'azure_fileshare_username': None,
-  'azure_fileshare_password': None,
-  'az_omsIntegrationNeeded': None,
-  'az_logs_id': None,
-  'az_logs_key': None
-}
+    @ansible_host_var
+    @default(None)
+    def azure_fileshare(self):
+        return self.get('azure', 'azure_fileshare')
+    
+    @ansible_host_var
+    @default(None)
+    def azure_fileshare_username(self):
+        return self.get('azure', 'azure_fileshare_username')
+
+    @ansible_host_var
+    @default(None)
+    def azure_fileshare_password(self):
+        return self.get('azure', 'azure_fileshare_password')
+
+    @ansible_host_var(name='az_omsIntegrationNeeded')
+    @default(False)
+    @is_valid(is_in([True, False]))
+    def omsIntegrationNeeded(self):
+        return self.getboolean('azure', 'az_omsIntegrationNeeded')
+
+    @ansible_host_var(name='az_logs_id')
+    @default(None)
+    def logs_id(self):
+        return self.get('azure', 'az_logs_id')
+
+    @ansible_host_var(name='az_logs_key')
+    @default(None)
+    def logs_key(self):
+        return self.get('azure', 'az_logs_key')

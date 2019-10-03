@@ -15,10 +15,10 @@
 # limitations under the License.
 #
 
-from muchos.config.base import BaseConfig, SERVICES, OPTIONAL_SERVICES, HOST_VAR_DEFAULTS, PLAY_VAR_DEFAULTS
+from muchos.config.base import BaseConfig, SERVICES, OPTIONAL_SERVICES
 from muchos.config.existing import ExistingDeployConfig
 from muchos.config.ec2 import Ec2DeployConfig
-from muchos.config.azure import AzureDeployConfig, AZURE_VAR_DEFAULTS 
+from muchos.config.azure import AzureDeployConfig
 
 from configparser import ConfigParser
 

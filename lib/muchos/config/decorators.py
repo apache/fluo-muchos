@@ -56,10 +56,14 @@ def default(val):
     def _default(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            res = func(*args, **kwargs)
-            if res in [None, 0, ''] or len(res) == 0:
+            try:
+                res = func(*args, **kwargs)
+            except:
                 return val
-            return res
+            else:
+                if res in [None, 0, ''] or len(res) == 0:
+                    return val
+                return res
         return wrapper
     return _default
 

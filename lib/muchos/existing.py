@@ -23,9 +23,6 @@ from os.path import isfile, join
 from sys import exit
 from os import listdir
 
-from .config import HOST_VAR_DEFAULTS, PLAY_VAR_DEFAULTS, AZURE_VAR_DEFAULTS
-
-
 class ExistingCluster:
 
     def __init__(self, config):
@@ -40,8 +37,6 @@ class ExistingCluster:
 
         host_vars = config.ansible_host_vars()
         play_vars = config.ansible_play_vars()
-
-        azure_vars = config.ansible_extra_vars(default_map=AZURE_VAR_DEFAULTS)
 
         for k,v in host_vars.items():
             host_vars[k] = self.config.resolve_value(k, default=v)
@@ -126,8 +121,6 @@ class ExistingCluster:
 
             print("\n[all:vars]", file=hosts_file)
             for (name, value) in sorted(host_vars.items()):
-                print("{0} = {1}".format(name, value), file=hosts_file)
-            for (name, value) in sorted(azure_vars.items()):
                 print("{0} = {1}".format(name, value), file=hosts_file)
 
         with open(join(config.deploy_path, "ansible/group_vars/all"), 'w') as play_vars_file:
