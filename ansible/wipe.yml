@@ -27,7 +27,7 @@
     file: path={{ default_data_dirs[0] }}/influxdb state=absent
   - name: "wipe grafana db"
     file: path=/var/lib/grafana/grafana.db state=absent
-- include: kill.yml
+- import_playbook: kill.yml
 - hosts: all
   tasks:
   - name: "wipe software installation dirs"
