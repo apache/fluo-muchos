@@ -51,3 +51,8 @@ def is_in(val):
     return _validator(
         lambda n: n in val,
         "must be in {}".format(val))
+
+def is_type(t):
+    return _validator(
+        lambda n: isinstance(n, t),
+        "must be of type {}".format(t))

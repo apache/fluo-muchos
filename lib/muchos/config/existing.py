@@ -48,9 +48,3 @@ class ExistingDeployConfig(BaseConfig):
 
     def metrics_drive_ids(self):
         return self.get("existing", "metrics_drive_ids").split(",")
-
-    def shutdown_delay_minutes(self):
-        return '0'
-
-    def instance_tags(self):
-        return {}

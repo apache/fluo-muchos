@@ -47,7 +47,6 @@ def test_azure_cluster():
     assert c.has_option('azure', 'subnet_cidr')
     assert c.has_option('azure', 'numnodes')
     assert c.has_option('azure', 'location')
-    assert c.instance_tags() == {}
     assert len(c.nodes()) == 6
     assert c.get_node('leader1') == ['namenode', 'resourcemanager', 'accumulomaster', 'zookeeper']
     assert c.get_node('leader2') == ['metrics']

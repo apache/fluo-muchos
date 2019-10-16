@@ -19,9 +19,18 @@ from collections.abc import Iterable
 from functools import wraps
 
 
-_host_vars = []
-_play_vars = []
-_extra_vars = []
+# struct to hold information about ansible vars defined via decorators.
+# var_name indicates the desired variable name
+# class_name indicates the class name where the variable was defined
+# property_name indicates the class property/function where the variable was
+#               defined
+class _ansible_var(object):
+    def __init__(self, var_name, class_name, property_name):
+        self.var_name = var_name
+        self.class_name = class_name
+        self.property_name = property_name
+
+# each entry of _ansible_vars will contain a list of _ansible_var instances
 _ansible_vars = dict(
     host=[],
     play=[],
@@ -45,7 +54,11 @@ def ansible_extra_var(name=None):
 
 def ansible_var_decorator(var_type, name):
     def _decorator(func):
-        _ansible_vars[var_type].append((name if isinstance(name, str) else func.__name__, func.__qualname__.split('.')[0], func.__name__))
+        ansible_var = _ansible_var(
+            var_name=name if isinstance(name, str) else func.__name__,
+            class_name=func.__qualname__.split('.')[0],
+            property_name=func.__name__)
+        _ansible_vars[var_type].append(ansible_var)
         return func
 
     if callable(name):

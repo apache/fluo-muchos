@@ -150,9 +150,12 @@ class BaseConfig(ConfigParser, metaclass=ABCMeta):
         # only render play_vars for base and cluster specific config
         f = ["{}deployconfig".format(self.get_cluster_type()), "baseconfig"]
         return {
-            v[0]: getattr(self, v[2])() for v in
-                  filter(lambda t: t[1].lower() in f,
-                  get_ansible_vars(var_type))}
+            v.var_name: getattr(self, v.property_name)() for v in
+                        # filter out any classes that are not baseconfig or
+                        # the cluster specific config
+                        filter(lambda t: t.class_name.lower() in f,
+                        # get all ansible vars of var_type
+                        get_ansible_vars(var_type))}
 
     @abstractmethod
     def verify_config(self, action):
@@ -230,10 +233,9 @@ class BaseConfig(ConfigParser, metaclass=ABCMeta):
     def metrics_drive_ids(self):
         raise NotImplementedError()
 
-    @abstractmethod
     @ansible_play_var
     def shutdown_delay_minutes(self):
-        raise NotImplementedError()
+        return '0'
 
     def version(self, software_id):
         return self.get('general', software_id + '_version')
@@ -282,10 +284,6 @@ class BaseConfig(ConfigParser, metaclass=ABCMeta):
         if key not in self.checksums_d:
             exit('ERROR - Failed to find checksums for %s %s in %s' % (software, version, self.checksums_path))
         return self.checksums_d[key]
-
-    @abstractmethod
-    def instance_tags(self):
-        return NotImplementedError()
 
     def nodes(self):
         return self.node_d

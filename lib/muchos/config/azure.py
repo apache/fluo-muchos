@@ -70,13 +70,6 @@ class AzureDeployConfig(BaseConfig):
                                 str(i))
         return drive_ids
 
-    def shutdown_delay_minutes(self):
-        retval = '0'
-        return retval
-
-    def instance_tags(self):
-        return {}
-
     @ansible_host_var
     @default(None)
     def azure_fileshare_mount(self):
