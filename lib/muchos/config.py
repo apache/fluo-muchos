@@ -21,6 +21,7 @@ from .util import get_ephemeral_devices, get_arch
 import os
 import json
 import glob
+from distutils.version import StrictVersion
 
 SERVICES = ['zookeeper', 'namenode', 'resourcemanager', 'accumulomaster', 'mesosmaster', 'worker', 'fluo', 'fluo_yarn', 'metrics', 'spark', 'client', 'swarmmanager', 'journalnode', 'zkfc']
 
@@ -64,6 +65,11 @@ class DeployConfig(ConfigParser):
                 if service not in OPTIONAL_SERVICES:
                     if not self.has_service(service):
                         exit("ERROR - Missing '{0}' service from [nodes] section of muchos.props".format(service))
+
+            # validate if we are using Java 11 and fail if we are using Accumulo 1.x
+            # See https://github.com/apache/accumulo/issues/958 for details
+            if self.java_product_version() >= 11 and StrictVersion(self.version('accumulo')) <= StrictVersion("1.9.3"):
+                exit("ERROR - Java 11 is not supported with Accumulo version '{0}'".format(self.version('accumulo')))
 
     def verify_launch(self):
         self.verify_instance_type(self.get('ec2', 'default_instance_type'))
@@ -187,6 +193,22 @@ class DeployConfig(ConfigParser):
 
     def version(self, software_id):
         return self.get('general', software_id + '_version')
+
+    def java_product_version(self):
+        java_version_map = {
+                "java-1.8.0-openjdk": 8,
+                "java-11-openjdk": 11,
+                "java-latest-openjdk": 13
+                }
+
+        # Given that a user might chose to install a specific JDK version (where the version is suffixed to package name)
+        # it is safer to check if the configured Java version starts with one of the above prefixes defined in the map.
+        configured_java_version = self.get("general", "java_package")
+        filtered_java_versions = {k:v for (k,v) in java_version_map.items() if configured_java_version.startswith(k)}
+        if len(filtered_java_versions) != 1:
+            exit('ERROR - unknown or ambiguous Java version \'{0}\' specified in properties'.format(configured_java_version))
+
+        return next(iter(filtered_java_versions.values()))
 
     def checksum(self, software):
         return self.checksum_ver(software, self.version(software))

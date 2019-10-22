@@ -32,3 +32,13 @@
     - { urlp: "{{ apache_mirror.stdout }}/hadoop/common/hadoop-{{ hadoop_version }}", fn: "{{ hadoop_tarball }}", sum: "{{ hadoop_sha256 }}" }
     - { urlp: "{{ apache_mirror.stdout }}/maven/maven-3/{{ maven_version }}/binaries", fn: "{{ maven_tarball }}", sum: "{{ maven_sha256 }}" }
     - { urlp: "https://github.com/github/hub/releases/download/v{{ hub_version }}", fn: "{{ hub_tarball }}", sum: "{{ hub_sha256 }}" }
+
+# This is currently needed to run hadoop with Java 11 (see https://github.com/apache/fluo-muchos/issues/266)      
+- name: "Download javax.activation-api for Hadoop 3 when Java 11 is used"
+  maven_artifact:
+   group_id: javax.activation
+   artifact_id: javax.activation-api
+   version: 1.2.0
+   dest: "{{ user_home }}/mvn_dep/"
+   mode: 0644
+  when: hadoop_major_version == '3' and java_product_version == 11 

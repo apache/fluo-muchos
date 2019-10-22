@@ -41,3 +41,6 @@ if [ ! -h /etc/ansible/hosts ]; then
   sudo rm -f hosts
   sudo ln -s $base_dir/conf/hosts hosts
 fi
+
+# install lxml as it is a dependency for the maven_artifact Ansible module
+sudo yum install -q -y python-lxml
