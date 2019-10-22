@@ -36,7 +36,7 @@ accumulo_instance = muchos
 # Accumluo Password
 accumulo_password = secret
 # Software versions (set sha-256 in conf/checksums)
-hadoop_version = 3.2.0
+hadoop_version = 3.2.1
 zookeeper_version = 3.4.14
 spark_version = 2.3.2
 fluo_version = 1.2.0
@@ -60,7 +60,7 @@ nameservice_id = muchoshacluster
 # You may need to change this value if a new image has been released or you are running in a different region.
 # Before using this AMI, subscribe to it on the CentOS product page below or launching will fail:
 #   https://aws.amazon.com/marketplace/pp/B00O7WM7QW
-aws_ami = ami-9887c6e7
+aws_ami = ami-02eac2c0129f6376b
 # Type of AWS instance launched by default
 default_instance_type = m5d.large
 # Type of AWS instance launched for any node running 'worker' service
@@ -79,7 +79,7 @@ worker_instance_type = %(default_instance_type)s
 # You can upload and name your public key using the EC2 Management Console.
 # Only the user with this key will be able to SSH to the cluster.
 # Name below should be your 'Key pair name' in EC2 and not name of your public key file.
-key_name = my_aws_key
+key_name = tf_key
 # Type of filesystem to format instance storage as.
 fstype = ext3
 # Force formatting of instance devices, even when it has an existing filesystem.

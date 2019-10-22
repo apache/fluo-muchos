@@ -1,0 +1,20 @@
+---
+#
+# Installing Filebeat
+#
+
+# Install Filebeat 
+
+- name: Install Filebeat with yum
+  yum:
+   name: filebeat
+   update_cache: yes
+  become: true
+
+# Starting Filebeat
+
+- name: Starting Filebeat
+  service:
+   name: filebeat
+   state: started
+  become: true

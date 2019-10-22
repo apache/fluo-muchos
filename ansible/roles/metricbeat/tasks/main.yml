@@ -1,0 +1,20 @@
+---
+#
+# Installing Metricbeat
+#
+
+# Install Metricbeat 
+
+- name: Install Metricbeat with yum
+  yum:
+   name: metricbeat
+   update_cache: yes
+  become: true
+    
+# Starting Metricbeat
+
+- name: Starting Metricbeat
+  service:
+   name: metricbeat
+   state: started
+  become: true

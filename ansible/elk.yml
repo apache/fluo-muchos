@@ -1,0 +1,10 @@
+---
+#
+# Playbook to install the ELK stack + Beats
+#
+- hosts: elkserver
+  roles:
+  - { role: elasticsearch }
+  - { role: kibana }
+  - { role: metricbeat }
+  - { role: filebeat }
