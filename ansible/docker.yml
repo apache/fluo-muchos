@@ -27,8 +27,12 @@
         docker info | egrep '^Swarm: ' | cut -d ' ' -f 2
       register: swarm_status
       changed_when: "'active' not in swarm_status.stdout_lines"
-    - name: initialize swarm
+    - name: leave swarm
       shell: >
+        docker swarm leave --force
+    - name: initialize swarm 
+      shell: |
+        docker swarm leave --force || echo "leaving swarm for multiple setups"
         docker swarm init --advertise-addr={{ ansible_default_ipv4.address }}:2377
       when: "'active' not in swarm_status.stdout_lines"
     - name: get swarm token
