@@ -67,6 +67,7 @@ class ExistingCluster:
         play_vars["force_format"] = config.force_format()
         host_vars['worker_data_dirs'] = str(config.worker_data_dirs())
         host_vars['default_data_dirs'] = str(config.default_data_dirs())
+        host_vars['java_product_version'] = str(config.java_product_version())
 
         with open(join(config.deploy_path, "ansible/site.yml"), 'w') as site_file:
             print("- import_playbook: common.yml", file=site_file)
