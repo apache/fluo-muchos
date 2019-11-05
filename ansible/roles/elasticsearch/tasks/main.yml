@@ -56,11 +56,11 @@
    enabled: yes
   become: true
 
-# Start Elasticsearch
-- name: Starting Elasticsearch
-  service:
+# Restart Elasticsearch
+- name: Restart Elasticsearch
+  service: 
    name: elasticsearch
-   state: started
+   state: restarted
   become: true
 
     
