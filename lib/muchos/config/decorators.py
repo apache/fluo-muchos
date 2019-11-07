@@ -30,6 +30,11 @@ class _ansible_var(object):
         self.class_name = class_name
         self.property_name = property_name
 
+    def __str__(self):
+        return 'var_name={}, class_name={}, property_name={}'.format(
+            self.var_name, self.class_name, self.property_name
+        )
+
 # each entry of _ansible_vars will contain a list of _ansible_var instances
 _ansible_vars = dict(
     host=[],
