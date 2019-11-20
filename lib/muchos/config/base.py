@@ -171,7 +171,7 @@ class BaseConfig(ConfigParser, metaclass=ABCMeta):
 
             # validate if we are using Java 11 and fail if we are using Accumulo 1.x
             # See https://github.com/apache/accumulo/issues/958 for details
-            if self.java_product_version() >= 11 and StrictVersion(self.version('accumulo')) <= StrictVersion("1.9.3"):
+            if self.java_product_version() >= 11 and StrictVersion(self.version('accumulo').replace('-SNAPSHOT','')) <= StrictVersion("1.9.3"):
                 exit("ERROR - Java 11 is not supported with Accumulo version '{0}'".format(self.version('accumulo')))
 
     @abstractmethod
