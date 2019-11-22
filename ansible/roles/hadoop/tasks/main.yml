@@ -24,6 +24,7 @@
     - hdfs-site.xml
     - yarn-site.xml
     - mapred-site.xml
+    - hadoop-metrics2.properties
 - name: "configure hadoop 2"
   template: src={{ item }} dest={{ hadoop_home }}/etc/hadoop/{{ item }}
   with_items:

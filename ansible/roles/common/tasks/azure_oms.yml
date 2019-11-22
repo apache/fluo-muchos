@@ -21,7 +21,7 @@
   template: src=../templates/etc/collectd.d/azure.conf.j2 dest=/etc/collectd.d/azure.conf
 
 - name: "Ensure OMS Agent is installed"
-  shell: eval $(curl -s https://raw.githubusercontent.com/Microsoft/OMS-Agent-for-Linux/master/installer/scripts/onboard_agent.sh | grep -e 'GITHUB_RELEASE=' -e 'BUNDLE_X64=') && wget ${GITHUB_RELEASE}${BUNDLE_X64} && sh ./${BUNDLE_X64} --upgrade
+  shell: eval $(curl -s https://raw.githubusercontent.com/Microsoft/OMS-Agent-for-Linux/master/installer/scripts/onboard_agent.sh | grep -e 'GITHUB_RELEASE_X64=' -e 'BUNDLE_X64=') && wget ${GITHUB_RELEASE_X64}${BUNDLE_X64} && sh ./${BUNDLE_X64} --upgrade
   args:
     creates: /opt/microsoft/omsagent/bin/omsadmin.sh
   register: omsagent_installed
