@@ -23,15 +23,15 @@
   failed_when: "'http' not in apache_mirror.stdout"
   changed_when: False
 - name: "download common tarballs to proxy"
-  get_url: url={{ item.urlp }}/{{ item.fn }} dest={{ tarballs_dir }}/{{ item.fn }} sha256sum={{ item.sum }} force=no
+  get_url: url={{ item.urlp }}/{{ item.fn }} dest={{ tarballs_dir }}/{{ item.fn }} checksum="{{ item.sum }}" force=no
   register: gresult
   until: "'OK' in gresult.msg or 'file already exists' in gresult.msg"
   retries: 3
   with_items:
-    - { urlp: "{{ apache_mirror.stdout }}/zookeeper/zookeeper-{{ zookeeper_version }}", fn: "{{ zookeeper_tarball }}", sum: "{{ zookeeper_sha256 }}" }
-    - { urlp: "{{ apache_mirror.stdout }}/hadoop/common/hadoop-{{ hadoop_version }}", fn: "{{ hadoop_tarball }}", sum: "{{ hadoop_sha256 }}" }
-    - { urlp: "{{ apache_mirror.stdout }}/maven/maven-3/{{ maven_version }}/binaries", fn: "{{ maven_tarball }}", sum: "{{ maven_sha256 }}" }
-    - { urlp: "https://github.com/github/hub/releases/download/v{{ hub_version }}", fn: "{{ hub_tarball }}", sum: "{{ hub_sha256 }}" }
+    - { urlp: "{{ apache_mirror.stdout }}/zookeeper/zookeeper-{{ zookeeper_version }}", fn: "{{ zookeeper_tarball }}", sum: "{{ zookeeper_checksum }}" }
+    - { urlp: "{{ apache_mirror.stdout }}/hadoop/common/hadoop-{{ hadoop_version }}", fn: "{{ hadoop_tarball }}", sum: "{{ hadoop_checksum }}" }
+    - { urlp: "{{ apache_mirror.stdout }}/maven/maven-3/{{ maven_version }}/binaries", fn: "{{ maven_tarball }}", sum: "{{ maven_checksum }}" }
+    - { urlp: "https://github.com/github/hub/releases/download/v{{ hub_version }}", fn: "{{ hub_tarball }}", sum: "{{ hub_checksum }}" }
 
 # This is currently needed to run hadoop with Java 11 (see https://github.com/apache/fluo-muchos/issues/266)      
 - name: "Download javax.activation-api for Hadoop 3 when Java 11 is used"

@@ -26,10 +26,10 @@
   stat: path={{ tarballs_dir }}/{{ accumulo_tarball }}
   register: accumulo
 - name: "download Accumulo tarball to proxy"
-  get_url: url={{ item.urlp }}/{{ item.fn }} dest={{ tarballs_dir }}/{{ item.fn }} sha256sum={{ item.sum }} force=no
+  get_url: url={{ item.urlp }}/{{ item.fn }} dest={{ tarballs_dir }}/{{ item.fn }} checksum="{{ item.sum }}" force=no
   register: gresult
   until: "'OK' in gresult.msg or 'file already exists' in gresult.msg"
   retries: 3
   with_items:
-    - { urlp: "{{ apache_mirror.stdout }}/accumulo/{{ accumulo_version }}", fn: "{{ accumulo_tarball }}", sum: "{{ accumulo_sha256 }}" }
+    - { urlp: "{{ apache_mirror.stdout }}/accumulo/{{ accumulo_version }}", fn: "{{ accumulo_tarball }}", sum: "{{ accumulo_checksum }}" }
   when: accumulo.stat.exists == False

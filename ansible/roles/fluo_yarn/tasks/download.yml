@@ -26,10 +26,10 @@
   stat: path={{ tarballs_dir }}/{{ fluo_yarn_tarball }}
   register: fluo_yarn
 - name: "download Fluo YARN tarball to proxy"
-  get_url: url={{ item.urlp }}/{{ item.fn }} dest={{ tarballs_dir }}/{{ item.fn }} sha256sum={{ item.sum }} force=no
+  get_url: url={{ item.urlp }}/{{ item.fn }} dest={{ tarballs_dir }}/{{ item.fn }} checksum="{{ item.sum }}" force=no
   register: gresult
   until: "'OK' in gresult.msg or 'file already exists' in gresult.msg"
   retries: 3
   with_items:
-    - { urlp: "{{ apache_mirror.stdout }}/fluo/fluo-yarn/{{ fluo_yarn_version }}", fn: "{{ fluo_yarn_tarball }}", sum: "{{ fluo_yarn_sha256 }}" }
+    - { urlp: "{{ apache_mirror.stdout }}/fluo/fluo-yarn/{{ fluo_yarn_version }}", fn: "{{ fluo_yarn_tarball }}", sum: "{{ fluo_yarn_checksum }}" }
   when: fluo_yarn.stat.exists == False
