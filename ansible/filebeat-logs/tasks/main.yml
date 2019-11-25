@@ -32,9 +32,46 @@
     src: filebeat.yml.j2
     dest: /etc/filebeat/filebeat.yml
 
+
+- name: Change to true to enable this input configuration.
+  lineinfile: 
+    path: /etc/filebeat/filebeat.yml
+    regexp: 'enabled: false'
+    line: 'enabled: true'
+
+- name: Add Paths that should be crawled and fetched. Glob based paths.
+  lineinfile: 
+    path: /etc/filebeat/filebeat.yml
+    regexp: ' - /var/log/*.log '
+    insertafter: " - /var/log/*.log "
+    line: ' - /media/ephemeral0/logs/accumulo/*.log '
+    line: ' - /media/ephemeral0/logs/hadoop/*.log '
+    create: yes 
+  become: true
+  
+
 # Starting Filebeat
 
 - name: Starting Filebeat
   service:
    name: filebeat
    state: started
+
+   # Install Logstash 
+
+- name: Install Logstash with yum
+  yum:
+   name: logstash
+   update_cache: yes
+  become: true
+
+
+  # Starting Logstash
+
+- name: Starting Logstash
+  service:
+   name: logstash
+   state: started
+  become: true
+
+ 
