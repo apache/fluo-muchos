@@ -9,11 +9,12 @@
   yum_repository:
     name: elasticsearch-7.x
     description: Elasticsearch repository for 7.x packages
-    baseurl: https://artifacts.elastic.co/packages/oss-7.x/yum
-    #gpgcheck: true
-    #gpgkey: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+    baseurl: https://artifacts.elastic.co/packages/7.x/yum
+    gpgcheck: true
+    gpgkey: https://artifacts.elastic.co/GPG-KEY-elasticsearch
   become: true
 
+   
 # Installing Elasticsearch
 
 - name: Install Elasticsearch
@@ -22,6 +23,7 @@
    state: present
    update_cache: true
   become: true
+
    
 # Update Elasticsearch config file to allow access (to secure Elasticsearch, bind to 'localhost'). 
 
@@ -40,16 +42,6 @@
    regexp: 'http.port:'
    line: 'http.port: 9200'
   become: true
-
-#Update Discovery Settings in config file
-
-- name: Update the Discovery Seed Host 
-  lineinfile:
-   destfile: /etc/elasticsearch/elasticsearch.yml
-   regexp: 'discovery.seed_hosts:'
-   line: 'discovery.seed_hosts: []'
-  become: true
-
 
 #Enable Elasticsearch 
 - name: Enable Elasticsearch
