@@ -8,7 +8,7 @@
 - name: Install Kibana with yum
   yum:
    name: kibana
-   update_cache: no
+   update_cache: yes
   become: true
  
 # Configurations
@@ -32,7 +32,7 @@
   lineinfile:
    destfile: /etc/kibana/kibana.yml
    regexp: 'elasticsearch.url:'
-   line: 'elasticsearch.url: "http://localhost:9200"'
+   line: '#elasticsearch.url: "http://leader1:9200"'
   become: true
 
 
@@ -40,7 +40,7 @@
   lineinfile:
    destfile: /etc/kibana/kibana.yml
    regexp: 'elasticsearch.hosts:'
-   line: 'elasticsearch.hosts: "http://localhost:9200"'
+   line: 'elasticsearch.hosts: ["http://leader1:9200"]'
   become: true
 
 - name: Defining the output kibana log files
@@ -61,7 +61,7 @@
   lineinfile:
    destfile: /etc/kibana/kibana.yml
    regexp: '#pid.file: /var/run/kibana.pid'
-   line: 'pid.file: /var/run/kibana.pid'
+   line: 'pid.file: /var/run/kibana/kibana.pid'
   become: true
 
 # Make Kibana log directory 
@@ -72,6 +72,27 @@
   become: true
 
 
+# Make kibana folder pid 
+- name: Make Kibana folder
+  become: true
+  file: 
+   path: /var/run/kibana/
+   state: directory
+   recurse: yes
+   mode: 0777
+   owner: kibana
+
+
+# Make kibana folder pid 
+- name: Make Kibana pid File 
+  become: true
+  file: 
+   path: /var/run/kibana/kibana.pid
+   state: touch
+   mode: 0777
+   owner: kibana
+
+
 # Starting Kibana
 
 - name: Starting Kibana
@@ -80,3 +101,5 @@
    state: started
   become: true
 
+
+ 

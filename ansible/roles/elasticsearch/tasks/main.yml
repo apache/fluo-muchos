@@ -3,23 +3,15 @@
 # Installing Elasticsearch
 #
 
-# Add Elasticsearch rpm key
-
-- name: Add Elasticsearch apt key
-  become: true
-  rpm_key: 
-   key: https://packages.elastic.co/GPG-KEY-elasticsearch
-   state: present
-
-# Add the Elasticsearch apt repo. For versions 6 of the stack - use '6.x-prerelease':
+# Add the Elasticsearch yum repo. 
 
 - name: install elasticsearch 7.x rpm repository
   yum_repository:
     name: elasticsearch-7.x
     description: Elasticsearch repository for 7.x packages
-    baseurl: https://artifacts.elastic.co/packages/7.x/yum
-    gpgcheck: true
-    gpgkey: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+    baseurl: https://artifacts.elastic.co/packages/oss-7.x/yum
+    #gpgcheck: true
+    #gpgkey: https://artifacts.elastic.co/GPG-KEY-elasticsearch
   become: true
 
 # Installing Elasticsearch
@@ -37,7 +29,7 @@
   lineinfile:
    destfile: /etc/elasticsearch/elasticsearch.yml
    regexp: 'network.host:'
-   line: 'network.host: http://localhost'
+   line: 'network.host: 0.0.0.0'
   become: true
  
 # Update Elasticsearch port in config file 
@@ -48,6 +40,16 @@
    regexp: 'http.port:'
    line: 'http.port: 9200'
   become: true
+
+#Update Discovery Settings in config file
+
+- name: Update the Discovery Seed Host 
+  lineinfile:
+   destfile: /etc/elasticsearch/elasticsearch.yml
+   regexp: 'discovery.seed_hosts:'
+   line: 'discovery.seed_hosts: []'
+  become: true
+
 
 #Enable Elasticsearch 
 - name: Enable Elasticsearch
@@ -61,6 +63,4 @@
   service: 
    name: elasticsearch
    state: restarted
-  become: true
-
-    
+  become: yes
