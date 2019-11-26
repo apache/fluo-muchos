@@ -20,7 +20,7 @@
   args:
     url: https://grafanarel.s3.amazonaws.com/builds/{{ grafana_rpm }}
     dest: /tmp/{{ grafana_rpm }}
-    sha256sum: "{{ grafana_sha256 }}"
+    checksum: "{{ grafana_checksum }}"
     force: no
 - name: "ensure grafana is installed"
   yum: name=/tmp/{{ grafana_rpm }} state=present

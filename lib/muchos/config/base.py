@@ -82,31 +82,39 @@ _PLAY_VAR_DEFAULTS = {
   'accumulo_dcache_size': None,
   'accumulo_icache_size': None,
   'accumulo_imap_size': None,
-  'accumulo_sha256': None,
+  'accumulo_checksum': None,
   'accumulo_tserv_mem': None,
-  'fluo_sha256': None,
+  'fluo_checksum': None,
   'fluo_worker_instances_multiplier': None,
   'fluo_worker_mem_mb': None,
   'fluo_worker_threads': None,
-  'fluo_yarn_sha256': None,
-  'hadoop_sha256': None,
+  'fluo_yarn_checksum': None,
+  'hadoop_checksum': None,
   'hub_version': '2.2.3',
   'hub_home': '"{{ install_dir }}/hub-linux-amd64-{{ hub_version }}"',
   'hub_tarball': 'hub-linux-amd64-{{ hub_version }}.tgz',
-  'hub_sha256': '54c35a459a4241b7ae4c28bcfea0ceef849dd2f8a9dd2b82ba2ba964a743e6bc',
-  'maven_sha256': '2528c35a99c30f8940cc599ba15d34359d58bec57af58c1075519b8cd33b69e7',
+  'hub_checksum': 'sha256:54c35a459a4241b7ae4c28bcfea0ceef849dd2f8a9dd2b82ba2ba964a743e6bc',
+  'maven_checksum': 'sha256:2528c35a99c30f8940cc599ba15d34359d58bec57af58c1075519b8cd33b69e7',
   'metrics_drive_ids': None,
   'mount_root': None,
   'node_type_map': None,
-  'spark_sha256': None,
+  'spark_checksum': None,
   'shutdown_delay_minutes': None,
   'twill_reserve_mem_mb': None,
   'yarn_nm_mem_mb': None,
-  'zookeeper_sha256': None
+  'zookeeper_checksum': None
 }
 
 _EXTRA_VAR_DEFAULTS = {}
 
+HASHLEN_ALGO_MAP = {
+        32: "md5",
+        40: "sha1",
+        56: "sha224",
+        64: "sha256",
+        96: "sha384",
+        128: "sha512"
+}
 
 class BaseConfig(ConfigParser, metaclass=ABCMeta):
     def __init__(self, deploy_path, config_path, hosts_path, checksums_path, templates_path, cluster_name):
@@ -131,7 +139,7 @@ class BaseConfig(ConfigParser, metaclass=ABCMeta):
 
     def ansible_play_vars(self):
         software_checksums = {
-            '{}_sha256'.format(k): self.checksum(k) for
+            '{}_checksum'.format(k): self.checksum(k) for
             k in ['accumulo', 'fluo', 'fluo_yarn', 'hadoop', 'spark', 'zookeeper']
         }
         return dict(
@@ -260,6 +268,15 @@ class BaseConfig(ConfigParser, metaclass=ABCMeta):
     def checksum(self, software):
         return self.checksum_ver(software, self.version(software))
 
+    def infer_hash_algo(self, hashstring):
+        # assign the algorithm based on length. These are the default supported algorithms for Ansible
+        hashlen = len(hashstring)
+
+        if hashlen in HASHLEN_ALGO_MAP:
+            return HASHLEN_ALGO_MAP[hashlen]
+        else:
+            return None
+
     def checksum_ver(self, software, version):
         if not os.path.isfile(self.checksums_path):
             exit('ERROR - A checksums file does not exist at %s' % self.hosts_path)
@@ -276,7 +293,16 @@ class BaseConfig(ConfigParser, metaclass=ABCMeta):
                         continue
                     args = line.split(':')
                     if len(args) == 3:
-                        self.checksums_d["{0}:{1}".format(args[0], args[1])] = args[2]
+                        inferred_algo = self.infer_hash_algo(args[2])
+                        if inferred_algo is not None:
+                            self.checksums_d["{0}:{1}".format(args[0], args[1])] = "{0}:{1}".format(self.infer_hash_algo(args[2]), args[2])
+                        else:
+                            exit('ERROR - Bad line %s in checksums %s' % (line, self.checksums_path))
+
+                    elif len(args) == 4:
+                        if args[2] not in HASHLEN_ALGO_MAP.values():
+                            exit('ERROR - Unsupported hash algorithm %s in checksums %s' % (line, self.checksums_path))
+                        self.checksums_d["{0}:{1}".format(args[0], args[1])] = "{0}:{1}".format(args[2], args[3])
                     else:
                         exit('ERROR - Bad line %s in checksums %s' % (line, self.checksums_path))
 

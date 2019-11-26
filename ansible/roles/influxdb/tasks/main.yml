@@ -20,7 +20,7 @@
   args:
     url: https://influxdb.s3.amazonaws.com/{{ influxdb_rpm }}
     dest: /tmp/{{ influxdb_rpm }}
-    sha256sum: "{{ influxdb_sha256 }}"
+    checksum: "{{ influxdb_checksum }}"
     force: no
 - name: "ensure influxdb is installed"
   yum: name=/tmp/{{ influxdb_rpm }} state=present

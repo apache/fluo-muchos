@@ -21,8 +21,8 @@ from muchos.config import Ec2DeployConfig
 def test_ec2_cluster():
     c = Ec2DeployConfig("muchos", '../conf/muchos.props.example', '../conf/hosts/example/example_cluster',
                      '../conf/checksums', '../conf/templates', 'mycluster')
-    assert c.checksum_ver('accumulo', '1.9.0') == 'f68a6145029a9ea843b0305c90a7f5f0334d8a8ceeea94734267ec36421fe7fe'
-    assert c.checksum('accumulo') == 'df172111698c7a73aa031de09bd5589263a6b824482fbb9b4f0440a16602ed47'
+    assert c.checksum_ver('accumulo', '1.9.0') == 'sha256:f68a6145029a9ea843b0305c90a7f5f0334d8a8ceeea94734267ec36421fe7fe'
+    assert c.checksum('accumulo') == 'sha256:df172111698c7a73aa031de09bd5589263a6b824482fbb9b4f0440a16602ed47'
     assert c.get('ec2', 'default_instance_type') == 'm5d.large'
     assert c.get('ec2', 'worker_instance_type') == 'm5d.large'
     assert c.get('ec2', 'aws_ami') == 'ami-9887c6e7'
