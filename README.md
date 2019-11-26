@@ -182,9 +182,11 @@ versions of these tarballs are specified in [muchos.props] and can be changed if
 Optionally, Muchos can setup the cluster using an Accumulo or Fluo tarball that is placed in the
 `conf/upload` directory of Muchos. This option is only necessary if you want to use an unreleased
 version of Fluo or Accumulo. Before running the `muchos setup` command, you should confirm that the
-version and hash (SHA-512 or SHA-256) of your tarball matches what is set in [conf/checksums][checksums]. 
-Run the command `shasum -a 512 /path/to/tarball` on your tarball to determine its hash. 
-The entry in [conf/checksums][checksums] must include the algorithm (sha512 or sha256) as a prefix.
+hash (typically SHA-512 or SHA-256) of your tarball matches what is set in [conf/checksums][checksums].
+Run the command `shasum -a 512 /path/to/tarball` on your tarball to determine its hash.
+The entry in [conf/checksums][checksums] can optionally include the algorithm as a prefix. If the algorithm
+is not specified then Muchos will infer the algorithm based on the length of the hash. Currently Muchos
+supports using sha512 / sha384 / sha256 / sha224 / sha1 / md5 hashes for the checksum.
 
 The `muchos setup` command will install and start Accumulo, Hadoop, and Zookeeper.  The optional
 services below will only be set up if configured in the `[nodes]` section of [muchos.props]:

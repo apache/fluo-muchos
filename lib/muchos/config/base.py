@@ -107,6 +107,14 @@ _PLAY_VAR_DEFAULTS = {
 
 _EXTRA_VAR_DEFAULTS = {}
 
+HASHLEN_ALGO_MAP = {
+        32: "md5",
+        40: "sha1",
+        56: "sha224",
+        64: "sha256",
+        96: "sha384",
+        128: "sha512"
+}
 
 class BaseConfig(ConfigParser, metaclass=ABCMeta):
     def __init__(self, deploy_path, config_path, hosts_path, checksums_path, templates_path, cluster_name):
@@ -260,6 +268,15 @@ class BaseConfig(ConfigParser, metaclass=ABCMeta):
     def checksum(self, software):
         return self.checksum_ver(software, self.version(software))
 
+    def infer_hash_algo(self, hashstring):
+        # assign the algorithm based on length. These are the default supported algorithms for Ansible
+        hashlen = len(hashstring)
+
+        if hashlen in HASHLEN_ALGO_MAP:
+            return HASHLEN_ALGO_MAP[hashlen]
+        else:
+            return None
+
     def checksum_ver(self, software, version):
         if not os.path.isfile(self.checksums_path):
             exit('ERROR - A checksums file does not exist at %s' % self.hosts_path)
@@ -275,7 +292,16 @@ class BaseConfig(ConfigParser, metaclass=ABCMeta):
                     if line.startswith("#") or not line:
                         continue
                     args = line.split(':')
-                    if len(args) == 4:
+                    if len(args) == 3:
+                        inferred_algo = self.infer_hash_algo(args[2])
+                        if inferred_algo is not None:
+                            self.checksums_d["{0}:{1}".format(args[0], args[1])] = "{0}:{1}".format(self.infer_hash_algo(args[2]), args[2])
+                        else:
+                            exit('ERROR - Bad line %s in checksums %s' % (line, self.checksums_path))
+
+                    elif len(args) == 4:
+                        if args[2] not in HASHLEN_ALGO_MAP.values():
+                            exit('ERROR - Unsupported hash algorithm %s in checksums %s' % (line, self.checksums_path))
                         self.checksums_d["{0}:{1}".format(args[0], args[1])] = "{0}:{1}".format(args[2], args[3])
                     else:
                         exit('ERROR - Bad line %s in checksums %s' % (line, self.checksums_path))

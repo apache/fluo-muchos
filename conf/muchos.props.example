@@ -35,7 +35,7 @@ proxy_hostname = leader1
 accumulo_instance = muchos
 # Accumluo Password
 accumulo_password = secret
-# Software versions (make sure you have a corresponding entry for the algorithm and checksum in conf/checksums)
+# Software versions (make sure you have a corresponding entry for the checksum in conf/checksums)
 hadoop_version = 3.2.1
 zookeeper_version = 3.4.14
 spark_version = 2.3.2
