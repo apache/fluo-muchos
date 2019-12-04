@@ -3,13 +3,22 @@
 # Installing Kibana
 #
 
-# Install Kibana 
+# Add the Kibana yum repo. 
 
-- name: Install Kibana with yum
-  yum:
-   name: kibana
-   update_cache: yes
+- name: "download kibana rpm"
+  get_url: 
+  args:
+    url: https://artifacts.elastic.co/downloads/kibana/{{ kibana_rpm }}
+    dest: /tmp/{{ kibana_rpm }}
+    force: no
+
+
+    #Install kibana    
+
+- name: "ensure kibana is installed"
   become: true
+  yum: name=/tmp/{{ kibana_rpm }} state=present
+
  
 # Configurations
 

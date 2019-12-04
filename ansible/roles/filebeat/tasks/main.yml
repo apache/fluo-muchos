@@ -5,16 +5,48 @@
 
 # Install Filebeat 
 
-- name: Install Filebeat with yum
-  yum:
-   name: filebeat
-   update_cache: yes
+
+- name: "download filebeat rpm"
+  get_url: 
+  args:
+    url: https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-oss-7.5.0-x86_64.rpm
+    dest: /tmp/filebeat-oss-7.5.0-x86_64.rpm
+    force: no
+  
+
+ #Install filebeat    
+
+- name: "ensure filebeat is installed"
   become: true
+  yum: name=/tmp/filebeat-oss-7.5.0-x86_64.rpm state=present
 
 # Starting Filebeat
 
 - name: Starting Filebeat
   service:
    name: filebeat
+   state: started
+  become: true
+
+# Dowload Logstash 
+- name: "download logstash rpm"
+  get_url: 
+  args:
+    url: https://artifacts.elastic.co/downloads/logstash/logstash-oss-7.5.0.rpm
+    dest: /tmp/logstash-oss-7.5.0.rpm
+    force: no
+  
+
+ #Install Logstash    
+
+- name: "ensure logstash is installed"
+  become: true
+  yum: name=/tmp/logstash-oss-7.5.0.rpm state=present
+
+# Starting Logstash
+
+- name: Starting Logstash
+  service:
+   name: logstash
    state: started
   become: true

@@ -18,13 +18,7 @@
 - name: Move SSL certification to new folder
   shell: cp COMODORSADomainValidationSecureServerCA.crt /etc/pki/tls/certs/
 
-# Install Filebeat 
 
-- name: Install Filebeat with apt
-  apt:
-   name: filebeat
-   update_cache: yes
- 
 # Replace Filebeat configuration to ship to Logz.io. 
 
 - name: Replace default filebeat.yml configurations

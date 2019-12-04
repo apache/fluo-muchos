@@ -3,14 +3,21 @@
 # Installing Metricbeat
 #
 
-# Install Metricbeat 
+- name: "download metric rpm"
+  get_url: 
+  args:
+    url: https://artifacts.elastic.co/downloads/beats/metricbeat/{{ metricbeat_rpm }}
+    dest: /tmp/{{ metricbeat_rpm }}
+    force: no
+  
 
-- name: Install Metricbeat with yum
-  yum:
-   name: metricbeat
-   update_cache: yes
+ #Install Metricbeat    
+
+- name: "ensure elasticsearch is installed"
   become: true
-    
+  yum: name=/tmp/{{ metricbeat_rpm }} state=present
+
+   
 # Starting Metricbeat
 
 - name: Starting Metricbeat
@@ -18,3 +25,4 @@
    name: metricbeat
    state: started
   become: true
+ 

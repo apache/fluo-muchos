@@ -5,24 +5,19 @@
 
 # Add the Elasticsearch yum repo. 
 
-- name: install elasticsearch 7.x rpm repository
-  yum_repository:
-    name: elasticsearch-7.x
-    description: Elasticsearch repository for 7.x packages
-    baseurl: https://artifacts.elastic.co/packages/7.x/yum
-    gpgcheck: true
-    gpgkey: https://artifacts.elastic.co/GPG-KEY-elasticsearch
-  become: true
+- name: "download elasticsearch rpm"
+  get_url: 
+  args:
+    url: https://artifacts.elastic.co/downloads/elasticsearch/{{ elasticsearch_rpm }}
+    dest: /tmp/{{ elasticsearch_rpm }}
+    force: no
+  
 
-   
-# Installing Elasticsearch
+ #Install elasticsearch    
 
-- name: Install Elasticsearch
-  yum:
-   name: elasticsearch
-   state: present
-   update_cache: true
+- name: "ensure elasticsearch is installed"
   become: true
+  yum: name=/tmp/{{ elasticsearch_rpm }} state=present
 
    
 # Update Elasticsearch config file to allow access (to secure Elasticsearch, bind to 'localhost'). 
@@ -43,6 +38,24 @@
    line: 'http.port: 9200'
   become: true
 
+#Update Discovery Settings in config file
+
+- name: Update the Discovery Seed Host 
+  lineinfile:
+   destfile: /etc/elasticsearch/elasticsearch.yml
+   regexp: 'discovery.seed_hosts:'
+   line: 'discovery.seed_hosts: ["leader1"]'
+  become: true
+
+  #Update Discovery Settings in config file
+
+- name: Update the Discovery Seed Host 
+  lineinfile:
+   destfile: /etc/elasticsearch/elasticsearch.yml
+   regexp: 'cluster.initial_master_nodes:'
+   line: 'cluster.initial_master_nodes: ["leader1"]'
+  become: true
+
 #Enable Elasticsearch 
 - name: Enable Elasticsearch
   service: 
@@ -51,8 +64,8 @@
   become: true
 
 # Restart Elasticsearch
-- name: Restart Elasticsearch
+- name: Start Elasticsearch
   service: 
    name: elasticsearch
-   state: restarted
+   state: started
   become: yes
