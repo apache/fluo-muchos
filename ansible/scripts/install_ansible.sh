@@ -23,10 +23,14 @@ base_dir=$( cd "$( dirname "$bin" )" && pwd )
 set -e
 
 # enable yum epel repo
-rpm -q --quiet epel-release || sudo yum install -q -y epel-release
+is_installed_epel_release="rpm -q --quiet epel-release"
+install_epel_release="sudo yum install -q -y epel-release"
+for i in {1..10}; do ($is_installed_epel_release || $install_epel_release) && break || sleep 15; done
 
 # install ansible
-rpm -q --quiet ansible || sudo yum install -q -y ansible
+is_installed_ansible="rpm -q --quiet ansible"
+install_ansible="sudo yum install -q -y ansible"
+for i in {1..10}; do ($is_installed_ansible || $install_ansible) && break || sleep 15; done
 
 # setup user-specific ansible configuration
 if [ ! -h ~/.ansible.cfg ]; then
