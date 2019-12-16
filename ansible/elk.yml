@@ -2,7 +2,7 @@
 #
 # Playbook to install the ELK stack + Beats
 #
-- hosts: elkserver
+- hosts: all:!{{ azure_proxy_host }}
   roles:
   - { role: elasticsearch }
   - { role: metricbeat }
