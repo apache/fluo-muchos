@@ -164,6 +164,9 @@ Under the `azure` section, edit following values as per your configuration
 * `numnodes` to change the cluster size in terms of number of nodes deployed
 * `vm_sku` to specify the VM size to use. You can choose from the
   [available VM sizes](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/sizes-general).
+* `use_adlsg2` to use Azure Data Lake Storage(ADLS) Gen2 as datastore for Accumulo
+  [ADLS Gen2 Doc](https://docs.microsoft.com/en-us/azure/storage/blobs/data-lake-storage-introduction).
+  [Setup ADLS Gen2 as datastore for Accumulo](https://accumulo.apache.org/blog/2019/10/15/accumulo-adlsgen2-notes.html).
 
 Within Azure the `nodes` section is auto populated with the hostnames and their default roles.
 

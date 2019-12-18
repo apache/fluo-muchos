@@ -27,6 +27,16 @@
     - import_tasks: roles/accumulo/tasks/init-accumulo.yml
   handlers:
     - import_tasks: roles/accumulo/handlers/init-accumulo.yml
+- hosts: all:!{{ azure_proxy_host }}
+  tasks:
+    - import_tasks: roles/accumulo/tasks/add-adlsgen2.yml
+      when: accumulo_major_version == '2' and use_adlsg2 == True
+- hosts: accumulomaster[0]
+  tasks:
+    - import_tasks: roles/accumulo/tasks/init-adlsgen2.yml
+      when: accumulo_major_version == '2' and use_adlsg2 == True
+  handlers:
+    - import_tasks: roles/accumulo/handlers/init-adlsgen2.yml
 - hosts: accumulo
   tasks:
     - name: "start accumulo 1.0"

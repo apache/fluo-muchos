@@ -105,3 +105,28 @@ class AzureDeployConfig(BaseConfig):
     @default(None)
     def logs_key(self):
         return self.get('azure', 'az_logs_key')
+
+    @ansible_host_var(name='use_adlsg2')
+    @default(None)
+    def use_adlsg2(self):
+        return self.get('azure', 'use_adlsg2')
+
+    @ansible_host_var(name='azure_tenant_id')
+    @default(None)
+    def azure_tenant_id(self):
+        return self.get('azure', 'azure_tenant_id')
+
+    @ansible_host_var(name='azure_client_id')
+    @default(None)
+    def azure_client_id(self):
+        return self.get('azure', 'azure_client_id')
+
+    @ansible_host_var(name='principal_id')
+    @default(None)
+    def principal_id(self):
+        return self.get('azure', 'principal_id')
+
+    @ansible_host_var(name='instance_volumes_preferred')
+    @default(None)
+    def instance_volumes_preferred(self):
+        return self.get('azure', 'instance_volumes_preferred')
