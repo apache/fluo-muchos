@@ -97,4 +97,4 @@
       $HADOOP_PREFIX/share/hadoop/yarn/lib/jersey.*.jar
     </value>
   </property>
-</configuration>    
+</configuration>
