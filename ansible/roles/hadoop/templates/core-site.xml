@@ -36,4 +36,34 @@
     <name>dfs.domain.socket.path</name>
     <value>/var/lib/hadoop-hdfs/dn_socket</value>
   </property>
+{% if use_adlsg2 == True %}
+  <property>
+    <name>fs.azure.account.auth.type</name>
+    <value>OAuth</value>
+  </property>
+  <property>
+    <name>fs.azure.account.oauth.provider.type</name>
+    <value>org.apache.hadoop.fs.azurebfs.oauth2.MsiTokenProvider</value>
+  </property>
+  <property>
+    <name>fs.azure.account.oauth2.msi.tenant</name>
+    <value>{{ azure_tenant_id}}</value>
+  </property>
+  <property>
+    <name>fs.azure.account.oauth2.client.id</name>
+    <value>{{ azure_client_id }}</value>
+  </property>
+  <property>
+    <name>fs.azure.use.upn</name>
+    <value>true</value>
+  </property>
+  <property>
+    <name>fs.azure.identity.transformer.service.principal.substitution.list</name>
+    <value>*</value>
+  </property>
+  <property>
+    <name>fs.azure.identity.transformer.service.principal.id</name>
+    <value>{{ principal_id }}</value>
+  </property>
+{% endif %}
 </configuration>

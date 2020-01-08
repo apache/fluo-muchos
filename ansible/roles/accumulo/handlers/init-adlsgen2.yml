@@ -1,5 +1,3 @@
----
-
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -17,7 +15,5 @@
 # limitations under the License.
 #
 
-# tasks file for azure
-- import_tasks: create_vmss.yml
-- import_tasks: create_adlsgen2.yml
-  when: use_adlsg2 == True
+- name: "Initialize Apache Accumulo on ADLS Gen2 volume"
+  command: "{{ accumulo_home }}/bin/accumulo init --add-volumes"
