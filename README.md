@@ -308,9 +308,6 @@ data on your cluster will be lost:
 
     ./bin/muchos terminate
 
-Note: The terminate command is currently unsupported for Azure based clusters. Instead, you should delete
-underlying Azure VMSS resources when you need to terminate the cluster.
-
 ## Automatic shutdown of clusters
 
 With the default configuration, clusters will not shutdown automatically after a delay and the default
