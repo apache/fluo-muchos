@@ -230,23 +230,21 @@ class ExistingCluster:
             self.setup()
         elif action == 'ssh':
             self.ssh()
-        elif action == 'wipe':
-            # First execute kill and wipe routines on the attached disks
-            print("Killing all processes started by Muchos and wiping Muchos data from {0} cluster"
-                    .format(self.config.cluster_name))
-            self.execute_playbook("wipe.yml")
-            # In case of Azure, also check and if necessary wipe the storage accounts
-            # It is necessary to do this after the common kill and wipe to ensure that processes are all killed prior to this
-            if self.config.get("general", "cluster_type") == 'azure':
-                self.wipeadlsg2()
-        elif action in ('kill', 'cancel_shutdown'):
+        elif action in ('wipe', 'kill', 'cancel_shutdown'):
             if not isfile(self.config.hosts_path):
                 exit("Hosts file does not exist for cluster: " + self.config.hosts_path)
-            if action == 'kill':
+            if action == 'wipe':
+                print("Killing all processes started by Muchos and wiping Muchos data from {0} cluster"
+                      .format(self.config.cluster_name))
+            elif action == 'kill':
                 print("Killing all processes started by Muchos on {0} cluster".format(self.config.cluster_name))
             elif action == 'cancel_shutdown':
                 print("Cancelling automatic shutdown of {0} cluster".format(self.config.cluster_name))
             self.execute_playbook(action + ".yml")
+            # In case of Azure, also check and if necessary wipe the storage accounts
+            # It is necessary to do this after the common kill and wipe to ensure that processes are all killed prior to this
+            if  action == 'wipe' and self.config.get("general", "cluster_type") == 'azure':
+                self.wipeadlsg2()
         elif action == 'terminate':
             self.terminate()
         else:
