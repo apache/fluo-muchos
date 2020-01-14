@@ -230,9 +230,11 @@ class Ec2Cluster(ExistingCluster):
                 ec2.terminate_instances(InstanceIds=[node['InstanceId']])
 
             print("Terminated nodes.")
+       
             if not self.config.has_option('ec2', 'security_group_id'):
                 self.delete_security_group()
 
+    #def get
             if isfile(self.config.hosts_path):
                 os.remove(self.config.hosts_path)
                 print("Removed hosts file at ", self.config.hosts_path)
