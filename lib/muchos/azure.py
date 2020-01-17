@@ -68,12 +68,14 @@ class VmssCluster(ExistingCluster):
         if response == "y":
             subprocess.call(["ansible-playbook",
                              join(config.deploy_path,
-                                  "ansible/azure-terminate.yml"),
+                                  "ansible/roles/azure/tasks/terminate_cluster.yml"),
                              "--extra-vars", json.dumps(azure_config)])
         else:
             print("Aborted termination")
 
-    def wipeadlsg2(self):
+    def wipe(self):
+        self.execute_playbook("wipe.yml")
+        # Wipe ADLS Gen2 storage accounts if implemented
         config = self.config
         azure_config = dict(config.items("azure"))
         azure_config["vmss_name"] = config.cluster_name
@@ -82,7 +84,7 @@ class VmssCluster(ExistingCluster):
         azure_config = {k:  VmssCluster._parse_config_value(v)
                         for k, v in azure_config.items()}
         retcode = subprocess.call(["ansible-playbook",
-                         join(config.deploy_path, "ansible/azure-wipe-adlsg2.yml"),
+                         join(config.deploy_path, "ansible/roles/azure/tasks/wipe_adlsg2.yml"),
                          "--extra-vars", json.dumps(azure_config)])
         if retcode != 0:
             exit("ERROR - Command failed with return code of {0}".format(retcode))
