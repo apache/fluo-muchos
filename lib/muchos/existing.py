@@ -230,12 +230,15 @@ class ExistingCluster:
             self.setup()
         elif action == 'ssh':
             self.ssh()
-        elif action in ('wipe', 'kill', 'cancel_shutdown'):
+        elif action == 'wipe':
             if not isfile(self.config.hosts_path):
                 exit("Hosts file does not exist for cluster: " + self.config.hosts_path)
-            if action == 'wipe':
-                print("Killing all processes started by Muchos and wiping Muchos data from {0} cluster"
-                      .format(self.config.cluster_name))
+            print("Killing all processes started by Muchos and wiping Muchos data from {0} cluster"
+                    .format(self.config.cluster_name))
+            self.wipe()
+        elif action in ('kill', 'cancel_shutdown'):
+            if not isfile(self.config.hosts_path):
+                exit("Hosts file does not exist for cluster: " + self.config.hosts_path)
             elif action == 'kill':
                 print("Killing all processes started by Muchos on {0} cluster".format(self.config.cluster_name))
             elif action == 'cancel_shutdown':

@@ -27,7 +27,9 @@
     file: path={{ default_data_dirs[0] }}/influxdb state=absent
   - name: "wipe grafana db"
     file: path=/var/lib/grafana/grafana.db state=absent
+
 - import_playbook: kill.yml
+
 - hosts: all
   tasks:
   - name: "wipe software installation dirs"
@@ -38,20 +40,40 @@
       - "{{ accumulo_home }}"
       - "{{ fluo_home }}"
       - "{{ spark_home }}"
+      - "{{ maven_home }}"
+      - "{{ hub_home }}"
+      - "{{ fluo_yarn_home }}"
+
 - hosts: hadoop
   tasks:
   - name: "wipe hadoop data"
     file: path={{item}}/hadoop state=absent
     with_items: "{{ worker_data_dirs }}"
+    when: cluster_type != 'azure'
   - name: "remove hadoop logs"
     shell: rm -rf {{ hadoop_home }}/logs/*
+    when: cluster_type != 'azure'
+
 - hosts: zookeepers
   tasks:
   - name: "wipe zookeeper data"
     file: path={{ default_data_dirs[0] }}/zookeeper state=absent
+    when: cluster_type != 'azure'
   - name: "remove zookeeper logs"
     file: path={{ zookeeper_home }}/zookeeper.out state=absent
+    when: cluster_type != 'azure'
+
 - hosts: accumulo
   tasks:
   - name: "remove accumulo logs"
     shell: rm -rf {{ accumulo_home }}/logs/*
+    when: cluster_type != 'azure'
+
+# Using rm -rf instead of Ansible file module to remove multiple levels of subfolder
+- hosts: all
+  tasks:
+  - name: "wipe data and log directories for Azure"
+    shell: rm -rf {{ item }}/*
+    loop:
+      "{{ worker_data_dirs }}"
+    when: cluster_type == 'azure'
