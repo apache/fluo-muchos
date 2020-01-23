@@ -216,49 +216,49 @@
     path: "{{ deploy_path }}/conf/muchos.props"
     line: "{{ item }} = namenode,resourcemanager,accumulomaster,zookeeper"
   with_items: "{{ instances_dict | json_query('[0].value') }}"
-  when: not hdfs_ha|bool
+  when: not hdfs_ha
 
 - name: Assign metrics to the second node of the cluster
   lineinfile:
     path: "{{ deploy_path }}/conf/muchos.props"
     line: "{{ item }} = metrics"
   with_items: "{{ instances_dict | json_query('[1].value') }}"
-  when: not hdfs_ha|bool
+  when: not hdfs_ha
 
 - name: Add worker nodes to muchos.props
   lineinfile:
     path: "{{ deploy_path }}/conf/muchos.props"
     line: "{{ item }} = worker"
   with_items: "{{ instances_dict | json_query('[2:].value') }}"
-  when: not hdfs_ha|bool
+  when: not hdfs_ha
 
 - name: Assign Accumulo master, HDFS HA components cluster roles to the first node of the cluster
   lineinfile:
     path: "{{ deploy_path }}/conf/muchos.props"
     line: "{{ item }} = namenode,resourcemanager,accumulomaster,zookeeper,journalnode,zkfc"
   with_items: "{{ instances_dict | json_query('[0].value') }}"
-  when: hdfs_ha|bool
+  when: hdfs_ha
 
 - name: Assign Accumulo master, HDFS HA components cluster roles to the second node of the cluster
   lineinfile:
     path: "{{ deploy_path }}/conf/muchos.props"
     line: "{{ item }} = zookeeper,metrics,journalnode,namenode,zkfc,accumulomaster"
   with_items: "{{ instances_dict | json_query('[1].value') }}"
-  when: hdfs_ha|bool
+  when: hdfs_ha
 
 - name: Assign HDFS HA components cluster roles to the third node of the cluster
   lineinfile:
     path: "{{ deploy_path }}/conf/muchos.props"
     line: "{{ item }} = journalnode,zookeeper"
   with_items: "{{ instances_dict | json_query('[2].value') }}"
-  when: hdfs_ha|bool
+  when: hdfs_ha
 
 - name: Add worker nodes to muchos.props
   lineinfile:
     path: "{{ deploy_path }}/conf/muchos.props"
     line: "{{ item }} = worker"
   with_items: "{{ instances_dict | json_query('[3:].value') }}"
-  when: hdfs_ha|bool
+  when: hdfs_ha
 
 - name: Change proxy hostname to azure proxy host in muchos.props
   lineinfile:
