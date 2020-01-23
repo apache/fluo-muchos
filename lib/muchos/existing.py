@@ -47,10 +47,7 @@ class ExistingCluster:
             print("- import_playbook: common.yml", file=site_file)
 
             print("- import_playbook: zookeeper.yml", file=site_file)
-            if config.get("general","hdfs_ha") == 'True':
-                print("- import_playbook: hadoop-ha.yml", file=site_file)
-            else:
-                print("- import_playbook: hadoop.yml", file=site_file)
+            print("- import_playbook: hadoop.yml", file=site_file)
 
             if config.has_service("spark"):
                 print("- import_playbook: spark.yml", file=site_file)

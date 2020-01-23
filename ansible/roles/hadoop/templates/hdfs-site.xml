@@ -21,8 +21,6 @@
 
 <!-- Put site-specific property overrides in this file. -->
 
-<!-- when editing this file please consider if changes are also needed in roles/hadoop-ha/templates -->
-
 <configuration>
   <property>
     <name>dfs.datanode.synconclose</name>
@@ -39,6 +37,7 @@
               {%- if not loop.last -%} , {%- endif -%}
            {%- endfor %}</value>
   </property>
+{% if hdfs_ha == False %}  
   <property>
     <name>dfs.namenode.secondary.http-address</name>
     <value>{{ groups['namenode'][0] }}:50090</value>
@@ -47,6 +46,60 @@
     <name>dfs.namenode.secondary.https-address</name>
     <value>{{ groups['namenode'][0] }}:50091</value>
   </property>
+{% else %}
+  <property>
+    <name>dfs.nameservices</name>
+    <value>{{ nameservice_id }}</value>
+  </property>
+  <property>
+   <name>dfs.ha.namenodes.{{ nameservice_id }}</name>
+   <value>nn1,nn2</value>
+  </property>
+  <property>
+    <name>dfs.namenode.rpc-address.{{ nameservice_id }}.nn1</name>
+    <value>{{ groups['namenode'][0] }}:8020</value>
+  </property>
+  <property>
+    <name>dfs.namenode.rpc-address.{{ nameservice_id }}.nn2</name>
+    <value>{{ groups['namenode'][1] }}:8020</value>
+  </property>
+  <property>
+    <name>dfs.namenode.http-address.{{ nameservice_id }}.nn1</name>
+    <value>{{ groups['namenode'][0] }}:50070</value>
+  </property>
+  <property>
+    <name>dfs.namenode.http-address.{{ nameservice_id }}.nn2</name>
+    <value>{{ groups['namenode'][1] }}:50070</value>
+  </property>
+  <property>
+    <name>dfs.namenode.https-address.{{ nameservice_id }}.nn1</name>
+    <value>{{ groups['namenode'][0] }}:50071</value>
+  </property>
+  <property>
+    <name>dfs.namenode.https-address.{{ nameservice_id }}.nn2</name>
+    <value>{{ groups['namenode'][1] }}:50071</value>
+  </property>
+  <property>
+    <name>dfs.namenode.shared.edits.dir</name>
+    <value>qjournal://{{ journal_quorum }}/{{ nameservice_id }}</value>
+  </property>
+  <property>
+    <name>dfs.client.failover.proxy.provider.{{ nameservice_id }}</name>
+    <value>org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider</value>
+  </property>
+  <property>
+    <name>dfs.ha.fencing.methods</name>
+    <value>shell(/usr/bin/true)</value>
+  </property>
+  <property>
+    <name>dfs.journalnode.edits.dir</name>
+    <value>{{ worker_data_dirs[0] }}/hadoop/journal</value>
+  </property>
+  <property>
+    <name>dfs.ha.automatic-failover.enabled</name>
+    <value>true</value>
+  </property>
+{% endif %}
     <property>
     <name>dfs.client.read.shortcircuit</name>
     <value>true</value>
