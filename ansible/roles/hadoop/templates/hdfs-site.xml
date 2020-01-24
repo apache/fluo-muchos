@@ -37,7 +37,7 @@
               {%- if not loop.last -%} , {%- endif -%}
            {%- endfor %}</value>
   </property>
-{% if hdfs_ha == False %}  
+{% if hdfs_ha == False %}
   <property>
     <name>dfs.namenode.secondary.http-address</name>
     <value>{{ groups['namenode'][0] }}:50090</value>
@@ -51,34 +51,26 @@
     <name>dfs.nameservices</name>
     <value>{{ nameservice_id }}</value>
   </property>
+{% set nn_list = [] %}
+{% for item in groups['namenode'] %}{{ nn_list.append('nn' + loop.index|string() ) }}{% endfor %}
   <property>
-   <name>dfs.ha.namenodes.{{ nameservice_id }}</name>
-   <value>nn1,nn2</value>
+    <name>dfs.ha.namenodes.{{ nameservice_id }}</name>
+    <value>{{ nn_list | join(',') }}</value>
+  </property>
+{% for nn_host in groups['namenode'] %}{% set nn_id = 'nn' + loop.index|string() %}
+  <property>
+    <name>dfs.namenode.rpc-address.{{ nameservice_id }}.{{ nn_id }}</name>
+    <value>{{ nn_host }}:8020</value>
   </property>
   <property>
-    <name>dfs.namenode.rpc-address.{{ nameservice_id }}.nn1</name>
-    <value>{{ groups['namenode'][0] }}:8020</value>
+    <name>dfs.namenode.http-address.{{ nameservice_id }}.{{ nn_id }}</name>
+    <value>{{ nn_host }}:50070</value>
   </property>
   <property>
-    <name>dfs.namenode.rpc-address.{{ nameservice_id }}.nn2</name>
-    <value>{{ groups['namenode'][1] }}:8020</value>
+    <name>dfs.namenode.https-address.{{ nameservice_id }}.{{ nn_id }}</name>
+    <value>{{ nn_host }}:50071</value>
   </property>
-  <property>
-    <name>dfs.namenode.http-address.{{ nameservice_id }}.nn1</name>
-    <value>{{ groups['namenode'][0] }}:50070</value>
-  </property>
-  <property>
-    <name>dfs.namenode.http-address.{{ nameservice_id }}.nn2</name>
-    <value>{{ groups['namenode'][1] }}:50070</value>
-  </property>
-  <property>
-    <name>dfs.namenode.https-address.{{ nameservice_id }}.nn1</name>
-    <value>{{ groups['namenode'][0] }}:50071</value>
-  </property>
-  <property>
-    <name>dfs.namenode.https-address.{{ nameservice_id }}.nn2</name>
-    <value>{{ groups['namenode'][1] }}:50071</value>
-  </property>
+{% endfor %}
   <property>
     <name>dfs.namenode.shared.edits.dir</name>
     <value>qjournal://{{ journal_quorum }}/{{ nameservice_id }}</value>
@@ -100,7 +92,7 @@
     <value>true</value>
   </property>
 {% endif %}
-    <property>
+  <property>
     <name>dfs.client.read.shortcircuit</name>
     <value>true</value>
   </property>
