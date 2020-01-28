@@ -133,12 +133,12 @@
     UserAssignedIdentityArr: "{{ UserAssignedIdentityInfo.response|default({})|map(attribute='id')|map('regex_replace','^(.*)$','{\"\\1\":{}}')|list}}"
 
 # Retrieve facts about role assignment
-- name: Get role definition id for "Storage Blob Data Contributor"
+- name: Get role definition id for "Storage Blob Data Owner"
   azure_rm_resource_facts:
     resource_group: "{{ resource_group }}"
     provider: Authorization
     resource_type:  roleDefinitions
-    resource_name:  ba92f5b4-2d11-453d-a403-e96b0029c9fe
+    resource_name:  b7e6dc6d-f1e8-4753-8033-0f276bb0955b
     api_version: '2015-07-01'
   register: RoleDefinitionInfo
 
