@@ -27,7 +27,7 @@
          resource_name:  "{{ user_assigned_identity if user_assigned_identity !='' else vmss_name + '-ua-msi' }}"
          api_version: '2018-11-30'
          state: absent
-      when: use_adlsg2 == True
+      when: use_adlsg2
 
     - name: Delete ADLS Gen2 storage Account
       azure_rm_storageaccount:
@@ -37,7 +37,7 @@
          state: absent
       loop:
          "{{ instance_volumes_preferred.split(',') }}"
-      when: use_adlsg2 == True
+      when: use_adlsg2
 
     - name: Delete VM Scale Set
       azure_rm_virtualmachinescaleset:
