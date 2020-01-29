@@ -183,6 +183,10 @@ class BaseConfig(ConfigParser, metaclass=ABCMeta):
             if self.java_product_version() >= 11 and StrictVersion(self.version('accumulo').replace('-SNAPSHOT','')) <= StrictVersion("1.9.3"):
                 exit("ERROR - Java 11 is not supported with Accumulo version '{0}'".format(self.version('accumulo')))
 
+            # validate and fail if we are using ZooKeeper 3.5.5 or greater and Accumulo 1.9.x or less
+            if StrictVersion(self.version('zookeeper')) >= StrictVersion("3.5.5") and StrictVersion(self.version('accumulo').replace('-SNAPSHOT','')) < StrictVersion("1.10.0"):
+                exit("ERROR - ZooKeeper version '{0}' is not supported with Accumulo version '{1}'".format(self.version('zookeeper'), self.version('accumulo')))
+
     @abstractmethod
     def verify_launch(self):
         raise NotImplementedError()
