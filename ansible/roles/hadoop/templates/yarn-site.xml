@@ -80,7 +80,7 @@
     <name>twill.java.reserved.memory.mb</name>
     <value>{{ twill_reserve_mem_mb }}</value>
   </property>
-  {% if cluster_type == 'azure' and use_adlsg2 == True %}
+  {% if cluster_type == 'azure' and use_adlsg2 %}
   <property>
     <name>yarn.application.classpath</name>
     <value>${HADOOP_HOME}/share/hadoop/tools/lib/*,${HADOOP_HOME}/share/hadoop/hdfs/lib/*,${HADOOP_HOME}/share/hadoop/common/lib/*,${HADOOP_HOME}/share/hadoop/yarn/*,${HADOOP_HOME}/share/hadoop/yarn/lib/*,${HADOOP_HOME}/share/hadoop/hdfs/*,${HADOOP_HOME}/share/hadoop/common/*,${HADOOP_HOME}/share/hadoop/mapreduce/*,${HADOOP_HOME}/share/hadoop/mapreduce/lib/*,${HADOOP_HOME}/share/hadoop/client/*</value>

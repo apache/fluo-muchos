@@ -20,4 +20,4 @@
 # tasks file for azure
 - import_tasks: create_vmss.yml
 - import_tasks: create_adlsgen2.yml
-  when: use_adlsg2 == True
+  when: use_adlsg2

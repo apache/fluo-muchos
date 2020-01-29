@@ -26,7 +26,7 @@
       force: yes
     loop:
         "{{ instance_volumes_preferred.split(',') }}"
-    when: cluster_type == 'azure' and use_adlsg2 == True
+    when: cluster_type == 'azure' and use_adlsg2
 
   - name: Create container/Filesystem on ADLS Gen2
     azure_rm_storageblob:
@@ -39,4 +39,4 @@
     until: result is succeeded and (result.changed == False or (result.changed == True and result.container|length > 0))
     loop:
       "{{ instance_volumes_preferred.split(',')  }}"
-    when: cluster_type == 'azure' and use_adlsg2 == True
+    when: cluster_type == 'azure' and use_adlsg2
