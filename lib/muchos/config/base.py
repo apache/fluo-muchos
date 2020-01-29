@@ -73,8 +73,8 @@ _HOST_VAR_DEFAULTS = {
   'worker_data_dirs': None,
   'zookeeper_connect': "{% for host in groups['zookeepers'] %}{{ host }}:2181{% if not loop.last %},{% endif %}{% endfor %}",
   'zookeeper_client_port': '"2181"',
-  'zookeeper_home': '"{{ install_dir }}/zookeeper-{{ zookeeper_version }}"',
-  'zookeeper_tarball': 'zookeeper-{{ zookeeper_version }}.tar.gz',
+  'zookeeper_home': "{% if zookeeper_version.startswith('3.5') %}{{ install_dir }}/apache-zookeeper-{{ zookeeper_version }}-bin{% else %}{{ install_dir }}/zookeeper-{{ zookeeper_version }}{% endif %}",
+  'zookeeper_tarball': "{% if zookeeper_version.startswith('3.5') %}apache-zookeeper-{{ zookeeper_version }}-bin.tar.gz{% else %}zookeeper-{{ zookeeper_version }}.tar.gz{% endif %}",
   'zookeeper_version': None
 }
 
