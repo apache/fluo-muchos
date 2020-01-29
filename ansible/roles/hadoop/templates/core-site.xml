@@ -40,7 +40,7 @@
     <value>{{ zookeeper_connect }}</value>
   </property>
 {% endif %}  
-{% if use_adlsg2 == True %}
+{% if cluster_type == 'azure' and use_adlsg2 == True %}
   <property>
     <name>fs.azure.account.auth.type</name>
     <value>OAuth</value>

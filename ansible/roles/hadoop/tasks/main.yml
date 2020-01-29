@@ -62,4 +62,4 @@
     block: |
        export HADOOP_OPTIONAL_TOOLS=hadoop-azure
        export HADOOP_OPTS="-Dorg.wildfly.openssl.path=/usr/lib64 ${HADOOP_OPTS}"
-  when: hadoop_major_version == '3' and use_adlsg2 == True
+  when: cluster_type == 'azure' and hadoop_major_version == '3' and use_adlsg2 == True

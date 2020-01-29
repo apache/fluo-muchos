@@ -41,7 +41,7 @@ export HADOOP_HOME={{ hadoop_home }}
 export HADOOP_CONF_DIR="$HADOOP_HOME/etc/hadoop"
 
 CLASSPATH="${conf}:${lib}/*:${HADOOP_CONF_DIR}:${ZOOKEEPER_HOME}/*:${HADOOP_HOME}/share/hadoop/client/*"
-{% if use_adlsg2 == True %}
+{% if cluster_type == 'azure' and use_adlsg2 == True %}
 CLASSPATH="${CLASSPATH}:${HADOOP_HOME}/share/hadoop/tools/lib/*"
 CLASSPATH="${CLASSPATH}:${HADOOP_HOME}/share/hadoop/common/lib/*"
 {% endif %}
@@ -54,7 +54,7 @@ JAVA_OPTS=("${ACCUMULO_JAVA_OPTS[@]}"
   '-XX:OnOutOfMemoryError=kill -9 %p'
   '-XX:-OmitStackTraceInFastThrow'
   '-Djava.net.preferIPv4Stack=true'
-{% if use_adlsg2 == True %}
+{% if cluster_type == 'azure' and use_adlsg2 == True %}
   '-Dorg.wildfly.openssl.path=/usr/lib64'
 {% endif %}
   "-Daccumulo.native.lib.path=${lib}/native")
