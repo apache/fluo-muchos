@@ -73,8 +73,9 @@ _HOST_VAR_DEFAULTS = {
   'worker_data_dirs': None,
   'zookeeper_connect': "{% for host in groups['zookeepers'] %}{{ host }}:2181{% if not loop.last %},{% endif %}{% endfor %}",
   'zookeeper_client_port': '"2181"',
-  'zookeeper_home': '"{{ install_dir }}/zookeeper-{{ zookeeper_version }}"',
-  'zookeeper_tarball': 'zookeeper-{{ zookeeper_version }}.tar.gz',
+  'zookeeper_basename': "{% if zookeeper_version.startswith('3.5') %}apache-zookeeper-{{ zookeeper_version }}-bin{% else %}zookeeper-{{ zookeeper_version }}{% endif %}",
+  'zookeeper_home': "{{ install_dir }}/{{ zookeeper_basename }}",
+  'zookeeper_tarball': "{{ zookeeper_basename }}.tar.gz",
   'zookeeper_version': None
 }
 
@@ -181,6 +182,10 @@ class BaseConfig(ConfigParser, metaclass=ABCMeta):
             # See https://github.com/apache/accumulo/issues/958 for details
             if self.java_product_version() >= 11 and StrictVersion(self.version('accumulo').replace('-SNAPSHOT','')) <= StrictVersion("1.9.3"):
                 exit("ERROR - Java 11 is not supported with Accumulo version '{0}'".format(self.version('accumulo')))
+
+            # validate and fail if we are using ZooKeeper 3.5.5 or greater and Accumulo 1.9.x or less
+            if StrictVersion(self.version('zookeeper')) >= StrictVersion("3.5.5") and StrictVersion(self.version('accumulo').replace('-SNAPSHOT','')) < StrictVersion("1.10.0"):
+                exit("ERROR - ZooKeeper version '{0}' is not supported with Accumulo version '{1}'".format(self.version('zookeeper'), self.version('accumulo')))
 
     @abstractmethod
     def verify_launch(self):
