@@ -19,10 +19,10 @@
   shell: curl -sk https://apache.org/mirrors.cgi?as_json | grep preferred | cut -d \" -f 4
   args:
     warn: no
+  register: apache_mirror
   retries: 10
   delay: 10
-  register: apache_mirror
-  failed_when: "'http' not in apache_mirror.stdout"
+  until: "'http' in apache_mirror.stdout"
   changed_when: False
 - name: "check if Accumulo tarball was uploaded to proxy"
   stat: path={{ tarballs_dir }}/{{ accumulo_tarball }}
