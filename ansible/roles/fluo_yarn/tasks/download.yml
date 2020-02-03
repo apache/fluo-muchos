@@ -15,15 +15,7 @@
 # limitations under the License.
 #
 
-- name: "determine best apache mirror to use"
-  shell: curl -sk https://apache.org/mirrors.cgi?as_json | grep preferred | cut -d \" -f 4
-  args:
-    warn: no
-  register: apache_mirror
-  retries: 10
-  delay: 10
-  until: "'http' in apache_mirror.stdout"
-  changed_when: False
+- import_tasks: ../../proxy/tasks/get-asf-mirror.yml
 - name: "check if Fluo YARN tarball was uploaded to proxy"
   stat: path={{ tarballs_dir }}/{{ fluo_yarn_tarball }}
   register: fluo_yarn

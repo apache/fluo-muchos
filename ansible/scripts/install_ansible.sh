@@ -48,3 +48,6 @@ fi
 
 # install lxml as it is a dependency for the maven_artifact Ansible module
 sudo yum install -q -y python-lxml
+
+# install jq to ease JSON parsing on the proxy
+sudo yum install -y jq
