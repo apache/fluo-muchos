@@ -107,9 +107,10 @@ class AzureDeployConfig(BaseConfig):
         return self.get('azure', 'az_logs_key')
 
     @ansible_host_var(name='use_adlsg2')
-    @default(None)
+    @is_valid(is_in([True, False]))
+    @default(False)
     def use_adlsg2(self):
-        return self.get('azure', 'use_adlsg2')
+        return self.getboolean('azure', 'use_adlsg2')
 
     @ansible_host_var(name='azure_tenant_id')
     @default(None)
