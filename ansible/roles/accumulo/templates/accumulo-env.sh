@@ -40,10 +40,29 @@ export MALLOC_ARENA_MAX=${MALLOC_ARENA_MAX:-1}
 export HADOOP_HOME={{ hadoop_home }}
 export HADOOP_CONF_DIR="$HADOOP_HOME/etc/hadoop"
 
-CLASSPATH="${conf}:${lib}/*:${HADOOP_CONF_DIR}:${ZOOKEEPER_HOME}/*:${HADOOP_HOME}/share/hadoop/client/*"
+add_jar_prefix_to_classpath() {
+  for JAR in "$1"*jar; do
+    CLASSPATH="${CLASSPATH}:${JAR}"
+  done
+}
+CLASSPATH="${conf}:${lib}/*:${HADOOP_CONF_DIR}:${ZOOKEEPER_HOME}/*"
+add_jar_prefix_to_classpath "${ZOOKEEPER_HOME}/lib/zookeeper-"
+CLASSPATH="${CLASSPATH}:${HADOOP_HOME}/share/hadoop/client/*"
 {% if cluster_type == 'azure' and use_adlsg2 %}
-CLASSPATH="${CLASSPATH}:${HADOOP_HOME}/share/hadoop/tools/lib/*"
-CLASSPATH="${CLASSPATH}:${HADOOP_HOME}/share/hadoop/common/lib/*"
+add_jar_prefix_to_classpath "${HADOOP_HOME}/share/hadoop/tools/lib/azure-data-lake-store-sdk-"
+add_jar_prefix_to_classpath "${HADOOP_HOME}/share/hadoop/tools/lib/azure-keyvault-core-"
+add_jar_prefix_to_classpath "${HADOOP_HOME}/share/hadoop/tools/lib/hadoop-azure-"
+add_jar_prefix_to_classpath "${HADOOP_HOME}/share/hadoop/tools/lib/azure-storage-"
+add_jar_prefix_to_classpath "${HADOOP_HOME}/share/hadoop/tools/lib/wildfly-openssl-"
+add_jar_prefix_to_classpath "${HADOOP_HOME}/share/hadoop/common/lib/jaxb-api-"
+add_jar_prefix_to_classpath "${HADOOP_HOME}/share/hadoop/common/lib/jaxb-impl-"
+add_jar_prefix_to_classpath "${HADOOP_HOME}/share/hadoop/common/lib/commons-lang3-"
+add_jar_prefix_to_classpath "${HADOOP_HOME}/share/hadoop/common/lib/httpclient-"
+add_jar_prefix_to_classpath "${HADOOP_HOME}/share/hadoop/common/lib/jackson-core-asl-"
+add_jar_prefix_to_classpath "${HADOOP_HOME}/share/hadoop/common/lib/jackson-mapper-asl-"
+{% if not use_hdfs|default(True) %}
+add_jar_prefix_to_classpath "${HADOOP_HOME}/share/hadoop/hdfs/lib/jetty-util-ajax-"
+{% endif %}
 {% endif %}
 export CLASSPATH
 
