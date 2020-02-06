@@ -74,7 +74,7 @@ def default(val):
             except:
                 return val
             else:
-                if res in [None, 0, ''] or isinstance(res, str) and len(res) == 0:
+                if res is None or (isinstance(res, str) and len(res) == 0):
                     return val
                 return res
         return wrapper
