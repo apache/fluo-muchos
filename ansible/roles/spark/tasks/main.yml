@@ -22,3 +22,6 @@
   with_items:
     - spark-defaults.conf
     - spark-env.sh
+- name: "copy spark yarn shuffle jar to hadoop lib"
+  command: cp {{ spark_home }}/yarn/spark-{{ spark_version }}-yarn-shuffle.jar {{ hadoop_home }}/share/hadoop/yarn/lib/ creates={{ hadoop_home }}/share/hadoop/yarn/lib/spark-{{ spark_version }}-yarn-shuffle.jar
+  when: "'spark' in groups"
