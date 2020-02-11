@@ -14,11 +14,20 @@
     force: no
   
 
- #Install filebeat    
-
-- name: "ensure filebeat is installed"
+ #Install filebeat"
   become: true
   yum: name=/tmp/filebeat-oss-7.5.0-x86_64.rpm state=present
+
+
+
+#Copy filebeat modules 
+- name: Copy filebeat modules
+  template:
+    src: "{{ filebeat_modules_sourcedir }}/{{ item }}"
+    dest: /etc/filebeat/modules.d/{{ item | basename | regex_replace('\.j2','') }}
+    backup: true
+  with_items:
+    - "{{ filebeat_modules }}"
 
 # Starting Filebeat
 
@@ -26,6 +35,7 @@
   service:
    name: filebeat
    state: started
+   enabled: true
   become: true
 
   # Download Logstash 
