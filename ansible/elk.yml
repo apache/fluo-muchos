@@ -5,7 +5,6 @@
 - hosts: all:!{{ azure_proxy_host }}
   roles:
   - { role: elasticsearch }
-  - { role: metricbeat }
   - { role: filebeat }
   - { role: kibana }
 
