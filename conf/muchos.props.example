@@ -38,7 +38,7 @@ accumulo_password = secret
 # Software versions (make sure you have a corresponding entry for the checksum in conf/checksums)
 hadoop_version = 3.2.1
 zookeeper_version = 3.5.6
-spark_version = 2.3.2
+spark_version = 2.4.5
 fluo_version = 1.2.0
 fluo_yarn_version = 1.0.0
 accumulo_version = 2.0.0
