@@ -93,6 +93,7 @@ class Ec2Cluster(ExistingCluster):
         return group_id
 
     def delete_security_group(self):
+        
         sg_id = None
         ec2 = boto3.client('ec2')
         try:
@@ -234,12 +235,12 @@ class Ec2Cluster(ExistingCluster):
             if not self.config.has_option('ec2', 'security_group_id'):
                 self.delete_security_group()
 
-    #def get
+    
             if isfile(self.config.hosts_path):
                 os.remove(self.config.hosts_path)
                 print("Removed hosts file at ", self.config.hosts_path)
-        else:
-            print("Aborted termination")
+            else:
+                print("Aborted termination")
 
 
 class Ec2ClusterTemplate(Ec2Cluster):

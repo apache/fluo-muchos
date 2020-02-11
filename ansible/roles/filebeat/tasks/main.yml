@@ -28,7 +28,7 @@
    state: started
   become: true
 
-# Dowload Logstash 
+  # Download Logstash 
 - name: "download logstash rpm"
   get_url: 
   args:
@@ -43,10 +43,40 @@
   become: true
   yum: name=/tmp/logstash-oss-7.5.0.rpm state=present
 
-# Starting Logstash
 
-- name: Starting Logstash
+#Make Logstash conf.d  directory 
+- name: Make Logstash Conf.d Directory 
+  file:
+   path: /etc/logstash/conf.d/
+   state: directory
+  become: true
+
+- name: Create Logstash Configuration File 
+  template: 
+    src: "{{ item }}.j2"
+    dest: "/etc/logstash/conf.d/{{ item }}"
+    owner: root
+    group: root
+  become: true
+  with_items: 
+    - elasticsearch-output.conf
+    - syslog-input.conf
+
+- name: Create Logstash filter
+  template: 
+    src: "{{ item }}"
+    dest: "/etc/logstash/conf.d/{{item}}"
+    owner: root
+    group: root
+  become: true
+  with_items:
+    - logstash.conf
+
+# Restart Logstash
+
+- name: Restarting logstash
   service:
    name: logstash
-   state: started
+   state: restarted
   become: true
+
