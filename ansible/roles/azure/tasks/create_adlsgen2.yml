@@ -110,7 +110,7 @@
 
 # Retrieving  facts about User Assigned Identity 
 - name: Get facts for User Assigned Identity
-  azure_rm_resource_facts:
+  azure_rm_resource_info:
     resource_group: "{{ resource_group }}"
     provider: ManagedIdentity
     resource_type: userAssignedIdentities
@@ -134,7 +134,7 @@
 
 # Retrieve facts about role assignment
 - name: Get role definition id for "Storage Blob Data Owner"
-  azure_rm_resource_facts:
+  azure_rm_resource_info:
     resource_group: "{{ resource_group }}"
     provider: Authorization
     resource_type:  roleDefinitions
@@ -143,25 +143,25 @@
   register: RoleDefinitionInfo
 
 # Retrieve storage acount informationn. 
-- name: Check if the storage accounts is visible
-  azure_rm_storageaccount_facts:
+- name: Check if the storage accounts are visible
+  azure_rm_storageaccount_info:
         resource_group: "{{ resource_group }}"
         name:   "{{ item.split('@')[1].split('.')[0] }}"
   register: StorageAccountsInfo
   retries: 20
   delay: 15
-  until:  StorageAccountsInfo.storageaccounts|sum(start=[])|map(attribute='id')|join('') is defined
+  until: StorageAccountsInfo.storageaccounts | map(attribute='id') | join('') | length > 0
   loop:
      "{{ InstanceVolumes }}"
 
 # Retrieve storage accounts id  creeated -- Used for account assignments
 - name: Get the id of storage accounts created
   set_fact:
-    StorageAccountsId: "{{StorageAccountsInfo.results|map(attribute='ansible_facts')|map(attribute='azure_storageaccounts')|sum(start=[])|map(attribute='id')|list|unique }}"
+    StorageAccountsId: "{{StorageAccountsInfo.results | sum(attribute='storageaccounts', start=[]) | map(attribute='id') | list | unique }}"
   
 # Adding this module since role aassignment fails if it already exists.
 - name:  Get facts about role assignment
-  azure_rm_roleassignment_facts:
+  azure_rm_roleassignment_info:
      scope: "{{ item }}"
      assignee: "{{ UserAssignedIdentityInfo.response|map(attribute='properties')|map(attribute='principalId')|list|join('') }}"
      role_definition_id: "{{ RoleDefinitionInfo.response|map(attribute='id')|list|join('') }}"
@@ -200,8 +200,8 @@
     resource_group: "{{ resource_group }}" 
     storage_account_name:  "{{ item.split('@')[1].split('.')[0] }}"
     container: "{{ item.split('@')[0].split('://')[1] }}"
-  retries: 30
-  delay: 15
+  retries: 20
+  delay: 30
   register: createfsresult            
   until: createfsresult is succeeded and (createfsresult.changed == False or (createfsresult.changed == True and createfsresult.container|length > 0))
   loop:
