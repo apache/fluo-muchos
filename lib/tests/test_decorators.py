@@ -57,6 +57,21 @@ class DecoratedThing(object):
         return None
 
     @property
+    @decorators.default(True)
+    def default_boolean_val_True(self):
+        return True
+
+    @property
+    @decorators.default(True)
+    def default_boolean_val_False(self):
+        return False
+
+    @property
+    @decorators.default(True)
+    def default_missing_boolean_val(self):
+        return None
+
+    @property
     @decorators.required
     def required_val(self):
         return 'required_val'
@@ -74,41 +89,44 @@ class DecoratorTests(TestCase):
     def test_decorators(self):
         thing = DecoratedThing()
 
-        all_host_vars = decorators.get_ansible_vars('host')
-        all_play_vars = decorators.get_ansible_vars('play')
-        all_extra_vars = decorators.get_ansible_vars('extra')
+        actual_host_vars = decorators.get_ansible_vars('host', type(thing))
+        actual_play_vars = decorators.get_ansible_vars('play', type(thing))
+        actual_extra_vars = decorators.get_ansible_vars('extra', type(thing))
 
         expected_host_vars = [
-            decorators._ansible_var('host_var1', 'DecoratedThing', 'host_var1'),
-            decorators._ansible_var('named_host_var2', 'DecoratedThing', 'host_var2')
+            decorators._ansible_var('host_var1', 'DecoratedThing', 'host_var1', 'tests.test_decorators'),
+            decorators._ansible_var('named_host_var2', 'DecoratedThing', 'host_var2', 'tests.test_decorators')
         ]
 
         expected_play_vars = [
-            decorators._ansible_var('play_var1', 'DecoratedThing', 'play_var1'),
-            decorators._ansible_var('named_play_var2', 'DecoratedThing', 'play_var2')
+            decorators._ansible_var('play_var1', 'DecoratedThing', 'play_var1', 'tests.test_decorators'),
+            decorators._ansible_var('named_play_var2', 'DecoratedThing', 'play_var2', 'tests.test_decorators')
         ]
 
         expected_extra_vars = [
-            decorators._ansible_var('extra_var1', 'DecoratedThing', 'extra_var1'),
-            decorators._ansible_var('named_extra_var2', 'DecoratedThing', 'extra_var2')
+            decorators._ansible_var('extra_var1', 'DecoratedThing', 'extra_var1', 'tests.test_decorators'),
+            decorators._ansible_var('named_extra_var2', 'DecoratedThing', 'extra_var2', 'tests.test_decorators')
         ]
 
         self.assertEquals(
-            set([str(v) for v in expected_host_vars]) - set([str(v) for v in all_host_vars]),
-            set()
+            set([str(v) for v in expected_host_vars]),
+            set([str(v) for v in actual_host_vars])
         )
 
         self.assertEquals(
-            set([str(v) for v in expected_play_vars]) - set([str(v) for v in all_play_vars]),
-            set()
+            set([str(v) for v in expected_play_vars]),
+            set([str(v) for v in actual_play_vars])
         )
 
         self.assertEquals(
-            set([str(v) for v in expected_extra_vars]) - set([str(v) for v in all_extra_vars]),
-            set()
+            set([str(v) for v in expected_extra_vars]),
+            set([str(v) for v in actual_extra_vars])
         )
 
         self.assertEquals(thing.default_val, 'default_val')
+        self.assertEquals(thing.default_boolean_val_True, True)
+        self.assertEquals(thing.default_boolean_val_False, False)
+        self.assertEquals(thing.default_missing_boolean_val, True)
         self.assertEquals(thing.required_val, 'required_val')
         with self.assertRaises(decorators.ConfigMissingError):
             thing.missing_required_val
