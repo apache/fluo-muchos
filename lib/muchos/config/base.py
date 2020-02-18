@@ -164,7 +164,7 @@ class BaseConfig(ConfigParser, metaclass=ABCMeta):
                         # the cluster specific config
                         filter(lambda t: t.class_name.lower() in f,
                         # get all ansible vars of var_type
-                        get_ansible_vars(var_type))}
+                        get_ansible_vars(var_type, type(self)))}
 
     @abstractmethod
     def verify_config(self, action):

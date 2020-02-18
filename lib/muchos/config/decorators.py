@@ -17,6 +17,7 @@
 
 from collections.abc import Iterable
 from functools import wraps
+from pydoc import locate
 
 
 # struct to hold information about ansible vars defined via decorators.
@@ -25,10 +26,16 @@ from functools import wraps
 # property_name indicates the class property/function where the variable was
 #               defined
 class _ansible_var(object):
-    def __init__(self, var_name, class_name, property_name):
+    def __init__(self, var_name, class_name, property_name, module_name):
         self.var_name = var_name
         self.class_name = class_name
         self.property_name = property_name
+        self.module_name = module_name
+
+    def __str__(self):
+        return 'var_name={}, class_name={}, property_name={}, module_name={}'.format(
+            self.var_name, self.class_name, self.property_name, self.module_name
+        )
 
 # each entry of _ansible_vars will contain a list of _ansible_var instances
 _ansible_vars = dict(
@@ -37,8 +44,11 @@ _ansible_vars = dict(
     extra=[]
 )
 
-def get_ansible_vars(var_type):
-    return _ansible_vars.get(var_type)
+def get_ansible_vars(var_type, class_in_scope):
+    # return variables for the complete class hierarchy
+    return list(filter(lambda v:
+        issubclass(class_in_scope, locate(v.module_name + "." + v.class_name)),
+        _ansible_vars.get(var_type)))
 
 # ansible hosts inventory variables
 def ansible_host_var(name=None):
@@ -57,7 +67,8 @@ def ansible_var_decorator(var_type, name):
         ansible_var = _ansible_var(
             var_name=name if isinstance(name, str) else func.__name__,
             class_name=func.__qualname__.split('.')[0],
-            property_name=func.__name__)
+            property_name=func.__name__,
+            module_name=func.__module__)
         _ansible_vars[var_type].append(ansible_var)
         return func
 
@@ -108,4 +119,3 @@ def is_valid(validators):
 class ConfigMissingError(Exception):
     def __init__(self, name):
         super(ConfigMissingError, self).__init__("{} is missing from the configuration".format(name))
-
