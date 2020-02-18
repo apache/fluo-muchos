@@ -17,7 +17,14 @@
 # limitations under the License.
 #
 
-# tasks file for azure
+- name: ensure Ansible version is >= 2.9 if ADLS Gen2 is to be used
+  assert:
+    quiet: yes
+    that: ansible_version.full is version('2.9.0', '>=')
+    fail_msg: "Ansible 2.9 or above is required for using Azure ADLS Gen2 in Muchos.
+    Update it using pip install --upgrade ansible[azure]"
+  when: use_adlsg2
+
 - import_tasks: create_vmss.yml
 - import_tasks: create_adlsgen2.yml
   when: use_adlsg2

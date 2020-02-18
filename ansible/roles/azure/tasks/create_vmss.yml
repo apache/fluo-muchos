@@ -78,7 +78,10 @@
     name: "{{ azure_proxy_host }}-nic"
     virtual_network: "{{ vnet }}"
     subnet: "{{ subnet }}"
-    public_ip_name: "{{ azure_proxy_host }}-ip"
+    ip_configurations:
+      - name: default
+        public_ip_address_name: "{{ azure_proxy_host }}-ip"
+        primary: True
     security_group: "{{ azure_proxy_host }}-nsg"
   when: azure_proxy_host is defined and azure_proxy_host != '' and azure_proxy_host != None
 
