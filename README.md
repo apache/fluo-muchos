@@ -72,6 +72,8 @@ sudo yum install azure-cli-2.0.69-1.el7.x86_64.rpm
 * Install [Ansible for Azure](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/ansible-install-configure) within
   the Python virtual environment by using `pip install ansible[azure]`
 
+When running Muchos under Ubuntu 18.04, checkout these [tips](docs/azure-ubuntu-1804.md).
+
 ## Quickstart
 
 The following commands will install Muchos, launch a cluster, and setup/run Accumulo:
