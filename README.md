@@ -169,6 +169,10 @@ Under the `azure` section, edit following values as per your configuration
 * `use_adlsg2` to use Azure Data Lake Storage(ADLS) Gen2 as datastore for Accumulo
   [ADLS Gen2 Doc](https://docs.microsoft.com/en-us/azure/storage/blobs/data-lake-storage-introduction).
   [Setup ADLS Gen2 as datastore for Accumulo](https://accumulo.apache.org/blog/2019/10/15/accumulo-adlsgen2-notes.html).
+* `az_oms_integration_needed` to implement Log Analytics workspace, Dashboard & Azure Monitor Workbooks
+  [Create Log Analytics workspace](https://docs.microsoft.com/en-us/azure/azure-monitor/learn/quick-create-workspace).
+  [Create and Share dashboards](https://docs.microsoft.com/en-us/azure/azure-portal/azure-portal-dashboards).
+  [Azure Monitor Workbooks](https://docs.microsoft.com/en-us/azure/azure-monitor/platform/workbooks-overview).
 
 Within Azure the `nodes` section is auto populated with the hostnames and their default roles.
 

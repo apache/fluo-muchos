@@ -164,7 +164,7 @@ principal_id =
 # Workspace ID and key must be updated to enable this.
 # For details on how to get a workspace ID and key, see the link below
 # https://docs.microsoft.com/en-us/azure/azure-monitor/learn/quick-collect-linux-computer#obtain-workspace-id-and-key
-az_omsIntegrationNeeded = False
+az_oms_integration_needed = False
 #az_logs_id = 
 #az_logs_key = 
 

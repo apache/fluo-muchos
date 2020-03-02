@@ -90,11 +90,11 @@ class AzureDeployConfig(BaseConfig):
     def azure_fileshare_password(self):
         return self.get('azure', 'azure_fileshare_password')
 
-    @ansible_host_var(name='az_omsIntegrationNeeded')
+    @ansible_host_var(name='az_oms_integration_needed')
     @default(False)
     @is_valid(is_in([True, False]))
     def omsIntegrationNeeded(self):
-        return self.getboolean('azure', 'az_omsIntegrationNeeded')
+        return self.getboolean('azure', 'az_oms_integration_needed')
 
     @ansible_host_var(name='az_logs_id')
     @default(None)

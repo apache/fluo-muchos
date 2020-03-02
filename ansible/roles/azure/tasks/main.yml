@@ -28,3 +28,5 @@
 - import_tasks: create_vmss.yml
 - import_tasks: create_adlsgen2.yml
   when: use_adlsg2
+- import_tasks: create_log_analytics_ws.yml
+  when: az_oms_integration_needed and (az_logs_id is not defined or az_logs_id == '' or az_logs_id == None)
