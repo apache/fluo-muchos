@@ -17,3 +17,7 @@ sudo apt install python3-pip
 sudo pip3 install ansible[azure]
 ```
 
+A virtual python environment is not needed in Ubuntu.  The instructions that
+mention that are targeted for Centos 7.  The version of Python 3 and pip3 that
+ship with Ubuntu 18.04 suffice.
+
