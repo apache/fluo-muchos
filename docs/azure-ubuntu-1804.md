@@ -6,7 +6,7 @@ wish to run Muchos under Ubuntu 18.04 and have it set up an Azure cluster, then
 the following steps can get you on your way.
 
 ```bash
-# Install azure cli.  See the Azure documentation.
+# Install Azure CLI.  See the Azure documentation.
 # https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-apt?view=azure-cli-latest
 
 # Install Ansible Azure for Python 3.  The main reason these tips were written
