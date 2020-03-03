@@ -15,17 +15,16 @@
 # limitations under the License.
 #
 
-- name: "ensure zookeeper data dir exists"
-  file: path={{ default_data_dirs[0] }}/zookeeper state=directory
-- name: "ensure myid file is set"
-  template: src=roles/zookeeper/templates/myid dest={{ default_data_dirs[0] }}/zookeeper/myid
-- name: Check if Zookeeper is running
-  shell: jps | grep "QuorumPeerMain" | grep -v grep
+- name: Check if JobHistoryServer is running
+  shell: jps | grep "JobHistoryServer" | grep -v grep
   ignore_errors: yes
   changed_when: false
-  register: zookeeper_status
-- name: "start zookeeper"
-  shell: "{{ zookeeper_home }}/bin/zkServer.sh start"
-  register: zk_start
-  changed_when: "'STARTED' in zk_start.stdout"
-  when: zookeeper_status.rc == 1
+  register: jhs_status
+
+- name: Start Job History Server on Hadoop 3.x
+  command: "nohup {{ hadoop_home }}/bin/mapred --daemon start historyserver"
+  when: jhs_status.rc == 1 and hadoop_major_version == '3'
+
+- name: Start Job History Server on Hadoop 2.x
+  command: "nohup {{ hadoop_home }}/sbin/mr-jobhistory-daemon.sh start historyserver"
+  when: jhs_status.rc == 1 and hadoop_major_version == '2'

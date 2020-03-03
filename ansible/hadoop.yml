@@ -46,3 +46,4 @@
 - hosts: resourcemanager
   tasks:
     - import_tasks: roles/hadoop/tasks/start-yarn.yml
+    - import_tasks: roles/hadoop/tasks/start-jhs.yml
