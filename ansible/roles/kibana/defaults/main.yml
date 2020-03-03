@@ -15,4 +15,4 @@
 # limitations under the License.
 #
 
-kibana_rpm: kibana-oss-7.4.2-x86_64.rpm
+kibana_rpm: kibana-oss-7.6.0-x86_64.rpm

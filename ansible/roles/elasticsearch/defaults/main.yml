@@ -15,5 +15,5 @@
 # limitations under the License.
 #
 
-elasticsearch_rpm: elasticsearch-oss-7.4.2-x86_64.rpm
-elasticsearch_sha512: 192dd929d964ee115eaca5a330bd58891421e0e6569970168154945665a73d9b466a7e9be8e9cd058fd046754b47caf9930f8a55e8c1ff94c81e769517cc9312 
+elasticsearch_rpm: elasticsearch-oss-7.6.0-x86_64.rpm
+elasticsearch_sha512: 5271c54f8a72afed605118953c530b2de8bfd7902fe2c053aa470cf66f8418e40eb759d75ef89c462edd8c6db8d7c46a754fca7afacedd032bdea67ea6d07404  

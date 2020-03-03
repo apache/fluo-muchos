@@ -29,8 +29,9 @@
 - name: Defining the default logstash host in Filebeat.yml 
   lineinfile:
    destfile: /etc/filebeat/filebeat.yml
-   regexp: '#hosts: ["localhost:5044"]'
-   line: 'hosts: ["localhost:5044"]'
+   insertafter: '# The Logstash hosts'
+   regexp: '  #hosts: ["localhost:5044"]'
+   line: '  hosts: ["localhost:5044"]'
   become: true
 
 
