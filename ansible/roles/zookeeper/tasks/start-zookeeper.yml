@@ -20,7 +20,7 @@
 - name: "ensure myid file is set"
   template: src=roles/zookeeper/templates/myid dest={{ default_data_dirs[0] }}/zookeeper/myid
 - name: Check if Zookeeper is running
-  shell: jps | grep "QuorumPeerMain" | grep -v grep
+  shell: jps | grep "QuorumPeerMain" 
   ignore_errors: yes
   changed_when: false
   register: zookeeper_status

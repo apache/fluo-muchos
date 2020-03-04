@@ -16,7 +16,7 @@
 #
 
 - name: Check if JobHistoryServer is running
-  shell: jps | grep "JobHistoryServer" | grep -v grep
+  shell: jps | grep "JobHistoryServer" 
   ignore_errors: yes
   changed_when: false
   register: jhs_status
