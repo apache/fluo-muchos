@@ -22,9 +22,19 @@ base_dir=$( cd "$( dirname "$bin" )" && pwd )
 
 set -e
 
+# get the release id
+if [ -f /etc/os-release ]; then
+  . /etc/os-release
+  ID=$ID
+fi
+
 # enable yum epel repo
-is_installed_epel_release="rpm -q --quiet epel-release"
-install_epel_release="sudo yum install -q -y epel-release"
+if [ $ID = "rhel" ]; then
+  is_installed_epel_release="rpm -q --quiet epel-release"
+else
+  install_epel_release="sudo yum install -q -y epel-release"
+fi
+install_epel_release="sudo yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm"
 for i in {1..10}; do ($is_installed_epel_release || $install_epel_release) && break || sleep 15; done
 
 # install ansible
@@ -47,7 +57,11 @@ if [ ! -h /etc/ansible/hosts ]; then
 fi
 
 # install lxml as it is a dependency for the maven_artifact Ansible module
-sudo yum install -q -y python-lxml
+if [ $ID = "rhel" ]; then
+  sudo yum install -q -y python3-lxml
+else
+  sudo yum install -q -y python-lxml
+fi
 
 # install jq to ease JSON parsing on the proxy
 sudo yum install -y jq

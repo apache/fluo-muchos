@@ -15,12 +15,25 @@
 # limitations under the License.
 #
 
-- name: "enable epel yum repo"
-  yum: name=epel-release state=present
-  register: epelresult
-  retries: 10
-  delay: 15
-  until: epelresult is not failed
+- name: "enable epel yum repo (Red Hat)"
+  block:
+    - name: "check if epel is installed"
+      shell: "rpm -q --quiet epel-release"
+      register: epel_installed
+      failed_when: epel_installed.rc == 2
+    - name: "install epel on Red Hat"
+      shell: "sudo yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm"
+      when: epel_installed.rc == 1
+  when: ansible_distribution == "RedHat"
+- name: "enable epel yum repo (CentOS)"
+  block:
+    - name: "enable epel yum repo (CentOS)"
+      yum: name=epel-release state=present
+      register: epelresult
+      retries: 10
+      delay: 15
+      until: epelresult is not failed
+  when: ansible_distribution == "CentOS"
 - name: "install packages"
   yum:
     name:
@@ -39,6 +52,16 @@
   retries: 10
   delay: 15
   until: yumresult is not failed
+- name: "enable SELinux (Red Hat)"
+  block:
+    - name: "check if container-selinux is installed"
+      shell: "rpm -q --quiet container-selinux"
+      register: container_selinux_installed
+      failed_when: container_selinux_installed.rc == 2
+    - name: "install container-selinux"
+      shell: "sudo yum -y install http://mirror.centos.org/centos/7/extras/x86_64/Packages/container-selinux-2.107-1.el7_6.noarch.rpm"
+      when: container_selinux_installed.rc == 1
+  when: ansible_distribution == "RedHat"
 - name: "configure node shutdown"
   shell: shutdown +{{ shutdown_delay_minutes }} &> {{ user_home }}/.shutdown creates={{ user_home }}/.shutdown
   when: shutdown_delay_minutes > 0
