@@ -30,11 +30,11 @@ fi
 
 # enable yum epel repo
 if [ $ID = "rhel" ]; then
-  is_installed_epel_release="rpm -q --quiet epel-release"
+  install_epel_release="sudo yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm"
 else
   install_epel_release="sudo yum install -q -y epel-release"
 fi
-install_epel_release="sudo yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm"
+ is_installed_epel_release="rpm -q --quiet epel-release"
 for i in {1..10}; do ($is_installed_epel_release || $install_epel_release) && break || sleep 15; done
 
 # install ansible
