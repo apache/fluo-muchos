@@ -23,10 +23,6 @@
 
 <configuration>
   <property>
-    <name>yarn.resourcemanager.hostname</name>
-    <value>{{ groups['resourcemanager'][0] }}</value>
-  </property>
-  <property>
     <name>yarn.nodemanager.local-dirs</name>
     <value>{% for dir in worker_data_dirs -%}
               {{ dir }}/hadoop/yarn/local
@@ -87,10 +83,6 @@
   </property>
   {% endif %}
   <property>
-    <name>yarn.resourcemanager.webapp.address</name>
-    <value>{{ groups['resourcemanager'][0] }}:8088</value>
-  </property>
-  <property>
     <name>yarn.log.server.url</name>
     <value>http://{{ groups['resourcemanager'][0] }}:19888/jobhistory/logs</value>
   </property>
@@ -134,4 +126,114 @@
     <name>yarn.nodemanager.remote-app-log-dir-suffix</name>
     <value>logs</value>
   </property>
+
+{% if hdfs_ha %}
+<!-- RM HA Configurations -->
+
+  <property>
+    <name>yarn.resourcemanager.ha.enabled</name>
+    <value>true</value>
+  </property>
+
+  <property>
+    <name>yarn.resourcemanager.cluster-id</name>
+    <value>yarn-cluster</value>
+  </property>
+
+{% set rm_list = [] %}
+{% for item in groups['resourcemanager'] %}{{ rm_list.append('rm' + loop.index|string() ) }}{% endfor %}
+  <property>
+    <name>yarn.resourcemanager.ha.rm-ids</name>
+    <value>{{ rm_list | join(',') }}</value>
+  </property>
+
+{% for rm_host in groups['resourcemanager'] %}{% set rm_id = 'rm' + loop.index|string() %}
+  <property>
+    <name>yarn.resourcemanager.hostname.{{ rm_id }}</name>
+    <value>{{ rm_host }}</value>
+  </property>
+
+  <property>
+    <name>yarn.resourcemanager.webapp.address.{{ rm_id }}</name>
+    <value>{{ rm_host }}:8088</value>
+  </property>
+
+  <property>
+    <name>yarn.resourcemanager.webapp.https.address.{{ rm_id }}</name>
+    <value>{{ rm_host }}:8090</value>
+  </property>
+{% endfor %}
+
+{% if hadoop_major_version == '2' %}
+  <property>
+    <name>yarn.resourcemanager.zk-address</name>
+    <value>{{ zookeeper_connect }}</value>
+  </property>
+{% elif hadoop_major_version == '3' %}
+  <property>
+    <name>hadoop.zk.address</name>
+    <value>{{ zookeeper_connect }}</value>
+  </property>
+{% endif %}
+
+<!-- Below properties required for work-preserving RM restarts -->
+
+  <property>
+    <name>yarn.resourcemanager.recovery.enabled</name>
+    <value>true</value>
+  </property>
+
+  <property>
+    <name>yarn.resourcemanager.zk-state-store.parent-path</name>
+    <value>/rmstore</value>
+  </property>
+
+  <property>
+    <name>yarn.resourcemanager.store.class</name>
+    <value>org.apache.hadoop.yarn.server.resourcemanager.recovery.ZKRMStateStore</value>
+  </property>
+
+  <property>
+    <name>yarn.resourcemanager.work-preserving-recovery.enabled</name>
+    <value>true</value>
+  </property>
+
+  <property>
+    <name>yarn.resourcemanager.work-preserving-recovery.scheduling-wait-ms</name>
+    <value>10000</value>
+  </property>
+
+  <property>
+    <name>yarn.resourcemanager.zk-num-retries</name>
+    <value>1000</value>
+  </property>
+
+  <property>
+    <name>yarn.resourcemanager.zk-retry-interval-ms</name>
+    <value>1000</value>
+  </property>
+
+  <property>
+    <name>yarn.client.failover-proxy-provider</name>
+    <value>org.apache.hadoop.yarn.client.ConfiguredRMFailoverProxyProvider</value>
+  </property>
+
+  <property>
+    <name>yarn.resourcemanager.ha.automatic-failover.zk-base-path</name>
+    <value>/yarn-leader-election</value>
+  </property>
+
+{% else %}
+
+  <property>
+    <name>yarn.resourcemanager.webapp.address</name>
+    <value>{{ groups['resourcemanager'][0] }}:8088</value>
+  </property>
+
+  <property>
+    <name>yarn.resourcemanager.hostname</name>
+    <value>{{ groups['resourcemanager'][0] }}</value>
+  </property>
+{% endif %}
+
 </configuration>
