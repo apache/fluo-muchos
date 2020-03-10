@@ -245,7 +245,7 @@
 - name: Assign Accumulo master, HDFS HA components cluster roles to the second node of the cluster
   lineinfile:
     path: "{{ deploy_path }}/conf/muchos.props"
-    line: "{{ item }} = zookeeper,metrics,journalnode,namenode,zkfc,accumulomaster"
+    line: "{{ item }} = zookeeper,metrics,journalnode,namenode,zkfc,accumulomaster,resourcemanager"
   with_items: "{{ instances_dict | json_query('[1].value') }}"
   when: hdfs_ha
 
