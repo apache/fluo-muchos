@@ -15,5 +15,5 @@
 # limitations under the License.
 #
 
-filebeat_rpm: filebeat-oss-7.5.0-x86_64.rpm
-logstash_rpm: logstash-oss-7.5.0.rpm
+filebeat_rpm: filebeat-oss-7.6.0-x86_64.rpm
+logstash_rpm: logstash-oss-7.6.0.rpm

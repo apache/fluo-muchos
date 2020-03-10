@@ -1,0 +1,61 @@
+ # Download Logstash 
+- name: "download logstash rpm"
+  get_url: 
+  args:
+    url: https://artifacts.elastic.co/downloads/logstash/logstash-oss-7.6.0.rpm
+    dest: /tmp/logstash-oss-7.6.0.rpm
+    force: no
+  
+
+ #Install Logstash    
+
+- name: "ensure logstash is installed"
+  become: true
+  yum: name=/tmp/logstash-oss-7.6.0.rpm state=present
+
+
+#Make Logstash conf.d  directory 
+- name: Make Logstash Conf.d Directory 
+  file:
+   path: /etc/logstash/conf.d/
+   state: directory
+  become: true
+
+- name: Create Logstash Configuration File 
+  template: 
+    src: "{{ item }}.j2"
+    dest: "/etc/logstash/conf.d/{{ item }}"
+    owner: root
+    group: root
+  become: true
+  with_items: 
+    - pipeline.conf
+
+- name: Install logstash input configuration files 
+  template: src = logstash_input.conf dest=/etc/logstash/conf.d/{{ item }}.conf
+  with_dict: logstash.config.file_inputs
+  notify: Restart Logstash
+
+- name: Install logstash output configuration files 
+  template: src = logstash_output.conf dest=/etc/logstash/conf.d/{{ item }}.conf
+  notify: Restart Logstash 
+
+
+
+# - name: Create Logstash filter
+#   template: 
+#     src: "{{ item }}"
+#     dest: "/etc/logstash/conf.d/{{item}}"
+#     owner: root
+#     group: root
+#   become: true
+#   with_items:
+#     - logstash.conf
+
+# Restart Logstash
+
+- name: Restarting logstash
+  service:
+   name: logstash
+   state: restarted
+  become: true
