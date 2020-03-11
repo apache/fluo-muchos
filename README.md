@@ -307,6 +307,8 @@ Before enabling HA, it is strongly recommended you read the Apache doc for [HDFS
 
 Also in the `[nodes]` section of [muchos.props] ensure the `journalnode` and `zkfc` service are configured to run.
 
+When `hdfs_ha` is `True` it also enables the ability to have HA resource managers for YARN.  To utilize this feature, specify `resourcemanager` for multiple leader nodes in the `[nodes]` section.
+
 ## Terminating your cluster
 
 If you launched your cluster, run the following command to terminate your cluster. WARNING - All
