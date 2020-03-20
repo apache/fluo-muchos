@@ -157,13 +157,15 @@ Under the `general` section, edit following values as per your configuration
 * `cluster_user` should be set to the name of the administrative user
 * `proxy_hostname` (optional) is the name of the machine which has access to the cluster VNET
 
-Under the `azure` section, edit following values as per your configuration
+Under the `azure` section, edit following values as per your configuration:
 * `resource_group` to provide the resource-group name for the cluster deployment. A new resource group with
   this name will be created if it doesn't already exist
 * `vnet` to provide the name of the VNET that your cluster nodes should use. A new VNET with this name will be
   created if it doesn't already exist
 * `subnet` to provide a name for the subnet within which the cluster resources will be deployed
 * `numnodes` to change the cluster size in terms of number of nodes deployed
+* `data_disk_count` to specify how many persistent data disks are attached to each node and will be used by HDFS.
+   If you would prefer to use ephemeral / storage for Azure clusters, please follow [these steps](docs/azure-ephemeral-disks.md).
 * `vm_sku` to specify the VM size to use. You can choose from the
   [available VM sizes](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/sizes-general).
 * `use_adlsg2` to use Azure Data Lake Storage(ADLS) Gen2 as datastore for Accumulo

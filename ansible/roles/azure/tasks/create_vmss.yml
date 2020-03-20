@@ -114,7 +114,7 @@
 - name: Create luns dictionary
   set_fact:
     luns_dict: "{{ luns_dict | default ([]) + [{ 'lun': item, 'disk_size_gb': disk_size_gb , 'caching': None } ] }}"
-  with_sequence: start=0 end={{numdisks-1}}
+  with_sequence: start=0 end={{ data_disk_count-1 if data_disk_count > 0 else 0 }}
 
 - name: Set single placement group to correct value
   set_fact:
@@ -146,7 +146,7 @@
       publisher: OpenLogic
       sku: 7.5
       version: latest
-    data_disks: "{{ luns_dict }}"
+    data_disks: "{{ luns_dict if data_disk_count > 0 else omit }}"
   tags: create_vmss
 
 # SECTION 4: Automatically populate entries in the hosts file and in the muchos.props file, based on the VMSS node details
