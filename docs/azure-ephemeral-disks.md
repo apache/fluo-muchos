@@ -1,10 +1,12 @@
 Using ephemeral storage within clusters deployed by Muchos for Azure
 --------------------------------------------------------------------
 
-By default for Azure based clusters, Muchos will create 3 data disks, each of size 128GiB, attached to each VM. This provides
+By default for Azure based clusters, Muchos will create 3 data disks, each of size 128GiB, attached to each VM. These
+[managed disks](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/managed-disks-overview) provide
 persistent storage which ensures that the data in HDFS is safe and consistent even if the VMs are deallocated (stopped).
-However, certain cases, in case you'd like to use only the ephemeral / temporary disk storage for HDFS, you first need to 
-understand that using temp storage will result in lost data across VM deallocate - start cycles. If that behavior is acceptable 
+
+However, if you'd like to use only the ephemeral / temporary disk storage for HDFS, you first need to understand that
+using temp storage will result in lost data across VM deallocate - start cycles. If that behavior is acceptable
 for your dev/test scenario, there are two options available to use ephemeral storage within Azure:
 * Use the temporary SSD disk which is available on most VM types. This tends to be smaller in size. Refer to the 
 [Azure VM sizes](https://docs.microsoft.com/en-us/azure/virtual-machines/dv3-dsv3-series) page for details on temp storage sizes
