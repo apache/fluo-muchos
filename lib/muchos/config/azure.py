@@ -54,21 +54,58 @@ class AzureDeployConfig(BaseConfig):
     def data_dirs_common(self, nodeType):
         data_dirs = []
 
-        num_disks = int(self.get("azure", "numdisks"))
+        num_disks = self.data_disk_count()
+
+        # Check if using temp storage (non-NVME) for HDFS
+        if num_disks == 0 and self.mount_root() == "/mnt/resource":
+            data_dirs.append(self.mount_root())
+            return data_dirs
+
+        # Check if using Lsv2 NVME temp storage for HDFS
+        lsv2_vm_disk_map = { "Standard_L8s_v2": 1,
+            "Standard_L16s_v2": 2,
+            "Standard_L32s_v2": 4,
+            "Standard_L48s_v2": 6,
+            "Standard_L64s_v2": 8,
+            "Standard_L80s_v2": 10}
+
+        if num_disks == 0 and self.vm_sku() in lsv2_vm_disk_map.keys():
+            # pretend that we have N data disks - in this case those are NVME temp disks
+            num_disks = lsv2_vm_disk_map[self.vm_sku()]
+
+        # Persistent data disks attached to VMs
         range_var = num_disks + 1
         for diskNum in range(1, range_var):
-            data_dirs.append(self.get("azure", "mount_root") +
-                                str(diskNum))
+            data_dirs.append(self.mount_root() + str(diskNum))
 
         return data_dirs
 
     def metrics_drive_ids(self):
         drive_ids = []
-        range_var = int(self.get("azure", "numdisks")) + 1
+        range_var = self.data_disk_count() + 1
         for i in range(1, range_var):
             drive_ids.append(self.get("azure", "metrics_drive_root") +
                                 str(i))
         return drive_ids
+
+    @ansible_host_var
+    def vm_sku(self):
+        return self.get('azure', 'vm_sku')
+
+    @ansible_host_var
+    @is_valid(is_type(int))
+    def data_disk_count(self):
+        return self.getint('azure', 'data_disk_count')
+
+    @ansible_host_var
+    @default('/dev/disk/azure/scsi1')
+    def azure_disk_device_path(self):
+        return self.get('azure', 'azure_disk_device_path')
+
+    @ansible_host_var
+    @default('lun*')
+    def azure_disk_device_pattern(self):
+        return self.get('azure', 'azure_disk_device_pattern')
 
     @ansible_host_var
     @default(None)

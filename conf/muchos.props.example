@@ -117,9 +117,17 @@ numnodes = 8
 # https://docs.microsoft.com/en-us/azure/virtual-machines/linux/sizes-general
 vm_sku = Standard_D8s_v3
 # Each VM will be provisioned with the following type of managed disk
+# The azure_disk_device* parameters below specify the Linux device paths Muchos looks for when selecting disks for storage
+# The default values below are for using Azure managed disks
+azure_disk_device_path = /dev/disk/azure/scsi1
+azure_disk_device_pattern = lun*
+# If using Azure Lsv2 VMs which have NVME disks for ephemeral storage, use the parameters below instead of the defaults
+# azure_disk_device_path = /dev
+# azure_disk_device_pattern = nvme*n1
+# Type of the data disk attached to the VMSS. 'Standard_LRS' for HDD, 'Premium_LRS' for SSD, 'StandardSSD_LRS' for Standard SSD
 managed_disk_type = Standard_LRS
 # Number of managed disks provisioned on each VM
-numdisks = 3
+data_disk_count = 3
 # The size of each managed disk provisioned
 disk_size_gb = 128
 # Location to mount managed disks in each VM
