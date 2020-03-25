@@ -19,6 +19,38 @@
 
 - hosts: localhost
   tasks:
+    - block:
+      - import_tasks: log_analytics_ws_common.yml
+
+      - name: Delete workbook
+        azure_rm_resource:
+           resource_group: "{{ resource_group }}"
+           provider: insights
+           resource_type: workbooks
+           resource_name: "{{ workbook_exists|join('') }}"
+           api_version: '2020-02-12'
+           state: absent
+        when: workbook_exists is defined
+
+      - name: Delete dashboard
+        azure_rm_resource:
+           resource_group: "{{ resource_group }}"
+           provider: Portal
+           resource_type: dashboards
+           resource_name:  "{{ monitor_name.stdout + '-db' }}"
+           api_version: '2019-01-01-preview'
+           state: absent
+
+      - name: Delete log analytics workspace
+        azure_rm_resource:
+           resource_group: "{{ resource_group }}"
+           provider: OperationalInsights
+           resource_type: workspaces
+           resource_name: "{{ monitor_name.stdout + '-la' }}"
+           api_version: '2015-03-20'
+           state: absent
+      when: az_oms_integration_needed
+
     - name: Delete User Assigned Identity
       azure_rm_resource:
          resource_group: "{{ resource_group }}"
@@ -62,7 +94,7 @@
       when: azure_proxy_host is defined and azure_proxy_host|length
 
     - name: Get facts for virtual network
-      azure_rm_virtualnetwork_facts:
+      azure_rm_virtualnetwork_info:
         resource_group: "{{ resource_group }}"
         name: "{{ vnet }}"
       register: vnet_facts
@@ -73,9 +105,8 @@
         name: "{{ vnet }}"
         state: absent
       when: >
-        vnet_facts['ansible_facts']['azure_virtualnetworks']|length and
-        'deployment_type' in vnet_facts['ansible_facts']['azure_virtualnetworks'][0]['tags'] and
-        vnet_facts['ansible_facts']['azure_virtualnetworks'][0]['tags']['deployment_type'] == 'muchos'
+        vnet_facts.virtualnetworks|length and
+        vnet_facts.virtualnetworks|map(attribute='tags')|map(attribute='deployment_type')|join('') == 'muchos'
 
     - name: Delete the resource group if it is empty
       azure_rm_resourcegroup:

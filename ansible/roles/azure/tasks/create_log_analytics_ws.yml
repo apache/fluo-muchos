@@ -24,32 +24,7 @@
 # 
 #
 
-- name: Generate name for Workspace, Dashboard and Workbook
-  shell:  echo -n {{resource_group + vmss_name + location }}|md5sum|tr -cd "[:alnum:]"|cut -c 1-48
-  register: monitor_name
-
-- name: Set name for log analytics workspace
-  set_fact:
-     log_workspace_name: "{{ monitor_name.stdout + '-la' }}"
-
-- name: Set name for dashboard
-  set_fact:
-     dashboard_name: "{{ monitor_name.stdout + '-db' }}"
-
-- name: Set name for workbook
-  set_fact:
-    workbook_name: "{{ monitor_name.stdout + '-wb' }}"
-
-- name: Query all the resources in the resource group
-  azure_rm_resource_info:
-    resource_group: "{{ resource_group }}"
-    resource_type: resources
-  register: rgfacts
-
-- name: Retrieve workbook name
-  set_fact: 
-     workbook_exists: "{{ rgfacts.response|selectattr('type', 'equalto', 'microsoft.insights/workbooks')|map(attribute='name')|list }}"
-  when: workbook_name in rgfacts.response|map(attribute='tags')|selectattr('hidden-title','defined')|map(attribute='hidden-title')|list 
+- import_tasks: log_analytics_ws_common.yml
      
 - name: Deploy log analytics workspace and performance counters
   azure_rm_deployment:
