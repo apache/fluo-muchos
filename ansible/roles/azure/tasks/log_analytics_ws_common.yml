@@ -42,6 +42,6 @@
   register: rgfacts
 
 - name: Retrieve workbook name
-  set_fact: 
+  set_fact:
      workbook_exists: "{{ rgfacts.response|selectattr('type', 'equalto', 'microsoft.insights/workbooks')|map(attribute='name')|list }}"
-  when: workbook_name in rgfacts.response|map(attribute='tags')|selectattr('hidden-title','defined')|map(attribute='hidden-title')|list 
+  when: workbook_name in rgfacts.response|map(attribute='tags')|selectattr('hidden-title','defined')|map(attribute='hidden-title')|list

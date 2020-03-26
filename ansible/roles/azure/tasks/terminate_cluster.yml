@@ -37,7 +37,7 @@
            resource_group: "{{ resource_group }}"
            provider: Portal
            resource_type: dashboards
-           resource_name:  "{{ monitor_name.stdout + '-db' }}"
+           resource_name:  "{{ dashboard_name }}"
            api_version: '2019-01-01-preview'
            state: absent
 
@@ -46,7 +46,7 @@
            resource_group: "{{ resource_group }}"
            provider: OperationalInsights
            resource_type: workspaces
-           resource_name: "{{ monitor_name.stdout + '-la' }}"
+           resource_name: "{{ log_workspace_name }}"
            api_version: '2015-03-20'
            state: absent
       when: az_oms_integration_needed
