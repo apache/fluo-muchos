@@ -11,5 +11,8 @@ LoadPlugin statsd
   Host "::"
   Port "8125"
   DeleteSets     true
+  DeleteCounters true
+  DeleteTimers   true
+  DeleteGauges   true
   TimerPercentile 90.0
 </Plugin>
