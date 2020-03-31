@@ -7,7 +7,7 @@ After=network.target
 User={{ cluster_user }}
 Group={{ cluster_group }}
 Type=simple
-ExecStart={{ accumulo_home }}/bin/accumulo tserver{{''}}
+ExecStart={{ accumulo_home }}/bin/accumulo tserver
 Environment=ACCUMULO_HOME={{ accumulo_home }}
 Environment=JAVA_HOME={{ java_home }}
 Environment=ACCUMULO_SERVICE_INSTANCE=%I
