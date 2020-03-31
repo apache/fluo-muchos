@@ -35,10 +35,11 @@
   become: true
 
 - name: Defining the default paths to be crawled and fetched 
-  destfile: /etc/filebeat/filebeat.yml
-   insertafter: '- /var/log/*.log'
+  lineinfile:
+   destfile: /etc/filebeat/filebeat.yml
+   regexp: '    - /var/log/*.log'
    line: '- /media/ephemeral0/logs/accumulo/*.log'
-   become: true
+  become: true
 
 # Starting Filebeat
 

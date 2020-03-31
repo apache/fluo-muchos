@@ -41,7 +41,6 @@
   notify: Restart Logstash 
 
 
-
 # - name: Create Logstash filter
 #   template: 
 #     src: "{{ item }}"
