@@ -32,7 +32,7 @@
     failed_when: "stop_disable_service is failed and 'Could not find the requested service' not in stop_disable_service.msg"
 
   - name: "remove accumulo systemd units"
-    file: path="/etc/systemd/system/-*" state=absent
+    file: path="/etc/systemd/system/accumulo-*" state=absent
     register: delete_task
     retries: 10
     delay: 3
