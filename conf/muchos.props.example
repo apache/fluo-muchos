@@ -54,6 +54,11 @@ java_package=java-1.8.0-openjdk-devel
 hdfs_ha = False
 # Give a logical name for the cluster, all one word no special characters. Required to support HDFS HA.
 nameservice_id = muchoshacluster
+# number of accumulo tablet servers to run per host. This is only effective when systemd is set to 'True'. Needs changes in
+# accumulo-service script inorder to support non-systemd cases. 
+num_tservers = 1
+# If accumulo services are to be run under systemd, set this to 'True'
+use_systemd = False
 
 [ec2]
 # AWS machine image to use. The default below is for a CentOS 7 image (in us-east-1).
