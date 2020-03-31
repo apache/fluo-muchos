@@ -24,15 +24,15 @@
       state: stopped
       enabled: no
     with_items:
-      - "accumulo_master.service"
-      - "accumulo_monitor.service"
-      - "accumulo_gc.service"
-      - "accumulo_tracer.service"
+      - "accumulo-master.service"
+      - "accumulo-monitor.service"
+      - "accumulo-gc.service"
+      - "accumulo-tracer.service"
     register: stop_disable_service
     failed_when: "stop_disable_service is failed and 'Could not find the requested service' not in stop_disable_service.msg"
 
   - name: "remove accumulo systemd units"
-    file: path="/etc/systemd/system/accumulo_*" state=absent
+    file: path="/etc/systemd/system/-*" state=absent
     register: delete_task
     retries: 10
     delay: 3
@@ -44,7 +44,7 @@
   tasks:
   - name: "disable accumulo tserver systemd services"
     systemd:
-      name: "accumulo_tserver@{{ item }}.service"
+      name: "accumulo-tserver@{{ item }}.service"
       state: stopped
       enabled: no
     with_sequence: "start=1 end={{ num_tservers }}"
@@ -52,7 +52,7 @@
     failed_when: "stop_disable_service is failed and 'Could not find the requested service' not in stop_disable_service.msg"
 
   - name: "remove accumulo tserver systemd units"
-    file: path="/etc/systemd/system/accumulo_tserver*" state=absent
+    file: path="/etc/systemd/system/accumulo-tserver*" state=absent
     register: delete_task
     retries: 10
     delay: 3

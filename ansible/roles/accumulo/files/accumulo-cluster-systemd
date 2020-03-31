@@ -109,15 +109,15 @@ function control_tserver_service() {
 
     if [[ $host == "localhost" || $host == $(hostname -f) || $host == $(hostname -s) || $host == $(get_ip) ]]; then
       for (( inst_id=1; inst_id<="${NUM_TSERVERS:-1}"; inst_id++ )); do
-        if systemctl list-units | grep 'accumulo_tserver'; then
-            sudo systemctl "${control_cmd}" accumulo_tserver@"${inst_id}".service
+        if systemctl list-units | grep 'accumulo-tserver'; then
+            sudo systemctl "${control_cmd}" accumulo-tserver@"${inst_id}".service
         fi
       done
     else
       $SSH "$host" /bin/bash <<EOF
       for (( inst_id=1; inst_id<="${NUM_TSERVERS:-1}"; inst_id++ )); do
-        if systemctl list-units | grep 'accumulo_tserver'; then
-            sudo systemctl "${control_cmd}" accumulo_tserver@\${inst_id}.service
+        if systemctl list-units | grep 'accumulo-tserver'; then
+            sudo systemctl "${control_cmd}" accumulo-tserver@\${inst_id}.service
         fi
       done
 EOF
@@ -134,10 +134,10 @@ function start_service() {
   fi
 
   if [[ $host == "localhost" || $host == $(hostname -f) || $host == $(hostname -s) || $host == $(get_ip) ]]; then
-    find /etc/systemd/system/ -type f -name "accumulo_${service}*" | cut -d'/' -f5 | xargs -r sudo systemctl start
+    find /etc/systemd/system/ -type f -name "accumulo-${service}*" | cut -d'/' -f5 | xargs -r sudo systemctl start
   else
     $SSH "$host" /bin/bash <<EOF
-    find /etc/systemd/system/ -type f -name "accumulo_${service}*" | cut -d'/' -f5 | xargs -r sudo systemctl start
+    find /etc/systemd/system/ -type f -name "accumulo-${service}*" | cut -d'/' -f5 | xargs -r sudo systemctl start
 EOF
   fi
 }
@@ -234,10 +234,10 @@ function stop_service() {
   fi
 
   if [[ $host == "localhost" || $host == $(hostname -f) || $host == $(hostname -s) || $host == $(get_ip) ]]; then
-    find /etc/systemd/system/ -type f -name "accumulo_${service}*" | cut -d'/' -f5 | xargs -r sudo systemctl stop
+    find /etc/systemd/system/ -type f -name "accumulo-${service}*" | cut -d'/' -f5 | xargs -r sudo systemctl stop
   else
     $SSH "$host" /bin/bash <<EOF
-    find /etc/systemd/system/ -type f -name "accumulo_${service}*" | cut -d'/' -f5 | xargs -r sudo systemctl stop
+    find /etc/systemd/system/ -type f -name "accumulo-${service}*" | cut -d'/' -f5 | xargs -r sudo systemctl stop
 EOF
   fi
 }

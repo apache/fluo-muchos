@@ -18,12 +18,12 @@
 - name: install accumulo master systemd unit file
   template:
     src: roles/accumulo/templates/master.j2 
-    dest: "/etc/systemd/system/accumulo_master.service"
+    dest: "/etc/systemd/system/accumulo-master.service"
     mode: 0644
 
-- name: start accumulo_master using systemd
+- name: start accumulo-master using systemd
   systemd: 
     state: started 
-    name: "accumulo_master"
+    name: "accumulo-master"
     daemon_reload: yes
     enabled: yes

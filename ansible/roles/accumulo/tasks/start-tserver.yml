@@ -18,13 +18,13 @@
 - name: install accumulo tserver systemd unit file
   template:
     src: roles/accumulo/templates/tserver.j2 
-    dest: "/etc/systemd/system/accumulo_tserver@.service"
+    dest: "/etc/systemd/system/accumulo-tserver@.service"
     mode: 0644
 
-- name: start accumulo_tserver(s) using systemd
+- name: start accumulo-tserver(s) using systemd
   systemd: 
     state: started 
-    name: "accumulo_tserver@{{ item }}.service"
+    name: "accumulo-tserver@{{ item }}.service"
     daemon_reload: yes
     enabled: yes
   with_sequence: "start=1 end={{ num_tservers }}"

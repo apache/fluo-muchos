@@ -18,12 +18,12 @@
 - name: install accumulo tracer systemd unit file
   template:
     src: roles/accumulo/templates/tracer.j2 
-    dest: "/etc/systemd/system/accumulo_tracer.service"
+    dest: "/etc/systemd/system/accumulo-tracer.service"
     mode: 0644
 
-- name: start accumulo_tracer using systemd
+- name: start accumulo-tracer using systemd
   systemd: 
     state: started 
-    name: "accumulo_tracer"
+    name: "accumulo-tracer"
     daemon_reload: yes
     enabled: yes
