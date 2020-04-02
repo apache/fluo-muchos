@@ -1,0 +1,382 @@
+#! /usr/bin/env bash
+
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Used when Accumulo services are managed by systemd
+function print_usage {
+  cat <<EOF
+Usage: accumulo-cluster <command> (<argument> ...)
+To run more than 1 tservers per node, run accumulo-cluster
+command with NUM_TSERVERS=n prefix.
+
+For example, to start 2 tservers per node, run the below command.
+NUM_TSERVERS=2 accumulo-cluster start
+
+Commands:
+  create-config       Creates cluster config
+  restart             Restarts the Accumulo cluster
+  start               Starts Accumulo cluster
+  stop                Stops Accumulo cluster
+  start-non-tservers  Starts all services except tservers
+  start-tservers      Starts all tservers on cluster
+  stop-tservers       Stops all tservers on cluster
+  start-here          Starts all services on this node
+  stop-here           Stops all services on this node
+EOF
+  exit 1
+}
+
+function invalid_args {
+  echo -e "Invalid arguments: $1\n"
+  print_usage 1>&2
+  exit 1
+}
+
+function verify_config {
+  if [[ -f ${conf}/slaves ]]; then
+    echo "ERROR: A 'slaves' file was found in ${conf}/"
+    echo "Accumulo now reads tablet server hosts from 'tservers' and requires that the 'slaves' file not be present to reduce confusion."
+    echo "Please rename the 'slaves' file to 'tservers' or remove it if both exist."
+    exit 1
+  fi
+
+  if [[ ! -f ${conf}/tservers ]]; then
+    echo "ERROR: A 'tservers' file was not found at ${conf}/tservers"
+    echo "Please make sure it exists and is configured with tablet server hosts."
+    exit 1
+  fi
+
+
+  unset master1
+  if [[ -f "${conf}/masters" ]]; then
+    master1=$(grep -E -v '(^#|^\s*$)' "${conf}/masters" | head -1)
+  fi
+
+  if [[ ! -f "${conf}/monitor" ]]; then
+    if [[ -z "${master1}" ]] ; then
+      echo "Could not find a master node to use as a default for the monitor role."
+      echo "Either set up \"${conf}/monitor\" or make sure \"${conf}/masters\" is non-empty."
+      exit 1
+    else
+      echo "$master1" > "${conf}/monitor"
+    fi
+  fi
+
+  if [[ ! -f "${conf}/tracers" ]]; then
+    if [[ -z "${master1}" ]] ; then
+      echo "Could not find a master node to use as a default for the tracer role."
+      echo "Either set up \"${conf}/tracers\" or make sure \"${conf}/masters\" is non-empty."
+      exit 1
+    else
+      echo "$master1" > "${conf}/tracers"
+    fi
+  fi
+
+  if [[ ! -f "${conf}/gc" ]]; then
+    if [[ -z "${master1}" ]] ; then
+      echo "Could not infer a GC role. You need to either set up \"${conf}/gc\" or make sure \"${conf}/masters\" is non-empty."
+      exit 1
+    else
+      echo "$master1" > "${conf}/gc"
+    fi
+  fi
+}
+
+function get_ip() {
+  ip_addr=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1  -d'/')
+  if [[ $? != 0 ]]; then
+    ip_addr=$(getent ahosts "$(hostname -f)" | grep DGRAM | cut -f 1 -d ' ')
+  fi
+  echo "$ip_addr"
+}
+
+function control_tserver_service() {
+  host="$1"
+  control_cmd="$2"
+
+    if [[ $host == "localhost" || $host == $(hostname -f) || $host == $(hostname -s) || $host == $(get_ip) ]]; then
+      for (( inst_id=1; inst_id<="${NUM_TSERVERS:-1}"; inst_id++ )); do
+        if systemctl list-units | grep 'accumulo-tserver'; then
+            sudo systemctl "${control_cmd}" accumulo-tserver@"${inst_id}".service
+        fi
+      done
+    else
+      $SSH "$host" /bin/bash <<EOF
+      for (( inst_id=1; inst_id<="${NUM_TSERVERS:-1}"; inst_id++ )); do
+        if systemctl list-units | grep 'accumulo-tserver'; then
+            sudo systemctl "${control_cmd}" accumulo-tserver@\${inst_id}.service
+        fi
+      done
+EOF
+    fi
+}
+
+function start_service() {
+  host="$1"
+  service="$2"
+
+  if [[ $service == "tserver" ]]; then
+    control_tserver_service "$host" start
+    return
+  fi
+
+  if [[ $host == "localhost" || $host == $(hostname -f) || $host == $(hostname -s) || $host == $(get_ip) ]]; then
+    find /etc/systemd/system/ -type f -name "accumulo-${service}*" | cut -d'/' -f5 | xargs -r sudo systemctl start
+  else
+    $SSH "$host" /bin/bash <<EOF
+    find /etc/systemd/system/ -type f -name "accumulo-${service}*" | cut -d'/' -f5 | xargs -r sudo systemctl start
+EOF
+  fi
+}
+
+function start_tservers() {
+  echo -n "Starting tablet servers ..."
+  count=1
+  for server in $(grep -E -v '(^#|^\s*$)' "${conf}/tservers"); do
+    echo -n "."
+    start_service "$server" tserver &
+    if (( ++count % 72 == 0 )) ;
+    then
+      echo
+      wait
+    fi
+  done
+  echo " done"
+}
+
+function start_all() {
+  unset DISPLAY
+
+  for host in $(grep -E -v '(^#|^\s*$)' "${conf}/monitor"); do
+    start_service "$host" monitor &
+  done
+  wait
+
+  if [[ "$1" != "--no-tservers" ]]; then
+    start_tservers
+  fi
+
+  for host in $(grep -E -v '(^#|^\s*$)' "${conf}/masters"); do
+    start_service "$host" master &
+  done
+  wait
+
+  for host in $(grep -E -v '(^#|^\s*$)' "${conf}/gc"); do
+    start_service "$host" gc &
+  done
+  wait
+
+  for host in $(grep -E -v '(^#|^\s*$)' "${conf}/tracers"); do
+    start_service "$host" tracer &
+  done
+  wait
+}
+
+function start_here() {
+
+  local_hosts="$(hostname -a 2> /dev/null) $(hostname) localhost 127.0.0.1 $(get_ip)"
+  for host in $local_hosts; do
+    if grep -q "^${host}\$" "${conf}/tservers"; then
+      start_service "$host" tserver
+      break
+    fi
+  done
+
+  for host in $local_hosts; do
+    if grep -q "^${host}\$" "${conf}/masters"; then
+      start_service "$host" master
+      break
+    fi
+  done
+
+  for host in $local_hosts; do
+    if grep -q "^${host}\$" "${conf}/gc"; then
+      start_service "$host" gc
+      break
+    fi
+  done
+
+  for host in $local_hosts; do
+    if grep -q "^${host}\$" "${conf}/monitor"; then
+      start_service "$host" monitor
+      break
+    fi
+  done
+
+  for host in $local_hosts; do
+    if grep -q "^${host}\$" "${conf}/tracers"; then
+      start_service "$host" tracer
+      break
+    fi
+  done
+}
+
+function stop_service() {
+  host="$1"
+  service="$2"
+
+  if [[ $service == "tserver" ]]; then
+    control_tserver_service "$host" stop
+    return
+  fi
+
+  if [[ $host == "localhost" || $host == $(hostname -f) || $host == $(hostname -s) || $host == $(get_ip) ]]; then
+    find /etc/systemd/system/ -type f -name "accumulo-${service}*" | cut -d'/' -f5 | xargs -r sudo systemctl stop
+  else
+    $SSH "$host" /bin/bash <<EOF
+    find /etc/systemd/system/ -type f -name "accumulo-${service}*" | cut -d'/' -f5 | xargs -r sudo systemctl stop
+EOF
+  fi
+}
+
+function stop_tservers() {
+  tserver_hosts=$(grep -E -v '(^#|^\s*$)' "${conf}/tservers")
+
+  echo "Stopping unresponsive tablet servers (if any)..."
+  for host in ${tserver_hosts}; do
+    stop_service "$host" tserver &
+  done
+
+  sleep 10
+
+  echo "Cleaning tablet server entries from zookeeper"
+  ${accumulo_cmd} org.apache.accumulo.server.util.ZooZap -tservers
+}
+
+function stop_all() {
+  echo "Stopping Accumulo cluster..."
+  if ! ${accumulo_cmd} admin stopAll
+  then
+    echo "Invalid password or unable to connect to the master"
+    echo "Initiating forced shutdown in 15 seconds (Ctrl-C to abort)"
+    sleep 10
+    echo "Initiating forced shutdown in  5 seconds (Ctrl-C to abort)"
+  else
+    echo "Accumulo shut down cleanly"
+    echo "Utilities and unresponsive servers will shut down in 5 seconds (Ctrl-C to abort)"
+  fi
+
+  sleep 5
+
+  # Look for processes not killed by 'admin stopAll'
+  for master in $(grep -v '^#' "${conf}/masters"); do
+    stop_service "$master" master &
+  done
+  wait
+
+  for gc in $(grep -v '^#' "${conf}/gc"); do
+    stop_service "$gc" gc &
+  done
+  wait
+
+  for monitor in $(grep -v '^#' "${conf}/gc"); do
+    stop_service "$monitor" monitor &
+  done
+  wait
+
+  for tracer in $(grep -E -v '(^#|^\s*$)' "${conf}/tracers"); do
+    stop_service "$tracer" tracer &
+  done
+  wait
+
+  # stop tserver still running
+  stop_tservers
+
+  echo "Cleaning all server entries in ZooKeeper"
+  ${accumulo_cmd} org.apache.accumulo.server.util.ZooZap -master -tservers -tracers
+}
+
+function stop_here() {
+  # Determine hostname without errors to user
+  hosts_to_check=("$(hostname -a 2> /dev/null | head -1)" "$(hostname -f)")
+
+  for host in "${hosts_to_check[@]}"; do
+    for svc in  tserver gc master monitor tracer; do
+      stop_service "$host" "$svc"
+    done
+  done
+}
+
+function main() {
+
+  if [[ -z $1 ]]; then
+    invalid_args "<command> cannot be empty"
+  fi
+
+  # Resolve base directory
+  SOURCE="${BASH_SOURCE[0]}"
+  while [ -h "${SOURCE}" ]; do
+     bin="$( cd -P "$( dirname "${SOURCE}" )" && pwd )"
+     SOURCE="$(readlink "${SOURCE}")"
+     [[ "${SOURCE}" != /* ]] && SOURCE="${bin}/${SOURCE}"
+  done
+  bin="$( cd -P "$( dirname "${SOURCE}" )" && pwd )"
+  basedir=$( cd -P "${bin}"/.. && pwd )
+  conf="${ACCUMULO_CONF_DIR:-${basedir}/conf}"
+
+  accumulo_cmd="${bin}/accumulo"
+  SSH='ssh -q -o ConnectTimeout=2'
+
+  case "$1" in
+    create-config)
+      echo "localhost" > "$conf/gc"
+      echo "localhost" > "$conf/masters"
+      echo "localhost" > "$conf/monitor"
+      echo "localhost" > "$conf/tracers"
+      echo "localhost" > "$conf/tservers"
+      ;;
+    restart)
+      verify_config
+      stop_all
+      # Make sure the JVM has a chance to fully exit
+      sleep 1
+      start_all
+      ;;
+    start)
+      verify_config
+      start_all
+      ;;
+    stop)
+      verify_config
+      stop_all
+      ;;
+    start-non-tservers)
+      verify_config
+      start_all --no-tservers
+      ;;
+    start-tservers)
+      verify_config
+      start_tservers
+      ;;
+    start-here)
+      verify_config
+      start_here
+      ;;
+    stop-tservers)
+      verify_config
+      stop_tservers
+      ;;
+    stop-here)
+      verify_config
+      stop_here
+      ;;
+    *)
+      invalid_args "'$1' is an invalid <command>"
+      ;;
+  esac
+}
+
+main "$@"

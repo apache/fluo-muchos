@@ -57,6 +57,7 @@ _HOST_VAR_DEFAULTS = {
   'hdfs_root': "{% if hdfs_ha %}hdfs://{{ nameservice_id }}{% else %}hdfs://{{ groups[\'namenode\'][0] }}:8020{% endif %}",
   'hdfs_ha': None,
   'nameservice_id': None,
+  'num_tservers': 1,
   'install_dir': None,
   'install_hub': None,
   'java_home': '"/usr/lib/jvm/java"',
@@ -103,7 +104,8 @@ _PLAY_VAR_DEFAULTS = {
   'shutdown_delay_minutes': None,
   'twill_reserve_mem_mb': None,
   'yarn_nm_mem_mb': None,
-  'zookeeper_checksum': None
+  'zookeeper_checksum': None,
+  'use_systemd': False
 }
 
 _EXTRA_VAR_DEFAULTS = {}

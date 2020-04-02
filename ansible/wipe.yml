@@ -28,6 +28,9 @@
   - name: "wipe grafana db"
     file: path=/var/lib/grafana/grafana.db state=absent
 
+- import_playbook: wipe-systemd.yml
+  when: use_systemd == True
+
 - import_playbook: kill.yml
 
 - hosts: all
