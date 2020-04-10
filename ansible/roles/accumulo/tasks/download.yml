@@ -26,4 +26,4 @@
   retries: 3
   with_items:
     - { urlp: "{{ apache_mirror.stdout }}/accumulo/{{ accumulo_version }}", fn: "{{ accumulo_tarball }}", sum: "{{ accumulo_checksum }}" }
-  when: accumulo.stat.exists == False
+  when: not accumulo.stat.exists

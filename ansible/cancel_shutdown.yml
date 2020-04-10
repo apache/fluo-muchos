@@ -19,4 +19,4 @@
   become: yes
   tasks:
     - name: "cancelling node shutdown"
-      shell: shutdown -c
+      command: shutdown -c

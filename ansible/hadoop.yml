@@ -21,25 +21,25 @@
 - hosts: journalnode
   tasks:
     - import_tasks: roles/hadoop/tasks/start-journal.yml
-      when: hdfs_ha == True
+      when: hdfs_ha
 - hosts: namenode[0]
   tasks:
     - import_tasks: roles/hadoop/tasks/format-nn.yml
 - hosts: namenode[0]
   tasks:
     - import_tasks: roles/hadoop/tasks/format-zk.yml
-      when: hdfs_ha == True    
+      when: hdfs_ha
 - hosts: namenode
   tasks:
     - import_tasks: roles/hadoop/tasks/start-zkfc.yml
-      when: hdfs_ha == True
+      when: hdfs_ha
 - hosts: namenode[0]
   tasks:
     - import_tasks: roles/hadoop/tasks/start-nn1.yml
 - hosts: namenode:!namenode[0]
   tasks:
     - import_tasks: roles/hadoop/tasks/start-nn2.yml
-      when: hdfs_ha == True
+      when: hdfs_ha
 - hosts: namenode
   tasks:
     - import_tasks: roles/hadoop/tasks/start-hdfs.yml

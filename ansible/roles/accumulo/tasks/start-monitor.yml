@@ -17,13 +17,13 @@
 ##
 - name: install accumulo monitor systemd unit file
   template:
-    src: roles/accumulo/templates/monitor.j2 
+    src: roles/accumulo/templates/monitor.j2
     dest: "/etc/systemd/system/accumulo-monitor.service"
     mode: 0644
 
 - name: start accumulo-monitor using systemd
-  systemd: 
-    state: started 
+  systemd:
+    state: started
     name: "accumulo-monitor"
     daemon_reload: yes
     enabled: yes

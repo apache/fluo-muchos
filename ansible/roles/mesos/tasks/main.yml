@@ -18,10 +18,10 @@
 - name: "add mesosphere repo"
   yum: name={{ mesosphere_yum_repo }} state=present
 - name: "install mesos, marathon & docker"
-  yum: name={{item}} state=present
+  yum: name={{ item }} state=present
   with_items:
-    - mesos-{{mesos_version}}
-    - marathon-{{marathon_version}}
+    - mesos-{{ mesos_version }}
+    - marathon-{{ marathon_version }}
     - docker
 - name: "docker is running"
   service: name=docker state=started

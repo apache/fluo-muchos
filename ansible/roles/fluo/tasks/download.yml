@@ -26,4 +26,4 @@
   retries: 3
   with_items:
     - { urlp: "{{ apache_mirror.stdout }}/fluo/fluo/{{ fluo_version }}", fn: "{{ fluo_tarball }}", sum: "{{ fluo_checksum }}" }
-  when: fluo.stat.exists == False
+  when: not fluo.stat.exists

@@ -19,13 +19,19 @@ from muchos.config import ExistingDeployConfig
 
 
 def test_existing_cluster():
-    c = ExistingDeployConfig("muchos", '../conf/muchos.props.example', '../conf/hosts/example/example_cluster',
-                     '../conf/checksums', '../conf/templates', 'mycluster')
-    c.cluster_type = 'existing'
-    assert c.get_cluster_type() == 'existing'
+    c = ExistingDeployConfig(
+        "muchos",
+        "../conf/muchos.props.example",
+        "../conf/hosts/example/example_cluster",
+        "../conf/checksums",
+        "../conf/templates",
+        "mycluster",
+    )
+    c.cluster_type = "existing"
+    assert c.get_cluster_type() == "existing"
     assert c.node_type_map() == {}
-    assert c.mount_root() == '/var/data'
-    assert c.worker_data_dirs() == ['/var/data1', '/var/data2', '/var/data3']
-    assert c.default_data_dirs() == ['/var/data1', '/var/data2', '/var/data3']
-    assert c.metrics_drive_ids() == ['var-data1', 'var-data2', 'var-data3']
-    assert c.shutdown_delay_minutes() == '0'
+    assert c.mount_root() == "/var/data"
+    assert c.worker_data_dirs() == ["/var/data1", "/var/data2", "/var/data3"]
+    assert c.default_data_dirs() == ["/var/data1", "/var/data2", "/var/data3"]
+    assert c.metrics_drive_ids() == ["var-data1", "var-data2", "var-data3"]
+    assert c.shutdown_delay_minutes() == "0"

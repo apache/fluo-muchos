@@ -15,20 +15,27 @@
 # limitations under the License.
 #
 
-from muchos.config import BaseConfig
-from sys import exit
-from muchos.config.decorators import *
-from muchos.config.validators import *
-from muchos.util import get_ephemeral_devices, get_arch
-import os
-import json
-import glob
+from .base import BaseConfig
 
 
 class ExistingDeployConfig(BaseConfig):
-
-    def __init__(self, deploy_path, config_path, hosts_path, checksums_path, templates_path, cluster_name):
-        super(ExistingDeployConfig, self).__init__(deploy_path, config_path, hosts_path, checksums_path, templates_path, cluster_name)
+    def __init__(
+        self,
+        deploy_path,
+        config_path,
+        hosts_path,
+        checksums_path,
+        templates_path,
+        cluster_name,
+    ):
+        super(ExistingDeployConfig, self).__init__(
+            deploy_path,
+            config_path,
+            hosts_path,
+            checksums_path,
+            templates_path,
+            cluster_name,
+        )
 
     def verify_config(self, action):
         self._verify_config(action)
@@ -41,10 +48,10 @@ class ExistingDeployConfig(BaseConfig):
         return node_types
 
     def mount_root(self):
-        return self.get('existing', 'mount_root')
+        return self.get("existing", "mount_root")
 
     def data_dirs_common(self, nodeType):
-        return self.get('existing', 'data_dirs').split(",")
+        return self.get("existing", "data_dirs").split(",")
 
     def metrics_drive_ids(self):
         return self.get("existing", "metrics_drive_ids").split(",")

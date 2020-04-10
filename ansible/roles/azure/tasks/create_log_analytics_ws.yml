@@ -21,11 +21,11 @@
 # 1. Create Log Analytics workspace
 # 2. Create dashboard and workbook using json templates
 # 3. Update az_logs_id and az_logs_key in muchos.props
-# 
+#
 #
 
 - import_tasks: log_analytics_ws_common.yml
-     
+
 - name: Deploy log analytics workspace and performance counters
   azure_rm_deployment:
     resource_group_name: "{{ resource_group }}"
@@ -39,7 +39,7 @@
 - name: Gather information about log analytics workspace
   azure_rm_loganalyticsworkspace_info:
     resource_group: "{{ resource_group }}"
-    name: "{{ log_workspace_name }}" 
+    name: "{{ log_workspace_name }}"
     show_shared_keys: True
   retries: 20
   delay: 15

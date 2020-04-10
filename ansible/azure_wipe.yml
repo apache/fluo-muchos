@@ -36,7 +36,7 @@
     retries: 20
     delay: 30
     register: result
-    until: result is succeeded and (result.changed == False or (result.changed == True and result.container|length > 0))
+    until: result is succeeded and (not result.changed or (result.changed and result.container|length > 0))
     loop:
       "{{ instance_volumes_preferred.split(',')  }}"
     when: cluster_type == 'azure' and use_adlsg2

@@ -27,7 +27,7 @@
     - { urlp: "{{ apache_mirror.stdout }}/maven/maven-3/{{ maven_version }}/binaries", fn: "{{ maven_tarball }}", sum: "{{ maven_checksum }}" }
     - { urlp: "https://github.com/github/hub/releases/download/v{{ hub_version }}", fn: "{{ hub_tarball }}", sum: "{{ hub_checksum }}" }
 
-# This is currently needed to run hadoop with Java 11 (see https://github.com/apache/fluo-muchos/issues/266)      
+# This is currently needed to run hadoop with Java 11 (see https://github.com/apache/fluo-muchos/issues/266)
 - name: "Download javax.activation-api for Hadoop 3 when Java 11 is used"
   maven_artifact:
    group_id: javax.activation
@@ -36,10 +36,12 @@
    version: 1.2.0
    dest: "{{ user_home }}/mvn_dep/"
    mode: 0644
-  when: hadoop_major_version == '3' and java_product_version == 11 
+  when: hadoop_major_version == '3' and java_product_version == 11
 
 - name: "download omsagent installer to proxy"
-  shell: eval $(curl -s https://raw.githubusercontent.com/Microsoft/OMS-Agent-for-Linux/master/installer/scripts/onboard_agent.sh | grep -e 'GITHUB_RELEASE_X64=' -e 'BUNDLE_X64=') && wget ${GITHUB_RELEASE_X64}${BUNDLE_X64} -O {{ tarballs_dir }}/omsagent.x64.sh
+  shell: set -o pipefail && eval $(curl -s https://raw.githubusercontent.com/Microsoft/OMS-Agent-for-Linux/master/installer/scripts/onboard_agent.sh | grep -e 'GITHUB_RELEASE_X64=' -e 'BUNDLE_X64=') && wget ${GITHUB_RELEASE_X64}${BUNDLE_X64} -O {{ tarballs_dir }}/omsagent.x64.sh
+  args:
+    executable: bash
   register: result
   until: result is not failed
   retries: 3

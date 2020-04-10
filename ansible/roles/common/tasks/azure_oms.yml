@@ -18,7 +18,7 @@
 # The tasks below have been added to enable integration with Azure Monitor Logs
 
 - name: "Configure required plugins in collectd"
-  template: src=../templates/etc/collectd.d/azure.conf.j2 dest=/etc/collectd.d/azure.conf
+  template: src=roles/common/templates/etc/collectd.d/azure.conf.j2 dest=/etc/collectd.d/azure.conf
 
 - name: "Ensure OMS Agent is installed"
   script: "{{ tarballs_dir }}/omsagent.x64.sh --upgrade"
@@ -26,7 +26,7 @@
     creates: /opt/microsoft/omsagent/bin/omsadmin.sh
 
 - name: "Configure OMS Agent for workspace"
-  shell: /opt/microsoft/omsagent/bin/omsadmin.sh -w {{ az_logs_id }} -s {{ az_logs_key }}
+  command: /opt/microsoft/omsagent/bin/omsadmin.sh -w {{ az_logs_id }} -s {{ az_logs_key }}
   args:
     creates: /etc/opt/microsoft/omsagent/{{ az_logs_id }}/conf/omsadmin.conf
   register: omsagent_configured
@@ -40,5 +40,5 @@
   copy: remote_src=true src=/etc/opt/microsoft/omsagent/sysconf/omsagent.d/collectd.conf dest=/etc/opt/microsoft/omsagent/{{ az_logs_id }}/conf/omsagent.d/collectd.conf
 
 - name: "Restart service omsagent, in all cases"
-  shell: /opt/microsoft/omsagent/bin/service_control restart {{ az_logs_id }}
+  command: /opt/microsoft/omsagent/bin/service_control restart {{ az_logs_id }}
   when: omsagent_configured is succeeded

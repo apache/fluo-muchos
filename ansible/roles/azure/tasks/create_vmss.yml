@@ -57,7 +57,7 @@
     allocation_method: Static
     name: "{{ azure_proxy_host }}-ip"
   register: azure_proxy_public_ip
-  when: azure_proxy_host is defined and azure_proxy_host != '' and azure_proxy_host != None
+  when: azure_proxy_host is defined and azure_proxy_host and azure_proxy_host != None
 
 - name: Create Network Security Group that allows SSH
   azure_rm_securitygroup:
@@ -70,7 +70,7 @@
         access: Allow
         priority: 1001
         direction: Inbound
-  when: azure_proxy_host is defined and azure_proxy_host != '' and azure_proxy_host != None
+  when: azure_proxy_host is defined and azure_proxy_host and azure_proxy_host != None
 
 - name: Create NIC
   azure_rm_networkinterface:
@@ -83,7 +83,7 @@
         public_ip_address_name: "{{ azure_proxy_host }}-ip"
         primary: True
     security_group: "{{ azure_proxy_host }}-nsg"
-  when: azure_proxy_host is defined and azure_proxy_host != '' and azure_proxy_host != None
+  when: azure_proxy_host is defined and azure_proxy_host and azure_proxy_host != None
 
 - name: Create azure proxy virtual machine
   azure_rm_virtualmachine:
@@ -95,7 +95,7 @@
     admin_username: "{{ admin_username }}"
     ssh_password_enabled: false
     ssh_public_keys:
-      - path: /home/{{admin_username}}/.ssh/authorized_keys
+      - path: /home/{{ admin_username }}/.ssh/authorized_keys
         key_data: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
     os_disk_caching: ReadWrite
     managed_disk_type: Standard_LRS
@@ -108,7 +108,7 @@
      - lun: 0
        disk_size_gb: 64
        managed_disk_type: Standard_LRS
-  when: azure_proxy_host is defined and azure_proxy_host != '' and azure_proxy_host != None
+  when: azure_proxy_host is defined and azure_proxy_host and azure_proxy_host != None
 
 # SECTION 3: Create the Azure VMSS for the nodes used by Muchos
 - name: Create luns dictionary
@@ -130,7 +130,7 @@
     admin_username: "{{ admin_username }}"
     ssh_password_enabled: false
     ssh_public_keys:
-      - path: /home/{{admin_username}}/.ssh/authorized_keys
+      - path: /home/{{ admin_username }}/.ssh/authorized_keys
         key_data: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
     capacity: "{{ numnodes }}"
     virtual_network_name: "{{ vnet }}"
@@ -151,17 +151,22 @@
 
 # SECTION 4: Automatically populate entries in the hosts file and in the muchos.props file, based on the VMSS node details
 - name: get instance ids
-  shell: "az vmss list-instances --resource-group {{ resource_group }} --name {{ vmss_name }} --query '[].[{name: name,vmresourceid: id}]' -o json | sed -e 's/{{vmss_name}}_/{{vmss_name}}-/g'"
+  shell: "set -o pipefail && az vmss list-instances --resource-group {{ resource_group }} --name {{ vmss_name }} --query '[].[{name: name,vmresourceid: id}]' -o json | sed -e 's/{{ vmss_name }}_/{{ vmss_name }}-/g'"
+  args:
+    executable: bash
   register: instance_list
-- set_fact:
+- name: set instance_list
+  set_fact:
     instances: "{{ instance_list.stdout|from_json }}"
 
 - name: get private ip addresses
   command: "az vmss nic list --resource-group {{ resource_group }} --vmss-name {{ vmss_name }} --query '[].[{ip: ipConfigurations[0].privateIpAddress, vmresourceid: virtualMachine.id}]' -o json"
   register: ip_list
-- set_fact:
+- name: obtain ip address list
+  set_fact:
     addresses: "{{ ip_list.stdout|from_json }}"
-- set_fact:
+- name: create instance name and ip address dictionaries
+  set_fact:
     instances_dict: "{{ instances | json_query('[].{key: vmresourceid, value: name}') }}"
     addresses_dict: "{{ addresses | json_query('[].{key: vmresourceid, value: ip}') }}"
 
@@ -182,13 +187,13 @@
   lineinfile:
     path: "{{ deploy_path }}/conf/hosts/{{ vmss_name }}"
     line: "{{ azure_proxy_host }} {{ azure_proxy_public_ip.state.ip_address }}"
-  when: azure_proxy_host is defined and azure_proxy_host != '' and azure_proxy_host != None
+  when: azure_proxy_host is defined and azure_proxy_host and azure_proxy_host != None
 
 - name: Write VMSS vms to hosts file
   lineinfile:
     path: "{{ deploy_path }}/conf/hosts/{{ vmss_name }}"
     line: "{{ item1[0] }} {{ item2[0] }}"
-  with_items: "{{ instances_dict | json_query('[].key')}}"
+  with_items: "{{ instances_dict | json_query('[].key') }}"
   vars:
     myquery: "[?key=='{{ item }}'].value"
     item1: "{{ instances_dict | json_query(myquery) }}"
@@ -212,7 +217,7 @@
   lineinfile:
     path: "{{ deploy_path }}/conf/muchos.props"
     line: "{{ azure_proxy_host }} = client"
-  when: azure_proxy_host is defined and azure_proxy_host != '' and azure_proxy_host != None
+  when: azure_proxy_host is defined and azure_proxy_host and azure_proxy_host != None
 
 - name: Assign Accumulo master, HDFS components to the first node of the cluster
   lineinfile:
@@ -268,7 +273,7 @@
     path: "{{ deploy_path }}/conf/muchos.props"
     regexp: '^proxy_hostname\s*=\s*'
     line: "proxy_hostname = {{ azure_proxy_host }}"
-  when: azure_proxy_host is defined and azure_proxy_host != '' and azure_proxy_host != None
+  when: azure_proxy_host is defined and azure_proxy_host and azure_proxy_host != None
 
 - name: Change proxy hostname to first node in vmss in muchos.props
   lineinfile:
@@ -276,4 +281,4 @@
     regexp: '^proxy_hostname\s*=\s*'
     line: "proxy_hostname = {{ item }}"
   with_items: "{{ instances_dict | json_query('[0].value') }}"
-  when: not (azure_proxy_host is defined and azure_proxy_host != '' and azure_proxy_host != None)
+  when: not (azure_proxy_host is defined and azure_proxy_host and azure_proxy_host != None)

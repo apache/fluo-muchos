@@ -20,7 +20,9 @@
 #
 
 - name: Generate name for Workspace, Dashboard and Workbook
-  shell:  echo -n {{resource_group + vmss_name + location }}|md5sum|tr -cd "[:alnum:]"|cut -c 1-48
+  shell: set -o pipefail && echo -n {{ resource_group + vmss_name + location }} | md5sum | tr -cd "[:alnum:]" | cut -c 1-48
+  args:
+    executable: bash
   register: monitor_name
 
 - name: Set name for log analytics workspace
