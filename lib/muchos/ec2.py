@@ -240,7 +240,7 @@ class Ec2Cluster(ExistingCluster):
             print("Aborted termination")
 
     def wipe(self):
-        self.execute_playbook("wipe.yml")
+        super().wipe()
 
 class Ec2ClusterTemplate(Ec2Cluster):
 
