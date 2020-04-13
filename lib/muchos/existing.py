@@ -217,6 +217,13 @@ class ExistingCluster:
             cmd=cmd, src=path, usr=self.config.get('general', 'cluster_user'), ldr=self.config.get_proxy_ip(),
             tdir=target), shell=True)
 
+    def wipe(self):
+        if not isfile(self.config.hosts_path):
+            exit("Hosts file does not exist for cluster: " + self.config.hosts_path)
+        print("Killing all processes started by Muchos and wiping Muchos data from {0} cluster"
+                .format(self.config.cluster_name))
+        self.execute_playbook("wipe.yml")
+
     def perform(self, action):
         if action == 'launch':
             self.launch()
@@ -229,10 +236,6 @@ class ExistingCluster:
         elif action == 'ssh':
             self.ssh()
         elif action == 'wipe':
-            if not isfile(self.config.hosts_path):
-                exit("Hosts file does not exist for cluster: " + self.config.hosts_path)
-            print("Killing all processes started by Muchos and wiping Muchos data from {0} cluster"
-                    .format(self.config.cluster_name))
             self.wipe()
         elif action in ('kill', 'cancel_shutdown'):
             if not isfile(self.config.hosts_path):

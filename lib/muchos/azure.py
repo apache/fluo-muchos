@@ -74,7 +74,7 @@ class VmssCluster(ExistingCluster):
             print("Aborted termination")
 
     def wipe(self):
-        self.execute_playbook("wipe.yml")
+        super().wipe()
         # Wipe ADLS Gen2 storage accounts if implemented
         config = self.config
         azure_config = dict(config.items("azure"))
