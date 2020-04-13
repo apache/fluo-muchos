@@ -16,8 +16,8 @@ language: python
 python:
   - "3.5"
 install:
-  pip install flake8
-  pip install ansible-lint
+  - pip install flake8
+  - pip install ansible-lint
 script:
   - nosetests -w lib/
   - ansible-lint -x 204,301
