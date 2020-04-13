@@ -22,7 +22,10 @@ If you believe that you have found a bug, please search for an existing [issue](
 ## Development
 
 The [CI](https://github.com/apache/fluo-muchos/tree/master/.travis.yml) for this project runs Ansible-lint with specific checks excluded. Rather than wait for the CI to flag any issues with your work, please follow the steps below on your development environment to detect issues early.
-- Please use [Black](https://github.com/psf/black) to enforce that Python code found under the [lib](https://github.com/apache/fluo-muchos/tree/master/lib) folder is formatted correctly. Before submitting a PR, please ensure that you have used Black to format the code.
+- Please use [Black](https://github.com/psf/black) to enforce that Python code found under the [lib](https://github.com/apache/fluo-muchos/tree/master/lib) folder is formatted correctly. Before submitting a PR, please ensure that you have used Black to format the code with max line length set to 79 as below (it is to be run from the repo root):
+```
+black lib --line-length 79
+```
 - Please also run [flake8](https://github.com/pycqa/flake8) to validate that the Python code in the project conforms to known good practices.
 - We also highly recommend that you run [Ansible-lint](https://github.com/ansible/ansible-lint/) prior to submitting a PR. This will ensure that you align with known good practices.
 - Please also review the guidance on [false positives](https://docs.ansible.com/ansible-lint/rules/rules.html#false-positives-skipping-rules) from Ansible-lint.
