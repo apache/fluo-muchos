@@ -19,7 +19,4 @@ install:
   - pip install flake8
   - pip install ansible-lint
 script:
-  - nosetests -w lib/
-  - ansible-lint -x 204,301
-  - flake8
-  - git ls-files | tr '\n' '\0' | xargs -0 -L1 bash -c 'if test "$(grep --files-with-matches --binary-files=without-match --max-count=1 --regexp='.*' "$0")" && test "$(tail --bytes=1 "$0")"; then echo "No new line at end of $0."; false; fi'
+  - ./scripts/cibuild.sh
