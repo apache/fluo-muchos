@@ -19,4 +19,4 @@ install:
   - pip install flake8
   - pip install ansible-lint
 script:
-  - ./scripts/cibuild.sh
+  - ./scripts/cibuild
