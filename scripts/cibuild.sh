@@ -1,3 +1,4 @@
+#! /usr/bin/bash
 set -e
 echo "Running nose tests"
 nosetests -w lib/
