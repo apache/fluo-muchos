@@ -17,13 +17,13 @@
 ##
 - name: install accumulo gc systemd unit file
   template:
-    src: roles/accumulo/templates/gc.j2 
+    src: roles/accumulo/templates/gc.j2
     dest: "/etc/systemd/system/accumulo-gc.service"
     mode: 0644
 
 - name: start accumulo-gc using systemd
-  systemd: 
-    state: started 
+  systemd:
+    state: started
     name: "accumulo-gc"
     daemon_reload: yes
     enabled: yes

@@ -22,7 +22,7 @@
   register: namenode_status
 - name: "bootstrap standby"
   command: "nohup {{ hadoop_home }}/bin/hdfs namenode -bootstrapStandby -force"
-  when: namenode_status.rc == 1                                                                                                                                               
+  when: namenode_status.rc == 1
 - name: "start namenode"
   command: "nohup {{ hadoop_home }}/sbin/hadoop-daemon.sh start namenode"
-  when: namenode_status.rc == 1                                                                                                                                               
+  when: namenode_status.rc == 1

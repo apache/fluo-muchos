@@ -15,23 +15,51 @@
 # limitations under the License.
 #
 
-from muchos.config.base import BaseConfig, SERVICES, OPTIONAL_SERVICES
-from muchos.config.existing import ExistingDeployConfig
-from muchos.config.ec2 import Ec2DeployConfig
-from muchos.config.azure import AzureDeployConfig
+from .existing import ExistingDeployConfig
+from .ec2 import Ec2DeployConfig
+from .azure import AzureDeployConfig
 
 from configparser import ConfigParser
 
-def DeployConfig(deploy_path, config_path, hosts_path, checksums_path, templates_path, cluster_name):
+
+def DeployConfig(
+    deploy_path,
+    config_path,
+    hosts_path,
+    checksums_path,
+    templates_path,
+    cluster_name,
+):
     c = ConfigParser()
     c.read(config_path)
-    cluster_type = c.get('general', 'cluster_type')
+    cluster_type = c.get("general", "cluster_type")
 
-    if cluster_type == 'existing':
-        return ExistingDeployConfig(deploy_path, config_path, hosts_path, checksums_path, templates_path, cluster_name)
+    if cluster_type == "existing":
+        return ExistingDeployConfig(
+            deploy_path,
+            config_path,
+            hosts_path,
+            checksums_path,
+            templates_path,
+            cluster_name,
+        )
 
-    if cluster_type == 'ec2':
-        return Ec2DeployConfig(deploy_path, config_path, hosts_path, checksums_path, templates_path, cluster_name)
+    if cluster_type == "ec2":
+        return Ec2DeployConfig(
+            deploy_path,
+            config_path,
+            hosts_path,
+            checksums_path,
+            templates_path,
+            cluster_name,
+        )
 
-    if cluster_type == 'azure':
-        return AzureDeployConfig(deploy_path, config_path, hosts_path, checksums_path, templates_path, cluster_name)
+    if cluster_type == "azure":
+        return AzureDeployConfig(
+            deploy_path,
+            config_path,
+            hosts_path,
+            checksums_path,
+            templates_path,
+            cluster_name,
+        )

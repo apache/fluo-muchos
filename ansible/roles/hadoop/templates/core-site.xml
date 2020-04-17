@@ -34,12 +34,12 @@
     <name>dfs.domain.socket.path</name>
     <value>/var/lib/hadoop-hdfs/dn_socket</value>
   </property>
-{% if hdfs_ha == True %}
+{% if hdfs_ha %}
   <property>
     <name>ha.zookeeper.quorum</name>
     <value>{{ zookeeper_connect }}</value>
   </property>
-{% endif %}  
+{% endif %}
 {% if cluster_type == 'azure' and use_adlsg2 %}
   <property>
     <name>fs.azure.account.auth.type</name>

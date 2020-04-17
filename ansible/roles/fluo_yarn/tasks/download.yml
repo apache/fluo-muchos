@@ -26,4 +26,4 @@
   retries: 3
   with_items:
     - { urlp: "{{ apache_mirror.stdout }}/fluo/fluo-yarn/{{ fluo_yarn_version }}", fn: "{{ fluo_yarn_tarball }}", sum: "{{ fluo_yarn_checksum }}" }
-  when: fluo_yarn.stat.exists == False
+  when: not fluo_yarn.stat.exists

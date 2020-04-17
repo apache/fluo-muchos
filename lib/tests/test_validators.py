@@ -70,7 +70,7 @@ class ValidateThis(object):
     @property
     @is_valid(validators.contains(5))
     def containsFive(self):
-        return [4,5,6]
+        return [4, 5, 6]
 
     @property
     @is_valid(validators.contains(5))
@@ -100,7 +100,7 @@ class ValidateThis(object):
     @property
     @is_valid(validators.is_type(str))
     def stringIsString(self):
-        return 'some string'
+        return "some string"
 
 
 class ValidationTests(TestCase):
@@ -131,7 +131,7 @@ class ValidationTests(TestCase):
         with self.assertRaises(Exception):
             thing.sixeNotEqualFive
 
-        self.assertEqual(thing.containsFive, [4,5,6])
+        self.assertEqual(thing.containsFive, [4, 5, 6])
 
         with self.assertRaises(Exception):
             thing.notContainsFive
@@ -147,4 +147,4 @@ class ValidationTests(TestCase):
         with self.assertRaises(Exception):
             thing.intIsNotString
 
-        self.assertEqual(thing.stringIsString, 'some string')
+        self.assertEqual(thing.stringIsString, "some string")

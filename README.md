@@ -297,7 +297,7 @@ managed in their own git repository (see [mikewalch/muchos-custom][mc] for an ex
 ## High-Availability (optional)
 
 Additionally, Muchos can be configured to provide High-Availability for HDFS & Accumulo components. By default,
-this feature is off, however it can be turned on by editing the following settings in [muchos.props] 
+this feature is off, however it can be turned on by editing the following settings in [muchos.props]
 under the `general` section as shown below:
 
 ```ini
@@ -305,7 +305,7 @@ hdfs_ha = True                        # default is False
 nameservice_id = muchoshacluster      # Logical name for the cluster, no special characters
 ```
 
-Before enabling HA, it is strongly recommended you read the Apache doc for [HDFS HA] & [Accumulo HA] 
+Before enabling HA, it is strongly recommended you read the Apache doc for [HDFS HA] & [Accumulo HA]
 
 Also in the `[nodes]` section of [muchos.props] ensure the `journalnode` and `zkfc` service are configured to run.
 
@@ -340,6 +340,10 @@ $ ./bin/muchos config -p leader.public.ip
 10.10.10.10
 ```
 
+## Contributions
+
+We welcome contributions to the project. [These notes](./CONTRIBUTING.md) should be helpful.
+
 ## Powered by
 
 Muchos is powered by the following projects:
@@ -349,16 +353,6 @@ Muchos is powered by the following projects:
    start Fluo, Accumulo, Hadoop, etc on an existing EC2 or bare metal cluster.
  * [azure-cli] - The Azure CLI is a command-line tool for managing Azure resources.
  * [ansible-azure] - Ansible includes a suite of modules for interacting with Azure Resource Manager.
-
-## Muchos Testing
-
-Muchos has unit tests.  To run them, first install nose using pip:
-
-    pip install nose
-
-The following command runs the unit tests:
-
-    nosetests -w lib/
 
 [centos7]: https://aws.amazon.com/marketplace/pp/B00O7WM7QW
 [aws-config]: http://docs.aws.amazon.com/cli/latest/userguide/cli-config-files.html

@@ -33,42 +33,55 @@ class _ansible_var(object):
         self.module_name = module_name
 
     def __str__(self):
-        return 'var_name={}, class_name={}, property_name={}, module_name={}'.format(
-            self.var_name, self.class_name, self.property_name, self.module_name
+        return (
+            "var_name={}, class_name={}, " "property_name={}, module_name={}"
+        ).format(
+            self.var_name,
+            self.class_name,
+            self.property_name,
+            self.module_name,
         )
 
+
 # each entry of _ansible_vars will contain a list of _ansible_var instances
-_ansible_vars = dict(
-    host=[],
-    play=[],
-    extra=[]
-)
+_ansible_vars = dict(host=[], play=[], extra=[])
+
 
 def get_ansible_vars(var_type, class_in_scope):
     # return variables for the complete class hierarchy
-    return list(filter(lambda v:
-        issubclass(class_in_scope, locate(v.module_name + "." + v.class_name)),
-        _ansible_vars.get(var_type)))
+    return list(
+        filter(
+            lambda v: issubclass(
+                class_in_scope, locate(v.module_name + "." + v.class_name)
+            ),
+            _ansible_vars.get(var_type),
+        )
+    )
+
 
 # ansible hosts inventory variables
 def ansible_host_var(name=None):
-    return ansible_var_decorator('host', name)
+    return ansible_var_decorator("host", name)
+
 
 # ansible group/all variables
 def ansible_play_var(name=None):
-    return ansible_var_decorator('play', name)
+    return ansible_var_decorator("play", name)
+
 
 # ansible extra variables
 def ansible_extra_var(name=None):
-    return ansible_var_decorator('extra', name)
+    return ansible_var_decorator("extra", name)
+
 
 def ansible_var_decorator(var_type, name):
     def _decorator(func):
         ansible_var = _ansible_var(
             var_name=name if isinstance(name, str) else func.__name__,
-            class_name=func.__qualname__.split('.')[0],
+            class_name=func.__qualname__.split(".")[0],
             property_name=func.__name__,
-            module_name=func.__module__)
+            module_name=func.__module__,
+        )
         _ansible_vars[var_type].append(ansible_var)
         return func
 
@@ -76,46 +89,62 @@ def ansible_var_decorator(var_type, name):
         return _decorator(name)
     return _decorator
 
+
 def default(val):
     def _default(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
             try:
                 res = func(*args, **kwargs)
-            except:
+            except:  # noqa
                 return val
             else:
                 if res is None or (isinstance(res, str) and len(res) == 0):
                     return val
                 return res
+
         return wrapper
+
     return _default
+
 
 def required(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
         res = func(*args, **kwargs)
-        if res in [None, 0, ''] or len(res) == 0:
+        if res in [None, 0, ""] or len(res) == 0:
             raise ConfigMissingError(func.__name__)
         return res
+
     return wrapper
+
 
 def is_valid(validators):
     if not isinstance(validators, Iterable):
         validators = [validators]
+
     def _validate(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
             res = func(*args, **kwargs)
-            failed_checks = list(filter(lambda f: f(res) is not True, validators))
+            failed_checks = list(
+                filter(lambda f: f(res) is not True, validators)
+            )
             if len(failed_checks) > 0:
-                raise Exception("{}={} checked validation {}".format(
-                    func.__name__, res,
-                    [str(v) for v in failed_checks]))
+                raise Exception(
+                    "{}={} checked validation {}".format(
+                        func.__name__, res, [str(v) for v in failed_checks]
+                    )
+                )
             return res
+
         return wrapper
+
     return _validate
+
 
 class ConfigMissingError(Exception):
     def __init__(self, name):
-        super(ConfigMissingError, self).__init__("{} is missing from the configuration".format(name))
+        super(ConfigMissingError, self).__init__(
+            "{} is missing from the configuration".format(name)
+        )

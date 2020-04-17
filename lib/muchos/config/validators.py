@@ -15,6 +15,7 @@
 # limitations under the License.
 #
 
+
 class _validator(object):
     def __init__(self, f, msg):
         self.f = f
@@ -28,31 +29,26 @@ class _validator(object):
 
 
 def greater_than(val):
-    return _validator(
-        lambda n: n > val,
-        "must be greater than {}".format(val))
+    return _validator(lambda n: n > val, "must be greater than {}".format(val))
+
 
 def less_than(val):
-    return _validator(
-        lambda n: n < val,
-        "must be less than {}".format(val))
+    return _validator(lambda n: n < val, "must be less than {}".format(val))
+
 
 def equals(val):
-    return _validator(
-        lambda n: n == val,
-        "must equal {}".format(val))
+    return _validator(lambda n: n == val, "must equal {}".format(val))
+
 
 def contains(val):
-    return _validator(
-        lambda n: val in n,
-        "must contain {}".format(val))
+    return _validator(lambda n: val in n, "must contain {}".format(val))
+
 
 def is_in(val):
-    return _validator(
-        lambda n: n in val,
-        "must be in {}".format(val))
+    return _validator(lambda n: n in val, "must be in {}".format(val))
+
 
 def is_type(t):
     return _validator(
-        lambda n: isinstance(n, t),
-        "must be of type {}".format(t))
+        lambda n: isinstance(n, t), "must be of type {}".format(t)
+    )

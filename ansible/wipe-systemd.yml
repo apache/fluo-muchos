@@ -61,5 +61,5 @@
   - name: "reload config changes"
     systemd: daemon_reload=yes
 
-  - name: "reset failed on every node"
-    shell: systemctl reset-failed
+  - name: "reset failed on every node" # noqa 303
+    command: systemctl reset-failed

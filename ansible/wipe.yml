@@ -25,11 +25,20 @@
       - grafana-server
   - name: "wipe influxdb data"
     file: path={{ default_data_dirs[0] }}/influxdb state=absent
+    register: delete_task
+    retries: 10
+    delay: 3
+    until: delete_task is success
+
   - name: "wipe grafana db"
     file: path=/var/lib/grafana/grafana.db state=absent
+    register: delete_task
+    retries: 10
+    delay: 3
+    until: delete_task is success
 
 - import_playbook: wipe-systemd.yml
-  when: use_systemd == True
+  when: use_systemd
 
 - import_playbook: kill.yml
 
@@ -46,37 +55,58 @@
       - "{{ maven_home }}"
       - "{{ hub_home }}"
       - "{{ fluo_yarn_home }}"
+    register: delete_task
+    retries: 10
+    delay: 3
+    until: delete_task is success
 
 - hosts: hadoop
   tasks:
   - name: "wipe hadoop data"
-    file: path={{item}}/hadoop state=absent
+    file: path={{ item }}/hadoop state=absent
     with_items: "{{ worker_data_dirs }}"
-    when: cluster_type != 'azure'
-  - name: "remove hadoop logs"
-    shell: rm -rf {{ hadoop_home }}/logs/*
-    when: cluster_type != 'azure'
+    register: delete_task
+    retries: 10
+    delay: 3
+    until: delete_task is success
+  - name: "remove logs folder"
+    file: path={{ item }}/logs state=absent
+    with_items: "{{ worker_data_dirs }}"
+    register: delete_task
+    retries: 10
+    delay: 3
+    until: delete_task is success
 
 - hosts: zookeepers
   tasks:
   - name: "wipe zookeeper data"
-    file: path={{ default_data_dirs[0] }}/zookeeper state=absent
-    when: cluster_type != 'azure'
-  - name: "remove zookeeper logs"
-    file: path={{ zookeeper_home }}/zookeeper.out state=absent
-    when: cluster_type != 'azure'
+    file: path={{ item }}/zookeeper state=absent
+    with_items: "{{ default_data_dirs }}"
+    register: delete_task
+    retries: 10
+    delay: 3
+    until: delete_task is success
+  - name: "remove logs folder"
+    file: path={{ item }}/logs state=absent
+    with_items: "{{ default_data_dirs }}"
+    register: delete_task
+    retries: 10
+    delay: 3
+    until: delete_task is success
 
 - hosts: accumulo
   tasks:
-  - name: "remove accumulo logs"
-    shell: rm -rf {{ accumulo_home }}/logs/*
-    when: cluster_type != 'azure'
-
-# Using rm -rf instead of Ansible file module to remove multiple levels of subfolder
-- hosts: all
-  tasks:
-  - name: "wipe data and log directories for Azure"
-    shell: rm -rf {{ item }}/*
-    loop:
-      "{{ worker_data_dirs }}"
-    when: cluster_type == 'azure'
+  - name: "remove accumulo folder"
+    file: path={{ item }}/accumulo state=absent
+    with_items: "{{ worker_data_dirs }}"
+    register: delete_task
+    retries: 10
+    delay: 3
+    until: delete_task is success
+  - name: "remove logs folder"
+    file: path={{ item }}/logs state=absent
+    with_items: "{{ worker_data_dirs }}"
+    register: delete_task
+    retries: 10
+    delay: 3
+    until: delete_task is success

@@ -26,4 +26,4 @@
   retries: 3
   with_items:
     - { urlp: "{{ apache_mirror.stdout }}/spark/spark-{{ spark_version }}", fn: "{{ spark_tarball }}", sum: "{{ spark_checksum }}" }
-  when: spark.stat.exists == False
+  when: not spark.stat.exists

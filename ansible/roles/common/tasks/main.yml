@@ -47,12 +47,12 @@
 - name: "install maven"
   unarchive: src={{ tarballs_dir }}/{{ maven_tarball }} dest={{ install_dir }} creates={{ maven_home }}
 - name: "chown maven home"
-  file: path={{ maven_home }} recurse=yes owner={{ cluster_user }} group={{ cluster_group}}
+  file: path={{ maven_home }} recurse=yes owner={{ cluster_user }} group={{ cluster_group }}
 - name: "install hub"
   unarchive: src={{ tarballs_dir }}/{{ hub_tarball }} dest={{ install_dir }} creates={{ hub_home }}
   when: install_hub
 - name: "chown hub home"
-  file: path={{ hub_home }} recurse=yes owner={{ cluster_user }} group={{ cluster_group}}
+  file: path={{ hub_home }} recurse=yes owner={{ cluster_user }} group={{ cluster_group }}
   when: install_hub
 - name: "configure collectd"
   template: src=etc/collectd.conf.j2 dest=/etc/collectd.conf

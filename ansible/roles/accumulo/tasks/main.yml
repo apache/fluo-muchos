@@ -56,20 +56,20 @@
 - name: "configure tservers using managed templates"
   template: src=tservers dest={{ accumulo_home }}/conf/{{ accumulo_tservers_fn[accumulo_major_version] }}
 - name: "build accumulo native libraries"
-  shell: "{{ accumulo_build_native_cmd[accumulo_major_version] }}"
+  command: "{{ accumulo_build_native_cmd[accumulo_major_version] }}"
   args:
     creates: "{{ accumulo_home }}/lib/native/libaccumulo.so"
 - name: "Create accumulo log dir"
   file: path={{ worker_data_dirs[0] }}/logs/accumulo state=directory
 - name: "Copy the modified accumulo-cluster script that supports systemd to bin"
   copy: src=roles/accumulo/files/accumulo-cluster-systemd dest={{ accumulo_home }}/bin/accumulo-cluster-systemd mode=0755
-  when: use_systemd == True
+  when: use_systemd
 - name: "Remove the exisiting accumulo-service and accumulo-cluster scripts"
   file: path={{ accumulo_home }}/bin/{{ item }} state=absent
   with_items:
     - accumulo-service
     - accumulo-cluster
-  when: use_systemd == True
+  when: use_systemd
 - name: "Create a symlink for accumulo-cluster-systemd"
   file: src={{ accumulo_home }}/bin/accumulo-cluster-systemd dest={{ accumulo_home }}/bin/accumulo-cluster mode=0755 state=link
-  when: use_systemd == True
+  when: use_systemd
