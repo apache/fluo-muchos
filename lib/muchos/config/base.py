@@ -358,14 +358,7 @@ class BaseConfig(ConfigParser, metaclass=ABCMeta):
     def version(self, software_id):
         return self.get("general", software_id + "_version")
 
-    @ansible_host_var
-    def java_product_version(self):
-        java_version_map = {
-            "java-1.8.0-openjdk": 8,
-            "java-11-openjdk": 11,
-            "java-latest-openjdk": 13,
-        }
-
+    def filter_by_java_version(self, dict_to_search):
         # Given that a user might chose to install a specific JDK version
         # (where the version is suffixed to package name) it is safer
         # to check if the configured Java version starts with one of the above
@@ -373,7 +366,7 @@ class BaseConfig(ConfigParser, metaclass=ABCMeta):
         configured_java_version = self.get("general", "java_package")
         filtered_java_versions = {
             k: v
-            for (k, v) in java_version_map.items()
+            for (k, v) in dict_to_search.items()
             if configured_java_version.startswith(k)
         }
         if len(filtered_java_versions) != 1:
@@ -383,6 +376,26 @@ class BaseConfig(ConfigParser, metaclass=ABCMeta):
             )
 
         return next(iter(filtered_java_versions.values()))
+
+    @ansible_host_var
+    def java_product_version(self):
+        java_version_map = {
+            "java-1.8.0-openjdk": 8,
+            "java-11-openjdk": 11,
+            "java-latest-openjdk": 14,
+        }
+
+        return self.filter_by_java_version(java_version_map)
+
+    @ansible_host_var
+    def jdk_folder_pattern(self):
+        jdk_folder_pattern_map = {
+            "java-1.8.0-openjdk": "java-1.8.0-openjdk*x86_64",
+            "java-11-openjdk": "java-11-openjdk*x86_64",
+            "java-latest-openjdk": "java-14-openjdk*x86_64",
+        }
+
+        return self.filter_by_java_version(jdk_folder_pattern_map)
 
     def checksum(self, software):
         return self.checksum_ver(software, self.version(software))

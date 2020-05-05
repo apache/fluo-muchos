@@ -39,6 +39,17 @@
   retries: 10
   delay: 15
   until: yumresult is not failed
+- name: "get exact jdk folder path"
+  find:
+    file_type: directory
+    paths: /usr/lib/jvm/
+    patterns: "{{ jdk_folder_pattern }}"
+  register: actual_jdk_folder
+- name: "ensure correct version of jdk is selected"
+  alternatives:
+    link: /usr/lib/jvm/java
+    name: java-openjdk
+    path: "{{ actual_jdk_folder.files[0].path }}"
 - name: "configure node shutdown"
   shell: shutdown +{{ shutdown_delay_minutes }} &> {{ user_home }}/.shutdown creates={{ user_home }}/.shutdown
   when: shutdown_delay_minutes > 0
