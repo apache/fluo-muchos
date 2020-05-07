@@ -45,7 +45,7 @@
   tasks:
     - name: get swarm status
       shell: >
-        set -o pipefail && docker info | grep 'Swarm' | sed 's/\s*Swarm\:\s//'
+        set -o pipefail && docker info | grep 'Swarm:' | sed 's/\s*Swarm\:\s*//'
       args:
         executable: bash
       register: swarm_status
