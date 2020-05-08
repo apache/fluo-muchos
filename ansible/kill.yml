@@ -30,7 +30,7 @@
     - name: "stop mesos slaves"
       service: name=mesos-slave state=stopped
       when: "'mesosmaster' in groups"
-- hosts: all
+- hosts: all:!{{ azure_proxy_host }}
   become: yes
   tasks:
   - name: "stop docker"
