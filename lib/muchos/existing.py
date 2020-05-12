@@ -79,30 +79,20 @@ class ExistingCluster:
                 "[proxy]\n{0}".format(config.proxy_hostname()), file=hosts_file
             )
             print("\n[accumulomaster]", file=hosts_file)
-            for (index, accu_host) in enumerate(
-                config.get_service_hostnames("accumulomaster"), start=1
-            ):
-                print("{0}".format(accu_host, index), file=hosts_file)
+            for accu_host in config.get_service_hostnames("accumulomaster"):
+                print(accu_host, file=hosts_file)
             print("\n[namenode]", file=hosts_file)
-            for (index, nn_host) in enumerate(
-                config.get_service_hostnames("namenode"), start=1
-            ):
-                print("{0}".format(nn_host, index), file=hosts_file)
+            for nn_host in config.get_service_hostnames("namenode"):
+                print(nn_host, file=hosts_file)
             print("\n[journalnode]", file=hosts_file)
-            for (index, jn_host) in enumerate(
-                config.get_service_hostnames("journalnode"), start=1
-            ):
-                print("{0}".format(jn_host, index), file=hosts_file)
+            for jn_host in config.get_service_hostnames("journalnode"):
+                print(jn_host, file=hosts_file)
             print("\n[zkfc]", file=hosts_file)
-            for (index, zkfc_host) in enumerate(
-                config.get_service_hostnames("zkfc"), start=1
-            ):
-                print("{0}".format(zkfc_host, index), file=hosts_file)
+            for zkfc_host in config.get_service_hostnames("zkfc"):
+                print(zkfc_host, file=hosts_file)
             print("\n[resourcemanager]", file=hosts_file)
-            for (index, rm_host) in enumerate(
-                config.get_service_hostnames("resourcemanager"), start=1
-            ):
-                print("{0}".format(rm_host, index), file=hosts_file)
+            for rm_host in config.get_service_hostnames("resourcemanager"):
+                print(rm_host, file=hosts_file)
             if config.has_service("spark"):
                 print(
                     "\n[spark]\n{0}".format(
