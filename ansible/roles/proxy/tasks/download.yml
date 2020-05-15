@@ -26,6 +26,7 @@
     - { urlp: "{{ apache_mirror.stdout }}/hadoop/common/hadoop-{{ hadoop_version }}", fn: "{{ hadoop_tarball }}", sum: "{{ hadoop_checksum }}" }
     - { urlp: "{{ apache_mirror.stdout }}/maven/maven-3/{{ maven_version }}/binaries", fn: "{{ maven_tarball }}", sum: "{{ maven_checksum }}" }
     - { urlp: "https://github.com/github/hub/releases/download/v{{ hub_version }}", fn: "{{ hub_tarball }}", sum: "{{ hub_checksum }}" }
+  when: "'snapshot' not in item.fn.lower()"
 
 # This is currently needed to run hadoop with Java 11 (see https://github.com/apache/fluo-muchos/issues/266)
 - name: "Download javax.activation-api for Hadoop 3 when Java 11 is used"
