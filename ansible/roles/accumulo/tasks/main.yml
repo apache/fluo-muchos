@@ -25,18 +25,6 @@
     - monitor_logger.xml
     - log4j.properties
   when: accumulo_major_version == '1'
-- name: "configure accumulo 2.0 configuration"
-  template: src={{ item }} dest={{ accumulo_home }}/conf/{{ item }}
-  with_items:
-    - accumulo-env.sh
-    - accumulo.properties
-    - accumulo-client.properties
-    - gc
-    - tracers
-    - masters
-    - monitor
-    - log4j-service.properties
-  when: accumulo_major_version == '2'
 - name: "configure accumulo 1.0 configuration"
   template: src={{ item }} dest={{ accumulo_home }}/conf/{{ item }}
   with_items:
@@ -48,6 +36,28 @@
     - masters
     - monitor
   when: accumulo_major_version == '1'
+- name: "configure accumulo 2.X configuration"
+  template: src={{ item }} dest={{ accumulo_home }}/conf/{{ item }}
+  with_items:
+    - accumulo-env.sh
+    - accumulo.properties
+    - accumulo-client.properties
+    - gc
+    - tracers
+    - masters
+    - monitor
+  when: accumulo_major_version == '2'
+- name: "configure accumulo 2.0.0 logging"
+  command: cp {{ accumulo_home }}/conf/templates/{{ item }} {{ accumulo_home }}/conf/ creates={{ accumulo_home }}/conf/{{ item }}
+  with_items:
+    - log4j-service.properties
+  when: accumulo_version is version('2.0.0','>=') and accumulo_version is version('2.1.0','<')
+- name: "configure accumulo >= 2.1.0 logging"
+  command: cp {{ accumulo_home }}/conf/templates/{{ item }} {{ accumulo_home }}/conf/ creates={{ accumulo_home }}/conf/{{ item }}
+  with_items:
+    - log4j2.properties
+    - log4j2-service.properties
+  when: accumulo_version is version('2.1.0','>=')
 - name: "configure accumulo to send metrics (if metrics server exists)"
   template: src={{ item }} dest={{ accumulo_home }}/conf/{{ item }}
   with_items:
