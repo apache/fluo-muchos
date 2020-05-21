@@ -86,17 +86,30 @@ case "$cmd" in
   *)       JAVA_OPTS=("${JAVA_OPTS[@]}" '-Xmx256m' '-Xms64m') ;;
 esac
 
+
+
 JAVA_OPTS=("${JAVA_OPTS[@]}"
   "-Daccumulo.log.dir=${ACCUMULO_LOG_DIR}"
-  "-Daccumulo.application=${cmd}${ACCUMULO_SERVICE_INSTANCE}_$(hostname)")
+  "-Daccumulo.application=${cmd}${ACCUMULO_SERVICE_INSTANCE}_$(hostname)"
+{% if accumulo_version is version('2.1.0','>=') %}
+   "-Daccumulo.metrics.service.instance=${ACCUMULO_SERVICE_INSTANCE}"
+   "-Dlog4j2.contextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector"
+{% endif %}
+)
 
 case "$cmd" in
+{% if accumulo_version is version('2.1.0','>=') %}
+  monitor|gc|master|tserver|tracer)
+    JAVA_OPTS=("${JAVA_OPTS[@]}" "-Dlog4j.configurationFile=log4j2-service.properties")
+    ;;
+{% else %}
   monitor)
     JAVA_OPTS=("${JAVA_OPTS[@]}" "-Dlog4j.configuration=log4j-monitor.properties")
     ;;
   gc|master|tserver|tracer)
     JAVA_OPTS=("${JAVA_OPTS[@]}" "-Dlog4j.configuration=log4j-service.properties")
     ;;
+{% endif %}
   *)
     # let log4j use its default behavior (log4j.xml, log4j.properties)
     true
