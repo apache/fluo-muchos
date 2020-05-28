@@ -117,18 +117,16 @@ class ExistingCluster:
                     file=hosts_file,
                 )
             if config.has_service("swarmmanager"):
-<<<<<<< HEAD
-                print("\n[swarmmanager]\n{0}".format(config.get_service_hostnames("swarmmanager")[0]), file=hosts_file)
-            if config.has_service("elkserver"):
-                print("\n[elkserver]\n{0}".format(config.get_service_hostnames("elkserver")[0]), file=hosts_file)
-=======
                 print(
                     "\n[swarmmanager]\n{0}".format(
                         config.get_service_hostnames("swarmmanager")[0]
                     ),
                     file=hosts_file,
                 )
->>>>>>> d9b2473185b3b7b01ef71ad16c0797caddd18ff8
+
+            if config.has_service("elkserver"):
+                print("\n[elkserver]\n{0}".format(
+                    config.get_service_hostnames("elkserver")[0]), file=hosts_file)
 
             print("\n[zookeepers]", file=hosts_file)
             for (index, zk_host) in enumerate(
