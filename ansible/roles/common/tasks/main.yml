@@ -17,6 +17,10 @@
 
 - name: "enable epel yum repo"
   yum: name=epel-release state=present
+  register: epelresult
+  retries: 10
+  delay: 15
+  until: epelresult is not failed
 - name: "install packages"
   yum:
     name:
@@ -31,6 +35,21 @@
       - collectd-zookeeper
       - policycoreutils-python
     state: present
+  register: yumresult
+  retries: 10
+  delay: 15
+  until: yumresult is not failed
+- name: "get exact jdk folder path"
+  find:
+    file_type: directory
+    paths: /usr/lib/jvm/
+    patterns: "{{ jdk_folder_pattern }}"
+  register: actual_jdk_folder
+- name: "ensure correct version of jdk is selected"
+  alternatives:
+    link: /usr/lib/jvm/java
+    name: java-openjdk
+    path: "{{ actual_jdk_folder.files[0].path }}"
 - name: "configure node shutdown"
   shell: shutdown +{{ shutdown_delay_minutes }} &> {{ user_home }}/.shutdown creates={{ user_home }}/.shutdown
   when: shutdown_delay_minutes > 0
@@ -39,12 +58,12 @@
 - name: "install maven"
   unarchive: src={{ tarballs_dir }}/{{ maven_tarball }} dest={{ install_dir }} creates={{ maven_home }}
 - name: "chown maven home"
-  file: path={{ maven_home }} recurse=yes owner={{ cluster_user }} group={{ cluster_group}}
+  file: path={{ maven_home }} recurse=yes owner={{ cluster_user }} group={{ cluster_group }}
 - name: "install hub"
   unarchive: src={{ tarballs_dir }}/{{ hub_tarball }} dest={{ install_dir }} creates={{ hub_home }}
   when: install_hub
 - name: "chown hub home"
-  file: path={{ hub_home }} recurse=yes owner={{ cluster_user }} group={{ cluster_group}}
+  file: path={{ hub_home }} recurse=yes owner={{ cluster_user }} group={{ cluster_group }}
   when: install_hub
 - name: "configure collectd"
   template: src=etc/collectd.conf.j2 dest=/etc/collectd.conf

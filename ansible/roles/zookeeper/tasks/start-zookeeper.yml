@@ -19,7 +19,13 @@
   file: path={{ default_data_dirs[0] }}/zookeeper state=directory
 - name: "ensure myid file is set"
   template: src=roles/zookeeper/templates/myid dest={{ default_data_dirs[0] }}/zookeeper/myid
+- name: Check if Zookeeper is running
+  shell: jps | grep "QuorumPeerMain"
+  ignore_errors: yes
+  changed_when: false
+  register: zookeeper_status
 - name: "start zookeeper"
-  shell: "{{ zookeeper_home }}/bin/zkServer.sh start"
+  command: "{{ zookeeper_home }}/bin/zkServer.sh start"
   register: zk_start
   changed_when: "'STARTED' in zk_start.stdout"
+  when: zookeeper_status.rc == 1

@@ -15,14 +15,15 @@
 ### limitations under the License.
 ###
 ##
-- name: Check if NameNode is running
-  shell: jps | grep " NameNode" | grep -v grep
-  ignore_errors: yes
-  changed_when: false
-  register: namenode_status
-- name: "bootstrap standby"
-  command: "nohup {{ hadoop_home }}/bin/hdfs namenode -bootstrapStandby -force"
-  when: namenode_status.rc == 1                                                                                                                                               
-- name: "start namenode"
-  command: "nohup {{ hadoop_home }}/sbin/hadoop-daemon.sh start namenode"
-  when: namenode_status.rc == 1                                                                                                                                               
+- name: install accumulo monitor systemd unit file
+  template:
+    src: roles/accumulo/templates/monitor.j2
+    dest: "/etc/systemd/system/accumulo-monitor.service"
+    mode: 0644
+
+- name: start accumulo-monitor using systemd
+  systemd:
+    state: started
+    name: "accumulo-monitor"
+    daemon_reload: yes
+    enabled: yes

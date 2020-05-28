@@ -40,7 +40,30 @@ export MALLOC_ARENA_MAX=${MALLOC_ARENA_MAX:-1}
 export HADOOP_HOME={{ hadoop_home }}
 export HADOOP_CONF_DIR="$HADOOP_HOME/etc/hadoop"
 
-CLASSPATH="${conf}:${lib}/*:${HADOOP_CONF_DIR}:${ZOOKEEPER_HOME}/*:${HADOOP_HOME}/share/hadoop/client/*"
+add_jar_prefix_to_classpath() {
+  for JAR in "$1"*jar; do
+    CLASSPATH="${CLASSPATH}:${JAR}"
+  done
+}
+CLASSPATH="${conf}:${lib}/*:${HADOOP_CONF_DIR}:${ZOOKEEPER_HOME}/*"
+add_jar_prefix_to_classpath "${ZOOKEEPER_HOME}/lib/zookeeper-"
+CLASSPATH="${CLASSPATH}:${HADOOP_HOME}/share/hadoop/client/*"
+{% if cluster_type == 'azure' and use_adlsg2 %}
+add_jar_prefix_to_classpath "${HADOOP_HOME}/share/hadoop/tools/lib/azure-data-lake-store-sdk-"
+add_jar_prefix_to_classpath "${HADOOP_HOME}/share/hadoop/tools/lib/azure-keyvault-core-"
+add_jar_prefix_to_classpath "${HADOOP_HOME}/share/hadoop/tools/lib/hadoop-azure-"
+add_jar_prefix_to_classpath "${HADOOP_HOME}/share/hadoop/tools/lib/azure-storage-"
+add_jar_prefix_to_classpath "${HADOOP_HOME}/share/hadoop/tools/lib/wildfly-openssl-"
+add_jar_prefix_to_classpath "${HADOOP_HOME}/share/hadoop/common/lib/jaxb-api-"
+add_jar_prefix_to_classpath "${HADOOP_HOME}/share/hadoop/common/lib/jaxb-impl-"
+add_jar_prefix_to_classpath "${HADOOP_HOME}/share/hadoop/common/lib/commons-lang3-"
+add_jar_prefix_to_classpath "${HADOOP_HOME}/share/hadoop/common/lib/httpclient-"
+add_jar_prefix_to_classpath "${HADOOP_HOME}/share/hadoop/common/lib/jackson-core-asl-"
+add_jar_prefix_to_classpath "${HADOOP_HOME}/share/hadoop/common/lib/jackson-mapper-asl-"
+{% if not use_hdfs|default(True) %}
+add_jar_prefix_to_classpath "${HADOOP_HOME}/share/hadoop/hdfs/lib/jetty-util-ajax-"
+{% endif %}
+{% endif %}
 export CLASSPATH
 
 JAVA_OPTS=("${ACCUMULO_JAVA_OPTS[@]}"
@@ -50,6 +73,9 @@ JAVA_OPTS=("${ACCUMULO_JAVA_OPTS[@]}"
   '-XX:OnOutOfMemoryError=kill -9 %p'
   '-XX:-OmitStackTraceInFastThrow'
   '-Djava.net.preferIPv4Stack=true'
+{% if cluster_type == 'azure' and use_adlsg2 %}
+  '-Dorg.wildfly.openssl.path=/usr/lib64'
+{% endif %}
   "-Daccumulo.native.lib.path=${lib}/native")
 
 case "$cmd" in
@@ -60,17 +86,30 @@ case "$cmd" in
   *)       JAVA_OPTS=("${JAVA_OPTS[@]}" '-Xmx256m' '-Xms64m') ;;
 esac
 
+
+
 JAVA_OPTS=("${JAVA_OPTS[@]}"
   "-Daccumulo.log.dir=${ACCUMULO_LOG_DIR}"
-  "-Daccumulo.application=${cmd}${ACCUMULO_SERVICE_INSTANCE}_$(hostname)")
+  "-Daccumulo.application=${cmd}${ACCUMULO_SERVICE_INSTANCE}_$(hostname)"
+{% if accumulo_version is version('2.1.0','>=') %}
+   "-Daccumulo.metrics.service.instance=${ACCUMULO_SERVICE_INSTANCE}"
+   "-Dlog4j2.contextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector"
+{% endif %}
+)
 
 case "$cmd" in
+{% if accumulo_version is version('2.1.0','>=') %}
+  monitor|gc|master|tserver|tracer)
+    JAVA_OPTS=("${JAVA_OPTS[@]}" "-Dlog4j.configurationFile=log4j2-service.properties")
+    ;;
+{% else %}
   monitor)
     JAVA_OPTS=("${JAVA_OPTS[@]}" "-Dlog4j.configuration=log4j-monitor.properties")
     ;;
   gc|master|tserver|tracer)
     JAVA_OPTS=("${JAVA_OPTS[@]}" "-Dlog4j.configuration=log4j-service.properties")
     ;;
+{% endif %}
   *)
     # let log4j use its default behavior (log4j.xml, log4j.properties)
     true

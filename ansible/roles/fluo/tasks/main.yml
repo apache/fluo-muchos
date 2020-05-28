@@ -38,4 +38,4 @@
 - name: "fetch extra fluo dependencies"
   command: "{{ fluo_home }}/lib/fetch.sh extra"
 - name: "set correct owner & group"
-  file: path={{ fluo_home }} recurse=yes owner={{ cluster_user }} group={{ cluster_group}}
+  file: path={{ fluo_home }} recurse=yes owner={{ cluster_user }} group={{ cluster_group }}

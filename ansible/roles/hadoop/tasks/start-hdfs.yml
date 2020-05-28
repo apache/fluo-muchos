@@ -15,10 +15,6 @@
 # limitations under the License.
 #
 
-- name: "format namenode"
-  command: "{{ hadoop_home }}/bin/hdfs namenode -format"
-  args:
-    creates: "{{ worker_data_dirs[0] }}/hadoop/name"
 - name: "start hdfs"
   command: "{{ hadoop_home }}/sbin/start-dfs.sh"
   register: start_hdfs

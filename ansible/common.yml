@@ -38,9 +38,9 @@
     - block:
       - import_tasks: roles/common/tasks/azure.yml
       - import_tasks: roles/common/tasks/azure_oms.yml
-        when: az_omsIntegrationNeeded
+        when: az_oms_integration_needed
       - import_tasks: roles/common/tasks/azure_oms_selinux.yml
-        when: az_omsIntegrationNeeded
+        when: az_oms_integration_needed
       when: cluster_type == 'azure'
 
     - import_tasks: roles/common/tasks/ec2.yml

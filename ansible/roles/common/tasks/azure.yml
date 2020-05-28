@@ -16,9 +16,9 @@
 #
 - name: Find luns
   find:
-    paths: "/dev/disk/azure/scsi1"
-    patterns: "lun*"
-    file_type: link
+    paths: "{{ azure_disk_device_path }}"
+    patterns: "{{ azure_disk_device_pattern }}"
+    file_type: any
   register: files_matched
 - name: Create xfs filesytems
   filesystem:
@@ -41,20 +41,28 @@
     fstype: xfs
     state: mounted
   with_indexed_items: "{{ disk_uuids.results }}"
+- name: Set temp storage folder ownership
+  file:
+    path: '{{ mount_root }}'
+    state: directory
+    owner: "{{ cluster_user }}"
+    group: "{{ cluster_group }}"
+  when: mount_root == '/mnt/resource'
 - name: Set mount point ownership
   file:
     path: '{{ mount_root }}{{ item.0 + 1 }}'
     state: directory
     owner: "{{ cluster_user }}"
     group: "{{ cluster_group }}"
-  with_indexed_items: "{{ files_matched.files }}"
+  with_indexed_items:
+    - "{{ files_matched.files }}"
 - name: Create directory to mount Azure File share
   file:
     path: "{{ azure_fileshare_mount }}"
     state: directory
     owner: '{{ cluster_user }}'
     group: '{{ cluster_group }}'
-  when: azure_fileshare_mount is defined and azure_fileshare_mount != '' and azure_fileshare_mount != None
+  when: azure_fileshare_mount is defined and azure_fileshare_mount and azure_fileshare_mount != None
 - name: Mount Azure File share
   become: yes
   mount:
@@ -63,4 +71,4 @@
     path: "{{ azure_fileshare_mount }}"
     opts: vers=3.0,username={{ azure_fileshare_username }},password={{ azure_fileshare_password }},dir_mode=0777,file_mode=0777,serverino
     state: mounted
-  when: azure_fileshare_mount is defined and azure_fileshare_mount != '' and azure_fileshare_mount != None
+  when: azure_fileshare_mount is defined and azure_fileshare_mount and azure_fileshare_mount != None

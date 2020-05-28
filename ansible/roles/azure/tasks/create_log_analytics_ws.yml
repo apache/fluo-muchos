@@ -1,0 +1,92 @@
+---
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+#
+# These Ansible tasks only run on the client machine where Muchos runs
+# At a high level, the various sections in this file do the following:
+# 1. Create Log Analytics workspace
+# 2. Create dashboard and workbook using json templates
+# 3. Update az_logs_id and az_logs_key in muchos.props
+#
+#
+
+- import_tasks: log_analytics_ws_common.yml
+
+- name: Deploy log analytics workspace and performance counters
+  azure_rm_deployment:
+    resource_group_name: "{{ resource_group }}"
+    state: present
+    location: "{{ location }}"
+    parameters:
+       deployment-prefix:
+           value: "{{ monitor_name.stdout }}"
+    template: "{{ lookup('file', 'roles/azure/templates/azureDeployLinuxCounters.json') }}"
+
+- name: Gather information about log analytics workspace
+  azure_rm_loganalyticsworkspace_info:
+    resource_group: "{{ resource_group }}"
+    name: "{{ log_workspace_name }}"
+    show_shared_keys: True
+  retries: 20
+  delay: 15
+  until: logs_workspace.workspaces|map(attribute='customer_id')|list is defined
+  register: logs_workspace
+
+- name: Retrieve the workspace ID
+  set_fact:
+    az_logs_ws_id: "{{ logs_workspace.workspaces|map(attribute='customer_id')|list|join('') }}"
+
+- name: Retrieve the workspace key
+  set_fact:
+    az_logs_ws_key: "{{ logs_workspace.workspaces|map(attribute='shared_keys')|map(attribute='primary_shared_key')|list|join('') }}"
+
+- name: Update az_logs_id in muchos.props
+  lineinfile:
+    path: "{{ deploy_path }}/conf/muchos.props"
+    regexp: '^az_logs_id\s*=\s*|^[#]az_logs_id\s*=\s*'
+    line: "az_logs_id = {{ az_logs_ws_id }}"
+
+- name: Update az_logs_key in muchos.props
+  lineinfile:
+    path: "{{ deploy_path }}/conf/muchos.props"
+    regexp: '^az_logs_key\s*=\s*|^[#]az_logs_key\s*=\s*'
+    line: "az_logs_key = {{ az_logs_ws_key }}"
+
+- name: Create Dashboard
+  azure_rm_deployment:
+    resource_group_name: "{{ resource_group }}"
+    state: present
+    location: "{{ location }}"
+    parameters:
+       LogAnalyticsWorkspaceName:
+          value: "{{ log_workspace_name }}"
+       DashboardName:
+          value: "{{ dashboard_name }}"
+    template: "{{ lookup('file', 'roles/azure/templates/dashboardTemplate.json') }}"
+
+- name: Create Workbook
+  azure_rm_deployment:
+    resource_group_name: "{{ resource_group }}"
+    state: present
+    location: "{{ location }}"
+    parameters:
+       LogAnalyticsWorkspaceName:
+          value: "{{ log_workspace_name }}"
+       workbookDisplayName:
+          value: "{{ workbook_name }}"
+    template: "{{ lookup('file', 'roles/azure/templates/workbookTemplate.json') }}"
+  when: workbook_exists is undefined

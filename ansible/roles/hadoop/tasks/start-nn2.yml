@@ -15,11 +15,14 @@
 ### limitations under the License.
 ###
 ##
-- name: Check if DataNode is running
-  shell: jps | grep " DataNode" | grep -v grep
+- name: Check if NameNode is running
+  shell: jps | grep " NameNode" | grep -v grep
   ignore_errors: yes
   changed_when: false
-  register: datanode_status
-- name: "start datanodes"
-  command: "nohup {{ hadoop_home }}/sbin/hadoop-daemon.sh start datanode"
-  when: datanode_status.rc == 1
+  register: namenode_status
+- name: "bootstrap standby"
+  command: "nohup {{ hadoop_home }}/bin/hdfs namenode -bootstrapStandby -force"
+  when: namenode_status.rc == 1
+- name: "start namenode"
+  command: "nohup {{ hadoop_home }}/sbin/hadoop-daemon.sh start namenode"
+  when: namenode_status.rc == 1

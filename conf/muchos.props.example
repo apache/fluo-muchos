@@ -35,10 +35,17 @@ proxy_hostname = leader1
 accumulo_instance = muchos
 # Accumluo Password
 accumulo_password = secret
+<<<<<<< HEAD
 # Software versions (set sha-256 in conf/checksums)
 hadoop_version = 3.2.1
 zookeeper_version = 3.4.14
 spark_version = 2.3.2
+=======
+# Software versions (make sure you have a corresponding entry for the checksum in conf/checksums)
+hadoop_version = 3.2.1
+zookeeper_version = 3.5.8
+spark_version = 2.4.5
+>>>>>>> d9b2473185b3b7b01ef71ad16c0797caddd18ff8
 fluo_version = 1.2.0
 fluo_yarn_version = 1.0.0
 accumulo_version = 2.0.0
@@ -54,6 +61,11 @@ java_package=java-1.8.0-openjdk-devel
 hdfs_ha = False
 # Give a logical name for the cluster, all one word no special characters. Required to support HDFS HA.
 nameservice_id = muchoshacluster
+# number of accumulo tablet servers to run per host. This is only effective when systemd is set to 'True'. Needs changes in
+# accumulo-service script inorder to support non-systemd cases. 
+num_tservers = 1
+# If accumulo services are to be run under systemd, set this to 'True'
+use_systemd = False
 
 [ec2]
 # AWS machine image to use. The default below is for a CentOS 7 image (in us-east-1).
@@ -117,9 +129,17 @@ numnodes = 8
 # https://docs.microsoft.com/en-us/azure/virtual-machines/linux/sizes-general
 vm_sku = Standard_D8s_v3
 # Each VM will be provisioned with the following type of managed disk
+# The azure_disk_device* parameters below specify the Linux device paths Muchos looks for when selecting disks for storage
+# The default values below are for using Azure managed disks
+azure_disk_device_path = /dev/disk/azure/scsi1
+azure_disk_device_pattern = lun*
+# If using Azure Lsv2 VMs which have NVME disks for ephemeral storage, use the parameters below instead of the defaults
+# azure_disk_device_path = /dev
+# azure_disk_device_pattern = nvme*n1
+# Type of the data disk attached to the VMSS. 'Standard_LRS' for HDD, 'Premium_LRS' for SSD, 'StandardSSD_LRS' for Standard SSD
 managed_disk_type = Standard_LRS
 # Number of managed disks provisioned on each VM
-numdisks = 3
+data_disk_count = 3
 # The size of each managed disk provisioned
 disk_size_gb = 128
 # Location to mount managed disks in each VM
@@ -129,6 +149,31 @@ metrics_drive_root = var-data
 # Optional proxy VM. If not set, the first node of the cluster will be selected as the proxy.
 azure_proxy_host =
 location = westus2
+# Enable ADLS Gen2 storage configuration. Muchos parameters instance_volumes_input, instance_volumes_preferred & adls_storage_type is not required if use_adlsg2 is false.
+use_adlsg2 = False
+# Storage accounts can be auto generated or manually specified. "|" is used as separator between manual and auto generated storage account names and must be specified
+# Manual and Auto generated names are mutually exclusive
+#
+# Specifying storage accounts manually:
+#    |abfss://<container-name>@<storage-account-name>.<domain-name>/<folder-name>". Use comma to specify multiple entries
+#    Example:|abfss://accumulodata@shnawastore1.dfs.core.windows.net/accumulo,abfss://accumulodata@shnawastore2.dfs.core.windows.net/accumulo
+#
+# Specifying auto-generated storage accounts:
+#   <Number-of-Storage-Accounts>,<domain-name>|
+#   Example: 3,dfs.core.windows.net|
+instance_volumes_input = 1,dfs.core.windows.net|
+# Do not update "instance_volumes_preferred", it will be populated dynamically during launch phase of muchos
+instance_volumes_preferred =
+# Type of storage for ADLS Gen2 storage accounts
+adls_storage_type = Standard_LRS
+# Specify user assigned identity name. "{{ vmss_name }}-ua-msi"  will be created if value is not provided
+user_assigned_identity =
+# Do not update "azure_tenant_id", it will be populated dynamically during launch phase of muchos
+azure_tenant_id =
+# Do not update "azure_client_id", it will be populated dynamically during launch phase of muchos
+azure_client_id =
+# Do not update "principal_id", it will be populated dynamically during launch phase of muchos when "use_hdfs = False"
+principal_id = 
 # Optional Azure fileshare to mount on all nodes.
 # Path and credentials must be updated to enable this.
 #azure_fileshare_mount = /mnt/azure-fileshare
@@ -139,7 +184,7 @@ location = westus2
 # Workspace ID and key must be updated to enable this.
 # For details on how to get a workspace ID and key, see the link below
 # https://docs.microsoft.com/en-us/azure/azure-monitor/learn/quick-collect-linux-computer#obtain-workspace-id-and-key
-az_omsIntegrationNeeded = False
+az_oms_integration_needed = False
 #az_logs_id = 
 #az_logs_key = 
 

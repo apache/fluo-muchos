@@ -24,7 +24,9 @@
   tasks:
     - name: get swarm status
       shell: >
-        docker info | egrep '^Swarm: ' | cut -d ' ' -f 2
+        set -o pipefail && docker info | grep 'Swarm:' | sed 's/\s*Swarm\:\s*//'
+      args:
+        executable: bash
       register: swarm_status
       changed_when: "'active' not in swarm_status.stdout_lines"
     - name: initialize swarm 
@@ -33,7 +35,7 @@
         docker swarm init --advertise-addr={{ ansible_default_ipv4.address }}:2377
       when: "'active' not in swarm_status.stdout_lines"
     - name: get swarm token
-      shell: docker swarm join-token -q worker
+      command: docker swarm join-token -q worker
       register: swarm_token
       changed_when: "'active' not in swarm_status.stdout_lines"
 - hosts: workers:!swarmmanager
@@ -44,7 +46,9 @@
   tasks:
     - name: get swarm status
       shell: >
-        docker info | egrep '^Swarm: ' | cut -d ' ' -f 2
+        set -o pipefail && docker info | grep 'Swarm:' | sed 's/\s*Swarm\:\s*//'
+      args:
+        executable: bash
       register: swarm_status
       changed_when: "'active' not in swarm_status.stdout_lines"
     - name: join worker to swarm

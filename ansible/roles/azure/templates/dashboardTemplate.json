@@ -1,0 +1,1312 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "SubscriptionId": {
+            "defaultValue": "[subscription().subscriptionId]",
+            "type": "String"
+        },
+        "ResourceGroup": {
+            "defaultValue": "[resourceGroup().name]",
+            "type": "String"
+        },
+        "LogAnalyticsWorkspaceName": {
+            "type": "String"
+        },
+	"DashboardName": {
+            "type": "String"
+        }
+
+    },
+    "variables": {
+        "ResourceId": "[concat('/subscriptions/',parameters('SubscriptionId'), '/resourcegroups/',parameters('ResourceGroup'),'/providers/microsoft.operationalinsights/workspaces/',parameters('LogAnalyticsWorkspaceName'))]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Portal/dashboards",
+            "apiVersion": "2015-08-01-preview",
+            "name": "[parameters('DashboardName')]",
+            "location": "[resourceGroup().location]",
+            "tags": {
+                "hidden-title": "Accumulo-Metrics"
+            },
+           "properties": {
+            "lenses": {
+            "0": {
+                "order": 0,
+                "parts": {
+                "0": {
+                    "position": {
+                    "x": 0,
+                    "y": 0,
+                    "colSpan": 6,
+                    "rowSpan": 4
+                    },
+                    "metadata": {
+                    "inputs": [
+                        {
+                        "name": "ComponentId",
+                        "value": {
+                            "SubscriptionId": "[parameters('SubscriptionId')]",
+                            "ResourceGroup": "[parameters('ResourceGroup')]",
+                            "Name": "[parameters('LogAnalyticsWorkspaceName')]",
+                            "ResourceId": "[variables('ResourceId')]"
+                        }
+                        },
+                        {
+                        "name": "Query",
+                        "value": "Perf \r\n| where CounterName matches regex \"TabletServer(.)*.tserver.general.ingestByteRate.value\"\r\n| extend ClusterName = substring(Computer, 0, 6) \r\n| summarize avg_CounterValue = avg(CounterValue / 1000000000.0) by Computer, CounterName, bin(TimeGenerated,1min), ClusterName\r\n| summarize sum(avg_CounterValue) by Computer, TimeGenerated, ClusterName\r\n| summarize IngestByteRate = sum(sum_avg_CounterValue) by TimeGenerated, ClusterName\r\n| project IngestByteRate , TimeGenerated, ClusterName \r\n| render timechart\n"
+                        },
+                        {
+                        "name": "TimeRange",
+                        "value": "P1D"
+                        },
+                        {
+                        "name": "Dimensions",
+                        "value": {
+                            "xAxis": {
+                            "name": "TimeGenerated",
+                            "type": "datetime"
+                            },
+                            "yAxis": [
+                            {
+                                "name": "IngestByteRate",
+                                "type": "real"
+                            }
+                            ],
+                            "splitBy": [
+                            {
+                                "name": "ClusterName",
+                                "type": "string"
+                            }
+                            ],
+                            "aggregation": "Sum"
+                        }
+                        },
+                        {
+                        "name": "Version",
+                        "value": "1.0"
+                        },
+                        {
+                        "name": "PartId",
+                        "value": "32918bd5-7437-459b-81d2-479aed1c7980"
+                        },
+                        {
+                        "name": "PartTitle",
+                        "value": "Analytics"
+                        },
+                        {
+                        "name": "PartSubTitle",
+                        "value": "[parameters('LogAnalyticsWorkspaceName')]"
+                        },
+                        {
+                        "name": "resourceTypeMode",
+                        "value": "workspace"
+                        },
+                        {
+                        "name": "ControlType",
+                        "value": "AnalyticsChart"
+                        },
+                        {
+                        "name": "SpecificChart",
+                        "value": "Line"
+                        },
+                        {
+                        "name": "DashboardId",
+                        "isOptional": true
+                        }
+                    ],
+                    "type": "Extension/AppInsightsExtension/PartType/AnalyticsPart",
+                    "settings": {
+                        "content": {
+                        "PartTitle": "Ingest Byte Rate",
+                        "PartSubTitle": "[parameters('LogAnalyticsWorkspaceName')]"
+                        }
+                    },
+                    "asset": {
+                        "idInputName": "ComponentId",
+                        "type": "ApplicationInsights"
+                    }
+                    }
+                },
+                "1": {
+                    "position": {
+                    "x": 6,
+                    "y": 0,
+                    "colSpan": 6,
+                    "rowSpan": 4
+                    },
+                    "metadata": {
+                    "inputs": [
+                        {
+                        "name": "ComponentId",
+                        "value": {
+                            "SubscriptionId": "[parameters('SubscriptionId')]",
+                            "ResourceGroup": "[parameters('ResourceGroup')]",
+                            "Name": "[parameters('LogAnalyticsWorkspaceName')]",
+                            "ResourceId": "[variables('ResourceId')]"
+                        }
+                        },
+                        {
+                        "name": "Query",
+                        "value": "Perf \r\n| where CounterName matches regex \"TabletServer(.)*.tserver.general.queryByteRate.value\"\r\n| extend ClusterName = substring(Computer, 0, 6) \r\n| summarize avg_CounterValue = avg(CounterValue) by Computer, CounterName, bin(TimeGenerated,1min), ClusterName\r\n| summarize sum(avg_CounterValue) by Computer, TimeGenerated, ClusterName\r\n| summarize scanrate = sum(sum_avg_CounterValue) by TimeGenerated, ClusterName\r\n| project scanrate , TimeGenerated, ClusterName \r\n| render timechart\r\n"
+                        },
+                        {
+                        "name": "TimeRange",
+                        "value": "P1D"
+                        },
+                        {
+                        "name": "Dimensions",
+                        "value": {
+                            "xAxis": {
+                            "name": "TimeGenerated",
+                            "type": "datetime"
+                            },
+                            "yAxis": [
+                            {
+                                "name": "scanrate",
+                                "type": "real"
+                            }
+                            ],
+                            "splitBy": [
+                            {
+                                "name": "ClusterName",
+                                "type": "string"
+                            }
+                            ],
+                            "aggregation": "Sum"
+                        }
+                        },
+                        {
+                        "name": "Version",
+                        "value": "1.0"
+                        },
+                        {
+                        "name": "PartId",
+                        "value": "993396ca-67df-43f0-a8f7-3f1c37dbb8da"
+                        },
+                        {
+                        "name": "PartTitle",
+                        "value": "Analytics"
+                        },
+                        {
+                        "name": "PartSubTitle",
+                        "value": "[parameters('LogAnalyticsWorkspaceName')]"
+                        },
+                        {
+                        "name": "resourceTypeMode",
+                        "value": "workspace"
+                        },
+                        {
+                        "name": "ControlType",
+                        "value": "AnalyticsChart"
+                        },
+                        {
+                        "name": "SpecificChart",
+                        "value": "Line"
+                        },
+                        {
+                        "name": "DashboardId",
+                        "isOptional": true
+                        }
+                    ],
+                    "type": "Extension/AppInsightsExtension/PartType/AnalyticsPart",
+                    "settings": {
+                        "content": {
+                        "PartTitle": "Scan Rate",
+                        "PartSubTitle": "[parameters('LogAnalyticsWorkspaceName')]"
+                        }
+                    },
+                    "asset": {
+                        "idInputName": "ComponentId",
+                        "type": "ApplicationInsights"
+                    }
+                    }
+                },
+                "2": {
+                    "position": {
+                    "x": 12,
+                    "y": 0,
+                    "colSpan": 6,
+                    "rowSpan": 4
+                    },
+                    "metadata": {
+                    "inputs": [
+                        {
+                        "name": "ComponentId",
+                        "value": {
+                            "SubscriptionId": "[parameters('SubscriptionId')]",
+                            "ResourceGroup": "[parameters('ResourceGroup')]",
+                            "Name": "[parameters('LogAnalyticsWorkspaceName')]",
+                            "ResourceId": "[variables('ResourceId')]"
+                        }
+                        },
+                        {
+                        "name": "Query",
+                        "value": "Perf \r\n| where CounterName matches regex \"TabletServer(.)*.tserver.general.ingestRate.value\"\r\n| extend ClusterName = substring(Computer, 0, 6) \r\n| summarize avg_CounterValue = avg(CounterValue) by Computer, CounterName, bin(TimeGenerated,1min), ClusterName\r\n| summarize sum(avg_CounterValue) by Computer, TimeGenerated, ClusterName\r\n| summarize IngestrateEntriesPerSec = sum(sum_avg_CounterValue) by TimeGenerated, ClusterName\r\n| project IngestrateEntriesPerSec , TimeGenerated, ClusterName \r\n| render timechart\r\n"
+                        },
+                        {
+                        "name": "TimeRange",
+                        "value": "P1D"
+                        },
+                        {
+                        "name": "Dimensions",
+                        "value": {
+                            "xAxis": {
+                            "name": "TimeGenerated",
+                            "type": "datetime"
+                            },
+                            "yAxis": [
+                            {
+                                "name": "IngestrateEntriesPerSec",
+                                "type": "real"
+                            }
+                            ],
+                            "splitBy": [
+                            {
+                                "name": "ClusterName",
+                                "type": "string"
+                            }
+                            ],
+                            "aggregation": "Sum"
+                        }
+                        },
+                        {
+                        "name": "Version",
+                        "value": "1.0"
+                        },
+                        {
+                        "name": "PartId",
+                        "value": "42de0792-a07d-4d64-8432-2aa3bf8441f9"
+                        },
+                        {
+                        "name": "PartTitle",
+                        "value": "Analytics"
+                        },
+                        {
+                        "name": "PartSubTitle",
+                        "value": "[parameters('LogAnalyticsWorkspaceName')]"
+                        },
+                        {
+                        "name": "resourceTypeMode",
+                        "value": "workspace"
+                        },
+                        {
+                        "name": "ControlType",
+                        "value": "AnalyticsChart"
+                        },
+                        {
+                        "name": "SpecificChart",
+                        "value": "Line"
+                        },
+                        {
+                        "name": "DashboardId",
+                        "isOptional": true
+                        }
+                    ],
+                    "type": "Extension/AppInsightsExtension/PartType/AnalyticsPart",
+                    "settings": {
+                        "content": {
+                        "PartTitle": "Ingest rate (Entries/sec)",
+                        "PartSubTitle": "[parameters('LogAnalyticsWorkspaceName')]"
+                        }
+                    },
+                    "asset": {
+                        "idInputName": "ComponentId",
+                        "type": "ApplicationInsights"
+                    }
+                    }
+                },
+                "3": {
+                    "position": {
+                    "x": 18,
+                    "y": 0,
+                    "colSpan": 6,
+                    "rowSpan": 4
+                    },
+                    "metadata": {
+                    "inputs": [
+                        {
+                        "name": "ComponentId",
+                        "value": {
+                            "SubscriptionId": "[parameters('SubscriptionId')]",
+                            "ResourceGroup": "[parameters('ResourceGroup')]",
+                            "Name": "[parameters('LogAnalyticsWorkspaceName')]",
+                            "ResourceId": "[variables('ResourceId')]"
+                        }
+                        },
+                        {
+                        "name": "Query",
+                        "value": "Perf \r\n| where CounterName matches regex \"TabletServer(.)*.tserver.general.entries.value\"\r\n| extend ClusterName = substring(Computer, 0, 6) \r\n| summarize avg_CounterValue = avg(CounterValue) by Computer, CounterName, bin(TimeGenerated,1min), ClusterName\r\n| summarize sum(avg_CounterValue) by Computer, TimeGenerated, ClusterName\r\n| summarize TotalEntries = sum(sum_avg_CounterValue) by TimeGenerated, ClusterName\r\n| project TotalEntries , TimeGenerated, ClusterName \r\n| render timechart\r\n"
+                        },
+                        {
+                        "name": "TimeRange",
+                        "value": "P1D"
+                        },
+                        {
+                        "name": "Dimensions",
+                        "value": {
+                            "xAxis": {
+                            "name": "TimeGenerated",
+                            "type": "datetime"
+                            },
+                            "yAxis": [
+                            {
+                                "name": "TotalEntries",
+                                "type": "real"
+                            }
+                            ],
+                            "splitBy": [
+                            {
+                                "name": "ClusterName",
+                                "type": "string"
+                            }
+                            ],
+                            "aggregation": "Sum"
+                        }
+                        },
+                        {
+                        "name": "Version",
+                        "value": "1.0"
+                        },
+                        {
+                        "name": "PartId",
+                        "value": "97690df9-afbe-4a0f-8d69-c8229f646958"
+                        },
+                        {
+                        "name": "PartTitle",
+                        "value": "Analytics"
+                        },
+                        {
+                        "name": "PartSubTitle",
+                        "value": "[parameters('LogAnalyticsWorkspaceName')]"
+                        },
+                        {
+                        "name": "resourceTypeMode",
+                        "value": "workspace"
+                        },
+                        {
+                        "name": "ControlType",
+                        "value": "AnalyticsChart"
+                        },
+                        {
+                        "name": "SpecificChart",
+                        "value": "Line"
+                        },
+                        {
+                        "name": "DashboardId",
+                        "isOptional": true
+                        }
+                    ],
+                    "type": "Extension/AppInsightsExtension/PartType/AnalyticsPart",
+                    "settings": {
+                        "content": {
+                        "PartTitle": "Total Entries",
+                        "PartSubTitle": "[parameters('LogAnalyticsWorkspaceName')]"
+                        }
+                    },
+                    "asset": {
+                        "idInputName": "ComponentId",
+                        "type": "ApplicationInsights"
+                    }
+                    }
+                },
+                "4": {
+                    "position": {
+                    "x": 24,
+                    "y": 0,
+                    "colSpan": 6,
+                    "rowSpan": 4
+                    },
+                    "metadata": {
+                    "inputs": [
+                        {
+                        "name": "ComponentId",
+                        "value": {
+                            "SubscriptionId": "[parameters('SubscriptionId')]",
+                            "ResourceGroup": "[parameters('ResourceGroup')]",
+                            "Name": "[parameters('LogAnalyticsWorkspaceName')]",
+                            "ResourceId": "[variables('ResourceId')]"
+                        }
+                        },
+                        {
+                        "name": "Query",
+                        "value": "Perf \r\n| where CounterName matches regex \"TabletServer(.)*.tserver.general.entriesInMem.value\"\r\n| extend ClusterName = substring(Computer, 0, 6) \r\n| summarize avg_CounterValue = avg(CounterValue) by Computer, CounterName, bin(TimeGenerated,1min), ClusterName\r\n| summarize sum(avg_CounterValue) by Computer, TimeGenerated, ClusterName\r\n| summarize TotalEntriesInMem = sum(sum_avg_CounterValue) by TimeGenerated, ClusterName\r\n| project TotalEntriesInMem , TimeGenerated, ClusterName \r\n| render timechart\r\n"
+                        },
+                        {
+                        "name": "TimeRange",
+                        "value": "P1D"
+                        },
+                        {
+                        "name": "Dimensions",
+                        "value": {
+                            "xAxis": {
+                            "name": "TimeGenerated",
+                            "type": "datetime"
+                            },
+                            "yAxis": [
+                            {
+                                "name": "TotalEntriesInMem",
+                                "type": "real"
+                            }
+                            ],
+                            "splitBy": [
+                            {
+                                "name": "ClusterName",
+                                "type": "string"
+                            }
+                            ],
+                            "aggregation": "Sum"
+                        }
+                        },
+                        {
+                        "name": "Version",
+                        "value": "1.0"
+                        },
+                        {
+                        "name": "PartId",
+                        "value": "8327961c-8262-4cd1-82e6-0feaf9672902"
+                        },
+                        {
+                        "name": "PartTitle",
+                        "value": "Analytics"
+                        },
+                        {
+                        "name": "PartSubTitle",
+                        "value": "[parameters('LogAnalyticsWorkspaceName')]"
+                        },
+                        {
+                        "name": "resourceTypeMode",
+                        "value": "workspace"
+                        },
+                        {
+                        "name": "ControlType",
+                        "value": "AnalyticsChart"
+                        },
+                        {
+                        "name": "SpecificChart",
+                        "value": "Line"
+                        },
+                        {
+                        "name": "DashboardId",
+                        "isOptional": true
+                        }
+                    ],
+                    "type": "Extension/AppInsightsExtension/PartType/AnalyticsPart",
+                    "settings": {
+                        "content": {
+                        "PartTitle": "Total Entries (In Mem)",
+                        "PartSubTitle": "[parameters('LogAnalyticsWorkspaceName')]"
+                        }
+                    },
+                    "asset": {
+                        "idInputName": "ComponentId",
+                        "type": "ApplicationInsights"
+                    }
+                    }
+                },
+                "5": {
+                    "position": {
+                    "x": 0,
+                    "y": 4,
+                    "colSpan": 6,
+                    "rowSpan": 4
+                    },
+                    "metadata": {
+                    "inputs": [
+                        {
+                        "name": "ComponentId",
+                        "value": {
+                            "SubscriptionId": "[parameters('SubscriptionId')]",
+                            "ResourceGroup": "[parameters('ResourceGroup')]",
+                            "Name": "[parameters('LogAnalyticsWorkspaceName')]",
+                            "ResourceId": "[variables('ResourceId')]"
+                        }
+                        },
+                        {
+                        "name": "Query",
+                        "value": "Perf \r\n| where CounterName matches regex \"TabletServer(.)*.tserver.Updates.CommitTimeAvgTime.value\"\r\n| extend ClusterName = substring(Computer, 0, 6) \r\n| summarize avg_CounterValue = avg(CounterValue) by Computer, CounterName, bin(TimeGenerated,1min), ClusterName\r\n| summarize AvgUpdateTimeCommitTime = avg(avg_CounterValue) by TimeGenerated, ClusterName\r\n| project AvgUpdateTimeCommitTime , TimeGenerated, ClusterName \r\n| render timechart\r\n"
+                        },
+                        {
+                        "name": "TimeRange",
+                        "value": "P1D"
+                        },
+                        {
+                        "name": "Dimensions",
+                        "value": {
+                            "xAxis": {
+                            "name": "TimeGenerated",
+                            "type": "datetime"
+                            },
+                            "yAxis": [
+                            {
+                                "name": "AvgUpdateTimeCommitTime",
+                                "type": "real"
+                            }
+                            ],
+                            "splitBy": [
+                            {
+                                "name": "ClusterName",
+                                "type": "string"
+                            }
+                            ],
+                            "aggregation": "Sum"
+                        }
+                        },
+                        {
+                        "name": "Version",
+                        "value": "1.0"
+                        },
+                        {
+                        "name": "PartId",
+                        "value": "4d74fa8a-0793-4251-b109-13b65e5529a1"
+                        },
+                        {
+                        "name": "PartTitle",
+                        "value": "Analytics"
+                        },
+                        {
+                        "name": "PartSubTitle",
+                        "value": "[parameters('LogAnalyticsWorkspaceName')]"
+                        },
+                        {
+                        "name": "resourceTypeMode",
+                        "value": "workspace"
+                        },
+                        {
+                        "name": "ControlType",
+                        "value": "AnalyticsChart"
+                        },
+                        {
+                        "name": "SpecificChart",
+                        "value": "Line"
+                        },
+                        {
+                        "name": "DashboardId",
+                        "isOptional": true
+                        }
+                    ],
+                    "type": "Extension/AppInsightsExtension/PartType/AnalyticsPart",
+                    "settings": {
+                        "content": {
+                        "PartTitle": "Avg Update Time (Commit Time)",
+                        "PartSubTitle": "[parameters('LogAnalyticsWorkspaceName')]"
+                        }
+                    },
+                    "asset": {
+                        "idInputName": "ComponentId",
+                        "type": "ApplicationInsights"
+                    }
+                    }
+                },
+                "6": {
+                    "position": {
+                    "x": 6,
+                    "y": 4,
+                    "colSpan": 6,
+                    "rowSpan": 4
+                    },
+                    "metadata": {
+                    "inputs": [
+                        {
+                        "name": "ComponentId",
+                        "value": {
+                            "SubscriptionId": "[parameters('SubscriptionId')]",
+                            "ResourceGroup": "[parameters('ResourceGroup')]",
+                            "Name": "[parameters('LogAnalyticsWorkspaceName')]",
+                            "ResourceId": "[variables('ResourceId')]"
+                        }
+                        },
+                        {
+                        "name": "Query",
+                        "value": "Perf \r\n| where CounterName matches regex \"TabletServer(.)*.tserver.Updates.CommitPrepAvgTime.value\"\r\n| extend ClusterName = substring(Computer, 0, 6) \r\n| summarize avg_CounterValue = avg(CounterValue) by Computer, CounterName, bin(TimeGenerated,1min), ClusterName\r\n| summarize AvgUpdateTimeCommitPrepTime = avg(avg_CounterValue) by TimeGenerated, ClusterName\r\n| project AvgUpdateTimeCommitPrepTime , TimeGenerated, ClusterName \r\n| render timechart\r\n"
+                        },
+                        {
+                        "name": "TimeRange",
+                        "value": "P1D"
+                        },
+                        {
+                        "name": "Dimensions",
+                        "value": {
+                            "xAxis": {
+                            "name": "TimeGenerated",
+                            "type": "datetime"
+                            },
+                            "yAxis": [
+                            {
+                                "name": "AvgUpdateTimeCommitPrepTime",
+                                "type": "real"
+                            }
+                            ],
+                            "splitBy": [
+                            {
+                                "name": "ClusterName",
+                                "type": "string"
+                            }
+                            ],
+                            "aggregation": "Sum"
+                        }
+                        },
+                        {
+                        "name": "Version",
+                        "value": "1.0"
+                        },
+                        {
+                        "name": "PartId",
+                        "value": "c9d1f7af-0e5c-4aaf-8488-969233892bdf"
+                        },
+                        {
+                        "name": "PartTitle",
+                        "value": "Analytics"
+                        },
+                        {
+                        "name": "PartSubTitle",
+                        "value": "[parameters('LogAnalyticsWorkspaceName')]"
+                        },
+                        {
+                        "name": "resourceTypeMode",
+                        "value": "workspace"
+                        },
+                        {
+                        "name": "ControlType",
+                        "value": "AnalyticsChart"
+                        },
+                        {
+                        "name": "SpecificChart",
+                        "value": "Line"
+                        },
+                        {
+                        "name": "DashboardId",
+                        "isOptional": true
+                        }
+                    ],
+                    "type": "Extension/AppInsightsExtension/PartType/AnalyticsPart",
+                    "settings": {
+                        "content": {
+                        "PartTitle": "Avg Update Time (Commit Prep Time)",
+                        "PartSubTitle": "[parameters('LogAnalyticsWorkspaceName')]"
+                        }
+                    },
+                    "asset": {
+                        "idInputName": "ComponentId",
+                        "type": "ApplicationInsights"
+                    }
+                    }
+                },
+                "7": {
+                    "position": {
+                    "x": 12,
+                    "y": 4,
+                    "colSpan": 6,
+                    "rowSpan": 4
+                    },
+                    "metadata": {
+                    "inputs": [
+                        {
+                        "name": "ComponentId",
+                        "value": {
+                            "SubscriptionId": "[parameters('SubscriptionId')]",
+                            "ResourceGroup": "[parameters('ResourceGroup')]",
+                            "Name": "[parameters('LogAnalyticsWorkspaceName')]",
+                            "ResourceId": "[variables('ResourceId')]"
+                        }
+                        },
+                        {
+                        "name": "Query",
+                        "value": "Perf \r\n| where CounterName matches regex \"TabletServer(.)*.tserver.Updates.WaLogWriteTimeAvgTime.value\"\r\n| extend ClusterName = substring(Computer, 0, 6) \r\n| summarize avg_CounterValue = avg(CounterValue) by Computer, CounterName, bin(TimeGenerated,1min), ClusterName\r\n//| summarize sum(avg_CounterValue) by Computer, TimeGenerated, ClusterName\r\n| summarize AvgUpdateTimeWriteAheadLogTime = avg(avg_CounterValue) by TimeGenerated, ClusterName\r\n| project AvgUpdateTimeWriteAheadLogTime , TimeGenerated, ClusterName \r\n| render timechart\r\n"
+                        },
+                        {
+                        "name": "TimeRange",
+                        "value": "P1D"
+                        },
+                        {
+                        "name": "Dimensions",
+                        "value": {
+                            "xAxis": {
+                            "name": "TimeGenerated",
+                            "type": "datetime"
+                            },
+                            "yAxis": [
+                            {
+                                "name": "AvgUpdateTimeWriteAheadLogTime",
+                                "type": "real"
+                            }
+                            ],
+                            "splitBy": [
+                            {
+                                "name": "ClusterName",
+                                "type": "string"
+                            }
+                            ],
+                            "aggregation": "Sum"
+                        }
+                        },
+                        {
+                        "name": "Version",
+                        "value": "1.0"
+                        },
+                        {
+                        "name": "PartId",
+                        "value": "f14028e6-09c6-44d9-bc5c-34842f9429aa"
+                        },
+                        {
+                        "name": "PartTitle",
+                        "value": "Analytics"
+                        },
+                        {
+                        "name": "PartSubTitle",
+                        "value": "[parameters('LogAnalyticsWorkspaceName')]"
+                        },
+                        {
+                        "name": "resourceTypeMode",
+                        "value": "workspace"
+                        },
+                        {
+                        "name": "ControlType",
+                        "value": "AnalyticsChart"
+                        },
+                        {
+                        "name": "SpecificChart",
+                        "value": "Line"
+                        },
+                        {
+                        "name": "DashboardId",
+                        "isOptional": true
+                        }
+                    ],
+                    "type": "Extension/AppInsightsExtension/PartType/AnalyticsPart",
+                    "settings": {
+                        "content": {
+                        "PartTitle": "Avg Update Time (Write Ahead Log Time)",
+                        "PartSubTitle": "[parameters('LogAnalyticsWorkspaceName')]"
+                        }
+                    },
+                    "asset": {
+                        "idInputName": "ComponentId",
+                        "type": "ApplicationInsights"
+                    }
+                    }
+                },
+                "8": {
+                    "position": {
+                    "x": 18,
+                    "y": 4,
+                    "colSpan": 6,
+                    "rowSpan": 4
+                    },
+                    "metadata": {
+                    "inputs": [
+                        {
+                        "name": "ComponentId",
+                        "value": {
+                            "SubscriptionId": "[parameters('SubscriptionId')]",
+                            "ResourceGroup": "[parameters('ResourceGroup')]",
+                            "Name": "[parameters('LogAnalyticsWorkspaceName')]",
+                            "ResourceId": "[variables('ResourceId')]"
+                        }
+                        },
+                        {
+                        "name": "Query",
+                        "value": "Perf \r\n| where CounterName matches regex \"TabletServer(.)*.tserver.general.filesPerTablet.value\"\r\n| extend ClusterName = substring(Computer, 0, 6) \r\n| summarize avg_CounterValue = avg(CounterValue) by Computer, CounterName, bin(TimeGenerated,1min), ClusterName\r\n//| summarize sum(avg_CounterValue) by Computer, TimeGenerated, ClusterName\r\n| summarize FilesPerTablet = avg(avg_CounterValue) by TimeGenerated, ClusterName\r\n| project FilesPerTablet , TimeGenerated, ClusterName \r\n| render timechart\r\n"
+                        },
+                        {
+                        "name": "TimeRange",
+                        "value": "P1D"
+                        },
+                        {
+                        "name": "Dimensions",
+                        "value": {
+                            "xAxis": {
+                            "name": "TimeGenerated",
+                            "type": "datetime"
+                            },
+                            "yAxis": [
+                            {
+                                "name": "FilesPerTablet",
+                                "type": "real"
+                            }
+                            ],
+                            "splitBy": [
+                            {
+                                "name": "ClusterName",
+                                "type": "string"
+                            }
+                            ],
+                            "aggregation": "Sum"
+                        }
+                        },
+                        {
+                        "name": "Version",
+                        "value": "1.0"
+                        },
+                        {
+                        "name": "PartId",
+                        "value": "4f5a8f4f-4c14-44c8-8abd-a61e7496c9d7"
+                        },
+                        {
+                        "name": "PartTitle",
+                        "value": "Analytics"
+                        },
+                        {
+                        "name": "PartSubTitle",
+                        "value": "[parameters('LogAnalyticsWorkspaceName')]"
+                        },
+                        {
+                        "name": "resourceTypeMode",
+                        "value": "workspace"
+                        },
+                        {
+                        "name": "ControlType",
+                        "value": "AnalyticsChart"
+                        },
+                        {
+                        "name": "SpecificChart",
+                        "value": "Line"
+                        },
+                        {
+                        "name": "DashboardId",
+                        "isOptional": true
+                        }
+                    ],
+                    "type": "Extension/AppInsightsExtension/PartType/AnalyticsPart",
+                    "settings": {
+                        "content": {
+                        "PartTitle": "Files per tablet",
+                        "PartSubTitle": "[parameters('LogAnalyticsWorkspaceName')]"
+                        }
+                    },
+                    "asset": {
+                        "idInputName": "ComponentId",
+                        "type": "ApplicationInsights"
+                    }
+                    }
+                },
+                "9": {
+                    "position": {
+                    "x": 0,
+                    "y": 8,
+                    "colSpan": 6,
+                    "rowSpan": 4
+                    },
+                    "metadata": {
+                    "inputs": [
+                        {
+                        "name": "ComponentId",
+                        "value": {
+                            "SubscriptionId": "[parameters('SubscriptionId')]",
+                            "ResourceGroup": "[parameters('ResourceGroup')]",
+                            "Name": "[parameters('LogAnalyticsWorkspaceName')]",
+                            "ResourceId": "[variables('ResourceId')]"
+                        }
+                        },
+                        {
+                        "name": "Query",
+                        "value": "Perf \r\n| where CounterName matches regex \"TabletServer(.)*.tserver.general.activeMajCs.value\"\r\n| extend ClusterName = substring(Computer, 0, 6) \r\n| summarize avg_CounterValue = avg(CounterValue) by Computer, CounterName, bin(TimeGenerated,1min), ClusterName\r\n| summarize sum(avg_CounterValue) by Computer, TimeGenerated, ClusterName\r\n| summarize MajorCompactionActive = sum(sum_avg_CounterValue) by TimeGenerated, ClusterName\r\n| project MajorCompactionActive , TimeGenerated, ClusterName \r\n| render timechart\r\n"
+                        },
+                        {
+                        "name": "TimeRange",
+                        "value": "P1D"
+                        },
+                        {
+                        "name": "Dimensions",
+                        "value": {
+                            "xAxis": {
+                            "name": "TimeGenerated",
+                            "type": "datetime"
+                            },
+                            "yAxis": [
+                            {
+                                "name": "MajorCompactionActive",
+                                "type": "real"
+                            }
+                            ],
+                            "splitBy": [
+                            {
+                                "name": "ClusterName",
+                                "type": "string"
+                            }
+                            ],
+                            "aggregation": "Sum"
+                        }
+                        },
+                        {
+                        "name": "Version",
+                        "value": "1.0"
+                        },
+                        {
+                        "name": "PartId",
+                        "value": "927cc780-79f0-4043-af38-9170b4903624"
+                        },
+                        {
+                        "name": "PartTitle",
+                        "value": "Analytics"
+                        },
+                        {
+                        "name": "PartSubTitle",
+                        "value": "[parameters('LogAnalyticsWorkspaceName')]"
+                        },
+                        {
+                        "name": "resourceTypeMode",
+                        "value": "workspace"
+                        },
+                        {
+                        "name": "ControlType",
+                        "value": "AnalyticsChart"
+                        },
+                        {
+                        "name": "SpecificChart",
+                        "value": "Line"
+                        },
+                        {
+                        "name": "DashboardId",
+                        "isOptional": true
+                        }
+                    ],
+                    "type": "Extension/AppInsightsExtension/PartType/AnalyticsPart",
+                    "settings": {
+                        "content": {
+                        "PartTitle": "Major compaction (Active)",
+                        "PartSubTitle": "[parameters('LogAnalyticsWorkspaceName')]"
+                        }
+                    },
+                    "asset": {
+                        "idInputName": "ComponentId",
+                        "type": "ApplicationInsights"
+                    }
+                    }
+                },
+                "10": {
+                    "position": {
+                    "x": 6,
+                    "y": 8,
+                    "colSpan": 6,
+                    "rowSpan": 4
+                    },
+                    "metadata": {
+                    "inputs": [
+                        {
+                        "name": "ComponentId",
+                        "value": {
+                            "SubscriptionId": "[parameters('SubscriptionId')]",
+                            "ResourceGroup": "[parameters('ResourceGroup')]",
+                            "Name": "[parameters('LogAnalyticsWorkspaceName')]",
+                            "ResourceId": "[variables('ResourceId')]"
+                        }
+                        },
+                        {
+                        "name": "Query",
+                        "value": "Perf \r\n| where CounterName matches regex \"TabletServer(.)*.tserver.general.queuedMajCs.value\"\r\n| extend ClusterName = substring(Computer, 0, 6) \r\n| summarize avg_CounterValue = avg(CounterValue) by Computer, CounterName, bin(TimeGenerated,1min), ClusterName\r\n| summarize sum(avg_CounterValue) by Computer, TimeGenerated, ClusterName\r\n| summarize MajorCompactionQueued = sum(sum_avg_CounterValue) by TimeGenerated, ClusterName\r\n| project MajorCompactionQueued , TimeGenerated, ClusterName \r\n| render timechart\r\n"
+                        },
+                        {
+                        "name": "TimeRange",
+                        "value": "P1D"
+                        },
+                        {
+                        "name": "Dimensions",
+                        "value": {
+                            "xAxis": {
+                            "name": "TimeGenerated",
+                            "type": "datetime"
+                            },
+                            "yAxis": [
+                            {
+                                "name": "MajorCompactionQueued",
+                                "type": "real"
+                            }
+                            ],
+                            "splitBy": [
+                            {
+                                "name": "ClusterName",
+                                "type": "string"
+                            }
+                            ],
+                            "aggregation": "Sum"
+                        }
+                        },
+                        {
+                        "name": "Version",
+                        "value": "1.0"
+                        },
+                        {
+                        "name": "PartId",
+                        "value": "0e3bba33-fc17-49be-9c48-f8e8a645e8fa"
+                        },
+                        {
+                        "name": "PartTitle",
+                        "value": "Analytics"
+                        },
+                        {
+                        "name": "PartSubTitle",
+                        "value": "[parameters('LogAnalyticsWorkspaceName')]"
+                        },
+                        {
+                        "name": "resourceTypeMode",
+                        "value": "workspace"
+                        },
+                        {
+                        "name": "ControlType",
+                        "value": "AnalyticsChart"
+                        },
+                        {
+                        "name": "SpecificChart",
+                        "value": "Line"
+                        },
+                        {
+                        "name": "DashboardId",
+                        "isOptional": true
+                        }
+                    ],
+                    "type": "Extension/AppInsightsExtension/PartType/AnalyticsPart",
+                    "settings": {
+                        "content": {
+                        "PartTitle": "Major compactions (Queued)",
+                        "PartSubTitle": "[parameters('LogAnalyticsWorkspaceName')]"
+                        }
+                    },
+                    "asset": {
+                        "idInputName": "ComponentId",
+                        "type": "ApplicationInsights"
+                    }
+                    }
+                },
+                "11": {
+                    "position": {
+                    "x": 12,
+                    "y": 8,
+                    "colSpan": 6,
+                    "rowSpan": 4
+                    },
+                    "metadata": {
+                    "inputs": [
+                        {
+                        "name": "ComponentId",
+                        "value": {
+                            "SubscriptionId": "[parameters('SubscriptionId')]",
+                            "ResourceGroup": "[parameters('ResourceGroup')]",
+                            "Name": "[parameters('LogAnalyticsWorkspaceName')]",
+                            "ResourceId": "[variables('ResourceId')]"
+                        }
+                        },
+                        {
+                        "name": "Query",
+                        "value": "Perf \r\n| where CounterName matches regex \"TabletServer(.)*.tserver.general.activeMinCs.value\"\r\n| extend ClusterName = substring(Computer, 0, 6) \r\n| summarize avg_CounterValue = avg(CounterValue) by Computer, CounterName, bin(TimeGenerated,1min), ClusterName\r\n| summarize sum(avg_CounterValue) by Computer, TimeGenerated, ClusterName\r\n| summarize MinorCompactionActive = sum(sum_avg_CounterValue) by TimeGenerated, ClusterName\r\n| project MinorCompactionActive , TimeGenerated, ClusterName \r\n| render timechart\r\n"
+                        },
+                        {
+                        "name": "TimeRange",
+                        "value": "P1D"
+                        },
+                        {
+                        "name": "Dimensions",
+                        "value": {
+                            "xAxis": {
+                            "name": "TimeGenerated",
+                            "type": "datetime"
+                            },
+                            "yAxis": [
+                            {
+                                "name": "MinorCompactionActive",
+                                "type": "real"
+                            }
+                            ],
+                            "splitBy": [
+                            {
+                                "name": "ClusterName",
+                                "type": "string"
+                            }
+                            ],
+                            "aggregation": "Sum"
+                        }
+                        },
+                        {
+                        "name": "Version",
+                        "value": "1.0"
+                        },
+                        {
+                        "name": "PartId",
+                        "value": "e80ee299-0927-4790-bdd8-b7763410494b"
+                        },
+                        {
+                        "name": "PartTitle",
+                        "value": "Analytics"
+                        },
+                        {
+                        "name": "PartSubTitle",
+                        "value": "[parameters('LogAnalyticsWorkspaceName')]"
+                        },
+                        {
+                        "name": "resourceTypeMode",
+                        "value": "workspace"
+                        },
+                        {
+                        "name": "ControlType",
+                        "value": "AnalyticsChart"
+                        },
+                        {
+                        "name": "SpecificChart",
+                        "value": "Line"
+                        },
+                        {
+                        "name": "DashboardId",
+                        "isOptional": true
+                        }
+                    ],
+                    "type": "Extension/AppInsightsExtension/PartType/AnalyticsPart",
+                    "settings": {
+                        "content": {
+                        "PartTitle": "Minor compaction (Active)",
+                        "PartSubTitle": "[parameters('LogAnalyticsWorkspaceName')]"
+                        }
+                    },
+                    "asset": {
+                        "idInputName": "ComponentId",
+                        "type": "ApplicationInsights"
+                    }
+                    }
+                },
+                "12": {
+                    "position": {
+                    "x": 18,
+                    "y": 8,
+                    "colSpan": 6,
+                    "rowSpan": 4
+                    },
+                    "metadata": {
+                    "inputs": [
+                        {
+                        "name": "ComponentId",
+                        "value": {
+                            "SubscriptionId": "[parameters('SubscriptionId')]",
+                            "ResourceGroup": "[parameters('ResourceGroup')]",
+                            "Name": "[parameters('LogAnalyticsWorkspaceName')]",
+                            "ResourceId": "[variables('ResourceId')]"
+                        }
+                        },
+                        {
+                        "name": "Query",
+                        "value": "Perf \r\n| where CounterName matches regex \"TabletServer(.)*.tserver.general.queuedMinCs.value\"\r\n| extend ClusterName = substring(Computer, 0, 6) \r\n| summarize avg_CounterValue = avg(CounterValue) by Computer, CounterName, bin(TimeGenerated,1min), ClusterName\r\n| summarize sum(avg_CounterValue) by Computer, TimeGenerated, ClusterName\r\n| summarize MinorCompactionQueued = sum(sum_avg_CounterValue) by TimeGenerated, ClusterName\r\n| project MinorCompactionQueued , TimeGenerated, ClusterName \r\n| render timechart\r\n"
+                        },
+                        {
+                        "name": "TimeRange",
+                        "value": "P1D"
+                        },
+                        {
+                        "name": "Dimensions",
+                        "value": {
+                            "xAxis": {
+                            "name": "TimeGenerated",
+                            "type": "datetime"
+                            },
+                            "yAxis": [
+                            {
+                                "name": "MinorCompactionQueued",
+                                "type": "real"
+                            }
+                            ],
+                            "splitBy": [
+                            {
+                                "name": "ClusterName",
+                                "type": "string"
+                            }
+                            ],
+                            "aggregation": "Sum"
+                        }
+                        },
+                        {
+                        "name": "Version",
+                        "value": "1.0"
+                        },
+                        {
+                        "name": "PartId",
+                        "value": "6cd14a18-26ac-4b46-95cd-e0be34d0b0ca"
+                        },
+                        {
+                        "name": "PartTitle",
+                        "value": "Analytics"
+                        },
+                        {
+                        "name": "PartSubTitle",
+                        "value": "[parameters('LogAnalyticsWorkspaceName')]"
+                        },
+                        {
+                        "name": "resourceTypeMode",
+                        "value": "workspace"
+                        },
+                        {
+                        "name": "ControlType",
+                        "value": "AnalyticsChart"
+                        },
+                        {
+                        "name": "SpecificChart",
+                        "value": "Line"
+                        },
+                        {
+                        "name": "DashboardId",
+                        "isOptional": true
+                        }
+                    ],
+                    "type": "Extension/AppInsightsExtension/PartType/AnalyticsPart",
+                    "settings": {
+                        "content": {
+                        "PartTitle": "Minor compaction (Queued)",
+                        "PartSubTitle": "[parameters('LogAnalyticsWorkspaceName')]"
+                        }
+                    },
+                    "asset": {
+                        "idInputName": "ComponentId",
+                        "type": "ApplicationInsights"
+                    }
+                    }
+                }
+                }
+            }
+            },
+            "metadata": {
+            "model": {
+                "timeRange": {
+                "value": {
+                    "relative": {
+                    "duration": 24,
+                    "timeUnit": 1
+                    }
+                },
+                "type": "MsPortalFx.Composition.Configuration.ValueTypes.TimeRange"
+                },
+                "filterLocale": {
+                "value": "en-us"
+                },
+                "filters": {
+                "value": {
+                    "MsPortalFx_TimeRange": {
+                    "model": {
+                        "format": "utc",
+                        "granularity": "auto",
+                        "relative": "24h"
+                    },
+                    "displayCache": {
+                        "name": "UTC Time",
+                        "value": "Past 24 hours"
+                    },
+                    "filteredPartIds": [
+                        "StartboardPart-AnalyticsPart-7af986cb-22d8-4615-96c4-fa716011d6f6",
+                        "StartboardPart-AnalyticsPart-7af986cb-22d8-4615-96c4-fa716011d6f8",
+                        "StartboardPart-AnalyticsPart-7af986cb-22d8-4615-96c4-fa716011d6fa",
+                        "StartboardPart-AnalyticsPart-7af986cb-22d8-4615-96c4-fa716011d6fc",
+                        "StartboardPart-AnalyticsPart-7af986cb-22d8-4615-96c4-fa716011d6fe",
+                        "StartboardPart-AnalyticsPart-7af986cb-22d8-4615-96c4-fa716011d700",
+                        "StartboardPart-AnalyticsPart-7af986cb-22d8-4615-96c4-fa716011d702",
+                        "StartboardPart-AnalyticsPart-7af986cb-22d8-4615-96c4-fa716011d704",
+                        "StartboardPart-AnalyticsPart-7af986cb-22d8-4615-96c4-fa716011d706",
+                        "StartboardPart-AnalyticsPart-7af986cb-22d8-4615-96c4-fa716011d708",
+                        "StartboardPart-AnalyticsPart-7af986cb-22d8-4615-96c4-fa716011d70a",
+                        "StartboardPart-AnalyticsPart-7af986cb-22d8-4615-96c4-fa716011d70c",
+                        "StartboardPart-AnalyticsPart-7af986cb-22d8-4615-96c4-fa716011d70e"
+                    ]
+                    }
+                }
+                }
+              }
+            }
+           }
+        }
+    ]
+}

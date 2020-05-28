@@ -72,6 +72,8 @@ sudo yum install azure-cli-2.0.69-1.el7.x86_64.rpm
 * Install [Ansible for Azure](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/ansible-install-configure) within
   the Python virtual environment by using `pip install ansible[azure]`
 
+When running Muchos under Ubuntu 18.04, checkout these [tips](docs/azure-ubuntu-1804.md).
+
 ## Quickstart
 
 The following commands will install Muchos, launch a cluster, and setup/run Accumulo:
@@ -155,15 +157,24 @@ Under the `general` section, edit following values as per your configuration
 * `cluster_user` should be set to the name of the administrative user
 * `proxy_hostname` (optional) is the name of the machine which has access to the cluster VNET
 
-Under the `azure` section, edit following values as per your configuration
+Under the `azure` section, edit following values as per your configuration:
 * `resource_group` to provide the resource-group name for the cluster deployment. A new resource group with
   this name will be created if it doesn't already exist
 * `vnet` to provide the name of the VNET that your cluster nodes should use. A new VNET with this name will be
   created if it doesn't already exist
 * `subnet` to provide a name for the subnet within which the cluster resources will be deployed
 * `numnodes` to change the cluster size in terms of number of nodes deployed
+* `data_disk_count` to specify how many persistent data disks are attached to each node and will be used by HDFS.
+   If you would prefer to use ephemeral / storage for Azure clusters, please follow [these steps](docs/azure-ephemeral-disks.md).
 * `vm_sku` to specify the VM size to use. You can choose from the
   [available VM sizes](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/sizes-general).
+* `use_adlsg2` to use Azure Data Lake Storage(ADLS) Gen2 as datastore for Accumulo
+  [ADLS Gen2 Doc](https://docs.microsoft.com/en-us/azure/storage/blobs/data-lake-storage-introduction).
+  [Setup ADLS Gen2 as datastore for Accumulo](https://accumulo.apache.org/blog/2019/10/15/accumulo-adlsgen2-notes.html).
+* `az_oms_integration_needed` to implement Log Analytics workspace, Dashboard & Azure Monitor Workbooks
+  [Create Log Analytics workspace](https://docs.microsoft.com/en-us/azure/azure-monitor/learn/quick-create-workspace).
+  [Create and Share dashboards](https://docs.microsoft.com/en-us/azure/azure-portal/azure-portal-dashboards).
+  [Azure Monitor Workbooks](https://docs.microsoft.com/en-us/azure/azure-monitor/platform/workbooks-overview).
 
 Within Azure the `nodes` section is auto populated with the hostnames and their default roles.
 
@@ -182,8 +193,11 @@ versions of these tarballs are specified in [muchos.props] and can be changed if
 Optionally, Muchos can setup the cluster using an Accumulo or Fluo tarball that is placed in the
 `conf/upload` directory of Muchos. This option is only necessary if you want to use an unreleased
 version of Fluo or Accumulo. Before running the `muchos setup` command, you should confirm that the
-version and SHA-256 hash of your tarball matches what is set in [conf/checksums][checksums]. Run the command
-`shasum -a 256 /path/to/tarball` on your tarball to determine its hash.
+hash (typically SHA-512 or SHA-256) of your tarball matches what is set in [conf/checksums][checksums].
+Run the command `shasum -a 512 /path/to/tarball` on your tarball to determine its hash.
+The entry in [conf/checksums][checksums] can optionally include the algorithm as a prefix. If the algorithm
+is not specified then Muchos will infer the algorithm based on the length of the hash. Currently Muchos
+supports using sha512 / sha384 / sha256 / sha224 / sha1 / md5 hashes for the checksum.
 
 The `muchos setup` command will install and start Accumulo, Hadoop, and Zookeeper.  The optional
 services below will only be set up if configured in the `[nodes]` section of [muchos.props]:
@@ -234,9 +248,9 @@ to your proxy, you can view the monitoring & status pages below in your browser.
 hosts in the URLs below match the configuration in [nodes] of `muchos.prop.example` and may be
 different for your cluster.
 
- * NameNode status - [http://leader1:50070/](http://leader1:50070/)
+ * NameNode status - [http://leader1:9870/](http://leader1:9870/)
  * ResourceManger status - [http://leader2:8088/cluster](http://leader2:8088/cluster)
- * Accumulo monitor - [http://leader3:50095/](http://leader3:50095/)
+ * Accumulo monitor - [http://leader3:9995/](http://leader3:9995/)
  * Spark History Server - [http://leader2:18080/](http://leader2:18080/)
  * Grafana Metrics and Monitoring - [http://metrics:3000/](http://metrics:3000/)
  * Mesos status - [http://leader1:5050/](http://leader1:5050/) (if `mesosmaster` configured on leader1)
@@ -283,7 +297,7 @@ managed in their own git repository (see [mikewalch/muchos-custom][mc] for an ex
 ## High-Availability (optional)
 
 Additionally, Muchos can be configured to provide High-Availability for HDFS & Accumulo components. By default,
-this feature is off, however it can be turned on by editing the following settings in [muchos.props] 
+this feature is off, however it can be turned on by editing the following settings in [muchos.props]
 under the `general` section as shown below:
 
 ```ini
@@ -291,9 +305,11 @@ hdfs_ha = True                        # default is False
 nameservice_id = muchoshacluster      # Logical name for the cluster, no special characters
 ```
 
-Before enabling HA, it is strongly recommended you read the Apache doc for [HDFS HA] & [Accumulo HA] 
+Before enabling HA, it is strongly recommended you read the Apache doc for [HDFS HA] & [Accumulo HA]
 
 Also in the `[nodes]` section of [muchos.props] ensure the `journalnode` and `zkfc` service are configured to run.
+
+When `hdfs_ha` is `True` it also enables the ability to have HA resource managers for YARN.  To utilize this feature, specify `resourcemanager` for multiple leader nodes in the `[nodes]` section.
 
 ## Terminating your cluster
 
@@ -301,9 +317,6 @@ If you launched your cluster, run the following command to terminate your cluste
 data on your cluster will be lost:
 
     ./bin/muchos terminate
-
-Note: The terminate command is currently unsupported for Azure based clusters. Instead, you should delete
-underlying Azure VMSS resources when you need to terminate the cluster.
 
 ## Automatic shutdown of clusters
 
@@ -327,6 +340,10 @@ $ ./bin/muchos config -p leader.public.ip
 10.10.10.10
 ```
 
+## Contributions
+
+We welcome contributions to the project. [These notes](./CONTRIBUTING.md) should be helpful.
+
 ## Powered by
 
 Muchos is powered by the following projects:
@@ -336,16 +353,6 @@ Muchos is powered by the following projects:
    start Fluo, Accumulo, Hadoop, etc on an existing EC2 or bare metal cluster.
  * [azure-cli] - The Azure CLI is a command-line tool for managing Azure resources.
  * [ansible-azure] - Ansible includes a suite of modules for interacting with Azure Resource Manager.
-
-## Muchos Testing
-
-Muchos has unit tests.  To run them, first install nose using pip:
-
-    pip install nose
-
-The following command runs the unit tests:
-
-    nosetests -w lib/
 
 [centos7]: https://aws.amazon.com/marketplace/pp/B00O7WM7QW
 [aws-config]: http://docs.aws.amazon.com/cli/latest/userguide/cli-config-files.html
