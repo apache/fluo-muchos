@@ -7,4 +7,5 @@
   - { role: elasticsearch }
   - { role: filebeat }
   - { role: kibana }
+  - { role: logstash}
 

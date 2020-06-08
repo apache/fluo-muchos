@@ -44,6 +44,7 @@ SERVICES = [
     "swarmmanager",
     "journalnode",
     "zkfc",
+    "elkserver",
 ]
 
 OPTIONAL_SERVICES = [
@@ -56,6 +57,7 @@ OPTIONAL_SERVICES = [
     "swarmmanager",
     "journalnode",
     "zkfc",
+    "elkserver",
 ]
 
 _HOST_VAR_DEFAULTS = {

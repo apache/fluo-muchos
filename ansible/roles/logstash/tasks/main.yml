@@ -14,42 +14,49 @@
   yum: name=/tmp/logstash-oss-7.6.0.rpm state=present
 
 
+#Update startup.option file with the new home location.
+- name: Update the startup.option file
+  lineinfile:
+    destfile: /etc/logstash/startup.options
+    regexp: 'LS_HOME=/usr/share/logstash'
+    line: 'LS_HOME=/etc/logstash'
+  become: true 
+
+
+#Update logstash config path locatione
+- name: Update logstash config path location
+  lineinfile:
+    destfile: /etc/logstash/logstash.yml
+    regexp: '# path.config:'
+    line: 'path.config: /etc/logstash/conf.d/'
+  become: true
+
 #Make Logstash conf.d  directory 
-- name: Make Logstash Conf.d Directory 
+- name: make logstash conf.d directory
   file:
    path: /etc/logstash/conf.d/
    state: directory
   become: true
 
-- name: Create Logstash Configuration File 
-  template: 
-    src: "{{ item }}.j2"
-    dest: "/etc/logstash/conf.d/{{ item }}"
-    owner: root
-    group: root
+- name: Copy logstash into conf.d folder 
+  copy: 
+     src: ../../logstash/templates/logstash-simple-2.conf
+     dest: /etc/logstash/conf.d/
   become: true
-  with_items: 
-    - pipeline.conf
-
-- name: Install logstash input configuration files 
-  template: src = logstash_input.conf dest=/etc/logstash/conf.d/{{ item }}.conf
-  with_dict: logstash.config.file_inputs
-  notify: Restart Logstash
-
-- name: Install logstash output configuration files 
-  template: src = logstash_output.conf dest=/etc/logstash/conf.d/{{ item }}.conf
-  notify: Restart Logstash 
 
 
-# - name: Create Logstash filter
-#   template: 
-#     src: "{{ item }}"
-#     dest: "/etc/logstash/conf.d/{{item}}"
-#     owner: root
-#     group: root
-#   become: true
-#   with_items:
-#     - logstash.conf
+- name: Install beats input plugin 
+  become: true 
+  shell: /usr/share/logstash/bin/logstash-plugin install logstash-input-beats
+
+
+
+# #Run Logstash configuration
+
+# - name: Run Logstash configuration 
+#   become: true 
+#   shell: ./logstash -f /etc/logstash/conf.d/logstash-simple2.conf --path.settings /etc/logstash
+
 
 # Restart Logstash
 

@@ -12,19 +12,12 @@
     dest: /tmp/{{ elasticsearch_rpm }}
     force: no  
   
-#Check for file exists 
-
-- name: "check that file exists in directory"
-  stat: 
-    path: /tmp/{{ elasticsearch_rpm }}
-    register: stat_result
 
  #Install elasticsearch    
 
 - name: "ensure elasticsearch is installed"
   become: true
   yum: name=/tmp/{{ elasticsearch_rpm }} state=present
-  when: stat_result.stat.exists == False
 
 
 # Update Elasticsearch config file to allow access (to secure Elasticsearch, bind to 'localhost'). 
