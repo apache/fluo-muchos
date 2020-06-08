@@ -19,53 +19,14 @@
 
 #Configure Filebeat yml file 
 
-- name: Defining the default logstash output in Filebeat.yml 
-  lineinfile:
-   destfile: /etc/filebeat/filebeat.yml
-   regexp: '#output.logstash:'
-   line: 'output.logstash:'
+- name: Copy filebeat.yml onto ec2
+  copy: 
+    src: ../../filebeat/templates/filebeat.yml
+    dest: /etc/filebeat/
+    backup: yes
   become: true
 
-- name: Defining the default logstash host in Filebeat.yml 
-  lineinfile:
-   destfile: /etc/filebeat/filebeat.yml
-   insertafter: '# The Logstash hosts'
-   regexp: '  #hosts: ["localhost:5044"]'
-   line: '  hosts: ["localhost:5044"]'
-  become: true
-
-- name: Defining the default paths to be crawled and fetched 
-  lineinfile:
-   destfile: /etc/filebeat/filebeat.yml
-   insertafter: '- /var/log/*.log'
-   line: '- /media/ephemeral0/logs/accumulo/*.log'
-  become: true
-
-- name: Add logging for filebeat 
-  blockinfile: 
-   destfile: /etc/filebeat/filebeat.yml 
-   insertafter: '#logging.level: debug'
-   block: |
-    logging.level: info
-    logging.to_files: true
-    logging.files: 
-      path: /var/log/filebeat
-      name: filebeat
-      keepfiles: 7 
-      permissions: 0644
-  become: true
-
-- name: Change input configuration
-  lineinfile: 
-    destfile: /etc/filebeat/filebeat.yml
-    regexp: 'enabled: false'
-    line: 'enabled: true'
-  become: true
-
-
- - 
 # Starting Filebeat
-
 - name: Starting Filebeat
   service:
    name: filebeat
