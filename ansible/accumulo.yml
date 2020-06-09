@@ -30,11 +30,11 @@
 - hosts: all:!{{ azure_proxy_host }}
   tasks:
     - import_tasks: roles/accumulo/tasks/add-adlsgen2.yml
-      when: cluster_type == 'azure' and accumulo_major_version == '2' and use_adlsg2
+      when: cluster_type == 'azure' and accumulo_version is version('2.0.0','>=') and accumulo_version is version('2.1.0','<') and use_adlsg2
 - hosts: accumulomaster[0]
   tasks:
     - import_tasks: roles/accumulo/tasks/init-adlsgen2.yml
-      when: cluster_type == 'azure' and accumulo_major_version == '2' and use_adlsg2
+      when: cluster_type == 'azure' and accumulo_version is version('2.0.0','>=') and accumulo_version is version('2.1.0','<') and use_adlsg2
   handlers:
     - import_tasks: roles/accumulo/handlers/init-adlsgen2.yml
 - hosts: accumulo
