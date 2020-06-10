@@ -142,7 +142,7 @@ metrics_drive_root = var-data
 # Optional proxy VM. If not set, the first node of the cluster will be selected as the proxy.
 azure_proxy_host =
 location = westus2
-# Enable ADLS Gen2 storage configuration. Muchos parameters instance_volumes_input, instance_volumes_preferred & adls_storage_type is not required if use_adlsg2 is false.
+# Enable ADLS Gen2 storage configuration. Muchos parameters instance_volumes_input, instance_volumes_adls & adls_storage_type is not required if use_adlsg2 is false.
 use_adlsg2 = False
 # Storage accounts can be auto generated or manually specified. "|" is used as separator between manual and auto generated storage account names and must be specified
 # Manual and Auto generated names are mutually exclusive
@@ -155,8 +155,8 @@ use_adlsg2 = False
 #   <Number-of-Storage-Accounts>,<domain-name>|
 #   Example: 3,dfs.core.windows.net|
 instance_volumes_input = 1,dfs.core.windows.net|
-# Do not update "instance_volumes_preferred", it will be populated dynamically during launch phase of muchos
-instance_volumes_preferred =
+# Do not update "instance_volumes_adls", it will be populated dynamically during launch phase of muchos
+instance_volumes_adls =
 # Type of storage for ADLS Gen2 storage accounts
 adls_storage_type = Standard_LRS
 # Specify user assigned identity name. "{{ vmss_name }}-ua-msi"  will be created if value is not provided

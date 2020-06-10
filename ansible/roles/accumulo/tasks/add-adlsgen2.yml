@@ -18,4 +18,4 @@
   lineinfile:
     path: "{{ accumulo_home }}/conf/accumulo.properties"
     regexp: '^instance.volumes='
-    line: "instance.volumes={{ hdfs_root }}/accumulo,{{ instance_volumes_preferred }}"
+    line: "instance.volumes={{ hdfs_root }}/accumulo,{{ instance_volumes_adls }}"

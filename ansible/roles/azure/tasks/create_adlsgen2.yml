@@ -22,7 +22,7 @@
 # 2. Create User Assigned Identity.
 # 3. Assign roles to storage accounts.
 # 4. Create filesystem / container in storage accounts.
-# 5. Update tenant_id, client_id and instance_volumes_preferred in muchos.props.
+# 5. Update tenant_id, client_id and instance_volumes_adls in muchos.props.
 # 6. Assign User Assigned Identity to VMSS.
 
 - name: Generate MD5 checksum based on resource_group name, vmss_name and cluster name
@@ -70,11 +70,11 @@
   set_fact:
      InstanceVolumes: "{{ InstanceVolumesManual if  instance_volumes_input.split('|')[0].split(',') ==  [''] else InstanceVolumesAuto }}"
 
-- name: Update instance_volumes_preferred  in muchos.props
+- name: Update instance_volumes_adls  in muchos.props
   lineinfile:
     path: "{{ deploy_path }}/conf/muchos.props"
-    regexp: '^instance_volumes_preferred\s*=\s*|^[#]instance_volumes_preferred\s*=\s*'
-    line: "instance_volumes_preferred = {{ InstanceVolumes|join(',') }}"
+    regexp: '^instance_volumes_adls\s*=\s*|^[#]instance_volumes_adls\s*=\s*'
+    line: "instance_volumes_adls = {{ InstanceVolumes|join(',') }}"
 
 # Not registering variable because storage values are not visible immediately
 - name: Create ADLS Gen2 storage account using REST API
