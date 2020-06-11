@@ -180,7 +180,7 @@ class AzureDeployConfig(BaseConfig):
     def principal_id(self):
         return self.get("azure", "principal_id")
 
-    @ansible_host_var(name="instance_volumes_preferred")
+    @ansible_host_var(name="instance_volumes_adls")
     @default(None)
-    def instance_volumes_preferred(self):
-        return self.get("azure", "instance_volumes_preferred")
+    def instance_volumes_adls(self):
+        return self.get("azure", "instance_volumes_adls")
