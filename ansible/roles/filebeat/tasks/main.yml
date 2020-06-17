@@ -25,13 +25,21 @@
     dest: /etc/filebeat/
     backup: yes
   become: true
-
-# Starting Filebeat
-- name: Starting Filebeat
-  service:
-   name: filebeat
-   state: started
-   enabled: true
+ 
+- name: Copy filebeat.reference.yml onto ec2
+  copy:
+    src: ../../filebeat/templates/filebeat.reference.yml
+    dest: /etc/filebeat/
+    backup: yes
   become: true
+ 
+- name: Enable logstash module
+  shell: filebeat modules enable logstash
+  become: true
+
+# #Run Filebeat 
+# - name: Run Filebeat with logstash module
+#   shell: filebeat -e &
+#   become: true
 
  
