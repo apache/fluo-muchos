@@ -65,7 +65,7 @@ use_systemd = False
 # You may need to change this value if a new image has been released or you are running in a different region.
 # Before using this AMI, subscribe to it on the CentOS product page below or launching will fail:
 #   https://aws.amazon.com/marketplace/pp/B00O7WM7QW
-aws_ami = ami-02eac2c0129f6376b
+aws_ami = ami-9887c6e7
 # Type of AWS instance launched by default
 default_instance_type = m5d.large
 # Type of AWS instance launched for any node running 'worker' service
