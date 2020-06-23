@@ -4,8 +4,7 @@
 #
 - hosts: all:!{{ azure_proxy_host }}
   roles:
-  - { role: elasticsearch }
-  - { role: filebeat }
-  - { role: kibana }
-  - { role: logstash}
-
+    - { role: elasticsearch }
+    - { role: filebeat }
+    - { role: kibana }
+    - { role: logstash }

@@ -3,43 +3,40 @@
 # Installing Filebeat
 #
 
-# download Filebeat 
+# download Filebeat
 - name: "download filebeat rpm"
-  get_url: 
+  get_url:
   args:
     url: https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-oss-7.5.0-x86_64.rpm
     dest: /tmp/filebeat-oss-7.5.0-x86_64.rpm
     force: no
 
- #Install filebeat"
+  #Install filebeat"
 - name: "Install filebeat rpm"
   become: true
   yum: name=/tmp/filebeat-oss-7.5.0-x86_64.rpm state=present
 
-
-#Configure Filebeat yml file 
+#Configure Filebeat yml file
 
 - name: Copy filebeat.yml onto ec2
-  copy: 
+  copy:
     src: ../../filebeat/templates/filebeat.yml
     dest: /etc/filebeat/
     backup: yes
   become: true
- 
+
 - name: Copy filebeat.reference.yml onto ec2
   copy:
     src: ../../filebeat/templates/filebeat.reference.yml
     dest: /etc/filebeat/
     backup: yes
   become: true
- 
+
 - name: Enable logstash module
   shell: filebeat modules enable logstash
   become: true
-
-# #Run Filebeat 
+# #Run Filebeat
 # - name: Run Filebeat with logstash module
 #   shell: filebeat -e &
 #   become: true
 
- 

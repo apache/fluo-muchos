@@ -13,57 +13,56 @@
 # ============================== Filebeat inputs ===============================
 
 filebeat.inputs:
+  # Each - is an input. Most options can be set at the input level, so
+  # you can use different inputs for various configurations.
+  # Below are the input specific configurations.
 
-# Each - is an input. Most options can be set at the input level, so
-# you can use different inputs for various configurations.
-# Below are the input specific configurations.
+  - type: log
 
-- type: log
+    # Change to true to enable this input configuration.
+    enabled: true
 
-  # Change to true to enable this input configuration.
-  enabled: true
+    # Paths that should be crawled and fetched. Glob based paths.
+    paths:
+      #- /var/log/*.log
+      - /media/ephemeral0/logs/accumulo/*.log
+      - /media/ephemeral0/logs/zookeeper/*log
+      - /media/ephemeral0/logs/hadoop/*.log
+      #- c:\programdata\elasticsearch\logs\*
 
-  # Paths that should be crawled and fetched. Glob based paths.
-  paths:
-    #- /var/log/*.log
-    - /media/ephemeral0/logs/accumulo/*.log
-    - /media/ephemeral0/logs/zookeeper/*log
-    - /media/ephemeral0/logs/hadoop/*.log
-    #- c:\programdata\elasticsearch\logs\*
+    # Exclude lines. A list of regular expressions to match. It drops the lines that are
+    # matching any regular expression from the list.
+    #exclude_lines: ['^DBG']
 
-  # Exclude lines. A list of regular expressions to match. It drops the lines that are
-  # matching any regular expression from the list.
-  #exclude_lines: ['^DBG']
+    # Include lines. A list of regular expressions to match. It exports the lines that are
+    # matching any regular expression from the list.
+    #include_lines: ['^ERR', '^WARN']
 
-  # Include lines. A list of regular expressions to match. It exports the lines that are
-  # matching any regular expression from the list.
-  #include_lines: ['^ERR', '^WARN']
+    # Exclude files. A list of regular expressions to match. Filebeat drops the files that
+    # are matching any regular expression from the list. By default, no files are dropped.
+    #exclude_files: ['.gz$']
 
-  # Exclude files. A list of regular expressions to match. Filebeat drops the files that
-  # are matching any regular expression from the list. By default, no files are dropped.
-  #exclude_files: ['.gz$']
+    # Optional additional fields. These fields can be freely picked
+    # to add additional information to the crawled log files for filtering
+    #fields:
+    #  level: debug
+    #  review: 1
 
-  # Optional additional fields. These fields can be freely picked
-  # to add additional information to the crawled log files for filtering
-  #fields:
-  #  level: debug
-  #  review: 1
+    ### Multiline options
 
-  ### Multiline options
+    # Multiline can be used for log messages spanning multiple lines. This is common
+    # for Java Stack Traces or C-Line Continuation
 
-  # Multiline can be used for log messages spanning multiple lines. This is common
-  # for Java Stack Traces or C-Line Continuation
+    # The regexp Pattern that has to be matched. The example pattern matches all lines starting with [
+    #multiline.pattern: ^\[
 
-  # The regexp Pattern that has to be matched. The example pattern matches all lines starting with [
-  #multiline.pattern: ^\[
+    # Defines if the pattern set under pattern should be negated or not. Default is false.
+    #multiline.negate: false
 
-  # Defines if the pattern set under pattern should be negated or not. Default is false.
-  #multiline.negate: false
-
-  # Match can be set to "after" or "before". It is used to define if lines should be append to a pattern
-  # that was (not) matched before or after or as long as a pattern is not matched based on negate.
-  # Note: After is the equivalent to previous and before is the equivalent to to next in Logstash
-  #multiline.match: after
+    # Match can be set to "after" or "before". It is used to define if lines should be append to a pattern
+    # that was (not) matched before or after or as long as a pattern is not matched based on negate.
+    # Note: After is the equivalent to previous and before is the equivalent to to next in Logstash
+    #multiline.match: after
 
 # ============================== Filebeat modules ==============================
 
@@ -83,7 +82,6 @@ setup.template.settings:
   index.number_of_shards: 1
   #index.codec: best_compression
   #_source.enabled: false
-
 
 # ================================== General ===================================
 
@@ -117,13 +115,11 @@ setup.template.settings:
 # Starting with Beats version 6.0.0, the dashboards are loaded via the Kibana API.
 # This requires a Kibana endpoint configuration.
 setup.kibana:
-
   # Kibana Host
   # Scheme and port can be left out and will be set to the default (http and 5601)
   # In case you specify and additional path, the scheme is required: http://localhost:5601/path
   # IPv6 addresses should always be defined as: https://[2001:db8::1]:5601
   #host: "localhost:5601"
-
   # Kibana Space ID
   # ID of the Kibana Space into which the dashboards should be loaded. By default,
   # the Default Space will be used.
@@ -148,16 +144,16 @@ setup.kibana:
 
 # ---------------------------- Elasticsearch Output ----------------------------
 #output.elasticsearch:
-  # Array of hosts to connect to.
- # hosts: ["localhost:9200"]
+# Array of hosts to connect to.
+# hosts: ["localhost:9200"]
 
-  # Protocol - either `http` (default) or `https`.
-  #protocol: "https"
+# Protocol - either `http` (default) or `https`.
+#protocol: "https"
 
-  # Authentication credentials - either API key or username/password.
-  #api_key: "id:api_key"
-  #username: "elastic"
-  #password: "changeme"
+# Authentication credentials - either API key or username/password.
+#api_key: "id:api_key"
+#username: "elastic"
+#password: "changeme"
 
 # ------------------------------ Logstash Output -------------------------------
 output.logstash:
@@ -167,10 +163,8 @@ output.logstash:
   # Optional SSL. By default is off.
   # List of root certificates for HTTPS server verifications
   #ssl.certificate_authorities: ["/etc/pki/root/ca.pem"]
-
   # Certificate for SSL client authentication
   #ssl.certificate: "/etc/pki/client/cert.pem"
-
   # Client Certificate Key
   #ssl.key: "/etc/pki/client/cert.key"
 
@@ -181,19 +175,17 @@ processors:
   - add_cloud_metadata: ~
   - add_docker_metadata: ~
   - add_kubernetes_metadata: ~
-
 # ================================== Logging ===================================
 
 # Sets log level. The default log level is info.
 # Available log levels are: error, warning, info, debug
 #logging.level: info
- #   logging.to_files: true
-  #  logging.files: 
-   #   path: /var/log/filebeat
-    #  name: filebeat.log
-     # keepfiles: 7 
-      #permissions: 0644
-
+#   logging.to_files: true
+#  logging.files:
+#   path: /var/log/filebeat
+#  name: filebeat.log
+# keepfiles: 7
+#permissions: 0644
 
 # At debug level, you can selectively enable logging only for some components.
 # To enable all selectors use ["*"]. Examples of other selectors are "beat",

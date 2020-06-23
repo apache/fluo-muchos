@@ -3,69 +3,67 @@
 # Installing Elasticsearch
 #
 
- # Add the Elasticsearch yum repo. 
+# Add the Elasticsearch yum repo.
 
 - name: "download elasticsearch rpm"
-  get_url: 
+  get_url:
   args:
     url: https://artifacts.elastic.co/downloads/elasticsearch/{{ elasticsearch_rpm }}
     dest: /tmp/{{ elasticsearch_rpm }}
-    force: no  
-  
+    force: no
 
- #Install elasticsearch    
 
+  #Install elasticsearch
 - name: "ensure elasticsearch is installed"
   become: true
   yum: name=/tmp/{{ elasticsearch_rpm }} state=present
 
-
-# Update Elasticsearch config file to allow access (to secure Elasticsearch, bind to 'localhost'). 
+# Update Elasticsearch config file to allow access (to secure Elasticsearch, bind to 'localhost').
 
 - name: Updating the config file to allow outside access
   lineinfile:
-   destfile: /etc/elasticsearch/elasticsearch.yml
-   regexp: 'network.host:'
-   line: 'network.host: 0.0.0.0'
+    destfile: /etc/elasticsearch/elasticsearch.yml
+    regexp: "network.host:"
+    line: "network.host: 0.0.0.0"
   become: true
- 
-# Update Elasticsearch port in config file 
 
-- name: Updating the port in config file 
+# Update Elasticsearch port in config file
+
+- name: Updating the port in config file
   lineinfile:
-   destfile: /etc/elasticsearch/elasticsearch.yml
-   regexp: 'http.port:'
-   line: 'http.port: 9200'
+    destfile: /etc/elasticsearch/elasticsearch.yml
+    regexp: "http.port:"
+    line: "http.port: 9200"
   become: true
 
 #Update Discovery Settings in config file
 
-- name: Update the Discovery Seed Host 
+- name: Update the Discovery Seed Host
   lineinfile:
-   destfile: /etc/elasticsearch/elasticsearch.yml
-   regexp: 'discovery.seed_hosts:'
-   line: 'discovery.seed_hosts: ["leader1"]'
+    destfile: /etc/elasticsearch/elasticsearch.yml
+    regexp: "discovery.seed_hosts:"
+    line: 'discovery.seed_hosts: ["leader1"]'
   become: true
+
 
   #Update Discovery Settings in config file
-
-- name: Update the Discovery Seed Host 
+- name: Update the Discovery Seed Host
   lineinfile:
-   destfile: /etc/elasticsearch/elasticsearch.yml
-   regexp: 'cluster.initial_master_nodes:'
-   line: 'cluster.initial_master_nodes: ["leader1"]'
+    destfile: /etc/elasticsearch/elasticsearch.yml
+    regexp: "cluster.initial_master_nodes:"
+    line: 'cluster.initial_master_nodes: ["leader1"]'
   become: true
 
-#Enable Elasticsearch 
+#Enable Elasticsearch
 - name: Enable Elasticsearch
-  service: 
-   name: elasticsearch 
-   enabled: yes
+  service:
+    name: elasticsearch
+    enabled: yes
   become: true
 
 # Restart Elasticsearch
 - name: Start Elasticsearch
-  service: 
-   name: elasticsearch
-   state: started
+  service:
+    name: elasticsearch
+    state: started
   become: yes
