@@ -35,8 +35,9 @@
 - name: Enable logstash module
   shell: filebeat modules enable logstash
   become: true
-# #Run Filebeat
-# - name: Run Filebeat with logstash module
-#   shell: filebeat -e &
-#   become: true
+
+#Run Filebeat
+- name: Run Filebeat in the background
+  shell: screen -d -m ./filebeat -e -c filebeat.yml -d "publish"
+  become: true
 
