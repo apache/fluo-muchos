@@ -6,13 +6,11 @@
     dest: /tmp/logstash-oss-7.6.0.rpm
     force: no
   
-
  #Install Logstash    
 
 - name: "ensure logstash is installed"
   become: true
   yum: name=/tmp/logstash-oss-7.6.0.rpm state=present
-
 
 #Update startup.option file with the new home location.
 - name: Update the startup.option file
@@ -21,7 +19,6 @@
     regexp: 'LS_HOME=/usr/share/logstash'
     line: 'LS_HOME=/etc/logstash'
   become: true 
-
 
 #Update logstash config path locatione
 - name: Update logstash config path location
@@ -44,19 +41,15 @@
      dest: /etc/logstash/conf.d/
   become: true
 
-
 - name: Install beats input plugin 
   become: true 
   shell: /usr/share/logstash/bin/logstash-plugin install logstash-input-beats
-
-
 
 # #Run Logstash configuration
 
 # - name: Run Logstash configuration 
 #   become: true 
 #   shell: ./logstash -f /etc/logstash/conf.d/logstash-simple2.conf --path.settings /etc/logstash
-
 
 # Restart Logstash
 
