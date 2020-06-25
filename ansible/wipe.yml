@@ -29,7 +29,6 @@
     retries: 10
     delay: 3
     until: delete_task is success
-
   - name: "wipe grafana db"
     file: path=/var/lib/grafana/grafana.db state=absent
 
@@ -38,11 +37,12 @@
     retries: 10
     delay: 3
     until: delete_task is success
-
+    
 - import_playbook: wipe-systemd.yml
   when: use_systemd
 
 - import_playbook: kill.yml
+
 - hosts: all
   tasks:
   - name: "wipe software installation dirs"
