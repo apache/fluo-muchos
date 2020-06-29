@@ -10,13 +10,16 @@
   args:
     url: https://artifacts.elastic.co/downloads/elasticsearch/{{ elasticsearch_rpm }}
     dest: /tmp/{{ elasticsearch_rpm }}
+    checksum: "{{ elasticsearch_sha512 }}"
     force: no
 
 
   #Install elasticsearch
 - name: "ensure elasticsearch is installed"
   become: true
-  yum: name=/tmp/{{ elasticsearch_rpm }} state=present
+  yum: 
+    name: /tmp/{{ elasticsearch_rpm }} 
+    state: present
 
 # Update Elasticsearch config file to allow access (to secure Elasticsearch, bind to 'localhost').
 

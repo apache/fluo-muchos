@@ -10,13 +10,16 @@
   args:
     url: https://artifacts.elastic.co/downloads/kibana/{{ kibana_rpm }}
     dest: /tmp/{{ kibana_rpm }}
+    checksum: "{{ kibana_sha512 }}"
     force: no
 
     #Install kibana
 
 - name: "ensure kibana is installed"
   become: true
-  yum: name=/tmp/{{ kibana_rpm }} state=present
+  yum: 
+    name: /tmp/{{ kibana_rpm }} 
+    state: present
 
 # Configurations
 

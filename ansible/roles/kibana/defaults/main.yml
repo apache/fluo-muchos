@@ -15,4 +15,5 @@
 # limitations under the License.
 #
 
-kibana_rpm: kibana-oss-7.6.0-x86_64.rpm
+kibana_rpm: kibana-oss-7.8.0-x86_64.rpm
+kibana_sha512: "sha512:2d86268fb951f91a00a981b121e8fa8e77d67671400c180ef81d74d135c24838ea44faad69d76223f0bd8e86ca4ba5e893a75807e84b43287e0a3c323f1fd837"

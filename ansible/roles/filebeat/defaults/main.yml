@@ -1,3 +1,4 @@
+---
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -9,11 +10,12 @@
 #    http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
+# distributed under the License is distributed on an "AS IS" BASIS,e
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
 
-elasticsearch_rpm: elasticsearch-oss-7.8.0-x86_64.rpm
-elasticsearch_sha512: "sha512:0dfaf62bafd6830ebbf571d9e264411913078781f5fcf57a6bd427bab01c4c001d66245dcb268317b65161e8fc2d4e3d020e2e38d4f3b8ad3477d99e17c2d9d1 "
+filebeat_rpm: filebeat-7.8.0-x86_64.rpm
+filebeat_sha512: "sha512:d3483622cc55f8e0e5a3198bb179bd6e74d66a50a6b6d8df82a3e22eae9b345886505fce9439003b8ab57b3cf70bcfbcfaec40ff3fbd41ff385f1fb9ae6a34e0"
+

@@ -7,14 +7,17 @@
 - name: "download filebeat rpm"
   get_url:
   args:
-    url: https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-oss-7.5.0-x86_64.rpm
-    dest: /tmp/filebeat-oss-7.5.0-x86_64.rpm
+    url: https://artifacts.elastic.co/downloads/beats/filebeat/{{ filebeat_rpm }}
+    dest: /tmp/{{ filebeat_rpm }}
+    checksum: "{{ filebeat_sha512 }}"
     force: no
 
   #Install filebeat"
 - name: "Install filebeat rpm"
   become: true
-  yum: name=/tmp/filebeat-oss-7.5.0-x86_64.rpm state=present
+  yum:
+    name: /tmp/{{ filebeat_rpm }}
+    state: present
 
 #Configure Filebeat yml file
 

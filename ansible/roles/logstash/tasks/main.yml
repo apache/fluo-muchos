@@ -1,16 +1,24 @@
- # Download Logstash 
+---
+ #
+ # Installing Logstash
+ #
+
+ # Download Logstash
 - name: "download logstash rpm"
   get_url: 
   args:
-    url: https://artifacts.elastic.co/downloads/logstash/logstash-oss-7.6.0.rpm
-    dest: /tmp/logstash-oss-7.6.0.rpm
+    url: https://artifacts.elastic.co/downloads/logstash/{{ logstash_rpm }}
+    dest: /tmp/{{ logstash_rpm }}
+    checksum: "{{ logstash_sha512 }}"
     force: no
   
  #Install Logstash    
 
 - name: "ensure logstash is installed"
   become: true
-  yum: name=/tmp/logstash-oss-7.6.0.rpm state=present
+  yum: 
+    name: /tmp/{{ logstash_rpm }} 
+    state: present
 
 #Update startup.option file with the new home location.
 - name: Update the startup.option file
@@ -31,8 +39,8 @@
 #Make Logstash conf.d  directory 
 - name: make logstash conf.d directory
   file:
-   path: /etc/logstash/conf.d/
-   state: directory
+    path: /etc/logstash/conf.d/
+    state: directory
   become: true
 
 - name: Copy logstash into conf.d folder 
@@ -45,16 +53,10 @@
   become: true 
   shell: /usr/share/logstash/bin/logstash-plugin install logstash-input-beats
 
-# #Run Logstash configuration
-
-# - name: Run Logstash configuration 
-#   become: true 
-#   shell: ./logstash -f /etc/logstash/conf.d/logstash-simple2.conf --path.settings /etc/logstash
-
 # Restart Logstash
 
 - name: Restarting logstash
   service:
-   name: logstash
-   state: restarted
+    name: logstash
+    state: restarted
   become: true
