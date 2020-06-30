@@ -17,8 +17,8 @@
 
 - name: "ensure kibana is installed"
   become: true
-  yum: 
-    name: /tmp/{{ kibana_rpm }} 
+  yum:
+    name: /tmp/{{ kibana_rpm }}
     state: present
 
 # Configurations
@@ -27,7 +27,7 @@
   lineinfile:
     destfile: /etc/kibana/kibana.yml
     regexp: "server.host:"
-    line: "server.host: 0.0.0.0" 
+    line: "server.host: 0.0.0.0"
   become: true
 
 - name: Defining server port

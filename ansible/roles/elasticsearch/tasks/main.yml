@@ -13,7 +13,6 @@
     checksum: "{{ elasticsearch_sha512 }}"
     force: no
 
-
   #Install elasticsearch
 - name: "ensure elasticsearch is installed"
   become: true
@@ -22,7 +21,6 @@
     state: present
 
 # Update Elasticsearch config file to allow access (to secure Elasticsearch, bind to 'localhost').
-
 - name: Updating the config file to allow outside access
   lineinfile:
     destfile: /etc/elasticsearch/elasticsearch.yml
@@ -31,7 +29,6 @@
   become: true
 
 # Update Elasticsearch port in config file
-
 - name: Updating the port in config file
   lineinfile:
     destfile: /etc/elasticsearch/elasticsearch.yml
@@ -40,14 +37,12 @@
   become: true
 
 #Update Discovery Settings in config file
-
 - name: Update the Discovery Seed Host
   lineinfile:
     destfile: /etc/elasticsearch/elasticsearch.yml
     regexp: "discovery.seed_hosts:"
     line: 'discovery.seed_hosts: ["leader1"]'
   become: true
-
 
   #Update Discovery Settings in config file
 - name: Update the Discovery Seed Host

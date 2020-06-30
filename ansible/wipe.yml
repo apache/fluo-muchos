@@ -32,16 +32,16 @@
   - name: "wipe grafana db"
     file: path=/var/lib/grafana/grafana.db state=absent
 
-- import_playbook: kill.yml
+  - import_playbook: kill.yml
     register: delete_task
     retries: 10
     delay: 3
     until: delete_task is success
     
-- import_playbook: wipe-systemd.yml
-  when: use_systemd
+  - import_playbook: wipe-systemd.yml
+    when: use_systemd
 
-- import_playbook: kill.yml
+  - import_playbook: kill.yml
 
 - hosts: all
   tasks:
