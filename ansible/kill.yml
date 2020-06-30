@@ -33,10 +33,10 @@
 - hosts: all:!{{ azure_proxy_host }}
   become: yes
   tasks:
-  - name: "stop docker"
-    service:
+    - name: "stop docker"
+      service:
       name: docker
       state: stopped
-    when: "'swarmmanager' in groups"
-  - name: "ensure all processes started by Muchos are killed"
-    script: roles/common/files/kill.sh
+      when: "'swarmmanager' in groups"
+    - name: "ensure all processes started by Muchos are killed"
+      script: roles/common/files/kill.sh
