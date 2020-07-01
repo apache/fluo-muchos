@@ -72,7 +72,7 @@ class ExistingCluster:
                 print("- import_playbook: mesos.yml", file=site_file)
             if config.has_service("swarmmanager"):
                 print("- import_playbook: docker.yml", file=site_file)
-            if config.has_service("elkserver"): 
+            if config.has_service("elkserver"):
                 print("- import_playbook: elk.yml", file=site_file)
 
         ansible_conf = path.join(config.deploy_path, "ansible/conf")
@@ -125,8 +125,12 @@ class ExistingCluster:
                 )
 
             if config.has_service("elkserver"):
-                print("\n[elkserver]\n{0}".format(
-                    config.get_service_hostnames("elkserver")[0]), file=hosts_file)
+                print(
+                    "\n[elkserver]\n{0}".format(
+                        config.get_service_hostnames("elkserver")[0]
+                    ),
+                    file=hosts_file,
+                )
 
             print("\n[zookeepers]", file=hosts_file)
             for (index, zk_host) in enumerate(
