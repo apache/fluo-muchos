@@ -19,6 +19,7 @@
   become: yes
   roles:
     - docker
+
 - hosts: swarmmanager
   become: yes
   tasks:
@@ -29,7 +30,7 @@
         executable: bash
       register: swarm_status
       changed_when: "'active' not in swarm_status.stdout_lines"
-    - name: initialize swarm 
+    - name: initialize swarm
       shell: |
         docker swarm leave --force || echo "leaving swarm for multiple setups"
         docker swarm init --advertise-addr={{ ansible_default_ipv4.address }}:2377
@@ -38,6 +39,7 @@
       command: docker swarm join-token -q worker
       register: swarm_token
       changed_when: "'active' not in swarm_status.stdout_lines"
+
 - hosts: workers:!swarmmanager
   become: yes
   vars:

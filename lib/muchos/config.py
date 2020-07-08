@@ -90,7 +90,8 @@ class DeployConfig(ConfigParser):
 
             if proxy not in self.node_d:
                 exit(
-                    "ERROR - The proxy (set by property proxy_hostname={0}) cannot be found in 'nodes' section of "
+                    "ERROR - The proxy (set by property proxy_hostname={0})"
+                    " cannot be found in 'nodes' section of "
                     "muchos.props".format(proxy)
                 )
 
