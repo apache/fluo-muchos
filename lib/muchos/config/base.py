@@ -80,10 +80,7 @@ _HOST_VAR_DEFAULTS = {
     "hadoop_tarball": "hadoop-{{ hadoop_version }}.tar.gz",
     "hadoop_version": None,
     "hadoop_major_version": "{{ hadoop_version.split('.')[0] }}",
-    "hdfs_root": (
-        "{% if hdfs_ha %}hdfs://{{ nameservice_id }}{% else %}"
-        "hdfs://{{ groups['namenode'][0] }}:8020{% endif %}"
-    ),
+    "hdfs_root": "hdfs://{{ nameservice_id }}",
     "hdfs_ha": None,
     "nameservice_id": None,
     "num_tservers": 1,
