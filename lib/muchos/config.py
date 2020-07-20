@@ -100,7 +100,8 @@ class DeployConfig(ConfigParser):
                 if service not in OPTIONAL_SERVICES:
                     if not self.has_service(service):
                         exit(
-                            "ERROR - Missing '{0}' service from [nodes] section of muchos.props".format(
+                            "ERROR - Missing '{0}' service from [nodes]"
+                            " section of muchos.props".format(
                                 service
                             )
                         )
@@ -291,7 +292,8 @@ class DeployConfig(ConfigParser):
         if not self.cluster_template_d:
             if get_arch(instance_type) == "pvm":
                 exit(
-                    "ERROR - Configuration contains instance type '{0}' that uses pvm architecture."
+                    "ERROR - Configuration contains instance type '{0}' that"
+                    " uses pvm architecture."
                     "Only hvm architecture is supported!".format(instance_type)
                 )
 
@@ -461,12 +463,14 @@ class DeployConfig(ConfigParser):
             service = os.path.basename(json_path).rsplit(".", 1)[0]
             if service not in SERVICES:
                 exit(
-                    "ERROR - Template '{0}' has unrecognized option '{1}'. Must be one of {2}".format(
+                    "ERROR - Template '{0}' has unrecognized option '{1}'."
+                    " Must be one of {2}".format(
                         self.cluster_template_d["id"], service, str(SERVICES)
                     )
                 )
             with open(json_path, "r") as json_file:
-                # load as string, so we can use string.Template to inject config values
+                # load as string, so we can use string.
+                # Template to inject config values
                 self.cluster_template_d[service] = json_file.read()
 
     def load_template_device_map(self, template_dir):
@@ -490,21 +494,24 @@ class DeployConfig(ConfigParser):
 
         if "worker" not in self.cluster_template_d:
             exit(
-                "ERROR - '{0}' template config is invalid. No 'worker' launch request is defined".format(
+                "ERROR - '{0}' template config is invalid."
+                " No 'worker' launch request is defined".format(
                     self.cluster_template_d["id"]
                 )
             )
 
         if "worker" not in self.cluster_template_d["devices"]:
             exit(
-                "ERROR - '{0}' template is invalid. The devices file must have a 'worker' device map".format(
+                "ERROR - '{0}' template is invalid. The devices file must"
+                " have a 'worker' device map".format(
                     self.cluster_template_d["id"]
                 )
             )
 
         if "default" not in self.cluster_template_d["devices"]:
             exit(
-                "ERROR - '{0}' template is invalid. The devices file must have a 'default' device map".format(
+                "ERROR - '{0}' template is invalid. The devices file must"
+                " have a 'default' device map".format(
                     self.cluster_template_d["id"]
                 )
             )
@@ -520,24 +527,28 @@ class DeployConfig(ConfigParser):
             else:
                 if "worker" in self.node_d[hostname]:
                     exit(
-                        "ERROR - '{0}' node config is invalid. The 'worker' service should be listed first".format(
+                        "ERROR - '{0}' node config is invalid. The 'worker'"
+                        " service should be listed first".format(
                             hostname
                         )
                     )
             if selected_ec2_request not in self.cluster_template_d:
                 if len(self.node_d[hostname]) > 1:
                     print(
-                        "Hint: In template mode, the first service listed for a host denotes its EC2 template"
+                        "Hint: In template mode, the first service listed"
+                        " for a host denotes its EC2 template"
                     )
                 exit(
-                    "ERROR - '{0}' node config is invalid. No EC2 template defined for the '{1}' service".format(
+                    "ERROR - '{0}' node config is invalid. No EC2 template"
+                    " defined for the '{1}' service".format(
                         hostname, selected_ec2_request
                     )
                 )
 
         if worker_count == 0:
             exit(
-                "ERROR - No worker instances are defined for template '{0}'".format(
+                "ERROR - No worker instances are defined for"
+                " template '{0}'".format(
                     self.cluster_template_d["id"]
                 )
             )
@@ -565,24 +576,29 @@ HOST_VAR_DEFAULTS = {
     "hadoop_tarball": "hadoop-{{ hadoop_version }}.tar.gz",
     "hadoop_version": None,
     "hadoop_major_version": "\"{{ hadoop_version.split('.')[0] }}\"",
-    "hdfs_root": "{% if hdfs_ha %}hdfs://{{ nameservice_id }}{% else %}hdfs://{{ groups['namenode'][0] }}:8020{% endif %}",
+    "hdfs_root": "{% if hdfs_ha %}hdfs://{{ nameservice_id }}{% else %}"
+                 + "hdfs://{{ groups['namenode'][0] }}:8020{% endif %}",
     "hdfs_ha": None,
     "nameservice_id": None,
     "install_dir": None,
     "install_hub": None,
     "java_home": '"/usr/lib/jvm/java"',
     "java_package": '"java-1.8.0-openjdk-devel"',
-    "journal_quorum": "{% for host in groups['journalnode'] %}{{ host }}:8485{% if not loop.last %};{% endif %}{% endfor %}",
+    "journal_quorum": "{% for host in groups['journalnode'] %}{{ host }}"
+                     + ":8485{% if not loop.last %};{% endif %}{% endfor %}",
     "maven_home": '"{{ install_dir }}/apache-maven-{{ maven_version }}"',
     "maven_tarball": "apache-maven-{{ maven_version }}-bin.tar.gz",
     "maven_version": "3.6.3",
-    "spark_home": '"{{ install_dir }}/spark-{{ spark_version }}-bin-without-hadoop"',
+    "spark_home": '"{{ install_dir }}/spark-{{ spark_version }}'
+                  + ' -bin-without-hadoop"',
     "spark_tarball": "spark-{{ spark_version }}-bin-without-hadoop.tgz",
     "spark_version": None,
     "tarballs_dir": '"{{ user_home }}/tarballs"',
     "user_home": None,
     "worker_data_dirs": None,
-    "zookeeper_connect": "{% for host in groups['zookeepers'] %}{{ host }}:2181{% if not loop.last %},{% endif %}{% endfor %}",
+    "zookeeper_connect": "{% for host in groups['zookeepers'] %}"
+                         + "{{ host }}:2181{% if not loop.last %},{% endif %}"
+                         + " {% endfor %}",
     "zookeeper_client_port": '"2181"',
     "zookeeper_home": '"{{ install_dir }}/zookeeper-{{ zookeeper_version }}"',
     "zookeeper_tarball": "zookeeper-{{ zookeeper_version }}.tar.gz",
@@ -606,8 +622,10 @@ PLAY_VAR_DEFAULTS = {
     "hub_version": "2.2.3",
     "hub_home": '"{{ install_dir }}/hub-linux-amd64-{{ hub_version }}"',
     "hub_tarball": "hub-linux-amd64-{{ hub_version }}.tgz",
-    "hub_sha256": "54c35a459a4241b7ae4c28bcfea0ceef849dd2f8a9dd2b82ba2ba964a743e6bc",
-    "maven_sha256": "26ad91d751b3a9a53087aefa743f4e16a17741d3915b219cf74112bf87a438c5",
+    "hub_sha256": "54c35a459a4241b7ae4c28bcfea0ceef849dd2f8a9dd2b82ba2ba"
+                  + " 964a743e6bc",
+    "maven_sha256": "26ad91d751b3a9a53087aefa743f4e16a17741d3915b219cf7411"
+                   + " 2bf87a438c5",
     "metrics_drive_ids": None,
     "mount_root": None,
     "node_type_map": None,
