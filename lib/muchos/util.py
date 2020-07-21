@@ -158,6 +158,8 @@ def parse_args(hosts_dir, input_args=None):
         "Requires '-p'. Use '-p all' for all config.\n"
         + "  ssh              SSH to cluster proxy node\n"
         + "  kill             Kills processes on cluster started by Muchos\n"
+        + "  stop             Stops instance\n"
+        + "  start            Starts instance\n"
         + "  wipe             Wipes cluster data and kills processes\n"
         + "  terminate        Terminate EC2 cluster\n"
         + "  cancel_shutdown  Cancels automatic shutdown of EC2 cluster",

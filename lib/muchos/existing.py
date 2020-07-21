@@ -232,6 +232,20 @@ class ExistingCluster:
         )
 
     @staticmethod
+    def stop():
+        exit(
+            "ERROR - 'stop' command cannot be used "
+            "when cluster_type is set to 'existing'"
+        )
+
+    @staticmethod
+    def start():
+        exit(
+            "ERROR - 'start' command cannot be used "
+            "when cluster_type is set to 'existing'"
+        )
+
+    @staticmethod
     def terminate():
         exit(
             "ERROR - 'terminate' command cannot be used "
@@ -364,6 +378,10 @@ class ExistingCluster:
             self.setup()
         elif action == "ssh":
             self.ssh()
+        elif action == "start":
+            self.start()
+        elif action == "stop":
+            self.stop()
         elif action == "wipe":
             self.wipe()
         elif action in ("kill", "cancel_shutdown"):
