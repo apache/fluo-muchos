@@ -300,6 +300,7 @@ class Ec2Cluster(ExistingCluster):
                 node["PrivateIpAddress"],
                 node.get("PublicIpAddress", ""),
             )
+
     def stop(self):
         nodes = self.active_nodes()
         print(

@@ -227,6 +227,7 @@ class ExistingCluster:
             "ERROR - 'terminate' command cannot be used "
             "when cluster_type is set to 'existing'"
         )
+
     @staticmethod
     def stop():
         exit(
