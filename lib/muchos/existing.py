@@ -227,6 +227,19 @@ class ExistingCluster:
             "ERROR - 'terminate' command cannot be used "
             "when cluster_type is set to 'existing'"
         )
+    @staticmethod
+    def stop():
+        exit(
+            "ERROR - 'stop' command cannot be used "
+            "when cluster_type is set to 'existing'"
+        )
+
+    @staticmethod
+    def start():
+        exit(
+            "ERROR - 'start' command cannot be used "
+            "when cluster_type is set to 'existing'"
+        )
 
     def ssh(self):
         self.wait_until_proxy_ready()
@@ -352,6 +365,10 @@ class ExistingCluster:
             self.sync()
         elif action == "setup":
             self.setup()
+        elif action == "start":
+            self.start()
+        elif action == "stop":
+            self.stop()
         elif action == "ssh":
             self.ssh()
         elif action == "wipe":

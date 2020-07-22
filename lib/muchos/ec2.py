@@ -300,6 +300,29 @@ class Ec2Cluster(ExistingCluster):
                 node["PrivateIpAddress"],
                 node.get("PublicIpAddress", ""),
             )
+    def stop(self):
+        nodes = self.active_nodes()
+        print(
+            "The following {0} nodes in {1} cluster "
+            "will be stopped:".format(len(nodes), self.config.cluster_name)
+        )
+        ec2 = boto3.client("ec2")
+        for node in nodes:
+            ec2.stop_instances(InstanceIds=[node["InstanceId"]])
+        self.print_nodes(nodes)
+        print("Stopped nodes.")
+
+    def start(self):
+        nodes = self.active_nodes()
+        print(
+            "The following {0} nodes in {1} cluster "
+            "will be started:".format(len(nodes), self.config.cluster_name)
+        )
+        ec2 = boto3.client("ec2")
+        for node in nodes:
+            ec2.start_instances(InstanceIds=[node["InstanceId"]])
+        self.print_nodes(nodes)
+        print("Started nodes.")
 
     def terminate(self):
         nodes = self.active_nodes()
