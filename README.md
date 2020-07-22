@@ -48,7 +48,8 @@ ssh-add ~/.ssh/id_rsa
 
 Muchos requires the following for EC2 installations:
 
-* [awscli] & [boto3] libraries - Install using `pip3 install awscli boto3 --upgrade --user`
+* [awscli] (version 2) & [boto3] libraries - Install using `pip3 install awscli2 boto3 --upgrade` 
+* Note: if using Ubuntu you may need to install botocore separately using `pip3 install awscli boto3 botocore`
 * An AWS account with your SSH public key uploaded. When you configure [muchos.props], set `key.name`
   to name of your key pair in AWS.
 * `~/.aws` [configured][aws-config] on your machine. Can be created manually or using [aws configure][awscli-config].
@@ -73,6 +74,14 @@ sudo yum install azure-cli-2.0.69-1.el7.x86_64.rpm
   the Python virtual environment by using `pip install ansible[azure]`
 
 When running Muchos under Ubuntu 18.04, checkout these [tips](docs/azure-ubuntu-1804.md).
+
+You might also need to configure the `aws_ami` property in [muchos.props]. Muchos by default uses a free
+CentOS 7 image that is hosted in the AWS marketplace but managed by the
+CentOS organization. If you have never used this image in EC2 before, you will need to go to the
+[CentOS 7 product page][centos7] to accept the software terms. If this is not done, you will get an
+error when you try to launch your cluster. By default, the `aws_ami` property is set to an AMI in `us-east-1`.
+You will need to changes this value if a newer image has been released or if you are running in different region
+than `us-east-1`.
 
 ## Quickstart
 
@@ -113,13 +122,7 @@ their public keys to a file named `keys` in your `conf/` directory.  During the 
 cluster, this file will be appended on each node to the `~/.ssh/authorized_keys` file for the user
 set by the `cluster.username` property.
 
-You might also need to configure the `aws_ami` property in [muchos.props]. Muchos by default uses a free
-CentOS 7 image that is hosted in the AWS marketplace but managed by the
-CentOS organization. If you have never used this image in EC2 before, you will need to go to the
-[CentOS 7 product page][centos7] to accept the software terms. If this is not done, you will get an
-error when you try to launch your cluster. By default, the `aws_ami` property is set to an AMI in `us-east-1`.
-You will need to changes this value if a newer image has been released or if you are running in different region
-than `us-east-1`.
+
 
 After following the steps above, run the following command to launch an EC2 cluster called `mycluster`:
 
