@@ -156,6 +156,8 @@ def parse_args(hosts_dir, input_args=None):
         + "  sync             Sync ansible directory on cluster proxy node\n"
         + "  config           Print configuration for that cluster. "
         "Requires '-p'. Use '-p all' for all config.\n"
+        + "  stop             Stops instance\n"
+        + "  start            Starts instance\n"
         + "  ssh              SSH to cluster proxy node\n"
         + "  kill             Kills processes on cluster started by Muchos\n"
         + "  wipe             Wipes cluster data and kills processes\n"
