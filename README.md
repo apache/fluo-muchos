@@ -48,7 +48,8 @@ ssh-add ~/.ssh/id_rsa
 
 Muchos requires the following for EC2 installations:
 
-* [awscli] & [boto3] libraries - Install using `pip3 install awscli boto3 --upgrade --user`
+* [awscli] (version 2) & [boto3] libraries - Install using `pip3 install awscli2 boto3 --upgrade` 
+* Note: if using Ubuntu you may need to install botocore separately using `pip3 install awscli boto3 botocore`
 * An AWS account with your SSH public key uploaded. When you configure [muchos.props], set `key.name`
   to name of your key pair in AWS.
 * `~/.aws` [configured][aws-config] on your machine. Can be created manually or using [aws configure][awscli-config].
@@ -113,6 +114,8 @@ their public keys to a file named `keys` in your `conf/` directory.  During the 
 cluster, this file will be appended on each node to the `~/.ssh/authorized_keys` file for the user
 set by the `cluster.username` property.
 
+### Configuring the AMI
+
 You might also need to configure the `aws_ami` property in [muchos.props]. Muchos by default uses a free
 CentOS 7 image that is hosted in the AWS marketplace but managed by the
 CentOS organization. If you have never used this image in EC2 before, you will need to go to the
@@ -120,6 +123,8 @@ CentOS organization. If you have never used this image in EC2 before, you will n
 error when you try to launch your cluster. By default, the `aws_ami` property is set to an AMI in `us-east-1`.
 You will need to changes this value if a newer image has been released or if you are running in different region
 than `us-east-1`.
+
+### Launching the cluster
 
 After following the steps above, run the following command to launch an EC2 cluster called `mycluster`:
 

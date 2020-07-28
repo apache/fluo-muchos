@@ -50,12 +50,12 @@ install_hub = True
 java_package=java-1.8.0-openjdk-devel
 # The package to use for java 11
 # java_package=java-11-openjdk-devel
-# Please read the High-Availability section of the README before switching to 'True' 
+# Please read the High-Availability section of the README before switching to 'True'
 hdfs_ha = False
 # Give a logical name for the cluster, all one word no special characters. Required to support HDFS HA.
 nameservice_id = muchoshacluster
 # number of accumulo tablet servers to run per host. This is only effective when systemd is set to 'True'. Needs changes in
-# accumulo-service script inorder to support non-systemd cases. 
+# accumulo-service script inorder to support non-systemd cases.
 num_tservers = 1
 # If accumulo services are to be run under systemd, set this to 'True'
 use_systemd = False
@@ -166,7 +166,7 @@ azure_tenant_id =
 # Do not update "azure_client_id", it will be populated dynamically during launch phase of muchos
 azure_client_id =
 # Do not update "principal_id", it will be populated dynamically during launch phase of muchos when "use_hdfs = False"
-principal_id = 
+principal_id =
 # Optional Azure fileshare to mount on all nodes.
 # Path and credentials must be updated to enable this.
 #azure_fileshare_mount = /mnt/azure-fileshare
@@ -178,8 +178,8 @@ principal_id =
 # For details on how to get a workspace ID and key, see the link below
 # https://docs.microsoft.com/en-us/azure/azure-monitor/learn/quick-collect-linux-computer#obtain-workspace-id-and-key
 az_oms_integration_needed = False
-#az_logs_id = 
-#az_logs_key = 
+#az_logs_id =
+#az_logs_key =
 
 [existing]
 # Root of data dirs
