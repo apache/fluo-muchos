@@ -114,7 +114,7 @@ their public keys to a file named `keys` in your `conf/` directory.  During the 
 cluster, this file will be appended on each node to the `~/.ssh/authorized_keys` file for the user
 set by the `cluster.username` property.
 
-####Configuring the AMI
+### Configuring the AMI
 
 You might also need to configure the `aws_ami` property in [muchos.props]. Muchos by default uses a free
 CentOS 7 image that is hosted in the AWS marketplace but managed by the
@@ -124,6 +124,7 @@ error when you try to launch your cluster. By default, the `aws_ami` property is
 You will need to changes this value if a newer image has been released or if you are running in different region
 than `us-east-1`.
 
+### Launching the cluster
 
 After following the steps above, run the following command to launch an EC2 cluster called `mycluster`:
 
