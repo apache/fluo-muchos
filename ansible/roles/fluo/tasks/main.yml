@@ -38,4 +38,16 @@
 - name: "fetch extra fluo dependencies"
   command: "{{ fluo_home }}/lib/fetch.sh extra"
 - name: "set correct owner & group"
-  file: path={{ fluo_home }} recurse=yes owner={{ cluster_user }} group={{ cluster_group}}
+  file: path={{ fluo_home }} recurse=yes owner={{ cluster_user }} group={{ cluster_group }}
+- name: "Add Hadoop conf folder to fluo classpath (fluo version == 1.2.0)"
+  replace:
+    path: "{{ fluo_home }}/conf/fluo-env.sh"
+    regexp: '# If fluo-conn.properties exists, then classpath does not need to include twill or logback'
+    replace: 'CLASSPATH="$CLASSPATH:$HADOOP_PREFIX/etc/hadoop"\n# If fluo-conn.properties exists, then classpath does not need to include twill or logback'
+  when: fluo_version == '1.2.0'
+- name: "Add Hadoop native lib folder to fluo system lib load path (fluo version == 1.2.0)"
+  replace:
+    path: "{{ fluo_home }}/conf/fluo-env.sh"
+    regexp: 'export JAVA_OPTS'
+    replace: 'export JAVA_OPTS\ncase "$(uname)" in\n  Darwin) export DYLD_LIBRARY_PATH="${HADOOP_PREFIX}/lib/native:${DYLD_LIBRARY_PATH}" ;;\n  *)      export LD_LIBRARY_PATH="${HADOOP_PREFIX}/lib/native:${LD_LIBRARY_PATH}" ;;\nesac'
+  when: fluo_version == '1.2.0'

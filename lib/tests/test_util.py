@@ -19,21 +19,25 @@ from muchos.util import get_arch, parse_args, get_ephemeral_devices
 
 
 def test_util():
-    assert set(get_ephemeral_devices('m3.large')) == set(['/dev/xvdb'])
-    assert set(get_ephemeral_devices('m3.xlarge')) == set(['/dev/xvdb', '/dev/xvdc'])
+    assert set(get_ephemeral_devices("m3.large")) == set(["/dev/xvdb"])
+    assert set(get_ephemeral_devices("m3.xlarge")) == set(
+        ["/dev/xvdb", "/dev/xvdc"]
+    )
 
-    assert set(get_ephemeral_devices('i3.xlarge')) == set(['/dev/nvme0n1'])
-    assert set(get_ephemeral_devices('i3.4xlarge')) == set(['/dev/nvme0n1','/dev/nvme1n1'])
+    assert set(get_ephemeral_devices("i3.xlarge")) == set(["/dev/nvme0n1"])
+    assert set(get_ephemeral_devices("i3.4xlarge")) == set(
+        ["/dev/nvme0n1", "/dev/nvme1n1"]
+    )
 
-    assert get_arch('m1.large') == 'pvm'
-    assert get_arch('m3.large') == 'hvm'
+    assert get_arch("m1.large") == "pvm"
+    assert get_arch("m3.large") == "hvm"
 
-    hosts_dir = '../conf/hosts'
-    assert parse_args(hosts_dir, ['launch']) is None
-    assert parse_args(hosts_dir, ['launch', 'mycluster']) is None
-    assert parse_args(hosts_dir, ['-c', 'mycluster', 'launch']) is not None
+    hosts_dir = "../conf/hosts"
+    assert parse_args(hosts_dir, ["launch"]) is None
+    assert parse_args(hosts_dir, ["launch", "mycluster"]) is None
+    assert parse_args(hosts_dir, ["-c", "mycluster", "launch"]) is not None
 
-    hosts_dir = '../conf/hosts/example'
-    assert parse_args(hosts_dir, ['setup']) is not None
-    assert parse_args(hosts_dir, ['config']) is None
-    assert parse_args(hosts_dir, ['-p', 'all', 'config']) is not None
+    hosts_dir = "../conf/hosts/example"
+    assert parse_args(hosts_dir, ["setup"]) is not None
+    assert parse_args(hosts_dir, ["config"]) is None
+    assert parse_args(hosts_dir, ["-p", "all", "config"]) is not None

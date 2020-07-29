@@ -1,0 +1,44 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+# The tasks below have been added to enable integration with Azure Monitor Logs
+
+- name: "Configure required plugins in collectd"
+  template: src=roles/common/templates/etc/collectd.d/azure.conf.j2 dest=/etc/collectd.d/azure.conf
+
+- name: "Ensure OMS Agent is installed"
+  script: "{{ tarballs_dir }}/omsagent.x64.sh --upgrade"
+  args:
+    creates: /opt/microsoft/omsagent/bin/omsadmin.sh
+
+- name: "Configure OMS Agent for workspace"
+  command: /opt/microsoft/omsagent/bin/omsadmin.sh -w {{ az_logs_id }} -s {{ az_logs_key }}
+  args:
+    creates: /etc/opt/microsoft/omsagent/{{ az_logs_id }}/conf/omsadmin.conf
+  register: omsagent_configured
+
+- name: "Copy oms.conf to collectd folder"
+  copy: remote_src=true src=/etc/opt/microsoft/omsagent/sysconf/omsagent.d/oms.conf dest=/etc/collectd.d/oms.conf
+  notify:
+    - restart collectd
+
+- name: "Copy collectd to OMS folder"
+  copy: remote_src=true src=/etc/opt/microsoft/omsagent/sysconf/omsagent.d/collectd.conf dest=/etc/opt/microsoft/omsagent/{{ az_logs_id }}/conf/omsagent.d/collectd.conf
+
+- name: "Restart service omsagent, in all cases"
+  command: /opt/microsoft/omsagent/bin/service_control restart {{ az_logs_id }}
+  when: omsagent_configured is succeeded

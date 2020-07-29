@@ -31,6 +31,7 @@ class EC2Type:
         self.ephemeral = ephemeral
         self.has_nvme = has_nvme
 
+
 AMI_HELP_MSG = """PLEASE NOTE - If you have accepted the software terms for CentOS 7 and still get an error,
 this could be due to CentOS releasing new images of CentOS 7.  When this occurs, the old images
 are no longer available to new users.  If you think this is the case, go to the CentOS 7 product
@@ -40,7 +41,7 @@ page on AWS Marketplace at the URL below to find the latest AMI:
 
 On the product page, find the latest AMI ID for your EC2 region. This should be used to set the 'aws_ami'
 property in your muchos.props.  After setting the 'aws_ami' property, run the launch command again.
-"""
+"""  # noqa
 
 instance_types = {
     "c1.medium": EC2Type("pvm"),
@@ -88,13 +89,16 @@ instance_types = {
     "d2.xlarge": EC2Type("hvm", 3),
     "d2.2xlarge": EC2Type("hvm", 6),
     "d2.4xlarge": EC2Type("hvm", 12),
-    "d2.8xlarge": EC2Type("hvm", 24)
+    "d2.8xlarge": EC2Type("hvm", 24),
 }
 
 
 def verify_type(instance_type):
     if instance_type not in instance_types:
-        print("ERROR - EC2 instance type '%s' is currently not supported!" % instance_type)
+        print(
+            "ERROR - EC2 instance type '{}' is currently "
+            "not supported!".format(instance_type)
+        )
         print("This is probably due to the instance type being EBS-only.")
         print("Below is a list of supported instance types:")
         for key in instance_types:
@@ -105,6 +109,7 @@ def verify_type(instance_type):
 def get_arch(instance_type):
     verify_type(instance_type)
     return instance_types.get(instance_type).arch
+
 
 def get_ephemeral_devices(instance_type):
     verify_type(instance_type)
@@ -117,46 +122,62 @@ def get_ephemeral_devices(instance_type):
 
     for i in range(start, ec2_type.ephemeral + start):
         if ec2_type.has_nvme:
-            devices.append('/dev/nvme' + str(i) + 'n1')
+            devices.append("/dev/nvme" + str(i) + "n1")
         else:
-            devices.append('/dev/xvd' + chr(ord('b') + i))
+            devices.append("/dev/xvd" + chr(ord("b") + i))
 
     return devices
+
 
 def get_block_device_map(instance_type):
     verify_type(instance_type)
 
-    bdm = [{'DeviceName': '/dev/sda1',
-                'Ebs': {'DeleteOnTermination': True}}]
+    bdm = [{"DeviceName": "/dev/sda1", "Ebs": {"DeleteOnTermination": True}}]
 
     ec2_type = instance_types.get(instance_type)
-    if not ec2_type.has_nvme :
+    if not ec2_type.has_nvme:
         for i in range(0, ec2_type.ephemeral):
-            device = {'DeviceName':  '/dev/xvd' + chr(ord('b') + i),
-                      'VirtualName': 'ephemeral' + str(i)}
+            device = {
+                "DeviceName": "/dev/xvd" + chr(ord("b") + i),
+                "VirtualName": "ephemeral" + str(i),
+            }
             bdm.append(device)
 
     return bdm
 
+
 def parse_args(hosts_dir, input_args=None):
     parser = OptionParser(
-              usage="muchos [options] <action>\n\n"
-              + "where <action> can be:\n"
-              + "  launch           Launch cluster in EC2\n"
-              + "  status           Check status of EC2 cluster\n"
-              + "  setup            Set up cluster\n"
-              + "  sync             Sync ansible directory on cluster proxy node\n"
-              + "  config           Print configuration for that cluster. Requires '-p'. Use '-p all' for all config.\n"
-              + "  ssh              SSH to cluster proxy node\n"
-              + "  kill             Kills processes on cluster started by Muchos\n"
-              + "  wipe             Wipes cluster data and kills processes\n"
-              + "  terminate        Terminate EC2 cluster\n"
-              + "  cancel_shutdown  Cancels automatic shutdown of EC2 cluster",
-              add_help_option=False)
-    parser.add_option("-c", "--cluster", dest="cluster", help="Specifies cluster")
-    parser.add_option("-p", "--property", dest="property", help="Specifies property to print (if using 'config' action)"
-                                                                ". Set to 'all' to print every property")
-    parser.add_option("-h", "--help", action="help", help="Show this help message and exit")
+        usage="muchos [options] <action>\n\n"
+        + "where <action> can be:\n"
+        + "  launch           Launch cluster in Azure or EC2\n"
+        + "  status           Check status of Azure or EC2 cluster\n"
+        + "  setup            Set up cluster\n"
+        + "  sync             Sync ansible directory on cluster proxy node\n"
+        + "  config           Print configuration for that cluster. "
+        "Requires '-p'. Use '-p all' for all config.\n"
+        + "  stop             Stops instance\n"
+        + "  start            Starts instance\n"
+        + "  ssh              SSH to cluster proxy node\n"
+        + "  kill             Kills processes on cluster started by Muchos\n"
+        + "  wipe             Wipes cluster data and kills processes\n"
+        + "  terminate        Terminate EC2 cluster\n"
+        + "  cancel_shutdown  Cancels automatic shutdown of EC2 cluster",
+        add_help_option=False,
+    )
+    parser.add_option(
+        "-c", "--cluster", dest="cluster", help="Specifies cluster"
+    )
+    parser.add_option(
+        "-p",
+        "--property",
+        dest="property",
+        help="Specifies property to print (if using 'config' action)"
+        ". Set to 'all' to print every property",
+    )
+    parser.add_option(
+        "-h", "--help", action="help", help="Show this help message and exit"
+    )
 
     if input_args:
         (opts, args) = parser.parse_args(input_args)
@@ -168,7 +189,7 @@ def parse_args(hosts_dir, input_args=None):
         return
     action = args[0]
 
-    if action == 'launch' and not opts.cluster:
+    if action == "launch" and not opts.cluster:
         print("ERROR - You must specify a cluster if using launch command")
         return
 
@@ -176,17 +197,24 @@ def parse_args(hosts_dir, input_args=None):
 
     if not opts.cluster:
         if len(clusters) == 0:
-            print("ERROR - No clusters found in conf/hosts or specified by --cluster option")
+            print(
+                "ERROR - No clusters found in conf/hosts "
+                "or specified by --cluster option"
+            )
             return
         elif len(clusters) == 1:
             opts.cluster = clusters[0]
         else:
-            print("ERROR - Multiple clusters {0} found in conf/hosts/. " \
-                  "Please pick one using --cluster option".format(clusters))
+            print(
+                "ERROR - Multiple clusters {0} found in conf/hosts/. "
+                "Please pick one using --cluster option".format(clusters)
+            )
             return
 
-    if action == 'config' and not opts.property:
-        print("ERROR - For config action, you must set -p to a property or 'all'")
+    if action == "config" and not opts.property:
+        print(
+            "ERROR - For config action, you must set -p to a property or 'all'"
+        )
         return
 
     return opts, action, args[1:]

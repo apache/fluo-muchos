@@ -23,7 +23,7 @@
 
 <configuration>
   <property>
-    <name>fs.defaultFS</name> 
+    <name>fs.defaultFS</name>
     <value>{{ hdfs_root }}</value>
   </property>
   <property>
@@ -34,4 +34,40 @@
     <name>dfs.domain.socket.path</name>
     <value>/var/lib/hadoop-hdfs/dn_socket</value>
   </property>
+{% if hdfs_ha %}
+  <property>
+    <name>ha.zookeeper.quorum</name>
+    <value>{{ zookeeper_connect }}</value>
+  </property>
+{% endif %}
+{% if cluster_type == 'azure' and use_adlsg2 %}
+  <property>
+    <name>fs.azure.account.auth.type</name>
+    <value>OAuth</value>
+  </property>
+  <property>
+    <name>fs.azure.account.oauth.provider.type</name>
+    <value>org.apache.hadoop.fs.azurebfs.oauth2.MsiTokenProvider</value>
+  </property>
+  <property>
+    <name>fs.azure.account.oauth2.msi.tenant</name>
+    <value>{{ azure_tenant_id}}</value>
+  </property>
+  <property>
+    <name>fs.azure.account.oauth2.client.id</name>
+    <value>{{ azure_client_id }}</value>
+  </property>
+  <property>
+    <name>fs.azure.use.upn</name>
+    <value>true</value>
+  </property>
+  <property>
+    <name>fs.azure.identity.transformer.service.principal.substitution.list</name>
+    <value>*</value>
+  </property>
+  <property>
+    <name>fs.azure.identity.transformer.service.principal.id</name>
+    <value>{{ principal_id }}</value>
+  </property>
+{% endif %}
 </configuration>

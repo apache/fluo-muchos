@@ -5,7 +5,7 @@
 #PluginDir   "/usr/lib64/collectd"
 #TypesDB     "/usr/share/collectd/types.db"
 
-Interval     10
+Interval     60
 
 #Timeout      2
 #ReadThreads  5
@@ -17,6 +17,7 @@ LoadPlugin df
 LoadPlugin load
 LoadPlugin memory
 LoadPlugin network
+LoadPlugin disk
 
 <Plugin cpu>
   ReportByState false
@@ -27,8 +28,14 @@ LoadPlugin network
   MountPoint "/^{{ mount_root }}/"
 </Plugin>
 
+{% if 'metrics' in groups %}
 <Plugin network>
   Server "{{ groups['metrics'][0] }}" "8096"
+</Plugin>
+{% endif %}
+
+<Plugin disk>
+  IgnoreSelected true
 </Plugin>
 
 Include "/etc/collectd.d"

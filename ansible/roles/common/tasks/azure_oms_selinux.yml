@@ -1,0 +1,91 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+
+- name: Creates directory for SE Policy files
+  file: path=/home/{{ cluster_user }}/SEPolicyFiles state=directory
+
+- name: Copy Policy file OMS-collectd.te
+  copy: src=roles/common/files/OMS-collectd.te dest=/home/{{ cluster_user }}/SEPolicyFiles  owner={{ cluster_user }} group={{ cluster_group }}
+
+- name: Copy Policy file OMS-logrotate.te
+  copy: src=roles/common/files/OMS-logrotate.te dest=/home/{{ cluster_user }}/SEPolicyFiles  owner={{ cluster_user }} group={{ cluster_group }}
+
+- name: Copy Policy file OMS-reader3.te
+  copy: src=roles/common/files/OMS-reader3.te dest=/home/{{ cluster_user }}/SEPolicyFiles  owner={{ cluster_user }} group={{ cluster_group }}
+
+- name: Copy Policy file OMS-writer3.te
+  copy: src=roles/common/files/OMS-writer3.te dest=/home/{{ cluster_user }}/SEPolicyFiles  owner={{ cluster_user }} group={{ cluster_group }}
+
+- name: Run checkmodule for OMS-collectd.te
+  command: checkmodule -M -m -o my-collectd.mod  OMS-collectd.te
+  args:
+    chdir: /home/{{ cluster_user }}/SEPolicyFiles
+
+- name: Run checkmodule for OMS-reader3.te
+  command: checkmodule -M -m -o my-reader3.mod   OMS-reader3.te
+  args:
+    chdir: /home/{{ cluster_user }}/SEPolicyFiles
+
+- name: Run checkmodule for OMS-writer3.te
+  command: checkmodule -M -m -o my-writer3.mod   OMS-writer3.te
+  args:
+    chdir: /home/{{ cluster_user }}/SEPolicyFiles
+
+- name: Run checkmodule for OMS-logrotate.te
+  command: checkmodule -M -m -o my-logrotate.mod OMS-logrotate.te
+  args:
+    chdir: /home/{{ cluster_user }}/SEPolicyFiles
+
+- name: Run semodule_package for OMS-collectd.te
+  command: semodule_package -o OMS-collectd.pp  -m my-collectd.mod
+  args:
+    chdir: /home/{{ cluster_user }}/SEPolicyFiles
+
+- name: Run semodule_package for OMS-reader3.te
+  command: semodule_package -o OMS-reader3.pp   -m my-reader3.mod
+  args:
+    chdir: /home/{{ cluster_user }}/SEPolicyFiles
+
+- name: Run semodule_package for OMS-writer3.te
+  command: semodule_package -o OMS-writer3.pp   -m my-writer3.mod
+  args:
+    chdir: /home/{{ cluster_user }}/SEPolicyFiles
+
+- name: Run semodule_package for OMS-logrotate.te
+  command: semodule_package -o OMS-logrotate.pp -m my-logrotate.mod
+  args:
+    chdir: /home/{{ cluster_user }}/SEPolicyFiles
+
+- name: Run semodule for OMS-collectd.pp
+  command: semodule -i OMS-collectd.pp
+  args:
+    chdir: /home/{{ cluster_user }}/SEPolicyFiles
+
+- name: Run semodule for OMS-reader3.pp
+  command: semodule -i OMS-reader3.pp
+  args:
+    chdir: /home/{{ cluster_user }}/SEPolicyFiles
+
+- name: Run semodule for OMS-writer3.pp
+  command: semodule -i OMS-writer3.pp
+  args:
+    chdir: /home/{{ cluster_user }}/SEPolicyFiles
+
+- name: Run semodule for OMS-logrotate.pp
+  command: semodule -i OMS-logrotate.pp
+  args:
+    chdir: /home/{{ cluster_user }}/SEPolicyFiles

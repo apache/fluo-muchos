@@ -1,0 +1,117 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+---
+- hosts: localhost
+  tasks:
+    - block:
+      - import_tasks: roles/azure/tasks/log_analytics_ws_common.yml
+
+      - name: Delete workbook
+        azure_rm_resource:
+           resource_group: "{{ resource_group }}"
+           provider: insights
+           resource_type: workbooks
+           resource_name: "{{ workbook_exists|join('') }}"
+           api_version: '2020-02-12'
+           state: absent
+        when: workbook_exists is defined
+
+      - name: Delete dashboard
+        azure_rm_resource:
+           resource_group: "{{ resource_group }}"
+           provider: Portal
+           resource_type: dashboards
+           resource_name:  "{{ dashboard_name }}"
+           api_version: '2019-01-01-preview'
+           state: absent
+
+      - name: Delete log analytics workspace
+        azure_rm_resource:
+           resource_group: "{{ resource_group }}"
+           provider: OperationalInsights
+           resource_type: workspaces
+           resource_name: "{{ log_workspace_name }}"
+           api_version: '2015-03-20'
+           state: absent
+      when: az_oms_integration_needed
+
+    - name: Delete User Assigned Identity
+      azure_rm_resource:
+         resource_group: "{{ resource_group }}"
+         provider: ManagedIdentity
+         resource_type: userAssignedIdentities
+         resource_name:  "{{ user_assigned_identity if user_assigned_identity else vmss_name + '-ua-msi' }}"
+         api_version: '2018-11-30'
+         state: absent
+      when: use_adlsg2
+
+    - name: Delete ADLS Gen2 storage Account
+      azure_rm_storageaccount:
+         resource_group: "{{ resource_group }}"
+         name:  "{{ item.split('@')[1].split('.')[0] }}"
+         force_delete_nonempty: yes
+         state: absent
+      loop:
+         "{{ instance_volumes_adls.split(',') }}"
+      when: use_adlsg2
+
+    - name: Delete VM Scale Set
+      azure_rm_virtualmachinescaleset:
+        resource_group: "{{ resource_group }}"
+        name: "{{ vmss_name }}"
+        remove_on_absent: all
+        state: absent
+
+    - name: Delete azure proxy virtual machine if one was created
+      azure_rm_virtualmachine:
+        resource_group: "{{ resource_group }}"
+        name: "{{ azure_proxy_host }}"
+        remove_on_absent: all
+        state: absent
+      when: azure_proxy_host is defined and azure_proxy_host|length
+
+    - name: Delete corresponding network security group
+      azure_rm_securitygroup:
+        resource_group: "{{ resource_group }}"
+        name: "{{ azure_proxy_host }}-nsg"
+        state: absent
+      when: azure_proxy_host is defined and azure_proxy_host|length
+
+    - name: Get facts for virtual network
+      azure_rm_virtualnetwork_info:
+        resource_group: "{{ resource_group }}"
+        name: "{{ vnet }}"
+      register: vnet_facts
+
+    - name: Delete corresponding virtual network if one was created
+      azure_rm_virtualnetwork:
+        resource_group: "{{ resource_group }}"
+        name: "{{ vnet }}"
+        state: absent
+      when: >
+        vnet_facts.virtualnetworks|length and
+        vnet_facts.virtualnetworks|map(attribute='tags')|map(attribute='deployment_type')|join('') == 'muchos'
+
+    - name: Delete the resource group if it is empty
+      azure_rm_resourcegroup:
+        name: "{{ resource_group }}"
+        state: absent
+      retries: 30
+      delay: 15
+      register: resourcegroupresult
+      until: resourcegroupresult is not failed

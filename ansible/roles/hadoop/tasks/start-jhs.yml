@@ -1,0 +1,30 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+- name: Check if JobHistoryServer is running
+  shell: jps | grep "JobHistoryServer"
+  ignore_errors: yes
+  changed_when: false
+  register: jhs_status
+
+- name: Start Job History Server on Hadoop 3.x
+  command: "nohup {{ hadoop_home }}/bin/mapred --daemon start historyserver"
+  when: jhs_status.rc == 1 and hadoop_major_version == '3'
+
+- name: Start Job History Server on Hadoop 2.x
+  command: "nohup {{ hadoop_home }}/sbin/mr-jobhistory-daemon.sh start historyserver"
+  when: jhs_status.rc == 1 and hadoop_major_version == '2'

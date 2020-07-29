@@ -1,1 +1,3 @@
-{{ groups['accumulomaster'][0] }}
+{% for host in groups['accumulomaster'] %}
+{{ host }}
+{% endfor %}

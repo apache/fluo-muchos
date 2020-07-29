@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-- hosts: all
+- hosts: all:!{{ azure_proxy_host }}
   become: yes
   roles:
     - docker
@@ -24,7 +24,9 @@
   tasks:
     - name: get swarm status
       shell: >
-        docker info | egrep '^Swarm: ' | cut -d ' ' -f 2
+        set -o pipefail && docker info | grep 'Swarm:' | sed 's/\s*Swarm\:\s*//'
+      args:
+        executable: bash
       register: swarm_status
       changed_when: "'active' not in swarm_status.stdout_lines"
     - name: initialize swarm
@@ -32,21 +34,24 @@
         docker swarm init --advertise-addr={{ ansible_default_ipv4.address }}:2377
       when: "'active' not in swarm_status.stdout_lines"
     - name: get swarm token
-      shell: docker swarm join-token -q worker
+      command: docker swarm join-token -q worker
       register: swarm_token
       changed_when: "'active' not in swarm_status.stdout_lines"
-- hosts: workers
+- hosts: workers:!swarmmanager
   become: yes
   vars:
-    swarm_token: "{{ hostvars[groups['swarmmanager'][0]]['swarm_token']['stdout'] }}"
+    swarm_token_stdout: "{{ hostvars[groups['swarmmanager'][0]]['swarm_token']['stdout'] }}"
     manager_ip: "{{ hostvars[groups['swarmmanager'][0]]['ansible_default_ipv4']['address'] }}"
   tasks:
     - name: get swarm status
       shell: >
-        docker info | egrep '^Swarm: ' | cut -d ' ' -f 2
+        set -o pipefail && docker info | grep 'Swarm:' | sed 's/\s*Swarm\:\s*//'
+      args:
+        executable: bash
       register: swarm_status
       changed_when: "'active' not in swarm_status.stdout_lines"
     - name: join worker to swarm
-      shell: >
-        docker swarm join --token={{ swarm_token }} {{ manager_ip }}:2377
+      shell: |
+        docker swarm leave || echo "Not part of a swarm."
+        docker swarm join --token={{ swarm_token_stdout }} {{ manager_ip }}:2377
       when: "'active' not in swarm_status.stdout_lines"

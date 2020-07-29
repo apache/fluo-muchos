@@ -17,6 +17,24 @@
 
 - name: "set swappiness to zero"
   sysctl: name=vm.swappiness value=0
+
+# The kernel memory settings below have been added based on performance testing done
+# with Microsoft Azure based clusters. For more details please refer to
+# https://access.redhat.com/solutions/90883 and https://bugzilla.kernel.org/show_bug.cgi?id=107111
+- name: "set vm.min_free_kbytes to 1G"
+  sysctl: name=vm.min_free_kbytes value=1000000
+  when: cluster_type == 'azure' or cluster_type == 'ec2'
+- name: "set vm.zone_reclaim_mode to 1"
+  sysctl: name=vm.zone_reclaim_mode value=1
+  when: cluster_type == 'azure' or cluster_type == 'ec2'
+
+# The TCP/IP setting below has been added based on performance testing done 
+# with Microsoft Azure based clusters. For more details refer to
+# https://access.redhat.com/solutions/30453
+- name: "set net.core.somaxconn=2048"
+  sysctl: name=net.core.somaxconn value=2048
+  when: cluster_type == 'azure' or cluster_type == 'ec2'
+
 - name: "remove old limits file"
   file: path=/etc/security/limits.d/20-nproc.conf state=absent
 - name: "copy new limits.conf"

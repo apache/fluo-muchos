@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+if grep --quiet --files-with-matches --binary-files=without-match --max-count=1 --regexp='.*' "$1"; then
+  if [ "$(tail --bytes=1 "$1")" ]; then
+    echo "ERROR: No new line at end of $1."; false;
+  fi
+fi

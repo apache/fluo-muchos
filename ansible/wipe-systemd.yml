@@ -1,0 +1,65 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+- hosts: accumulomaster
+  gather_facts: false
+  become: yes
+  tasks:
+  - name: "disable all accumulo systemd services on master"
+    systemd:
+      name: "{{ item }}"
+      state: stopped
+      enabled: no
+    with_items:
+      - "accumulo-master.service"
+      - "accumulo-monitor.service"
+      - "accumulo-gc.service"
+      - "accumulo-tracer.service"
+    register: stop_disable_service
+    failed_when: "stop_disable_service is failed and 'Could not find the requested service' not in stop_disable_service.msg"
+
+  - name: "remove accumulo systemd units"
+    file: path="/etc/systemd/system/accumulo-*" state=absent
+    register: delete_task
+    retries: 10
+    delay: 3
+    until: delete_task is success
+
+- hosts: workers
+  gather_facts: false
+  become: yes
+  tasks:
+  - name: "disable accumulo tserver systemd services"
+    systemd:
+      name: "accumulo-tserver@{{ item }}.service"
+      state: stopped
+      enabled: no
+    with_sequence: "start=1 end={{ num_tservers }}"
+    register: stop_disable_service
+    failed_when: "stop_disable_service is failed and 'Could not find the requested service' not in stop_disable_service.msg"
+
+  - name: "remove accumulo tserver systemd units"
+    file: path="/etc/systemd/system/accumulo-tserver*" state=absent
+    register: delete_task
+    retries: 10
+    delay: 3
+    until: delete_task is success
+
+  - name: "reload config changes"
+    systemd: daemon_reload=yes
+
+  - name: "reset failed on every node" # noqa 303
+    command: systemctl reset-failed

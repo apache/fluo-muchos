@@ -1,0 +1,74 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+- name: Find luns
+  find:
+    paths: "{{ azure_disk_device_path }}"
+    patterns: "{{ azure_disk_device_pattern }}"
+    file_type: any
+  register: files_matched
+- name: Create xfs filesytems
+  filesystem:
+    fstype: xfs
+    dev: "{{ item.path }}"
+  with_items: "{{ files_matched.files }}"
+- name: Get UUID
+  command: "blkid {{ item.path }} -s UUID -o value"
+  with_items: "{{ files_matched.files }}"
+  register: disk_uuids
+- name: Create mount points
+  file:
+    path: '{{ mount_root }}{{ item.0 + 1 }}'
+    state: directory
+  with_indexed_items: "{{ files_matched.files }}"
+- name: Mount filesystems
+  mount:
+    path: '{{ mount_root }}{{ item.0 + 1 }}'
+    src: "UUID={{ item.1.stdout }}"
+    fstype: xfs
+    state: mounted
+  with_indexed_items: "{{ disk_uuids.results }}"
+- name: Set temp storage folder ownership
+  file:
+    path: '{{ mount_root }}'
+    state: directory
+    owner: "{{ cluster_user }}"
+    group: "{{ cluster_group }}"
+  when: mount_root == '/mnt/resource'
+- name: Set mount point ownership
+  file:
+    path: '{{ mount_root }}{{ item.0 + 1 }}'
+    state: directory
+    owner: "{{ cluster_user }}"
+    group: "{{ cluster_group }}"
+  with_indexed_items:
+    - "{{ files_matched.files }}"
+- name: Create directory to mount Azure File share
+  file:
+    path: "{{ azure_fileshare_mount }}"
+    state: directory
+    owner: '{{ cluster_user }}'
+    group: '{{ cluster_group }}'
+  when: azure_fileshare_mount is defined and azure_fileshare_mount and azure_fileshare_mount != None
+- name: Mount Azure File share
+  become: yes
+  mount:
+    fstype: cifs
+    src: "{{ azure_fileshare }}"
+    path: "{{ azure_fileshare_mount }}"
+    opts: vers=3.0,username={{ azure_fileshare_username }},password={{ azure_fileshare_password }},dir_mode=0777,file_mode=0777,serverino
+    state: mounted
+  when: azure_fileshare_mount is defined and azure_fileshare_mount and azure_fileshare_mount != None

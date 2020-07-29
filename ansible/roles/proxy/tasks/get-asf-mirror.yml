@@ -1,0 +1,10 @@
+- name: "determine best apache mirror to use"
+  shell: set -o pipefail && curl -sk https://www.apache.org/dyn/closer.cgi?as_json | jq -r .preferred
+  args:
+    executable: bash
+    warn: no
+  register: apache_mirror
+  retries: 10
+  delay: 10
+  until: "apache_mirror.stdout | length > 0"
+  changed_when: False

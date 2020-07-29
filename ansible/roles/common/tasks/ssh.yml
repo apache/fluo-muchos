@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-- name: "ensure cluster user exists but don't generate ssh key" 
+- name: "ensure cluster user exists but don't generate ssh key"
   user: name={{ cluster_user }} generate_ssh_key=no state=present
 - name: "copy cluster private key to all nodes"
   copy: src=/home/{{ cluster_user }}/.ssh/id_rsa dest=/home/{{ cluster_user }}/.ssh/id_rsa owner={{ cluster_user }} group={{ cluster_group }} mode=0600
@@ -26,4 +26,4 @@
 - name: "add conf/keys to ~/.ssh/authorized_keys"
   authorized_key: user={{ cluster_user }} key="{{ lookup('file', 'conf/keys') }}"
 - name: "set ssh config"
-  copy: src=roles/common/files/ssh_config dest=/home/{{ cluster_user}}/.ssh/config owner={{ cluster_user }} group={{ cluster_group }} mode=0600
+  copy: src=roles/common/files/ssh_config dest=/home/{{ cluster_user }}/.ssh/config owner={{ cluster_user }} group={{ cluster_group }} mode=0600

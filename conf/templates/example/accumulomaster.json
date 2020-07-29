@@ -1,0 +1,34 @@
+{
+  "KeyName": "${key_name}",
+  "BlockDeviceMappings": [
+    {
+      "DeviceName": "/dev/sda1",
+      "Ebs": {
+        "DeleteOnTermination": true,
+        "VolumeSize": 40,
+        "VolumeType": "gp2"
+      }
+    },
+    {
+      "DeviceName": "/dev/sdf",
+      "Ebs": {
+        "DeleteOnTermination": true,
+        "VolumeSize": 500,
+        "VolumeType": "gp2"
+      }
+    }
+  ],
+  "ImageId": "${aws_ami}",
+  "InstanceType": "m4.2xlarge",
+  "NetworkInterfaces": [
+    {
+      "DeviceIndex": 0,
+      "AssociatePublicIpAddress": "${associate_public_ip}",
+      "Groups": [
+        "${security_group_id}"
+      ]
+    }
+  ],
+  "EbsOptimized": true,
+  "InstanceInitiatedShutdownBehavior": "${shutdown_behavior}"
+}

@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -e
+echo "Running nose tests..."
+nosetests -w lib/
+echo "SUCCESS: All Nose tests completed."
+echo "Running Ansible-lint..."
+ansible-lint -x 204,301
+echo "SUCCESS: Ansible-lint completed."
+echo "Running flake8 to check Python code..."
+flake8
+echo "SUCCESS: flake8 completed."
+echo "Checking for files which have no newline at end of file..."
+git ls-files | tr '\n' '\0' | xargs -0 -L1 -n1 "$(dirname "$0")/checkMissingEOF"
+echo "SUCCESS: All files have newline at the end."
+echo "All tests passed!"
