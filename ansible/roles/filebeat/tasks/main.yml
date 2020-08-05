@@ -25,7 +25,7 @@
   args:
     url: https://artifacts.elastic.co/downloads/beats/filebeat/{{ filebeat_rpm }}
     dest: /tmp/{{ filebeat_rpm }}
-    checksum: "{{ filebeat_sha512 }}"
+    checksum: "{{ filebeat_checksum }}"
     force: no
 
   #Install filebeat"

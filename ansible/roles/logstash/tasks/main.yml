@@ -27,7 +27,7 @@
   args:
     url: https://artifacts.elastic.co/downloads/logstash/{{ logstash_rpm }}
     dest: /tmp/{{ logstash_rpm }}
-    checksum: "{{ logstash_sha512 }}"
+    checksum: "{{ logstash_checksum }}"
     force: no
 
  # Install Logstash

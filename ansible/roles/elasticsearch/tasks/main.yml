@@ -26,7 +26,7 @@
   args:
     url: https://artifacts.elastic.co/downloads/elasticsearch/{{ elasticsearch_rpm }}
     dest: /tmp/{{ elasticsearch_rpm }}
-    checksum: "{{ elasticsearch_sha512 }}"
+    checksum: "{{ elasticsearch_checksum }}"
     force: no
 
 # Install elasticsearch

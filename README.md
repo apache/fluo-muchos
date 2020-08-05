@@ -257,7 +257,7 @@ different for your cluster.
  * Grafana Metrics and Monitoring - [http://metrics:3000/](http://metrics:3000/)
  * Mesos status - [http://leader1:5050/](http://leader1:5050/) (if `mesosmaster` configured on leader1)
  * Marathon status - [http://leader1:8080/](http://leader1:8080/) (if `mesosmaster` configured on leader1)
- * Kibana status - [http;//leader1:5601/](http://leader1:5601) (But Kibana is configured on all nodes)
+ * Kibana status - [http://leader1:5601/](http://leader1:5601) (But Kibana is configured on all nodes)
 
 ## Run a Fluo application
 

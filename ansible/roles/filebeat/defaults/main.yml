@@ -17,5 +17,5 @@
 #
 
 filebeat_rpm: filebeat-7.8.0-x86_64.rpm
-filebeat_sha512: "sha512:d3483622cc55f8e0e5a3198bb179bd6e74d66a50a6b6d8df82a3e22eae9b345886505fce9439003b8ab57b3cf70bcfbcfaec40ff3fbd41ff385f1fb9ae6a34e0"
+filebeat_checksum: "sha512:d3483622cc55f8e0e5a3198bb179bd6e74d66a50a6b6d8df82a3e22eae9b345886505fce9439003b8ab57b3cf70bcfbcfaec40ff3fbd41ff385f1fb9ae6a34e0"
 

@@ -16,4 +16,4 @@
 #
 
 elasticsearch_rpm: elasticsearch-oss-7.8.0-x86_64.rpm
-elasticsearch_sha512: "sha512:0dfaf62bafd6830ebbf571d9e264411913078781f5fcf57a6bd427bab01c4c001d66245dcb268317b65161e8fc2d4e3d020e2e38d4f3b8ad3477d99e17c2d9d1 "
+elasticsearch_checksum: "sha512:0dfaf62bafd6830ebbf571d9e264411913078781f5fcf57a6bd427bab01c4c001d66245dcb268317b65161e8fc2d4e3d020e2e38d4f3b8ad3477d99e17c2d9d1 "
