@@ -32,12 +32,12 @@ The following command runs the unit tests:
 
 ## Before you submit a PR
 
-If you are modifying any of the Python code in this project, please use [Black](https://github.com/psf/black) to enforce that Python code found under the [lib](https://github.com/apache/fluo-muchos/tree/master/lib) folder is formatted correctly. Before submitting a PR, please ensure that you have used Black to format the code with max line length set to 79 as below (it is to be run from the repo root):
+If you are modifying any of the Python code in this project, please use [Black](https://github.com/psf/black) to enforce that Python code found under the [lib](https://github.com/apache/fluo-muchos/tree/main/lib) folder is formatted correctly. Before submitting a PR, please ensure that you have used Black to format the code with max line length set to 79 as below (it is to be run from the repo root):
 ```
 black lib --line-length 79
 ```
 
-The [CI](https://github.com/apache/fluo-muchos/tree/master/.travis.yml) for this project runs tools to detect common coding issues with Python and Ansible files. Rather than wait for the CI to flag any issues with your work, please run the [cibuild](https://github.com/apache/fluo-muchos/tree/master/scripts/cibuild.sh) script on your dev machine, which in turn runs the following tools:
+The [CI](https://github.com/apache/fluo-muchos/tree/main/.travis.yml) for this project runs tools to detect common coding issues with Python and Ansible files. Rather than wait for the CI to flag any issues with your work, please run the [cibuild](https://github.com/apache/fluo-muchos/tree/main/scripts/cibuild.sh) script on your dev machine, which in turn runs the following tools:
 - [flake8](https://github.com/pycqa/flake8) to validate that the Python code in the project conforms to known good practices.
 - [Ansible-lint](https://github.com/ansible/ansible-lint/) prior to submitting a PR. This will ensure that you align with known good practices. Please also review the guidance on [false positives](https://docs.ansible.com/ansible-lint/rules/rules.html#false-positives-skipping-rules) from Ansible-lint.
 
