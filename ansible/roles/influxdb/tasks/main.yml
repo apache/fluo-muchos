@@ -30,7 +30,7 @@
     - restart influxdb
     - setup influxdb
 - name: "download fluo setup"
-  get_url: url=https://raw.githubusercontent.com/apache/fluo/master/contrib/influxdb/fluo_metrics_setup.txt dest=/etc/opt/influxdb/fluo_metrics_setup.txt
+  get_url: url=https://raw.githubusercontent.com/apache/fluo/main/contrib/influxdb/fluo_metrics_setup.txt dest=/etc/opt/influxdb/fluo_metrics_setup.txt
 - name: "create data dir"
   file: path={{ default_data_dirs[0] }}/influxdb state=directory owner=influxdb group=influxdb
 - name: "ensure influxdb is running (and enable it at boot)"
