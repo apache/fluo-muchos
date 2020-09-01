@@ -27,7 +27,7 @@
   args:
     url: https://artifacts.elastic.co/downloads/kibana/{{ kibana_rpm }}
     dest: /tmp/{{ kibana_rpm }}
-    checksum: "{{ kibana_sha512 }}"
+    checksum: "{{ kibana_checksum }}"
     force: no
 
     #Install kibana
