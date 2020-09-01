@@ -31,12 +31,12 @@
 - name: "add cluster dashboard configuration"
   template: src=cluster-dashboard.json dest=/etc/grafana/dashboards/cluster-dashboard.json owner=grafana group=grafana
 - name: "configure fluo dashboards"
-  get_url: url=https://raw.githubusercontent.com/apache/fluo/master/contrib/grafana/{{ item }} dest=/etc/grafana/dashboards/{{ item }}
+  get_url: url=https://raw.githubusercontent.com/apache/fluo/main/contrib/grafana/{{ item }} dest=/etc/grafana/dashboards/{{ item }}
   with_items:
     - fluo-recent-dashboard.json
     - fluo-historical-dashboard.json
 - name: "configure accumulo dashboards"
-  get_url: url=https://raw.githubusercontent.com/apache/fluo-uno/master/plugins/influx-metrics/accumulo-dashboard.json dest=/etc/grafana/dashboards/accumulo-dashboard.json
+  get_url: url=https://raw.githubusercontent.com/apache/fluo-uno/main/plugins/influx-metrics/accumulo-dashboard.json dest=/etc/grafana/dashboards/accumulo-dashboard.json
 - name: "ensure owner and group are correct for /etc/grafana"
   file: path=/etc/grafana/ recurse=yes owner=grafana group=grafana
 - name: "ensure grafana is running (and enable it at boot)"

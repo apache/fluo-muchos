@@ -67,7 +67,7 @@
          force_delete_nonempty: yes
          state: absent
       loop:
-         "{{ instance_volumes_preferred.split(',') }}"
+         "{{ instance_volumes_adls.split(',') }}"
       when: use_adlsg2
 
     - name: Delete VM Scale Set

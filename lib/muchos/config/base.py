@@ -82,10 +82,7 @@ _HOST_VAR_DEFAULTS = {
     "hadoop_tarball": "hadoop-{{ hadoop_version }}.tar.gz",
     "hadoop_version": None,
     "hadoop_major_version": "{{ hadoop_version.split('.')[0] }}",
-    "hdfs_root": (
-        "{% if hdfs_ha %}hdfs://{{ nameservice_id }}{% else %}"
-        "hdfs://{{ groups['namenode'][0] }}:8020{% endif %}"
-    ),
+    "hdfs_root": "hdfs://{{ nameservice_id }}",
     "hdfs_ha": None,
     "nameservice_id": None,
     "num_tservers": 1,
@@ -114,7 +111,8 @@ _HOST_VAR_DEFAULTS = {
     ),
     "zookeeper_client_port": "2181",
     "zookeeper_basename": (
-        "{% if zookeeper_version is version('3.5', '>=') %}"
+        "{% if zookeeper_version is version('3.5', '>=') or "
+        "zookeeper_version in 'SNAPSHOT' %}"
         "apache-zookeeper-{{ zookeeper_version }}-bin{% else %}"
         "zookeeper-{{ zookeeper_version }}{% endif %}"
     ),
@@ -272,9 +270,9 @@ class BaseConfig(ConfigParser, metaclass=ABCMeta):
                 )
 
             # fail if we are using ZooKeeper >= 3.5.5 with Accumulo <= 1.9.x
-            if StrictVersion(self.version("zookeeper")) >= StrictVersion(
-                "3.5.5"
-            ) and StrictVersion(
+            if StrictVersion(
+                self.version("zookeeper").replace("-SNAPSHOT", "")
+            ) >= StrictVersion("3.5.5") and StrictVersion(
                 self.version("accumulo").replace("-SNAPSHOT", "")
             ) < StrictVersion(
                 "1.10.0"

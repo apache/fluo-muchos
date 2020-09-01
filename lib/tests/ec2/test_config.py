@@ -37,7 +37,7 @@ def test_ec2_cluster():
     )
     assert c.get("ec2", "default_instance_type") == "m5d.large"
     assert c.get("ec2", "worker_instance_type") == "m5d.large"
-    assert c.get("ec2", "aws_ami") == "ami-9887c6e7"
+    assert c.get("ec2", "aws_ami") == "ami-0affd4508a5d2481b"
     assert c.user_home() == "/home/centos"
     assert c.max_ephemeral() == 1
     assert c.mount_root() == "/media/ephemeral"
