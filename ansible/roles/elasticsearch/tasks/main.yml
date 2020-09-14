@@ -57,7 +57,7 @@
   lineinfile:
     destfile: /etc/elasticsearch/elasticsearch.yml
     regexp: "discovery.seed_hosts:"
-    line: "discovery.seed_hosts: [\"{{ groups['elkserver'][0] }}\"]"
+    line: 'discovery.seed_hosts: ["leader1"]'
   become: true
 
 # Update Discovery Settings in config file
