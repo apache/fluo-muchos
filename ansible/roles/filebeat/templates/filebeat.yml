@@ -41,11 +41,9 @@ filebeat.inputs:
 
     # Paths that should be crawled and fetched. Glob based paths.
     paths:
-      #- /var/log/*.log
-      - /media/ephemeral0/logs/accumulo/*.log
-      - /media/ephemeral0/logs/zookeeper/*log
-      - /media/ephemeral0/logs/hadoop/*.log
-      #- c:\programdata\elasticsearch\logs\*
+      - "{{ worker_data_dirs[0] }}/logs/accumulo/*.log"
+      - "{{ worker_data_dirs[0] }}/logs/zookeeper/*log"
+      - "{{ worker_data_dirs[0] }}/logs/hadoop/*.log"
 
     # Exclude lines. A list of regular expressions to match. It drops the lines that are
     # matching any regular expression from the list.

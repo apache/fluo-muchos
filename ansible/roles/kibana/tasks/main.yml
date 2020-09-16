@@ -58,14 +58,14 @@
   lineinfile:
     destfile: /etc/kibana/kibana.yml
     regexp: "elasticsearch.url:"
-    line: '#elasticsearch.url: "http://leader1:9200"'
+    line: "#elasticsearch.url: \"http://{{ groups['elkserver'][0] }}:9200\""
   become: true
 
 - name: Defining the Elasticsearch instance URL for queries
   lineinfile:
     destfile: /etc/kibana/kibana.yml
     regexp: "elasticsearch.hosts:"
-    line: 'elasticsearch.hosts: ["http://leader1:9200"]'
+    line: "elasticsearch.hosts: [\"http://{{ groups['elkserver'][0] }}:9200\"]"
   become: true
 
 - name: Defining the output kibana log files

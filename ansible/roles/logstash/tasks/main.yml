@@ -61,7 +61,7 @@
   become: true
 
 - name: Copy logstash into conf.d folder
-  copy:
+  template:
      src: ../../logstash/templates/logstash-simple-2.conf
      dest: /etc/logstash/conf.d/
   become: true

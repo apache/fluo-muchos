@@ -57,7 +57,7 @@
   lineinfile:
     destfile: /etc/elasticsearch/elasticsearch.yml
     regexp: "discovery.seed_hosts:"
-    line: 'discovery.seed_hosts: ["leader1"]'
+    line: "discovery.seed_hosts: [\"{{ groups['elkserver'][0] }}\"]"
   become: true
 
 # Update Discovery Settings in config file
@@ -65,7 +65,7 @@
   lineinfile:
     destfile: /etc/elasticsearch/elasticsearch.yml
     regexp: "cluster.initial_master_nodes:"
-    line: 'cluster.initial_master_nodes: ["leader1"]'
+    line: "cluster.initial_master_nodes: [\"{{ groups['elkserver'][0] }}\"]"
   become: true
 
 # Enable Elasticsearch

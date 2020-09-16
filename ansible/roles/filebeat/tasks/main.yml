@@ -37,14 +37,14 @@
 
 #Configure Filebeat yml file
 
-- name: Copy filebeat.yml onto ec2
-  copy:
+- name: Copy filebeat.yml to /etc
+  template:
     src: ../../filebeat/templates/filebeat.yml
     dest: /etc/filebeat/
     backup: yes
   become: true
 
-- name: Copy filebeat.reference.yml onto ec2
+- name: Copy filebeat.reference.yml to /etc
   copy:
     src: ../../filebeat/templates/filebeat.reference.yml
     dest: /etc/filebeat/
