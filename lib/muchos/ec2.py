@@ -347,8 +347,8 @@ class Ec2Cluster(ExistingCluster):
             if path.isfile(self.config.hosts_path):
                 os.remove(self.config.hosts_path)
                 print("Removed hosts file at ", self.config.hosts_path)
-            else:
-                print("Aborted termination")
+        else:
+            print("Aborted termination")
 
     def wipe(self):
         super().wipe()
