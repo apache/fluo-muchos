@@ -15,32 +15,5 @@
 # limitations under the License.
 #
 
-- hosts: mesosmaster
-  become: yes
-  tasks:
-  - name: "stop mesos-master & marathon"
-    service:
-      name: item
-      state: stopped
-    when: "'mesosmaster' in groups"
-    with_items:
-      - mesos-master
-      - marathon
-- hosts: workers
-  become: yes
-  tasks:
-  - name: "stop mesos slaves"
-    service:
-      name: mesos-slave
-      state: stopped
-    when: "'mesosmaster' in groups"
-- hosts: all:!{{ azure_proxy_host }}
-  become: yes
-  tasks:
-  - name: "stop docker"
-    service:
-      name: docker
-      state: stopped
-    when: "'swarmmanager' in groups"
-  - name: "ensure all processes started by Muchos are killed"
-    script: roles/common/files/kill.sh
+kibana_rpm: kibana-oss-7.8.0-x86_64.rpm
+kibana_checksum: "sha512:2d86268fb951f91a00a981b121e8fa8e77d67671400c180ef81d74d135c24838ea44faad69d76223f0bd8e86ca4ba5e893a75807e84b43287e0a3c323f1fd837"

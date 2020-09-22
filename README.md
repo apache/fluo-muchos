@@ -232,6 +232,8 @@ to this swarm. When this is set, docker will be installed on all nodes of the cl
 recommended that the swarm manager is specified on a worker node as it runs docker containers. Check
 out [Portainer] if you want to run a management UI for your swarm cluster.
 
+7. `elkserver` - Sets up the Elasticsearch, Logstash, and Kibana stack. This allows logging data to be search, analyzed, and visualized in real time. 
+
 If you run the `muchos setup` command and a failure occurs, you can repeat the command until setup
 completes. Any work that was successfully completed will not be repeated. While some setup steps can
 take over a minute, use `ctrl-c` to stop setup if it hangs for a long time. Just remember to run
@@ -260,6 +262,7 @@ different for your cluster.
  * Grafana Metrics and Monitoring - [http://metrics:3000/](http://metrics:3000/)
  * Mesos status - [http://leader1:5050/](http://leader1:5050/) (if `mesosmaster` configured on leader1)
  * Marathon status - [http://leader1:8080/](http://leader1:8080/) (if `mesosmaster` configured on leader1)
+ * Kibana status - [http://leader1:5601/](http://leader1:5601) (But Kibana is configured on all nodes)
 
 ## Run a Fluo application
 
@@ -389,3 +392,4 @@ Muchos is powered by the following projects:
 [checksums]: conf/checksums
 [HDFS HA]: https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HDFSHighAvailabilityWithQJM.html
 [Accumulo HA]: https://accumulo.apache.org/1.9/accumulo_user_manual.html#_components
+[ELK Stack]: https://www.elastic.co/

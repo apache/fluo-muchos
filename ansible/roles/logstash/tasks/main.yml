@@ -1,0 +1,78 @@
+---
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+
+ #
+ # Installing Logstash
+ #
+
+ # Download Logstash
+- name: "download logstash rpm"
+  get_url:
+  args:
+    url: https://artifacts.elastic.co/downloads/logstash/{{ logstash_rpm }}
+    dest: /tmp/{{ logstash_rpm }}
+    checksum: "{{ logstash_checksum }}"
+    force: no
+
+ # Install Logstash
+- name: "ensure logstash is installed"
+  become: true
+  yum:
+    name: /tmp/{{ logstash_rpm }}
+    state: present
+
+# Update startup.option file with the new home location.
+- name: Update the startup.option file
+  lineinfile:
+    destfile: /etc/logstash/startup.options
+    regexp: 'LS_HOME=/usr/share/logstash'
+    line: 'LS_HOME=/etc/logstash'
+  become: true
+
+# Update logstash config path locatione
+- name: Update logstash config path location
+  lineinfile:
+    destfile: /etc/logstash/logstash.yml
+    regexp: '# path.config:'
+    line: 'path.config: /etc/logstash/conf.d/'
+  become: true
+
+# Make Logstash conf.d  directory
+- name: make logstash conf.d directory
+  file:
+    path: /etc/logstash/conf.d/
+    state: directory
+  become: true
+
+- name: Copy logstash into conf.d folder
+  template:
+     src: ../../logstash/templates/logstash-simple-2.conf
+     dest: /etc/logstash/conf.d/
+  become: true
+
+- name: Install beats input plugin
+  become: true
+  command: /usr/share/logstash/bin/logstash-plugin install logstash-input-beats
+
+# Restart Logstash
+- name: Restarting logstash
+  service:
+    name: logstash
+    state: restarted
+  become: true

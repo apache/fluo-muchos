@@ -1,0 +1,124 @@
+---
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+
+# Installing Kibana
+#
+
+# Add the Kibana yum repo.
+
+- name: "download kibana rpm"
+  get_url:
+  args:
+    url: https://artifacts.elastic.co/downloads/kibana/{{ kibana_rpm }}
+    dest: /tmp/{{ kibana_rpm }}
+    checksum: "{{ kibana_checksum }}"
+    force: no
+
+    #Install kibana
+
+- name: "ensure kibana is installed"
+  become: true
+  yum:
+    name: /tmp/{{ kibana_rpm }}
+    state: present
+
+# Configurations
+
+- name: Updating the config file to allow outside access
+  lineinfile:
+    destfile: /etc/kibana/kibana.yml
+    regexp: "server.host:"
+    line: "server.host: 0.0.0.0"
+  become: true
+
+- name: Defining server port
+  lineinfile:
+    destfile: /etc/kibana/kibana.yml
+    regexp: "server.port:"
+    line: "server.port: 5601"
+  become: true
+
+- name: Defining Elasticsearch URL
+  lineinfile:
+    destfile: /etc/kibana/kibana.yml
+    regexp: "elasticsearch.url:"
+    line: "#elasticsearch.url: \"http://{{ groups['elkserver'][0] }}:9200\""
+  become: true
+
+- name: Defining the Elasticsearch instance URL for queries
+  lineinfile:
+    destfile: /etc/kibana/kibana.yml
+    regexp: "elasticsearch.hosts:"
+    line: "elasticsearch.hosts: [\"http://{{ groups['elkserver'][0] }}:9200\"]"
+  become: true
+
+- name: Defining the output kibana log files
+  lineinfile:
+    destfile: /etc/kibana/kibana.yml
+    regexp: "logging.dest:"
+    line: "logging.dest: stdout"
+  become: true
+
+- name: Defining the default Kibana Application
+  lineinfile:
+    destfile: /etc/kibana/kibana.yml
+    regexp: "kibana.defaultAppId:"
+    line: 'kibana.defaultAppId: "home"'
+  become: true
+
+- name: Defining the default Kibana PID
+  lineinfile:
+    destfile: /etc/kibana/kibana.yml
+    regexp: "#pid.file: /var/run/kibana.pid"
+    line: "pid.file: /var/run/kibana/kibana.pid"
+  become: true
+
+# Make Kibana log directory
+- name: Make Log Directory
+  file:
+    path: /var/log/kibana/
+    state: directory
+  become: true
+
+# Make kibana folder pid
+- name: Make Kibana folder
+  become: true
+  file:
+    path: /var/run/kibana/
+    state: directory
+    recurse: yes
+    mode: 0777
+    owner: kibana
+
+# Make kibana folder pid
+- name: Make Kibana pid File
+  become: true
+  file:
+    path: /var/run/kibana/kibana.pid
+    state: touch
+    mode: 0777
+    owner: kibana
+
+# Starting Kibana
+
+- name: Starting Kibana
+  service:
+    name: kibana
+    state: started
+  become: true

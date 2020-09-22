@@ -15,32 +15,5 @@
 # limitations under the License.
 #
 
-- hosts: mesosmaster
-  become: yes
-  tasks:
-  - name: "stop mesos-master & marathon"
-    service:
-      name: item
-      state: stopped
-    when: "'mesosmaster' in groups"
-    with_items:
-      - mesos-master
-      - marathon
-- hosts: workers
-  become: yes
-  tasks:
-  - name: "stop mesos slaves"
-    service:
-      name: mesos-slave
-      state: stopped
-    when: "'mesosmaster' in groups"
-- hosts: all:!{{ azure_proxy_host }}
-  become: yes
-  tasks:
-  - name: "stop docker"
-    service:
-      name: docker
-      state: stopped
-    when: "'swarmmanager' in groups"
-  - name: "ensure all processes started by Muchos are killed"
-    script: roles/common/files/kill.sh
+elasticsearch_rpm: elasticsearch-oss-7.8.0-x86_64.rpm
+elasticsearch_checksum: "sha512:0dfaf62bafd6830ebbf571d9e264411913078781f5fcf57a6bd427bab01c4c001d66245dcb268317b65161e8fc2d4e3d020e2e38d4f3b8ad3477d99e17c2d9d1 "

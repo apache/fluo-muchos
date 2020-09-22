@@ -1,0 +1,83 @@
+---
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+#
+# Installing Elasticsearch
+#
+
+# Add the Elasticsearch yum repo.
+- name: "download elasticsearch rpm"
+  get_url:
+  args:
+    url: https://artifacts.elastic.co/downloads/elasticsearch/{{ elasticsearch_rpm }}
+    dest: /tmp/{{ elasticsearch_rpm }}
+    checksum: "{{ elasticsearch_checksum }}"
+    force: no
+
+# Install elasticsearch
+- name: "ensure elasticsearch is installed"
+  become: true
+  yum:
+    name: /tmp/{{ elasticsearch_rpm }}
+    state: present
+
+# Update Elasticsearch config file to allow access (to secure Elasticsearch, bind to 'localhost').
+- name: Updating the config file to allow outside access
+  lineinfile:
+    destfile: /etc/elasticsearch/elasticsearch.yml
+    regexp: "network.host:"
+    line: "network.host: 0.0.0.0"
+  become: true
+
+# Update Elasticsearch port in config file
+- name: Updating the port in config file
+  lineinfile:
+    destfile: /etc/elasticsearch/elasticsearch.yml
+    regexp: "http.port:"
+    line: "http.port: 9200"
+  become: true
+
+# Update Discovery Settings in config file
+- name: Update the Discovery Seed Host
+  lineinfile:
+    destfile: /etc/elasticsearch/elasticsearch.yml
+    regexp: "discovery.seed_hosts:"
+    line: "discovery.seed_hosts: [\"{{ groups['elkserver'][0] }}\"]"
+  become: true
+
+# Update Discovery Settings in config file
+- name: Update the Discovery Seed Host
+  lineinfile:
+    destfile: /etc/elasticsearch/elasticsearch.yml
+    regexp: "cluster.initial_master_nodes:"
+    line: "cluster.initial_master_nodes: [\"{{ groups['elkserver'][0] }}\"]"
+  become: true
+
+# Enable Elasticsearch
+- name: Enable Elasticsearch
+  service:
+    name: elasticsearch
+    enabled: yes
+  become: true
+
+# Restart Elasticsearch
+- name: Start Elasticsearch
+  service:
+    name: elasticsearch
+    state: started
+  become: yes

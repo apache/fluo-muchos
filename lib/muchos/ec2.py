@@ -116,6 +116,7 @@ class Ec2Cluster(ExistingCluster):
         return group_id
 
     def delete_security_group(self):
+
         sg_id = None
         ec2 = boto3.client("ec2")
         try:

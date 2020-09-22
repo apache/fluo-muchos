@@ -1,3 +1,4 @@
+---
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -14,33 +15,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+#
 
-- hosts: mesosmaster
-  become: yes
-  tasks:
-  - name: "stop mesos-master & marathon"
-    service:
-      name: item
-      state: stopped
-    when: "'mesosmaster' in groups"
-    with_items:
-      - mesos-master
-      - marathon
-- hosts: workers
-  become: yes
-  tasks:
-  - name: "stop mesos slaves"
-    service:
-      name: mesos-slave
-      state: stopped
-    when: "'mesosmaster' in groups"
+# Playbook to install the ELK stack + Beats
+#
 - hosts: all:!{{ azure_proxy_host }}
-  become: yes
-  tasks:
-  - name: "stop docker"
-    service:
-      name: docker
-      state: stopped
-    when: "'swarmmanager' in groups"
-  - name: "ensure all processes started by Muchos are killed"
-    script: roles/common/files/kill.sh
+  roles:
+    - { role: elasticsearch }
+    - { role: filebeat }
+    - { role: kibana }
+    - { role: logstash }
