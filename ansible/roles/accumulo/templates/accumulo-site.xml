@@ -87,7 +87,11 @@
       $ACCUMULO_HOME/lib/accumulo-fate.jar,
       $ACCUMULO_HOME/lib/accumulo-proxy.jar,
       $ACCUMULO_HOME/lib/[^.].*.jar,
+{% if zookeeper_version is version('3.5','>=') %}
+      $ZOOKEEPER_HOME/lib/zookeeper[^.].*.jar,
+{% else %}      
       $ZOOKEEPER_HOME/zookeeper[^.].*.jar,
+{% endif %}
       $HADOOP_CONF_DIR,
       $HADOOP_PREFIX/share/hadoop/common/[^.].*.jar,
       $HADOOP_PREFIX/share/hadoop/common/lib/(?!slf4j)[^.].*.jar,
