@@ -1,6 +1,6 @@
 ![Muchos][logo]
 ---
-[![Build Status][ti]][tl] [![Apache License][li]][ll]
+[![Build Status][ci]][ga] [![Apache License][li]][ll]
 
 **Muchos automates setting up [Apache Accumulo][accumulo] or [Apache Fluo][fluo] (and their dependencies) on a cluster**
 
@@ -48,7 +48,7 @@ ssh-add ~/.ssh/id_rsa
 
 Muchos requires the following for EC2 installations:
 
-* [awscli] (version 2) & [boto3] libraries - Install using `pip3 install awscli2 boto3 --upgrade` 
+* [awscli] (version 2) & [boto3] libraries - Install using `pip3 install awscli2 boto3 --upgrade`
 * Note: if using Ubuntu you may need to install botocore separately using `pip3 install awscli boto3 botocore`
 * An AWS account with your SSH public key uploaded. When you configure [muchos.props], set `key.name`
   to name of your key pair in AWS.
@@ -232,7 +232,7 @@ to this swarm. When this is set, docker will be installed on all nodes of the cl
 recommended that the swarm manager is specified on a worker node as it runs docker containers. Check
 out [Portainer] if you want to run a management UI for your swarm cluster.
 
-7. `elkserver` - Sets up the Elasticsearch, Logstash, and Kibana stack. This allows logging data to be search, analyzed, and visualized in real time. 
+7. `elkserver` - Sets up the Elasticsearch, Logstash, and Kibana stack. This allows logging data to be search, analyzed, and visualized in real time.
 
 If you run the `muchos setup` command and a failure occurs, you can repeat the command until setup
 completes. Any work that was successfully completed will not be repeated. While some setup steps can
@@ -375,8 +375,8 @@ Muchos is powered by the following projects:
 [boto]: http://boto.cloudhackers.com/en/latest/
 [boto3]: https://github.com/boto/boto3
 [Ansible]: https://www.ansible.com/
-[ti]: https://travis-ci.org/apache/fluo-muchos.svg?branch=main
-[tl]: https://travis-ci.org/apache/fluo-muchos
+[ci]: ./workflows/CI/badge.svg
+[ga]: ./.github/workflows/ci.yaml
 [li]: http://img.shields.io/badge/license-ASL-blue.svg
 [ll]: https://github.com/apache/fluo-muchos/blob/main/LICENSE
 [logo]: contrib/muchos-logo.png
