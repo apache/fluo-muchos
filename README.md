@@ -375,8 +375,8 @@ Muchos is powered by the following projects:
 [boto]: http://boto.cloudhackers.com/en/latest/
 [boto3]: https://github.com/boto/boto3
 [Ansible]: https://www.ansible.com/
-[ci]: ./workflows/CI/badge.svg
-[ga]: ./.github/workflows/ci.yaml
+[ci]: https://github.com/apache/fluo-muchos/workflows/CI/badge.svg
+[ga]: https://github.com/apache/fluo-muchos/actions
 [li]: http://img.shields.io/badge/license-ASL-blue.svg
 [ll]: https://github.com/apache/fluo-muchos/blob/main/LICENSE
 [logo]: contrib/muchos-logo.png

@@ -17,9 +17,11 @@
 # under the License.
 #
 
-# This workflow will build a Java project with Maven
+# This GitHub Actions workflow will prepare a environment with Python 3.6
+# and the required Python packages, to run the CI tests
+# (Ansible-lint, Flake8 etc.) for Fluo-Muchos.
 # See also:
-#   https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+#   https://docs.github.com/en/free-pro-team@latest/actions/guides/building-and-testing-python
 
 name: CI
 
@@ -35,7 +37,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-18.04, macOS-latest, ubuntu-20.04]
+        os: [ubuntu-latest, macOS-latest]
     timeout-minutes: 10
     steps:
     - uses: actions/checkout@v1
