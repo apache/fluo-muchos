@@ -23,7 +23,7 @@ If you believe that you have found a bug, please search for an existing [issue](
 
 Muchos has unit tests. To run them, first install required packages:
 ```
-    pip install ./lib/requirements.txt
+    pip install -r ./lib/requirements.txt
 ```
 The following command runs the unit tests:
 ```

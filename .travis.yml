@@ -16,6 +16,6 @@ language: python
 python:
   - "3.5"
 install:
-  - pip install ./lib/requirements.txt
+  - pip install -r ./lib/requirements.txt
 script:
   - ./scripts/cibuild
