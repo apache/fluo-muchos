@@ -21,6 +21,11 @@
 - name: Copy Policy file OMS-collectd.te
   copy: src=roles/common/files/OMS-collectd.te dest=/home/{{ cluster_user }}/SEPolicyFiles  owner={{ cluster_user }} group={{ cluster_group }}
 
+# Update the policy file to use 'statsd_port_t' added in CentOS 8.2 to avoid runtime failures
+- name: Update Policy file OMS-collectd.te for CentOS 8.2 and later
+  replace: regexp=unreserved_port_t replace=statsd_port_t path=/home/{{ cluster_user }}/SEPolicyFiles/OMS-collectd.te owner={{ cluster_user }} group={{ cluster_group }}
+  when: ansible_facts['distribution_version'] is version('8.2', '>=')
+
 - name: Copy Policy file OMS-logrotate.te
   copy: src=roles/common/files/OMS-logrotate.te dest=/home/{{ cluster_user }}/SEPolicyFiles  owner={{ cluster_user }} group={{ cluster_group }}
 

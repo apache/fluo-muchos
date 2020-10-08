@@ -29,6 +29,13 @@
     checksum: "{{ elasticsearch_checksum }}"
     force: no
 
+- name: "Import GPG key for CentOS 8.0 and later"
+  become: true
+  rpm_key:
+    key: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+    state: present
+  when: ansible_facts['distribution_version'] is version('8.0', '>=')
+
 # Install elasticsearch
 - name: "ensure elasticsearch is installed"
   become: true

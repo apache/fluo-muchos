@@ -47,7 +47,12 @@ if [ ! -h /etc/ansible/hosts ]; then
 fi
 
 # install lxml as it is a dependency for the maven_artifact Ansible module
-sudo yum install -q -y python-lxml
+centos_version=`cat /etc/os-release | grep '^VERSION_ID' | cut -d'"' -f2`
+if [ $centos_version -eq 7 ]; then
+   sudo yum install -q -y python-lxml
+elif [ $centos_version -eq 8 ]; then
+   sudo yum install -q -y python3-lxml
+fi
 
 # install jq to ease JSON parsing on the proxy
 sudo yum install -y jq

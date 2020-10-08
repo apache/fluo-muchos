@@ -33,12 +33,34 @@
       - patch
       - "{{ java_package }}"
       - collectd-zookeeper
-      - policycoreutils-python
     state: present
   register: yumresult
   retries: 10
   delay: 15
   until: yumresult is not failed
+- name: "Install package specific to CentOS 7"
+  yum:
+    name:
+      - policycoreutils-python
+    state: present
+  register: yumresult_centos7
+  retries: 10
+  delay: 15
+  until: yumresult_centos7 is not failed
+  when: ansible_facts['distribution_major_version'] == "7"
+- name: "Install packages specific to CentOS 8"
+  yum:
+    name:
+      - python3-policycoreutils
+      - collectd-disk
+      - collectd-write_http
+      - make
+    state: present
+  register: yumresult_centos8
+  retries: 10
+  delay: 15
+  until: yumresult_centos8 is not failed
+  when: ansible_facts['distribution_major_version'] == "8"
 - name: "get exact jdk folder path"
   find:
     file_type: directory
