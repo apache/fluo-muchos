@@ -22,3 +22,4 @@ westus2     8_1-gen2
 westus2     8_2
 westus2     8_2-gen2
 ```
+
