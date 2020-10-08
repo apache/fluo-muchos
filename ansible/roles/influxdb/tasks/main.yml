@@ -23,7 +23,7 @@
     checksum: "{{ influxdb_checksum }}"
     force: no
 - name: "ensure influxdb is installed"
-  yum: name=/tmp/{{ influxdb_rpm }} state=present
+  yum: name=/tmp/{{ influxdb_rpm }} state=present disable_gpg_check=yes
 - name: "configure influxdb"
   template: src=influxdb-9.4.2.conf dest=/etc/opt/influxdb/influxdb.conf
   notify:

@@ -22,6 +22,12 @@
     dest: /tmp/{{ grafana_rpm }}
     checksum: "{{ grafana_checksum }}"
     force: no
+- name: "Import GPG key for CentOS 8.0 and later"
+  become: true
+  rpm_key:
+    key: https://grafanarel.s3.amazonaws.com/RPM-GPG-KEY-grafana-old
+    state: present
+  when: ansible_facts['distribution_version'] is version('8.0', '>=')
 - name: "ensure grafana is installed"
   yum: name=/tmp/{{ grafana_rpm }} state=present
 - name: "configure grafana"

@@ -142,11 +142,16 @@
     enable_accelerated_networking: yes
     single_placement_group: "{{ single_placement_group | default(omit) }}"
     image:
-      offer: CentOS
-      publisher: OpenLogic
-      sku: 7.5
-      version: latest
+      offer: "{{ image_offer if image_offer else omit }}"
+      publisher: "{{ image_publisher if image_publisher else omit }}"
+      sku: "{{ image_sku if image_sku else omit }}"
+      version: "{{ image_version if image_version else omit }}"
     data_disks: "{{ luns_dict if data_disk_count > 0 else omit }}"
+  vars:
+  - image_offer: "{{ azure_image_reference.split('|')[0] }}"
+  - image_publisher: "{{ azure_image_reference.split('|')[1] }}"
+  - image_sku: "{{ azure_image_reference.split('|')[2] }}"
+  - image_version: "{{ azure_image_reference.split('|')[3] }}"
   tags: create_vmss
 
 # SECTION 4: Automatically populate entries in the hosts file and in the muchos.props file, based on the VMSS node details

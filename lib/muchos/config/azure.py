@@ -143,6 +143,11 @@ class AzureDeployConfig(BaseConfig):
     def azure_fileshare_password(self):
         return self.get("azure", "azure_fileshare_password")
 
+    @ansible_host_var
+    @default("CentOS|OpenLogic|7.5|latest|")
+    def azure_image_reference(self):
+        return self.get("azure", "azure_image_reference")
+
     @ansible_host_var(name="az_oms_integration_needed")
     @default(False)
     @is_valid(is_in([True, False]))
