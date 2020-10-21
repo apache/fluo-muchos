@@ -21,11 +21,11 @@
     method: POST
     body: "{{ item }}"
     body_format: json
-    status_code: 200,500
+    status_code: 200,500,409
   register: uresult
   retries: 3
-  until: "uresult.status == 500 or uresult.status == 200"
+  until: "uresult.status == 500 or uresult.status == 200 or uresult.status == 409"
   with_items:
-    - '{"name":"cluster_metrics", "type":"influxdb", "url":"http://{{ groups["metrics"][0] }}:8086", "access":"direct", "isDefault":true, "database":"cluster_metrics", "user":"fluo", "password":"secret"}'
-    - '{"name":"fluo_metrics", "type":"influxdb", "url":"http://{{ groups["metrics"][0] }}:8086", "access":"direct", "isDefault":true, "database":"fluo_metrics", "user":"fluo", "password":"secret"}'
-    - '{"name":"accumulo_metrics", "type":"influxdb", "url":"http://{{ groups["metrics"][0] }}:8086", "access":"direct", "isDefault":true, "database":"accumulo_metrics", "user":"accumulo", "password":"secret"}'
+    - '{"name":"cluster_metrics", "type":"influxdb", "url":"http://{{ groups["metrics"][0] }}:8086", "access":"server", "isDefault":true, "database":"cluster_metrics", "user":"fluo", "password":"secret"}'
+    - '{"name":"fluo_metrics", "type":"influxdb", "url":"http://{{ groups["metrics"][0] }}:8086", "access":"server", "isDefault":true, "database":"fluo_metrics", "user":"fluo", "password":"secret"}'
+    - '{"name":"accumulo_metrics", "type":"influxdb", "url":"http://{{ groups["metrics"][0] }}:8086", "access":"server", "isDefault":true, "database":"accumulo_metrics", "user":"accumulo", "password":"secret"}'

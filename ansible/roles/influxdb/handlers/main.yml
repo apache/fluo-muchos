@@ -18,7 +18,7 @@
 - name: "restart influxdb"
   service: name=influxdb state=restarted
 - name: "setup influxdb"
-  command: /opt/influxdb/influx -import -path /etc/opt/influxdb/fluo_metrics_setup.txt
+  command: /usr/bin/influx -import -path /etc/influxdb/fluo_metrics_setup.txt
   register: cresult
   until: cresult.rc == 0
   retries: 5
