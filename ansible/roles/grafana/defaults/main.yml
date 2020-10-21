@@ -16,4 +16,4 @@
 #
 
 grafana_rpm: grafana-7.2.1-1.x86_64.rpm
-grafana_checksum: "sha256:5db61dd25ce85afa336bebfc94cb1dd48686753436e9f1f7e7b3db3d6f6eabcc"
+grafana_checksum: "sha512:1b6fec0464ac2cd2b9e1ea600ec24f6bfa81d8ce309eb90741a6563cc6bbb6ff4f083412928e3ca5516f23ee9920a8afeea90bcbcd0fc214611ae8429d524329"
