@@ -37,13 +37,6 @@
     - setup influxdb
 - name: "download fluo setup"
   get_url: url=https://raw.githubusercontent.com/apache/fluo/main/contrib/influxdb/fluo_metrics_setup.txt dest=/etc/influxdb/fluo_metrics_setup.txt
-
-# Added the below task because of https://github.com/influxdata/influxdb/issues/5707. Will manually remove 
-# 'IF NOT EXISTS' from the file once Influxdb upgraded in Fluo and the task may no longer be needed.
-- name: "Remove IF NOT EXISTS from create database command"
-  replace:
-    path: /etc/influxdb/fluo_metrics_setup.txt
-    regexp: 'IF NOT EXISTS '
 - name: "create data dir"
   file: path={{ default_data_dirs[0] }}/influxdb state=directory owner=influxdb group=influxdb
 - name: "ensure influxdb is running (and enable it at boot)"
