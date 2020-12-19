@@ -16,4 +16,4 @@
 #
 
 influxdb_rpm: influxdb-1.8.3.x86_64.rpm
-influxdb_checksum: "sha512:63b09f640e88e2b3dfa4917f7feeef5d0daf29a7ae9e3cc158ab3ff2aecf6f5a73671eb1a95cc77befaff6358e70329e58194f3c01acf805d1ae73efce165dd8"
+influxdb_checksum: "sha512:4c0557c24e5083e9d94d49cfad496f45421bb50aacf75737ca6bff36c8ef276af884c5419b5cc74e4fa1e8062e6bee18af53e3650eaa8a6ecd656346151ea87c"
