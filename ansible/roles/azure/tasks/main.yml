@@ -22,7 +22,7 @@
     quiet: yes
     that: ansible_version.full is version('2.9.0', '>=')
     fail_msg: "Ansible 2.9 or above is required for using Azure ADLS Gen2 in Muchos.
-    Update it using pip install --upgrade ansible[azure]"
+    Update it using pip install --upgrade ansible[azure]==2.9.13"
   when: use_adlsg2
 
 - import_tasks: create_vmss.yml

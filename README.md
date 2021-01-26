@@ -71,7 +71,7 @@ sudo yum install azure-cli-2.0.69-1.el7.x86_64.rpm
 * An Azure account with permissions to either use an existing or create new Resource Groups, Virtual Networks and Subnets
 * A machine which can connect to securely deploy the cluster in Azure.
 * Install [Ansible for Azure](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/ansible-install-configure) within
-  the Python virtual environment by using `pip install ansible[azure]`
+  the Python virtual environment by using `pip install ansible[azure]==2.9.13`
 
 When running Muchos under Ubuntu 18.04, checkout these [tips](docs/azure-ubuntu-1804.md).
 
