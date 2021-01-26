@@ -14,7 +14,7 @@ the following steps can get you on your way.
 # python-pip and pip were installed and used, those would go against Python 2
 # and would not work.
 sudo apt install python3-pip
-sudo pip3 install ansible[azure]
+sudo pip3 install ansible[azure]==2.9.13
 ```
 
 A virtual python environment is not needed in Ubuntu.  The instructions that
