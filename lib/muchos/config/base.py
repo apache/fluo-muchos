@@ -635,3 +635,8 @@ class BaseConfig(ConfigParser, metaclass=ABCMeta):
         except ValueError:
             return default
         return val
+
+    @ansible_host_var
+    def master_manager(self):
+        accumulo_version = self.get("general", "accumulo_version")
+        return "manager" if accumulo_version >= '2.1.0' else "master"
