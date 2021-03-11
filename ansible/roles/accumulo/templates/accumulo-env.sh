@@ -79,7 +79,7 @@ JAVA_OPTS=("${ACCUMULO_JAVA_OPTS[@]}"
   "-Daccumulo.native.lib.path=${lib}/native")
 
 case "$cmd" in
-  master)  JAVA_OPTS=("${JAVA_OPTS[@]}" '-Xmx512m' '-Xms512m') ;;
+  {{ master_manager }})  JAVA_OPTS=("${JAVA_OPTS[@]}" '-Xmx512m' '-Xms512m') ;;
   monitor) JAVA_OPTS=("${JAVA_OPTS[@]}" '-Xmx256m' '-Xms256m') ;;
   gc)      JAVA_OPTS=("${JAVA_OPTS[@]}" '-Xmx256m' '-Xms256m') ;;
   tserver) JAVA_OPTS=("${JAVA_OPTS[@]}" '-Xmx{{ accumulo_tserv_mem }}' '-Xms{{ accumulo_tserv_mem }}') ;;
@@ -99,7 +99,7 @@ JAVA_OPTS=("${JAVA_OPTS[@]}"
 
 case "$cmd" in
 {% if accumulo_version is version('2.1.0','>=') %}
-  monitor|gc|master|tserver|tracer)
+  monitor|gc|manager|tserver|tracer)
     JAVA_OPTS=("${JAVA_OPTS[@]}" "-Dlog4j.configurationFile=log4j2-service.properties")
     ;;
 {% else %}
