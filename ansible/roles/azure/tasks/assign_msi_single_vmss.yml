@@ -1,5 +1,4 @@
 ---
-
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -17,20 +16,15 @@
 # limitations under the License.
 #
 
-- name: ensure Ansible version is >= 2.9 if ADLS Gen2 is to be used
-  assert:
-    quiet: yes
-    that: ansible_version.full is version('2.9.0', '>=')
-    fail_msg: "Ansible 2.9 or above is required for using Azure ADLS Gen2 in Muchos.
-    Update it using pip install --upgrade ansible[azure]==2.9.13"
-  when: use_adlsg2
-
-- import_tasks: create_common_resources.yml
-- import_tasks: create_adlsgen2.yml
-  when: use_adlsg2
-- import_tasks: create_optional_proxy.yml
-- import_tasks: create_vmss.yml
-- import_tasks: assign_msi_single_vmss.yml
-  when: use_adlsg2
-- import_tasks: create_log_analytics_ws.yml
-  when: az_oms_integration_needed and (az_logs_id is not defined or (not az_logs_id) or az_logs_id == None)
+- name: Assign User assigned Identity to Single VMSS
+  azure_rm_resource:
+    resource_group: "{{ resource_group }}"
+    provider: Compute
+    resource_type: virtualMachineScaleSets
+    resource_name: "{{ vmss_name }}"
+    api_version: '2019-03-01'
+    body:
+     location: "{{ location }}"
+     identity:
+       type: UserAssigned
+       userAssignedIdentities: "{{ UserAssignedIdentityArr|join('') }}"
