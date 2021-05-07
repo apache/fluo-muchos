@@ -223,15 +223,3 @@
     regexp: '^azure_client_id\s*=\s*|^[#]azure_client_id\s*=\s*'
     line: "azure_client_id = {{ UserAssignedIdentityInfo.response|map(attribute='properties')|map(attribute='clientId')|list|join('') }}"
 
-- name: Assign User Assigned Identity to VMSS
-  azure_rm_resource:
-    resource_group: "{{ resource_group }}"
-    provider: Compute
-    resource_type: virtualMachineScaleSets
-    resource_name: "{{ vmss_name }}"
-    api_version: '2019-03-01'
-    body:
-     location: "{{ location }}"
-     identity:
-       type: UserAssigned
-       userAssignedIdentities: "{{ UserAssignedIdentityArr|join('') }}"

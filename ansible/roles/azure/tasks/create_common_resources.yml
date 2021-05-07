@@ -1,0 +1,65 @@
+---
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+#
+# These Ansible tasks only run on the client machine where Muchos runs
+# At a high level, the various sections in this file do the following:
+# 1. Create (if not already existing): an Azure resource group, virtual network / subnet
+# 2. Optionally (if the user specified) create a VM and related resources to use as a proxy host
+# 3. Create the Azure VMSS to support the nodes for use with Muchos
+# 4. Automatically populate the hosts file and associated [nodes] section in muchos.props
+#
+# SECTION 1: Create Azure RG, network and subnet
+#
+- name: Create a resource group
+  azure_rm_resourcegroup:
+    name: "{{ resource_group }}"
+    location: "{{ location }}"
+    tags:
+        deployment_type: muchos
+        application: accumulo
+
+- name: Ensure that the resource group is available
+  azure_rm_resourcegroup_info:
+    name: "{{ resource_group }}"
+  retries: 5
+  delay: 3
+  register: resource_group_facts
+  until: resource_group_facts.resourcegroups is defined and resource_group_facts.resourcegroups|map(attribute='name')|join('') is defined and resource_group_facts.resourcegroups|map(attribute='properties')|map(attribute='provisioningState')|join('') == "Succeeded"
+
+- debug:
+   msg: "Name of resource group created: {{ resource_group_facts.resourcegroups|map(attribute='name')|join('') }}"
+
+- debug:
+   msg: "Provisioning state of {{ resource_group }} is {{ resource_group_facts.resourcegroups|map(attribute='properties')|map(attribute='provisioningState')|join('') }}"
+
+- name: Create a virtual network
+  azure_rm_virtualnetwork:
+    resource_group: "{{ resource_group }}"
+    name: "{{ vnet }}"
+    address_prefixes_cidr:
+        - "{{ vnet_cidr }}"
+    tags:
+        deployment_type: muchos
+        application: accumulo
+
+- name: Create a subnet
+  azure_rm_subnet:
+    resource_group: "{{ resource_group }}"
+    virtual_network_name: "{{ vnet }}"
+    name: "{{ subnet }}"
+    address_prefix_cidr: "{{ subnet_cidr }}"
