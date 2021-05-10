@@ -128,3 +128,136 @@ class VmssCluster(ExistingCluster):
         if v.lower() in ("false", "no"):
             return False
         return v
+
+    # For Azure clusters this method creates Ansible group variables which
+    # allow overriding the "global" host or play variables with group specific
+    # variables. Because Ansible group variables override host variables this
+    # is a very powerful feature to support per-group specialization of
+    # configuration. Currently this is used to define the following:
+    #
+    # 1. Variables for different perf profiles for different groups of hosts
+    #    This capability allows specifying different settings for clusters
+    #    which have heterogenous hardware - RAM especially
+    #
+    # 2. Different mount roots for different sets of hosts, with a fallback to
+    #    using the global mount_root defined in the Ansible hosts file
+    #
+    # 3. Different worker_data_dirs and default_data_dirs for specific groups
+    #    of hosts.
+    #
+    # 4. Different Azure disk path and disk name pattern for specific groups
+    #    of hosts.
+    def add_specialized_configs(self, hosts_file):
+        if self.config.use_multiple_vmss():
+            vmss_hosts = open(
+                path.join(self.config.deploy_path, "conf/azure_vmss_to_hosts.txt"),  # noqa: E501
+                "r",
+            )
+            print("\n", file=hosts_file)
+            for line in vmss_hosts:
+                print(line.rstrip("\n"), file=hosts_file)
+
+            for curr_vmss in self.config.azure_multiple_vmss_vars["vars_list"]:
+                vmss_group_name = (
+                    self.config.cluster_name + "-" + curr_vmss["name_suffix"]
+                )
+                profile = curr_vmss["perf_profile"]
+
+                with open(
+                    path.join(
+                        self.config.deploy_path,
+                        "ansible/group_vars/"
+                        + vmss_group_name.replace("-", "_"),
+                    ),
+                    "w",
+                ) as vmss_file:
+                    for (name, value) in self.config.items(profile):
+                        print("{0}: {1}".format(name, value), file=vmss_file)
+
+                    # use VMSS-specific mount root if one is defined or
+                    # the global mount root if there is no VMSS-specific value
+                    curr_mount_root = curr_vmss.get(
+                        "mount_root", self.config.mount_root()
+                    )
+
+                    # write the mount root out to the per-VMSS group vars
+                    print(
+                        "{0}: {1}".format("mount_root", curr_mount_root),
+                        file=vmss_file,
+                    )
+
+                    # also include per-VMSS worker_data_dirs
+                    curr_worker_dirs = self.config.data_dirs_internal(
+                        "worker",
+                        curr_vmss["data_disk_count"],
+                        curr_mount_root,
+                        curr_vmss["sku"],
+                    )
+
+                    print(
+                        "{0}: {1}".format(
+                            "worker_data_dirs", curr_worker_dirs,
+                        ),
+                        file=vmss_file,
+                    )
+
+                    # per-VMSS default_data_dirs
+                    curr_default_dirs = self.config.data_dirs_internal(
+                        "default",
+                        curr_vmss["data_disk_count"],
+                        curr_mount_root,
+                        curr_vmss["sku"],
+                    )
+
+                    print(
+                        "{0}: {1}".format(
+                            "default_data_dirs", curr_default_dirs,
+                        ),
+                        file=vmss_file,
+                    )
+
+                    # also write out per-VMSS disk path and pattern
+                    # using the global value from muchos.props as default
+                    # if the VMSS does not define a custom value
+                    print(
+                        "{0}: {1}".format(
+                            "azure_disk_device_path",
+                            curr_vmss.get(
+                                "azure_disk_device_path",
+                                self.config.azure_disk_device_path(),
+                            ),
+                        ),
+                        file=vmss_file,
+                    )
+
+                    print(
+                        "{0}: {1}".format(
+                            "azure_disk_device_pattern",
+                            curr_vmss.get(
+                                "azure_disk_device_pattern",
+                                self.config.azure_disk_device_pattern(),
+                            ),
+                        ),
+                        file=vmss_file,
+                    )
+
+                    # these nested loops are a tight (if slightly less
+                    # readable way) of creating the various directory ordinals
+                    for dirtype in ["default", "worker"]:
+                        for ordinal in range(3):
+                            print(
+                                "{0}: {1}".format(
+                                    "{0}dir_ordinal{1}".format(
+                                        dirtype, ordinal
+                                    ),
+                                    0
+                                    if len(
+                                        curr_default_dirs
+                                        if dirtype == "default"
+                                        else curr_worker_dirs
+                                    )
+                                    < ordinal + 1
+                                    else ordinal,
+                                ),
+                                file=vmss_file,
+                            )

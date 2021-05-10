@@ -2,3 +2,5 @@
 /hosts/*
 /keys
 /user_data
+/azure_vmss_to_hosts.txt
+/azure_multiple_vmss_vars.yml

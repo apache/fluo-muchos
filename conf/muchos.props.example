@@ -114,6 +114,8 @@ vnet_cidr = 10.0.0.0/8
 subnet = subnet1
 # The CIDR prefix used for the single subnet within the virtual network.
 subnet_cidr = 10.1.0.0/16
+#Optional. If set to True, will create multiple VMSS based on multiple_vmss_vars.yml
+use_multiple_vmss = False
 # Azure image reference defined as a pipe-delimited string in the format offer|publisher|sku|version|
 # Please refer 'Launching an Azure cluster' section of the README before making changes 
 azure_image_reference = CentOS|OpenLogic|7.5|latest|
