@@ -150,7 +150,10 @@ class VmssCluster(ExistingCluster):
     def add_specialized_configs(self, hosts_file):
         if self.config.use_multiple_vmss():
             vmss_hosts = open(
-                path.join(self.config.deploy_path, "conf/azure_vmss_to_hosts.txt"),  # noqa: E501
+                path.join(
+                    self.config.deploy_path,
+                    "conf/azure_vmss_to_hosts.conf"
+                ),
                 "r",
             )
             print("\n", file=hosts_file)

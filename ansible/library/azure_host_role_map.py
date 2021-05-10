@@ -75,7 +75,7 @@ def main():
     label_lists = [label(*v) for k, v in label_tuples.items()]
     result_string = str(stringify(label_lists, hdfs_ns_tuples))
 
-    vmss_file = open(join(deploy_path, "conf/azure_vmss_to_hosts.txt"), "w")
+    vmss_file = open(join(deploy_path, "conf/azure_vmss_to_hosts.conf"), "w")
     for key in hd:
         vmss_file.write("[" + key.replace("-", "_") + "]\n")
         for value in hd[key]:
