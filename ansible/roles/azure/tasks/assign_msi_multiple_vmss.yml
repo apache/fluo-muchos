@@ -1,0 +1,40 @@
+---
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+#
+# These Ansible tasks only run on the client machine where Muchos runs
+# At a high level, the various sections in this file do the following:
+# 1. Create (if not already existing): an Azure resource group, virtual network / subnet
+# 2. Optionally (if the user specified) create a VM and related resources to use as a proxy host
+# 3. Create the Azure VMSS to support the nodes for use with Muchos
+# 4. Automatically populate the hosts file and associated [nodes] section in muchos.props
+#
+
+- name: Assign User assigned Identity to Multiple VMSS
+  azure_rm_resource:
+    resource_group: "{{ resource_group }}"
+    provider: Compute
+    resource_type: virtualMachineScaleSets
+    resource_name: "{{ vmss_name }}-{{ item.name_suffix }}"
+    api_version: '2019-03-01'
+    body:
+     location: "{{ location }}"
+     identity:
+       type: UserAssigned
+       userAssignedIdentities: "{{ UserAssignedIdentityArr|join('') }}"
+  loop:
+     "{{ azure_multiple_vmss_vars.vars_list }}"

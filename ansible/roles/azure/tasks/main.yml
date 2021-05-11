@@ -30,7 +30,12 @@
   when: use_adlsg2
 - import_tasks: create_optional_proxy.yml
 - import_tasks: create_vmss.yml
+  when: use_multiple_vmss is not defined or not use_multiple_vmss
 - import_tasks: assign_msi_single_vmss.yml
-  when: use_adlsg2
+  when: (use_multiple_vmss is not defined or not use_multiple_vmss) and use_adlsg2
+- import_tasks: create_multiple_vmss.yml
+  when: use_multiple_vmss
+- import_tasks: assign_msi_multiple_vmss.yml
+  when: use_multiple_vmss and use_adlsg2
 - import_tasks: create_log_analytics_ws.yml
   when: az_oms_integration_needed and (az_logs_id is not defined or (not az_logs_id) or az_logs_id == None)

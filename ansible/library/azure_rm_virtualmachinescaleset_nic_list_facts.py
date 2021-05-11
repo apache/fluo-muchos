@@ -52,9 +52,6 @@ options:
 extends_documentation_fragment:
     - azure
 
-author:
-    - "Min Pae (@sputnik13)"
-
 '''
 
 EXAMPLES = '''

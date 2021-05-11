@@ -1,0 +1,228 @@
+---
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+#
+# These Ansible tasks only run on the client machine where Muchos runs
+# At a high level, the various sections in this file do the following:
+# 1. Create (if not already existing): an Azure resource group, virtual network / subnet
+# 2. Optionally (if the user specified) create a VM and related resources to use as a proxy host
+# 3. Create the Azure VMSS to support the nodes for use with Muchos
+# 4. Automatically populate the hosts file and associated [nodes] section in muchos.props
+#
+# For 1 & 2 it uses create_common_resources.yml & create_optional_proxy.yml
+
+- name: Include azure_multiple_vmss_vars.yml
+  include_vars:
+    file: "{{ deploy_path }}/conf/azure_multiple_vmss_vars.yml"
+    name: azure_multiple_vmss_vars
+
+- name: Create Scale Set
+  azure_rm_virtualmachinescaleset:
+    resource_group: "{{ resource_group }}"
+    location: "{{ location }}"
+    name: "{{ vmss_name }}-{{ item.name_suffix }}"
+    vm_size: "{{ item.sku }}"
+    admin_username: "{{ admin_username }}"
+    ssh_password_enabled: false
+    ssh_public_keys:
+      - path: /home/{{ admin_username }}/.ssh/authorized_keys
+        key_data: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+    capacity: "{{ item.capacity }}"
+    single_placement_group: "{{ False if item.capacity > 100 else omit }}"
+    virtual_network_name: "{{ vnet }}"
+    subnet_name: "{{ subnet }}"
+    upgrade_policy: Manual
+    tier: Standard
+    managed_disk_type: "{{ osdisk_sku }}"
+    os_disk_caching: ReadWrite
+    enable_accelerated_networking: "{{ accnet_capable }}"
+    image:
+      offer: "{{ image_offer if image_offer else omit }}"
+      publisher: "{{ image_publisher if image_publisher else omit }}"
+      sku:  "{{ image_sku if image_sku else omit }}"
+      version:  "{{ image_version if image_version else omit }}"
+      id: "{{ image_id if image_id else omit }}"
+    data_disks: |
+      {%- set data_disks = [] -%}
+      {%- for lun in range(item.data_disk_count) -%}
+        {%- set _ = data_disks.append({'lun': lun, 'disk_size_gb': item.data_disk_size_gb, 'managed_disk_type': item.disk_sku }) -%}
+      {%- endfor -%}
+      {{ data_disks }}
+  with_items:
+    - "{{ azure_multiple_vmss_vars.vars_list }}"
+  vars:
+  - image_offer: "{{ azure_image_reference.split('|')[0] }}"
+  - image_publisher: "{{ azure_image_reference.split('|')[1] }}"
+  - image_sku: "{{ azure_image_reference.split('|')[2] }}"
+  - image_version: "{{ azure_image_reference.split('|')[3] }}"
+  - image_id: "{{ azure_image_reference.split('|')[4] }}"
+  - accnet_capable: "{{ True if item.sku in accnet_capable_skus else False }}"
+  - osdisk_sku: "{{ 'Premium_LRS' if item.sku in premiumio_capable_skus else 'Standard_LRS' }}"
+  register: _create_clusters
+  async: 600
+  poll: 0
+  tags: create_multiple_vmss
+
+- name: Wait
+  async_status:
+    jid: "{{ item.ansible_job_id }}"
+  register: _jobs
+  until: _jobs.finished
+  delay: 15
+  retries: 300
+  with_items: "{{ _create_clusters.results }}"
+
+- name: Get VMSS instances
+  azure_rm_virtualmachinescalesetinstance_info:
+    resource_group: "{{ resource_group }}"
+    vmss_name: "{{ vmss_name }}-{{ item.name_suffix }}"
+  register: _vmss_instances
+  with_items:
+    - "{{ azure_multiple_vmss_vars.vars_list }}"
+  async: 600
+  poll: 0
+
+- name: Get VMSS nic list
+  azure_rm_virtualmachinescaleset_nic_list_facts:
+    resource_group: "{{ resource_group }}"
+    vmss_name: "{{ vmss_name }}-{{ item.name_suffix }}"
+  register: _vmss_nic_list
+  with_items:
+    - "{{ azure_multiple_vmss_vars.vars_list }}"
+  async: 600
+  poll: 0
+
+- name: Wait for VMSS instance list operations
+  async_status:
+    jid: "{{ item.ansible_job_id }}"
+  register: vmss_instances
+  until: vmss_instances.finished
+  delay: 15
+  retries: 300
+  with_items: "{{ _vmss_instances.results }}"
+
+- name: Wait for NIC list operations
+  async_status:
+    jid: "{{ item.ansible_job_id }}"
+  register: vmss_nic_list
+  until: vmss_nic_list.finished
+  delay: 15
+  retries: 300
+  with_items: "{{ _vmss_nic_list.results }}"
+
+- name: Get VM hostname to IP mapping
+  set_fact:
+    hostname_ip_pairs: |
+      {%- set vmname_ips = [] -%}
+      {%- if azure_proxy_host is defined and azure_proxy_host -%}
+      {%- set _ = vmname_ips.append({'name': azure_proxy_host, 'ip': azure_proxy_public_ip.state.ip_address }) -%}
+      {%- endif -%}
+      {%- set vmid_names = {} -%}
+      {%- for vmss in vmss_instances.results -%}
+      {%- for instance in vmss.instances -%}
+      {%- set _ = vmid_names.__setitem__(instance.id, instance.name.replace('_','-')) -%}
+      {%- endfor -%}
+      {%- endfor -%}
+      {%- set vmid_ips = {} -%}
+      {%- for vmss in vmss_nic_list.results -%}
+      {%- for interface in vmss.networkinterfaces -%}
+      {%- if interface.virtualMachine is defined -%}
+      {%- set _ = vmid_ips.__setitem__(interface.virtualMachine.id, interface.ipConfigurations[0].privateIPAddress) -%}
+      {%- endif -%}
+      {%- endfor -%}
+      {%- endfor -%}
+      {%- for vmid in vmid_names -%}
+      {%- set _ = vmname_ips.append({'name': vmid_names[vmid], 'ip': vmid_ips[vmid]}) -%}
+      {%- endfor -%}
+      {{ vmname_ips }}
+
+- name: Ensures hosts sub-dir exists
+  file:
+     path: "{{ deploy_path }}/conf/hosts/"
+     state: directory
+     recurse: yes
+
+- name: Ensures host_vars sub-dir exists
+  file:
+     path: "{{ deploy_path }}/ansible/host_vars/"
+     state: directory
+     recurse: yes
+
+- name: Write hosts file
+  template:
+    src: hostname_ip_mappings.j2
+    dest: "{{ deploy_path }}/conf/hosts/{{ vmss_name }}"
+    mode: 0644
+
+- name: Get vmss to host map
+  set_fact:
+    vmss_host_pairs: |
+      {%- set vmss_host = [] -%}
+      {%- for vmss in vmss_instances.results -%}
+      {%- for instance in vmss.instances -%}
+      {%- set _ = vmss_host.append({'key': vmss.invocation.module_args.vmss_name, 'value': instance.name.replace('_','-')}) -%}
+      {%- endfor -%}
+      {%- endfor -%}
+      {{ vmss_host }}
+
+- name: Clear section
+  ini_file:
+    path: "{{ deploy_path }}/conf/muchos.props"
+    section: "nodes"
+    state: absent
+
+- name: Recreate section
+  ini_file:
+    path: "{{ deploy_path }}/conf/muchos.props"
+    section: "nodes"
+    option: "#host0"
+    value: "service"
+    state: present
+
+- name: add azure proxy host
+  lineinfile:
+    path: "{{ deploy_path }}/conf/muchos.props"
+    line: "{{ azure_proxy_host }} = client"
+  when: azure_proxy_host is defined and azure_proxy_host and azure_proxy_host != None
+
+- name: Get host-role assignments
+  azure_host_role_map:
+    hosts: "{{ vmss_host_pairs }}"
+    vars_list: "{{ azure_multiple_vmss_vars }}"
+    cluster_name: "{{ vmss_name }}"
+  register: assignments
+
+- name: Write role assignments to muchos.props
+  lineinfile:
+    path: "{{ deploy_path }}/conf/muchos.props"
+    line: "{{ assignments.result }}"
+
+- name: Change proxy hostname to azure proxy host in muchos.props
+  lineinfile:
+    path: "{{ deploy_path }}/conf/muchos.props"
+    regexp: '^proxy_hostname\s*=\s*'
+    line: "proxy_hostname = {{ azure_proxy_host }}"
+  when: azure_proxy_host is defined and azure_proxy_host and azure_proxy_host != None
+
+- name: Change proxy hostname to first node in vmss in muchos.props
+  lineinfile:
+    path: "{{ deploy_path }}/conf/muchos.props"
+    regexp: '^proxy_hostname\s*=\s*'
+    line: "proxy_hostname = {{ vmss_host_pairs[0].value }}"
+  when: not (azure_proxy_host is defined and azure_proxy_host and azure_proxy_host != None)
+
+

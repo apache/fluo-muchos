@@ -19,6 +19,7 @@ from sys import exit
 from .base import BaseConfig
 from .decorators import ansible_host_var, is_valid, default
 from .validators import is_type, is_in
+from yaml import load, FullLoader
 
 
 class AzureDeployConfig(BaseConfig):
@@ -39,6 +40,15 @@ class AzureDeployConfig(BaseConfig):
             templates_path,
             cluster_name,
         )
+
+        # load azure_multiple_vmss_vars.yml
+        if self.use_multiple_vmss():
+            with open(
+                "conf/azure_multiple_vmss_vars.yml"
+            ) as azure_multiple_vmss_vars_file:
+                self.azure_multiple_vmss_vars = load(
+                    azure_multiple_vmss_vars_file.read(), Loader=FullLoader
+                )
 
     def verify_config(self, action):
         self._verify_config(action)
@@ -189,3 +199,9 @@ class AzureDeployConfig(BaseConfig):
     @default(None)
     def instance_volumes_adls(self):
         return self.get("azure", "instance_volumes_adls")
+
+    @ansible_host_var
+    @default(False)
+    @is_valid(is_in([True, False]))
+    def use_multiple_vmss(self):
+        return self.getboolean("azure", "use_multiple_vmss")

@@ -76,6 +76,23 @@
         name: "{{ vmss_name }}"
         remove_on_absent: all
         state: absent
+      when: use_multiple_vmss is not defined or not use_multiple_vmss
+
+    - name: Include azure_multiple_vmss_vars.yml definition
+      include_vars:
+        file: "{{ deploy_path }}/conf/azure_multiple_vmss_vars.yml"
+        name: azure_multiple_vmss_vars
+      when: use_multiple_vmss
+
+    - name: Delete VM Scale Sets
+      azure_rm_virtualmachinescaleset:
+        resource_group: "{{ resource_group }}"
+        name: "{{ vmss_name }}-{{ item.name_suffix }}"
+        remove_on_absent: all
+        state: absent
+      with_items:
+        - "{{ azure_multiple_vmss_vars.vars_list }}"
+      when: use_multiple_vmss
 
     - name: Delete azure proxy virtual machine if one was created
       azure_rm_virtualmachine:

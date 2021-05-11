@@ -168,6 +168,8 @@ Under the `azure` section, edit following values as per your configuration:
 * `vnet` to provide the name of the VNET that your cluster nodes should use. A new VNET with this name will be
   created if it doesn't already exist
 * `subnet` to provide a name for the subnet within which the cluster resources will be deployed
+* `use_multiple_vmss` allows you to configure VMs with different CPU, memory, disks for leaders and workers. To 
+  know more about this feature, please follow the [doc](docs/azure-multiple-vmss.md).   
 * `azure_image_reference` allows you to specify the CentOS image SKU in the format as shown below. To configure 
   CentOS 8.x, please follow [these steps](docs/azure-image-reference.md).
   ```bash
