@@ -20,6 +20,7 @@ from .base import BaseConfig
 from .decorators import ansible_host_var, is_valid, default
 from .validators import is_type, is_in
 from yaml import load, FullLoader
+from .azurevalidations import validate_azure_configs
 
 
 class AzureDeployConfig(BaseConfig):
@@ -52,6 +53,10 @@ class AzureDeployConfig(BaseConfig):
 
     def verify_config(self, action):
         self._verify_config(action)
+
+        results = validate_azure_configs(self, action)
+        if len(results) > 0:
+            exit("ERROR - config failed validation {}".format(results))
 
         proxy = self.get("general", "proxy_hostname")
         cluster_type = self.get("general", "cluster_type")

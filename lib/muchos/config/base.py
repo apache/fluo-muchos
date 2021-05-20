@@ -21,6 +21,7 @@ from configparser import ConfigParser
 from distutils.version import StrictVersion
 from os.path import isfile
 from sys import exit
+from traceback import format_exc
 from .decorators import (
     ansible_host_var,
     ansible_play_var,
@@ -640,3 +641,30 @@ class BaseConfig(ConfigParser, metaclass=ABCMeta):
     def master_manager(self):
         accumulo_version = self.get("general", "accumulo_version")
         return "manager" if accumulo_version >= '2.1.0' else "master"
+
+
+# ConfigValidator is a helper to wrap validation functions.
+# The failure_message is returned if validation fails, else
+# None is returned
+class ConfigValidator(object):
+    def __init__(self, validation_func, failure_message=None):
+        self.validation_func = validation_func
+        self.failure_message = failure_message
+
+    def __call__(self, *args, **kwargs):
+        try:
+            result = self.validation_func(*args, **kwargs)
+            if isinstance(result, str):
+                return (
+                    result
+                    if self.failure_message is None
+                    else "{}: {}".format(self.failure_message, result)
+                )
+
+            if not result:
+                return self.failure_message
+        except Exception as e:
+            return "{}: unexpected exception during validation - {}".format(
+                self.failure_message, format_exc(e)
+            )
+        return None
