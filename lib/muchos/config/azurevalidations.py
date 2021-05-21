@@ -67,7 +67,9 @@ AZURE_VALIDATIONS = {
                 [
                     vmss.get("sku")
                     in {s.name: s for s in config.vm_skus_for_location}
-                    for vmss in config.azure_multiple_vmss_vars.get("vars_list", [])
+                    for vmss in config.azure_multiple_vmss_vars.get(
+                        "vars_list", []
+                    )
                 ]
             ),
             "when use_multiple_vmss == True, any VMSS with sku "
@@ -89,7 +91,9 @@ AZURE_VALIDATIONS = {
                 [
                     vmss.get("disk_sku") in
                     ["Standard_LRS",  "StandardSSD_LRS", "Premium_LRS"]
-                    for vmss in config.azure_multiple_vmss_vars.get("vars_list", [])
+                    for vmss in config.azure_multiple_vmss_vars.get(
+                        "vars_list", []
+                    )
                 ]
             ),
             "when use_multiple_vmss == True, any VMSS with disk_sku must "
@@ -114,7 +118,9 @@ AZURE_VALIDATIONS = {
                     vmss.get("sku") in config.premiumio_capable_skus()
                     if vmss.get("disk_sku") == "Premium_LRS"
                     else True
-                    for vmss in config.azure_multiple_vmss_vars.get("vars_list", [])
+                    for vmss in config.azure_multiple_vmss_vars.get(
+                        "vars_list", []
+                    )
                 ]
             ),
             "when use_multiple_vmss == True, any VMSS set to use Premium "
@@ -137,13 +143,16 @@ AZURE_VALIDATIONS = {
                 [
                     vmss.get("data_disk_count")
                     <= config.max_data_disks_for_skus()[vmss.get("sku")]
-                    for vmss in config.azure_multiple_vmss_vars.get("vars_list", [])
+                    for vmss in config.azure_multiple_vmss_vars.get(
+                        "vars_list", []
+                    )
                 ]
             ),
             "when use_multiple_vmss == True, no VMSS can specify number of "
             "data disks exceeding the allowed limit for the respective VM SKU",
         ),
-        # in the multiple VMSS case, a azure_multiple_vmss_vars.yml should exist
+        # in the multiple VMSS case, a azure_multiple_vmss_vars.yml
+        # should exist
         ConfigValidator(
             lambda config, client: not config.getboolean(
                 "azure", "use_multiple_vmss"
@@ -157,12 +166,16 @@ AZURE_VALIDATIONS = {
             lambda config, client: not config.getboolean(
                 "azure", "use_multiple_vmss"
             )
-            or len(config.azure_multiple_vmss_vars.get("vars_list", []))
+            or len(config.azure_multiple_vmss_vars.get(
+                "vars_list", []
+            ))
             == len(
                 set(
                     [
                         v.get("name_suffix")
-                        for v in config.azure_multiple_vmss_vars.get("vars_list", [])
+                        for v in config.azure_multiple_vmss_vars.get(
+                            "vars_list", []
+                        )
                     ]
                 )
             ),
