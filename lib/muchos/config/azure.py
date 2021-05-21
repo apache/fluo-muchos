@@ -20,6 +20,8 @@ from .base import BaseConfig
 from .decorators import ansible_host_var, is_valid, default
 from .validators import is_type, is_in
 from yaml import load, FullLoader
+from azure.mgmt.compute import ComputeManagementClient
+from azure.common.client_factory import get_client_from_cli_profile
 from .azurevalidations import validate_azure_configs
 
 
@@ -40,6 +42,28 @@ class AzureDeployConfig(BaseConfig):
             checksums_path,
             templates_path,
             cluster_name,
+        )
+
+        # get VM SKU resources for this location. we have to use
+        # a specific API version to do this as this resource_skus
+        # list operation is not allowed in any other API versions
+        # which are available with the version of Azure SDK
+        # that ships with Ansible for Azure
+        skuclient = get_client_from_cli_profile(
+            ComputeManagementClient, api_version="2017-09-01"
+        )
+        self.vm_skus_for_location = list(
+            filter(
+                lambda s: s.resource_type == "virtualMachines"
+                and self.location() in s.locations,
+                skuclient.resource_skus.list(),
+            )
+        )
+
+        # switch to 2018-06-01 API which has support for other operations
+        # including VMSS checks
+        self.client = get_client_from_cli_profile(
+            ComputeManagementClient, api_version="2018-06-01"
         )
 
         # load azure_multiple_vmss_vars.yml
@@ -210,3 +234,77 @@ class AzureDeployConfig(BaseConfig):
     @is_valid(is_in([True, False]))
     def use_multiple_vmss(self):
         return self.getboolean("azure", "use_multiple_vmss")
+
+    @ansible_host_var
+    @default(None)
+    def resource_group(self):
+        return self.get("azure", "resource_group")
+
+    @ansible_host_var
+    @default(None)
+    def vnet(self):
+        return self.get("azure", "vnet")
+
+    @ansible_host_var
+    @default(None)
+    def vnet_cidr(self):
+        return self.get("azure", "vnet_cidr")
+
+    @ansible_host_var
+    @default(None)
+    def subnet(self):
+        return self.get("azure", "subnet")
+
+    @ansible_host_var
+    @default(None)
+    def subnet_cidr(self):
+        return self.get("azure", "subnet_cidr")
+
+    @ansible_host_var
+    @default(None)
+    def location(self):
+        return self.get("azure", "location")
+
+    @ansible_host_var
+    @default("Standard_LRS")
+    @is_valid(is_in(["Standard_LRS", "Premium_LRS", "StandardSSD_LRS"]))
+    def managed_disk_type(self):
+        return self.get("azure", "managed_disk_type")
+
+    @ansible_host_var
+    def premiumio_capable_skus(self):
+        return list(
+            map(
+                lambda r: r.name,
+                filter(
+                    lambda s: len(
+                        list(
+                            filter(
+                                lambda c: c.name == "PremiumIO"
+                                and c.value == "True",
+                                s.capabilities,
+                            )
+                        )
+                    )
+                    > 0,
+                    self.vm_skus_for_location,
+                ),
+            )
+        )
+
+    def max_data_disks_for_skus(self):
+        n = list(map(lambda r: r.name, self.vm_skus_for_location))
+        d = list(
+            map(
+                lambda s: int(
+                    next(
+                        filter(
+                            lambda c: c.name == "MaxDataDiskCount",
+                            s.capabilities,
+                        )
+                    ).value
+                ),
+                self.vm_skus_for_location,
+            )
+        )
+        return dict(zip(n, d))

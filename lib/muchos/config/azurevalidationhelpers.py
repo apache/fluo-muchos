@@ -29,7 +29,7 @@ def vmss_status_succeeded_if_exists(config, client):
         else:
             return vmss.provisioning_state == "Succeeded"
     else:
-        for vmss_config in config.multiple_vmss_vars.get("vars_list", []):
+        for vmss_config in config.azure_multiple_vmss_vars.get("vars_list", []):
             cluster_name = "{}-{}".format(
                 config.cluster_name, vmss_config.get("name_suffix", "")
             )
@@ -100,7 +100,7 @@ def vmss_cluster_has_appropriate_data_disk_count(config, client):
             disk_validation_errors,
         )
     else:
-        for vmss in config.multiple_vmss_vars.get("vars_list", []):
+        for vmss in config.azure_multiple_vmss_vars.get("vars_list", []):
             validate_disk_count(
                 "VMSS {}".format(vmss.get("name_suffix")),
                 vmss.get("data_disk_count", 0),
@@ -130,7 +130,7 @@ def vmss_exists(config, client):
         else:
             return True
     else:
-        for vmss_config in config.multiple_vmss_vars.get("vars_list", []):
+        for vmss_config in config.azure_multiple_vmss_vars.get("vars_list", []):
             cluster_name = "{}-{}".format(
                 config.cluster_name, vmss_config.get("name_suffix", "")
             )
