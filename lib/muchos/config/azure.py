@@ -20,8 +20,6 @@ from .base import BaseConfig
 from .decorators import ansible_host_var, is_valid, default
 from .validators import is_type, is_in
 from yaml import load, FullLoader
-from azure.mgmt.compute import ComputeManagementClient
-from azure.common.client_factory import get_client_from_cli_profile
 from .azurevalidations import validate_azure_configs
 
 
@@ -42,28 +40,6 @@ class AzureDeployConfig(BaseConfig):
             checksums_path,
             templates_path,
             cluster_name,
-        )
-
-        # get VM SKU resources for this location. we have to use
-        # a specific API version to do this as this resource_skus
-        # list operation is not allowed in any other API versions
-        # which are available with the version of Azure SDK
-        # that ships with Ansible for Azure
-        skuclient = get_client_from_cli_profile(
-            ComputeManagementClient, api_version="2017-09-01"
-        )
-        self.vm_skus_for_location = list(
-            filter(
-                lambda s: s.resource_type == "virtualMachines"
-                and self.location() in s.locations,
-                skuclient.resource_skus.list(),
-            )
-        )
-
-        # switch to 2018-06-01 API which has support for other operations
-        # including VMSS checks
-        self.client = get_client_from_cli_profile(
-            ComputeManagementClient, api_version="2018-06-01"
         )
 
         # load azure_multiple_vmss_vars.yml
@@ -153,6 +129,11 @@ class AzureDeployConfig(BaseConfig):
         return self.getint("azure", "data_disk_count")
 
     @ansible_host_var
+    @is_valid(is_type(int))
+    def disk_size_gb(self):
+        return self.getint("azure", "disk_size_gb")
+
+    @ansible_host_var
     @default("/dev/disk/azure/scsi1")
     def azure_disk_device_path(self):
         return self.get("azure", "azure_disk_device_path")
@@ -209,6 +190,26 @@ class AzureDeployConfig(BaseConfig):
     def use_adlsg2(self):
         return self.getboolean("azure", "use_adlsg2")
 
+    @ansible_host_var
+    @default("Standard_LRS")
+    @is_valid(
+        is_in(
+            [
+                "Standard_LRS",
+                "Standard_GRS",
+                "Standard_RAGRS",
+                "Standard_ZRS",
+                "Premium_LRS",
+            ]
+        )
+    )
+    def adls_storage_type(self):
+        return self.get("azure", "adls_storage_type")
+
+    @ansible_host_var
+    def user_assigned_identity(self):
+        return self.get("azure", "user_assigned_identity")
+
     @ansible_host_var(name="azure_tenant_id")
     @default(None)
     def azure_tenant_id(self):
@@ -224,6 +225,11 @@ class AzureDeployConfig(BaseConfig):
     def principal_id(self):
         return self.get("azure", "principal_id")
 
+    @ansible_host_var
+    @default(None)
+    def instance_volumes_input(self):
+        return self.get("azure", "instance_volumes_input")
+
     @ansible_host_var(name="instance_volumes_adls")
     @default(None)
     def instance_volumes_adls(self):
@@ -234,6 +240,11 @@ class AzureDeployConfig(BaseConfig):
     @is_valid(is_in([True, False]))
     def use_multiple_vmss(self):
         return self.getboolean("azure", "use_multiple_vmss")
+
+    @ansible_host_var
+    @is_valid(is_type(int))
+    def numnodes(self):
+        return self.getint("azure", "numnodes")
 
     @ansible_host_var
     @default(None)
@@ -266,10 +277,42 @@ class AzureDeployConfig(BaseConfig):
         return self.get("azure", "location")
 
     @ansible_host_var
+    @default("")
+    def azure_proxy_host(self):
+        return self.get("azure", "azure_proxy_host")
+
+    @ansible_host_var
+    @default(None)
+    def azure_proxy_host_vm_sku(self):
+        return self.get("azure", "azure_proxy_host_vm_sku")
+
+    @ansible_host_var
     @default("Standard_LRS")
     @is_valid(is_in(["Standard_LRS", "Premium_LRS", "StandardSSD_LRS"]))
     def managed_disk_type(self):
         return self.get("azure", "managed_disk_type")
+
+    @ansible_host_var
+    def accnet_capable_skus(self):
+        return list(
+            map(
+                lambda r: r.name,
+                filter(
+                    lambda s: len(
+                        list(
+                            filter(
+                                lambda c: c.name
+                                == "AcceleratedNetworkingEnabled"
+                                and c.value == "True",
+                                s.capabilities,
+                            )
+                        )
+                    )
+                    > 0,
+                    self.vm_skus_for_location,
+                ),
+            )
+        )
 
     @ansible_host_var
     def premiumio_capable_skus(self):

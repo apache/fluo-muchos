@@ -21,9 +21,33 @@ from .azurevalidationhelpers import (
     vmss_cluster_has_appropriate_data_disk_count,
     vmss_exists,
 )
+from azure.mgmt.compute import ComputeManagementClient
+from azure.common.client_factory import get_client_from_cli_profile
 
 
 def validate_azure_configs(config, action):
+    # get VM SKU resources for this location. we have to use
+    # a specific API version to do this as this resource_skus
+    # list operation is not allowed in any other API versions
+    # which are available with the version of Azure SDK
+    # that ships with Ansible for Azure
+    config.client = get_client_from_cli_profile(
+        ComputeManagementClient, api_version="2017-09-01"
+    )
+    config.vm_skus_for_location = list(
+        filter(
+            lambda s: s.resource_type == "virtualMachines"
+            and config.location() in s.locations,
+            config.client.resource_skus.list(),
+        )
+    )
+
+    # switch to 2018-06-01 API which has support for other operations
+    # including VMSS checks
+    config.client = get_client_from_cli_profile(
+        ComputeManagementClient, api_version="2018-06-01"
+    )
+
     validations = (
         AZURE_VALIDATIONS["common"] + AZURE_VALIDATIONS[action]
         if action in AZURE_VALIDATIONS

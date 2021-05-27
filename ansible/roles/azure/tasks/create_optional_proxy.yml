@@ -66,7 +66,7 @@
     name: "{{ azure_proxy_host }}"
     network_interface_names:
       - "{{ azure_proxy_host }}-nic"
-    vm_size: "{{ azure_proxy_host_vm_sku }}"
+    vm_size: Standard_D8s_v3
     admin_username: "{{ cluster_user }}"
     ssh_password_enabled: false
     ssh_public_keys:

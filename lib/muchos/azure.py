@@ -32,16 +32,10 @@ class VmssCluster(ExistingCluster):
 
     def launch(self):
         config = self.config
-        azure_config = dict(config.items("azure"))
-        azure_config["admin_username"] = config.get("general", "cluster_user")
-        azure_config["hdfs_ha"] = config.get("general", "hdfs_ha")
+        azure_config = config.ansible_host_vars()
         azure_config["vmss_name"] = config.cluster_name
-        azure_config["deploy_path"] = config.deploy_path
-        azure_config = {
-            k: VmssCluster._parse_config_value(v)
-            for k, v in azure_config.items()
-        }
-        subprocess.call(
+
+        retcode = subprocess.call(
             [
                 "ansible-playbook",
                 path.join(config.deploy_path, "ansible/azure.yml"),
@@ -49,6 +43,12 @@ class VmssCluster(ExistingCluster):
                 json.dumps(azure_config),
             ]
         )
+        if retcode != 0:
+            exit(
+                "ERROR - Command failed with return code of {0}".format(
+                    retcode
+                )
+            )
 
     def status(self):
         config = self.config
