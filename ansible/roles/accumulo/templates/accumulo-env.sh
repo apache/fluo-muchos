@@ -99,7 +99,7 @@ JAVA_OPTS=("${JAVA_OPTS[@]}"
 
 case "$cmd" in
 {% if accumulo_version is version('2.1.0','>=') %}
-  monitor|gc|manager|tserver|tracer)
+  monitor|gc|manager|tserver|tracer|compaction-coordinator|compactor)
     JAVA_OPTS=("${JAVA_OPTS[@]}" "-Dlog4j.configurationFile=log4j2-service.properties")
     ;;
 {% else %}
