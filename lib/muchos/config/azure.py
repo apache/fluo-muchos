@@ -80,14 +80,26 @@ class AzureDeployConfig(BaseConfig):
     def mount_root(self):
         return self.get("azure", "mount_root")
 
-    def data_dirs_common(self, nodeType):
+    def data_dirs_internal(
+        self,
+        nodeType,
+        num_disks=None,
+        mount_root_actual=None,
+        curr_vm_sku=None,
+    ):
         data_dirs = []
 
-        num_disks = self.data_disk_count()
+        num_disks = self.data_disk_count() if num_disks is None else num_disks
+        mount_root_actual = (
+            self.mount_root()
+            if mount_root_actual is None
+            else mount_root_actual
+        )
+        curr_vm_sku = self.vm_sku() if curr_vm_sku is None else curr_vm_sku
 
         # Check if using temp storage (non-NVME) for HDFS
-        if num_disks == 0 and self.mount_root() == "/mnt/resource":
-            data_dirs.append(self.mount_root())
+        if num_disks == 0 and mount_root_actual == "/mnt/resource":
+            data_dirs.append(mount_root_actual)
             return data_dirs
 
         # Check if using Lsv2 NVME temp storage for HDFS
@@ -100,17 +112,20 @@ class AzureDeployConfig(BaseConfig):
             "Standard_L80s_v2": 10,
         }
 
-        if num_disks == 0 and self.vm_sku() in lsv2_vm_disk_map.keys():
+        if num_disks == 0 and curr_vm_sku in lsv2_vm_disk_map.keys():
             # pretend that we have N data disks
             # in this case those are NVME temp disks
-            num_disks = lsv2_vm_disk_map[self.vm_sku()]
+            num_disks = lsv2_vm_disk_map[curr_vm_sku]
 
         # Persistent data disks attached to VMs
         range_var = num_disks + 1
         for diskNum in range(1, range_var):
-            data_dirs.append(self.mount_root() + str(diskNum))
+            data_dirs.append(mount_root_actual + str(diskNum))
 
         return data_dirs
+
+    def data_dirs_common(self, nodeType):
+        return self.data_dirs_internal(nodeType, None, None, None)
 
     def metrics_drive_ids(self):
         drive_ids = []

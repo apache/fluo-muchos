@@ -151,8 +151,7 @@ class VmssCluster(ExistingCluster):
         if self.config.use_multiple_vmss():
             vmss_hosts = open(
                 path.join(
-                    self.config.deploy_path,
-                    "conf/azure_vmss_to_hosts.conf"
+                    self.config.deploy_path, "conf/azure_vmss_to_hosts.conf"
                 ),
                 "r",
             )

@@ -72,21 +72,16 @@ AZURE_VALIDATIONS = {
         # Validate that the data disk configuration is appropriate
         # considering temp disk usage etc.
         ConfigValidator(vmss_cluster_has_appropriate_data_disk_count, None),
-        ConfigValidator(
-            lambda config, client: not config.getboolean(
-                "azure", "use_multiple_vmss"
-            )
-        ),
+
+        ConfigValidator(lambda config, client: not config.use_multiple_vmss()),
         # the VM SKU specified is not a valid Azure VM SKU
         ConfigValidator(
-            lambda config, client: config.get("azure", "vm_sku")
+            lambda config, client: config.vm_sku()
             in {s.name: s for s in config.vm_skus_for_location},
             "azure.vm_sku must be a valid VM SKU for the selected location",
         ),
         ConfigValidator(
-            lambda config, client: not config.getboolean(
-                "azure", "use_multiple_vmss"
-            )
+            lambda config, client: not config.use_multiple_vmss()
             or all(
                 [
                     vmss.get("sku")
@@ -102,19 +97,17 @@ AZURE_VALIDATIONS = {
         # managed_disk_type in
         # ['Standard_LRS', 'StandardSSD_LRS', Premium_LRS']
         ConfigValidator(
-            lambda config, client: config.get("azure", "managed_disk_type")
+            lambda config, client: config.managed_disk_type()
             in ["Standard_LRS", "StandardSSD_LRS", "Premium_LRS"],
             "managed_disk_type must be "
             "one of Standard_LRS, StandardSSD_LRS, or Premium_LRS",
         ),
         ConfigValidator(
-            lambda config, client: not config.getboolean(
-                "azure", "use_multiple_vmss"
-            )
+            lambda config, client: not config.use_multiple_vmss()
             or all(
                 [
-                    vmss.get("disk_sku") in
-                    ["Standard_LRS",  "StandardSSD_LRS", "Premium_LRS"]
+                    vmss.get("disk_sku")
+                    in ["Standard_LRS",  "StandardSSD_LRS", "Premium_LRS"]
                     for vmss in config.azure_multiple_vmss_vars.get(
                         "vars_list", []
                     )
@@ -125,18 +118,14 @@ AZURE_VALIDATIONS = {
         ),
         # Cannot specify Premium managed disks if VMSS SKU is / are not capable
         ConfigValidator(
-            lambda config, client: config.getboolean(
-                "azure", "use_multiple_vmss"
-            )
+            lambda config, client: config.use_multiple_vmss()
             or not config.managed_disk_type() == "Premium_LRS"
             or config.vm_sku() in config.premiumio_capable_skus(),
             "azure.vm_sku must be Premium I/O capable VM SKU "
             "in order to use Premium Managed Disks",
         ),
         ConfigValidator(
-            lambda config, client: not config.getboolean(
-                "azure", "use_multiple_vmss"
-            )
+            lambda config, client: not config.use_multiple_vmss()
             or all(
                 [
                     vmss.get("sku") in config.premiumio_capable_skus()
@@ -152,17 +141,13 @@ AZURE_VALIDATIONS = {
         ),
         # Data disk count specified cannot exceed MaxDataDisks for VM SKU
         ConfigValidator(
-            lambda config, client: config.getboolean(
-                "azure", "use_multiple_vmss"
-            )
+            lambda config, client: config.use_multiple_vmss()
             or config.data_disk_count()
             <= config.max_data_disks_for_skus()[config.vm_sku()],
             "Number of data disks specified exceeds allowed limit for VM SKU",
         ),
         ConfigValidator(
-            lambda config, client: not config.getboolean(
-                "azure", "use_multiple_vmss"
-            )
+            lambda config, client: not config.use_multiple_vmss()
             or all(
                 [
                     vmss.get("data_disk_count")
@@ -175,24 +160,18 @@ AZURE_VALIDATIONS = {
             "when use_multiple_vmss == True, no VMSS can specify number of "
             "data disks exceeding the allowed limit for the respective VM SKU",
         ),
-        # in the multiple VMSS case, a azure_multiple_vmss_vars.yml
-        # should exist
+        # in the multiple VMSS case, a azure_multiple_vmss_vars.yml file
+        # must be provided
         ConfigValidator(
-            lambda config, client: not config.getboolean(
-                "azure", "use_multiple_vmss"
-            )
+            lambda config, client: not config.use_multiple_vmss()
             or hasattr(config, "azure_multiple_vmss_vars"),
-            "when use_multiple_vmss == True, "
-            "conf/azure_multiple_vmss_vars.yml to exist",
+            "in the multiple VMSS case, an azure_multiple_vmss_vars.yml"
+            " file must be provided",
         ),
         # in the multiple VMSS case, each name suffix should be unique
         ConfigValidator(
-            lambda config, client: not config.getboolean(
-                "azure", "use_multiple_vmss"
-            )
-            or len(config.azure_multiple_vmss_vars.get(
-                "vars_list", []
-            ))
+            lambda config, client: not config.use_multiple_vmss()
+            or len(config.azure_multiple_vmss_vars.get("vars_list", []))
             == len(
                 set(
                     [
@@ -203,8 +182,8 @@ AZURE_VALIDATIONS = {
                     ]
                 )
             ),
-            "when use_multiple_vmss == True, "
-            "each name_suffix of a vmss must be unique",
+            "in the multiple VMSS case, each name suffix of a VMSS"
+            " must be unique",
         ),
         # ADLS Gen2 is only supported if Accumulo 2.x is used
         ConfigValidator(
@@ -213,7 +192,50 @@ AZURE_VALIDATIONS = {
             "ADLS Gen2 support requires Accumulo 2.x",
         ),
     ],
-    "launch": [],
+    "launch": [
+        # Fail when HDFS HA is NOT enabled and azure_multiple_vmss_vars.yml
+        # specifies assignments for HA service roles
+        ConfigValidator(
+            lambda config, client: not config.use_multiple_vmss()
+            or config.hdfs_ha()
+            or all(
+                (
+                    "journalnode" not in current_vmss["roles"]
+                    and "zkfc" not in current_vmss["roles"]
+                )
+                for current_vmss in config.azure_multiple_vmss_vars[
+                    "vars_list"
+                ]
+            ),
+            "HDFS HA is NOT enabled, but azure_multiple_vmss_vars.yml "
+            "specifies assignments for HA service roles",
+        ),
+        # Fail when HDFS HA is enabled and azure_multiple_vmss_vars.yml
+        # does NOT specify nodes with HA service roles
+        ConfigValidator(
+            lambda config, client: not config.use_multiple_vmss()
+            or not config.hdfs_ha()
+            or
+            # TODO implement a count based check for the below,
+            # do not just check existence of ZKFC and Journal Node roles
+            (
+                any(
+                    ("journalnode" in current_vmss["roles"])
+                    for current_vmss in config.azure_multiple_vmss_vars[
+                        "vars_list"
+                    ]
+                )
+                and any(
+                    ("zkfc" in current_vmss["roles"])
+                    for current_vmss in config.azure_multiple_vmss_vars[
+                        "vars_list"
+                    ]
+                )
+            ),
+            "HDFS HA is enabled, but azure_multiple_vmss_vars.yml does NOT"
+            " specify ZKFC and / or Journal Node service roles",
+        ),
+    ],
     "setup": [
         ConfigValidator(
             vmss_exists,

@@ -30,23 +30,6 @@
     file: "{{ deploy_path }}/conf/azure_multiple_vmss_vars.yml"
     name: azure_multiple_vmss_vars
 
-# Minimum check to ensure azure_multiple_vmss_vars.yml contains the right set of services
-- name: Fail when HA is not enabled and azure_multiple_vmss_vars.yml contains HA services
-  fail:
-    msg:  |
-          Incorrect roles in azure_multiple_vmss_vars.yml, 'journalnode' or 'zkfc' required only when HA is enabled.
-          Refer the VMSS definition in the example yaml file.
-  with_items: "{{ azure_multiple_vmss_vars.vars_list }}"
-  when: "('journalnode' in item.roles or 'zkfc' in item.roles) and not hdfs_ha"
-
-- name: Fail when HA is enabled and azure_multiple_vmss_vars.yml does not contain HA services
-  fail:
-    msg:  |
-          Incorrect roles in azure_multiple_vmss_vars.yml, 'journalnode' or 'zkfc' missing.
-          Refer the sample shown in the example yaml file.
-  with_items: "{{ azure_multiple_vmss_vars.vars_list }}"
-  when: "('journalnode' not in item.roles or 'zkfc' not in item.roles) and 'worker' not in item.roles and hdfs_ha"
-
 - name: Create Scale Set
   azure_rm_virtualmachinescaleset:
     resource_group: "{{ resource_group }}"

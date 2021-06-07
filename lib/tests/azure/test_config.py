@@ -123,3 +123,5 @@ def test_azure_cluster():
         ("worker3", "worker"),
         ("worker4", "worker"),
     ]
+
+    # TODO: add test cases for the validations

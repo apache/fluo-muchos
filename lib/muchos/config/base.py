@@ -639,7 +639,7 @@ class BaseConfig(ConfigParser, metaclass=ABCMeta):
     @ansible_host_var
     def master_manager(self):
         accumulo_version = self.get("general", "accumulo_version")
-        return "manager" if accumulo_version >= '2.1.0' else "master"
+        return "manager" if accumulo_version >= "2.1.0" else "master"
 
     @ansible_host_var(name="deploy_path")
     def muchos_deploy_path(self):
