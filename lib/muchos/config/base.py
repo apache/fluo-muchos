@@ -21,9 +21,11 @@ from configparser import ConfigParser
 from distutils.version import StrictVersion
 from os.path import isfile
 from sys import exit
+from traceback import format_exc
 from .decorators import (
     ansible_host_var,
     ansible_play_var,
+    default,
     get_ansible_vars,
     is_valid,
 )
@@ -69,7 +71,6 @@ _HOST_VAR_DEFAULTS = {
     "accumulo_version": None,
     "cluster_type": None,
     "cluster_group": None,
-    "cluster_user": None,
     "default_data_dirs": None,
     "download_software": None,
     "fluo_home": "'{{ install_dir }}/fluo-{{ fluo_version }}'",
@@ -83,7 +84,6 @@ _HOST_VAR_DEFAULTS = {
     "hadoop_version": None,
     "hadoop_major_version": "{{ hadoop_version.split('.')[0] }}",
     "hdfs_root": "hdfs://{{ nameservice_id }}",
-    "hdfs_ha": None,
     "nameservice_id": None,
     "num_tservers": 1,
     "install_dir": None,
@@ -639,4 +639,45 @@ class BaseConfig(ConfigParser, metaclass=ABCMeta):
     @ansible_host_var
     def master_manager(self):
         accumulo_version = self.get("general", "accumulo_version")
-        return "manager" if accumulo_version >= '2.1.0' else "master"
+        return "manager" if accumulo_version >= "2.1.0" else "master"
+
+    @ansible_host_var(name="deploy_path")
+    def muchos_deploy_path(self):
+        return self.deploy_path
+
+    @ansible_host_var
+    def cluster_user(self):
+        return self.get("general", "cluster_user")
+
+    @ansible_host_var
+    @default(False)
+    @is_valid(is_in([True, False]))
+    def hdfs_ha(self):
+        return self.getboolean("general", "hdfs_ha")
+
+
+# ConfigValidator is a helper to wrap validation functions.
+# The failure_message is returned if validation fails, else
+# None is returned
+class ConfigValidator(object):
+    def __init__(self, validation_func, failure_message=None):
+        self.validation_func = validation_func
+        self.failure_message = failure_message
+
+    def __call__(self, *args, **kwargs):
+        try:
+            result = self.validation_func(*args, **kwargs)
+            if isinstance(result, str):
+                return (
+                    result
+                    if self.failure_message is None
+                    else "{}: {}".format(self.failure_message, result)
+                )
+
+            if not result:
+                return self.failure_message
+        except Exception as e:
+            return "{}: unexpected exception during validation - {}".format(
+                self.failure_message, format_exc(e)
+            )
+        return None

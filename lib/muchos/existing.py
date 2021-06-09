@@ -171,6 +171,10 @@ class ExistingCluster:
                     file=hosts_file,
                 )
 
+            # Call a method which can be used by different cluster types to
+            # write additional specialized configs into the Ansible hosts file
+            self.add_specialized_configs(hosts_file)
+
             print("\n[all:vars]", file=hosts_file)
             for (name, value) in sorted(host_vars.items()):
                 print("{0} = {1}".format(name, value), file=hosts_file)

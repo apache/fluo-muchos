@@ -32,16 +32,10 @@ class VmssCluster(ExistingCluster):
 
     def launch(self):
         config = self.config
-        azure_config = dict(config.items("azure"))
-        azure_config["admin_username"] = config.get("general", "cluster_user")
-        azure_config["hdfs_ha"] = config.get("general", "hdfs_ha")
+        azure_config = config.ansible_host_vars()
         azure_config["vmss_name"] = config.cluster_name
-        azure_config["deploy_path"] = config.deploy_path
-        azure_config = {
-            k: VmssCluster._parse_config_value(v)
-            for k, v in azure_config.items()
-        }
-        subprocess.call(
+
+        retcode = subprocess.call(
             [
                 "ansible-playbook",
                 path.join(config.deploy_path, "ansible/azure.yml"),
@@ -49,6 +43,12 @@ class VmssCluster(ExistingCluster):
                 json.dumps(azure_config),
             ]
         )
+        if retcode != 0:
+            exit(
+                "ERROR - Command failed with return code of {0}".format(
+                    retcode
+                )
+            )
 
     def status(self):
         config = self.config
@@ -84,7 +84,8 @@ class VmssCluster(ExistingCluster):
                 [
                     "ansible-playbook",
                     path.join(
-                        config.deploy_path, "ansible/azure_terminate.yml",
+                        config.deploy_path,
+                        "ansible/azure_terminate.yml",
                     ),
                     "--extra-vars",
                     json.dumps(azure_config),
@@ -108,7 +109,10 @@ class VmssCluster(ExistingCluster):
         retcode = subprocess.call(
             [
                 "ansible-playbook",
-                path.join(config.deploy_path, "ansible/azure_wipe.yml",),
+                path.join(
+                    config.deploy_path,
+                    "ansible/azure_wipe.yml",
+                ),
                 "--extra-vars",
                 json.dumps(azure_config),
             ]
@@ -151,8 +155,7 @@ class VmssCluster(ExistingCluster):
         if self.config.use_multiple_vmss():
             vmss_hosts = open(
                 path.join(
-                    self.config.deploy_path,
-                    "conf/azure_vmss_to_hosts.conf"
+                    self.config.deploy_path, "conf/azure_vmss_to_hosts.conf"
                 ),
                 "r",
             )
@@ -199,7 +202,8 @@ class VmssCluster(ExistingCluster):
 
                     print(
                         "{0}: {1}".format(
-                            "worker_data_dirs", curr_worker_dirs,
+                            "worker_data_dirs",
+                            curr_worker_dirs,
                         ),
                         file=vmss_file,
                     )
@@ -214,7 +218,8 @@ class VmssCluster(ExistingCluster):
 
                     print(
                         "{0}: {1}".format(
-                            "default_data_dirs", curr_default_dirs,
+                            "default_data_dirs",
+                            curr_default_dirs,
                         ),
                         file=vmss_file,
                     )

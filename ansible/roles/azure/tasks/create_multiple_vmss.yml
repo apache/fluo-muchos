@@ -36,10 +36,10 @@
     location: "{{ location }}"
     name: "{{ vmss_name }}-{{ item.name_suffix }}"
     vm_size: "{{ item.sku }}"
-    admin_username: "{{ admin_username }}"
+    admin_username: "{{ cluster_user }}"
     ssh_password_enabled: false
     ssh_public_keys:
-      - path: /home/{{ admin_username }}/.ssh/authorized_keys
+      - path: /home/{{ cluster_user }}/.ssh/authorized_keys
         key_data: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
     capacity: "{{ item.capacity }}"
     single_placement_group: "{{ False if item.capacity > 100 else omit }}"

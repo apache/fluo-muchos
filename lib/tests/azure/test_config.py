@@ -46,6 +46,7 @@ def test_azure_cluster():
     assert c.get("azure", "managed_disk_type") == "Standard_LRS"
     assert c.user_home() == "/home/centos"
     assert c.mount_root() == "/var/data"
+    assert c.use_multiple_vmss() is False
     assert c.worker_data_dirs() == ["/var/data1", "/var/data2", "/var/data3"]
     assert c.default_data_dirs() == ["/var/data1", "/var/data2", "/var/data3"]
     assert c.metrics_drive_ids() == ["var-data1", "var-data2", "var-data3"]
@@ -122,3 +123,5 @@ def test_azure_cluster():
         ("worker3", "worker"),
         ("worker4", "worker"),
     ]
+
+    # TODO: add test cases for the validations

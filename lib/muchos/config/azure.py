@@ -20,6 +20,7 @@ from .base import BaseConfig
 from .decorators import ansible_host_var, is_valid, default
 from .validators import is_type, is_in
 from yaml import load, FullLoader
+from .azurevalidations import validate_azure_configs
 
 
 class AzureDeployConfig(BaseConfig):
@@ -53,6 +54,10 @@ class AzureDeployConfig(BaseConfig):
     def verify_config(self, action):
         self._verify_config(action)
 
+        results = validate_azure_configs(self, action)
+        if len(results) > 0:
+            exit("ERROR - config failed validation {}".format(results))
+
         proxy = self.get("general", "proxy_hostname")
         cluster_type = self.get("general", "cluster_type")
         if cluster_type not in ["azure"]:
@@ -75,14 +80,26 @@ class AzureDeployConfig(BaseConfig):
     def mount_root(self):
         return self.get("azure", "mount_root")
 
-    def data_dirs_common(self, nodeType):
+    def data_dirs_internal(
+        self,
+        nodeType,
+        num_disks=None,
+        mount_root_actual=None,
+        curr_vm_sku=None,
+    ):
         data_dirs = []
 
-        num_disks = self.data_disk_count()
+        num_disks = self.data_disk_count() if num_disks is None else num_disks
+        mount_root_actual = (
+            self.mount_root()
+            if mount_root_actual is None
+            else mount_root_actual
+        )
+        curr_vm_sku = self.vm_sku() if curr_vm_sku is None else curr_vm_sku
 
         # Check if using temp storage (non-NVME) for HDFS
-        if num_disks == 0 and self.mount_root() == "/mnt/resource":
-            data_dirs.append(self.mount_root())
+        if num_disks == 0 and mount_root_actual == "/mnt/resource":
+            data_dirs.append(mount_root_actual)
             return data_dirs
 
         # Check if using Lsv2 NVME temp storage for HDFS
@@ -95,17 +112,20 @@ class AzureDeployConfig(BaseConfig):
             "Standard_L80s_v2": 10,
         }
 
-        if num_disks == 0 and self.vm_sku() in lsv2_vm_disk_map.keys():
+        if num_disks == 0 and curr_vm_sku in lsv2_vm_disk_map.keys():
             # pretend that we have N data disks
             # in this case those are NVME temp disks
-            num_disks = lsv2_vm_disk_map[self.vm_sku()]
+            num_disks = lsv2_vm_disk_map[curr_vm_sku]
 
         # Persistent data disks attached to VMs
         range_var = num_disks + 1
         for diskNum in range(1, range_var):
-            data_dirs.append(self.mount_root() + str(diskNum))
+            data_dirs.append(mount_root_actual + str(diskNum))
 
         return data_dirs
+
+    def data_dirs_common(self, nodeType):
+        return self.data_dirs_internal(nodeType, None, None, None)
 
     def metrics_drive_ids(self):
         drive_ids = []
@@ -122,6 +142,11 @@ class AzureDeployConfig(BaseConfig):
     @is_valid(is_type(int))
     def data_disk_count(self):
         return self.getint("azure", "data_disk_count")
+
+    @ansible_host_var
+    @is_valid(is_type(int))
+    def disk_size_gb(self):
+        return self.getint("azure", "disk_size_gb")
 
     @ansible_host_var
     @default("/dev/disk/azure/scsi1")
@@ -180,6 +205,26 @@ class AzureDeployConfig(BaseConfig):
     def use_adlsg2(self):
         return self.getboolean("azure", "use_adlsg2")
 
+    @ansible_host_var
+    @default("Standard_LRS")
+    @is_valid(
+        is_in(
+            [
+                "Standard_LRS",
+                "Standard_GRS",
+                "Standard_RAGRS",
+                "Standard_ZRS",
+                "Premium_LRS",
+            ]
+        )
+    )
+    def adls_storage_type(self):
+        return self.get("azure", "adls_storage_type")
+
+    @ansible_host_var
+    def user_assigned_identity(self):
+        return self.get("azure", "user_assigned_identity")
+
     @ansible_host_var(name="azure_tenant_id")
     @default(None)
     def azure_tenant_id(self):
@@ -195,6 +240,11 @@ class AzureDeployConfig(BaseConfig):
     def principal_id(self):
         return self.get("azure", "principal_id")
 
+    @ansible_host_var
+    @default(None)
+    def instance_volumes_input(self):
+        return self.get("azure", "instance_volumes_input")
+
     @ansible_host_var(name="instance_volumes_adls")
     @default(None)
     def instance_volumes_adls(self):
@@ -205,3 +255,114 @@ class AzureDeployConfig(BaseConfig):
     @is_valid(is_in([True, False]))
     def use_multiple_vmss(self):
         return self.getboolean("azure", "use_multiple_vmss")
+
+    @ansible_host_var
+    @is_valid(is_type(int))
+    def numnodes(self):
+        return self.getint("azure", "numnodes")
+
+    @ansible_host_var
+    @default(None)
+    def resource_group(self):
+        return self.get("azure", "resource_group")
+
+    @ansible_host_var
+    @default(None)
+    def vnet(self):
+        return self.get("azure", "vnet")
+
+    @ansible_host_var
+    @default(None)
+    def vnet_cidr(self):
+        return self.get("azure", "vnet_cidr")
+
+    @ansible_host_var
+    @default(None)
+    def subnet(self):
+        return self.get("azure", "subnet")
+
+    @ansible_host_var
+    @default(None)
+    def subnet_cidr(self):
+        return self.get("azure", "subnet_cidr")
+
+    @ansible_host_var
+    @default(None)
+    def location(self):
+        return self.get("azure", "location")
+
+    @ansible_host_var
+    @default("")
+    def azure_proxy_host(self):
+        return self.get("azure", "azure_proxy_host")
+
+    @ansible_host_var
+    @default(None)
+    def azure_proxy_host_vm_sku(self):
+        return self.get("azure", "azure_proxy_host_vm_sku")
+
+    @ansible_host_var
+    @default("Standard_LRS")
+    @is_valid(is_in(["Standard_LRS", "Premium_LRS", "StandardSSD_LRS"]))
+    def managed_disk_type(self):
+        return self.get("azure", "managed_disk_type")
+
+    @ansible_host_var
+    def accnet_capable_skus(self):
+        return list(
+            map(
+                lambda r: r.name,
+                filter(
+                    lambda s: len(
+                        list(
+                            filter(
+                                lambda c: c.name
+                                == "AcceleratedNetworkingEnabled"
+                                and c.value == "True",
+                                s.capabilities,
+                            )
+                        )
+                    )
+                    > 0,
+                    self.vm_skus_for_location,
+                ),
+            )
+        )
+
+    @ansible_host_var
+    def premiumio_capable_skus(self):
+        return list(
+            map(
+                lambda r: r.name,
+                filter(
+                    lambda s: len(
+                        list(
+                            filter(
+                                lambda c: c.name == "PremiumIO"
+                                and c.value == "True",
+                                s.capabilities,
+                            )
+                        )
+                    )
+                    > 0,
+                    self.vm_skus_for_location,
+                ),
+            )
+        )
+
+    def max_data_disks_for_skus(self):
+        n = list(map(lambda r: r.name, self.vm_skus_for_location))
+        d = list(
+            map(
+                lambda s: int(
+                    next(
+                        filter(
+                            lambda c: c.name == "MaxDataDiskCount",
+                            s.capabilities,
+                        )
+                    ).value
+                ),
+                self.vm_skus_for_location,
+            )
+        )
+        return dict(zip(n, d))
