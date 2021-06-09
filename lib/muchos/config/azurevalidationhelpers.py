@@ -15,6 +15,7 @@
 # limitations under the License.
 #
 
+
 def vmss_status_succeeded_if_exists(config, client):
     multi_vmss = config.getboolean("azure", "use_multiple_vmss")
     resource_group = config.get("azure", "resource_group")
@@ -49,7 +50,11 @@ def vmss_status_succeeded_if_exists(config, client):
 
 
 def validate_disk_count(
-    context, specified_disk_count, mount_root, disk_pattern, validation_errors,
+    context,
+    specified_disk_count,
+    mount_root,
+    disk_pattern,
+    validation_errors,
 ):
     # min_data_disk_count is 1 unless we are using exclusively
     # ephemeral storage (data_disk_count is 0), which in turn is when:

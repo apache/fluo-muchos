@@ -72,7 +72,6 @@ AZURE_VALIDATIONS = {
         # Validate that the data disk configuration is appropriate
         # considering temp disk usage etc.
         ConfigValidator(vmss_cluster_has_appropriate_data_disk_count, None),
-
         ConfigValidator(lambda config, client: not config.use_multiple_vmss()),
         # the VM SKU specified is not a valid Azure VM SKU
         ConfigValidator(
@@ -107,7 +106,7 @@ AZURE_VALIDATIONS = {
             or all(
                 [
                     vmss.get("disk_sku")
-                    in ["Standard_LRS",  "StandardSSD_LRS", "Premium_LRS"]
+                    in ["Standard_LRS", "StandardSSD_LRS", "Premium_LRS"]
                     for vmss in config.azure_multiple_vmss_vars.get(
                         "vars_list", []
                     )
@@ -143,7 +142,7 @@ AZURE_VALIDATIONS = {
         ConfigValidator(
             lambda config, client: config.use_multiple_vmss()
             or config.data_disk_count()
-            <= config.max_data_disks_for_skus()[config.vm_sku()],
+            <= config.max_data_disks_for_skus().get(config.vm_sku(), 0),
             "Number of data disks specified exceeds allowed limit for VM SKU",
         ),
         ConfigValidator(
@@ -151,7 +150,7 @@ AZURE_VALIDATIONS = {
             or all(
                 [
                     vmss.get("data_disk_count")
-                    <= config.max_data_disks_for_skus()[vmss.get("sku")]
+                    <= config.max_data_disks_for_skus().get(config.vm_sku(), 0)
                     for vmss in config.azure_multiple_vmss_vars.get(
                         "vars_list", []
                     )
