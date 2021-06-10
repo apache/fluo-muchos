@@ -31,7 +31,7 @@
 
 - name: Create luns dictionary
   set_fact:
-    luns_dict: "{{ luns_dict | default ([]) + [{ 'lun': item, 'disk_size_gb': disk_size_gb , 'caching': None } ] }}"
+    luns_dict: "{{ luns_dict | default ([]) + [{ 'lun': item, 'disk_size_gb': disk_size_gb, 'managed_disk_type': data_disk_sku, 'caching': None } ] }}"
   with_sequence: start=0 end={{ data_disk_count-1 if data_disk_count > 0 else 0 }}
 
 - name: Set single placement group to correct value
@@ -55,7 +55,7 @@
     subnet_name: "{{ subnet }}"
     upgrade_policy: Manual
     tier: Standard
-    managed_disk_type: "{{ managed_disk_type }}"
+    managed_disk_type: "{{ osdisk_sku }}"
     os_disk_caching: ReadWrite
     enable_accelerated_networking: "{{ accnet_capable }}"
     single_placement_group: "{{ single_placement_group | default(omit) }}"
@@ -71,6 +71,7 @@
   - image_sku: "{{ azure_image_reference.split('|')[2] }}"
   - image_version: "{{ azure_image_reference.split('|')[3] }}"
   - accnet_capable: "{{ True if vm_sku in accnet_capable_skus else False }}"
+  - osdisk_sku: "{{ 'Premium_LRS' if vm_sku in premiumio_capable_skus else 'Standard_LRS' }}"
   tags: create_vmss
 
 # SECTION 4: Automatically populate entries in the hosts file and in the muchos.props file, based on the VMSS node details

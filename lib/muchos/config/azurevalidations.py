@@ -93,32 +93,33 @@ AZURE_VALIDATIONS = {
             "when use_multiple_vmss == True, any VMSS with sku "
             "must be a valid VM SKU for the selected location",
         ),
-        # managed_disk_type in
+        # data_disk_sku in
         # ['Standard_LRS', 'StandardSSD_LRS', Premium_LRS']
         ConfigValidator(
-            lambda config, client: config.managed_disk_type()
+            lambda config, client: config.data_disk_sku()
             in ["Standard_LRS", "StandardSSD_LRS", "Premium_LRS"],
-            "managed_disk_type must be "
+            "data_disk_sku must be "
             "one of Standard_LRS, StandardSSD_LRS, or Premium_LRS",
         ),
         ConfigValidator(
             lambda config, client: not config.use_multiple_vmss()
             or all(
                 [
-                    vmss.get("disk_sku")
+                    vmss.get("data_disk_sku")
                     in ["Standard_LRS", "StandardSSD_LRS", "Premium_LRS"]
                     for vmss in config.azure_multiple_vmss_vars.get(
                         "vars_list", []
                     )
                 ]
             ),
-            "when use_multiple_vmss == True, any VMSS with disk_sku must "
-            "be one of Standard_LRS, StandardSSD_LRS or Premium_LRS",
+            "when use_multiple_vmss == True, the data_disk_sku specified for "
+            "the VMSS must be one of Standard_LRS, StandardSSD_LRS "
+            "or Premium_LRS",
         ),
         # Cannot specify Premium managed disks if VMSS SKU is / are not capable
         ConfigValidator(
             lambda config, client: config.use_multiple_vmss()
-            or not config.managed_disk_type() == "Premium_LRS"
+            or not config.data_disk_sku() == "Premium_LRS"
             or config.vm_sku() in config.premiumio_capable_skus(),
             "azure.vm_sku must be Premium I/O capable VM SKU "
             "in order to use Premium Managed Disks",
@@ -128,7 +129,7 @@ AZURE_VALIDATIONS = {
             or all(
                 [
                     vmss.get("sku") in config.premiumio_capable_skus()
-                    if vmss.get("disk_sku") == "Premium_LRS"
+                    if vmss.get("data_disk_sku") == "Premium_LRS"
                     else True
                     for vmss in config.azure_multiple_vmss_vars.get(
                         "vars_list", []

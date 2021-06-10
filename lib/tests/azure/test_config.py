@@ -43,7 +43,7 @@ def test_azure_cluster():
         "d611d7fc67698c91ec73da0e85b9907aa72b98d5eb4d49ea3a5d51b0c6c5785f"
     )
     assert c.get("azure", "vm_sku") == "Standard_D8s_v3"
-    assert c.get("azure", "managed_disk_type") == "Standard_LRS"
+    assert c.get("azure", "data_disk_sku") == "Standard_LRS"
     assert c.user_home() == "/home/centos"
     assert c.mount_root() == "/var/data"
     assert c.use_multiple_vmss() is False

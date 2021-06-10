@@ -117,7 +117,7 @@ subnet_cidr = 10.1.0.0/16
 #Optional. If set to True, will create multiple VMSS based on multiple_vmss_vars.yml
 use_multiple_vmss = False
 # Azure image reference defined as a pipe-delimited string in the format offer|publisher|sku|version|
-# Please refer 'Launching an Azure cluster' section of the README before making changes 
+# Please refer 'Launching an Azure cluster' section of the README before making changes
 azure_image_reference = CentOS|OpenLogic|7.5|latest|
 # Size of the cluster to provision.
 # A virtual machine scale set (VMSS) with these many VMs will be created.
@@ -135,7 +135,7 @@ azure_disk_device_pattern = lun*
 # azure_disk_device_path = /dev
 # azure_disk_device_pattern = nvme*n1
 # Type of the data disk attached to the VMSS. 'Standard_LRS' for HDD, 'Premium_LRS' for SSD, 'StandardSSD_LRS' for Standard SSD
-managed_disk_type = Standard_LRS
+data_disk_sku = Standard_LRS
 # Number of managed disks provisioned on each VM
 data_disk_count = 3
 # The size of each managed disk provisioned
