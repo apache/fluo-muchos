@@ -144,7 +144,7 @@ You can check the status of the nodes using the EC2 Dashboard or by running the 
 ## Launching an Azure cluster
 
 Before launching a cluster, you will need to complete the requirements for Azure above, clone the Muchos repo, and
-create [muchos.props] by making a copy of existing [muchos.props.example]. If you want to give others access to your
+create your `conf/muchos.props` file by making a copy of the [muchos.props] example. If you want to give others access to your
 cluster, add their public keys to a file named `keys` in your `conf/` directory.  During the setup of your cluster,
 this file will be appended on each node to the `~/.ssh/authorized_keys` file for the user set by the
 `cluster.username` property.  You will also need to ensure you have authenticated to Azure and set the target
@@ -168,14 +168,14 @@ Under the `azure` section, edit following values as per your configuration:
 * `vnet` to provide the name of the VNET that your cluster nodes should use. A new VNET with this name will be
   created if it doesn't already exist
 * `subnet` to provide a name for the subnet within which the cluster resources will be deployed
-* `use_multiple_vmss` allows you to configure VMs with different CPU, memory, disks for leaders and workers. To 
-  know more about this feature, please follow the [doc](docs/azure-multiple-vmss.md).   
-* `azure_image_reference` allows you to specify the CentOS image SKU in the format as shown below. To configure 
+* `use_multiple_vmss` allows you to configure VMs with different CPU, memory, disk configurations for leaders and workers. To
+  know more about this feature, please follow the [doc](docs/azure-multiple-vmss.md).
+* `azure_image_reference` allows you to specify the CentOS image SKU in the format as shown below. To configure
   CentOS 8.x, please follow [these steps](docs/azure-image-reference.md).
   ```bash
   offer|publisher|sku|version|
   Ex: CentOS|OpenLogic|7.5|latest|
-  ```  
+  ```
 * `numnodes` to change the cluster size in terms of number of nodes deployed
 * `data_disk_count` to specify how many persistent data disks are attached to each node and will be used by HDFS.
    If you would prefer to use ephemeral / storage for Azure clusters, please follow [these steps](docs/azure-ephemeral-disks.md).
@@ -188,6 +188,8 @@ Under the `azure` section, edit following values as per your configuration:
   [Create Log Analytics workspace](https://docs.microsoft.com/en-us/azure/azure-monitor/learn/quick-create-workspace).
   [Create and Share dashboards](https://docs.microsoft.com/en-us/azure/azure-portal/azure-portal-dashboards).
   [Azure Monitor Workbooks](https://docs.microsoft.com/en-us/azure/azure-monitor/platform/workbooks-overview).
+
+Please refer to the [muchos.props] example for the full list of Azure-specific configurations - some of which have supplementary comments.
 
 Within Azure the `nodes` section is auto populated with the hostnames and their default roles.
 

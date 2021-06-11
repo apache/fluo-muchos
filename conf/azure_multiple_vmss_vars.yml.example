@@ -25,7 +25,6 @@ vars_list:
     capacity: 4
     roles:
       zookeeper: 2
-      metrics: 1
       journalnode: 1
       namenode: 1
       zkfc: 1

@@ -146,6 +146,9 @@ mount_root = /var/data
 metrics_drive_root = var-data
 # Optional proxy VM. If not set, the first node of the cluster will be selected as the proxy.
 azure_proxy_host =
+# Azure VM SKU to use when creating the proxy host - defaults to a 8-vCore general-purpose VM
+azure_proxy_host_vm_sku = Standard_D8s_v3
+# The Azure datacenter location to use for creating Muchos resources
 location = westus2
 # Enable ADLS Gen2 storage configuration. Muchos parameters instance_volumes_input, instance_volumes_adls & adls_storage_type is not required if use_adlsg2 is false.
 use_adlsg2 = False
