@@ -5,7 +5,7 @@ vars_list:
     sku: Standard_D4s_v3
     perf_profile: azd8s
     data_disk_count: 4
-    disk_sku: Premium_LRS
+    data_disk_sku: Premium_LRS
     data_disk_size_gb: 512
     capacity: 4
     roles:
@@ -20,12 +20,11 @@ vars_list:
     sku: Standard_D4s_v3
     perf_profile: perf-small
     data_disk_count: 4
-    disk_sku: Standard_LRS
+    data_disk_sku: Standard_LRS
     data_disk_size_gb: 512
     capacity: 4
     roles:
       zookeeper: 2
-      metrics: 1
       journalnode: 1
       namenode: 1
       zkfc: 1
@@ -36,18 +35,18 @@ vars_list:
     sku: Standard_D4s_v3
     perf_profile: azd8s
     data_disk_count: 8
-    disk_sku: Standard_LRS
+    data_disk_sku: Standard_LRS
     data_disk_size_gb: 1024
     capacity: 4
     roles:
       worker: 4
-    
+
   # The below roles are required when HA is not enabled  (i.e hdfs_ha = False)
   - name_suffix: vmss4
     sku: Standard_D4s_v3
     perf_profile: azd8s
     data_disk_count: 4
-    disk_sku: Premium_LRS
+    data_disk_sku: Premium_LRS
     data_disk_size_gb: 512
     capacity: 3
     roles:
@@ -60,7 +59,7 @@ vars_list:
     sku: Standard_D4s_v3
     perf_profile: azd8s
     data_disk_count: 4
-    disk_sku: Premium_LRS
+    data_disk_sku: Premium_LRS
     data_disk_size_gb: 512
     capacity: 1
     roles:
@@ -70,7 +69,7 @@ vars_list:
     sku: Standard_D8s_v3
     perf_profile: azd8s
     data_disk_count: 8
-    disk_sku: Standard_LRS
+    data_disk_sku: Standard_LRS
     data_disk_size_gb: 1024
     capacity: 3
     roles:
@@ -87,7 +86,7 @@ vars_list:
     azure_disk_device_pattern: nvme*n1
     mount_root: /nvmedata
     data_disk_count: 0
-    disk_sku: Standard_LRS
+    data_disk_sku: Standard_LRS
     data_disk_size_gb: 1024
     capacity: 4
     roles:

@@ -59,7 +59,7 @@
     data_disks: |
       {%- set data_disks = [] -%}
       {%- for lun in range(item.data_disk_count) -%}
-        {%- set _ = data_disks.append({'lun': lun, 'disk_size_gb': item.data_disk_size_gb, 'managed_disk_type': item.disk_sku }) -%}
+        {%- set _ = data_disks.append({'lun': lun, 'disk_size_gb': item.data_disk_size_gb, 'managed_disk_type': item.data_disk_sku, 'caching': None }) -%}
       {%- endfor -%}
       {{ data_disks }}
   with_items:

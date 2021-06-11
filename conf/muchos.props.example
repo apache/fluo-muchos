@@ -117,7 +117,7 @@ subnet_cidr = 10.1.0.0/16
 #Optional. If set to True, will create multiple VMSS based on multiple_vmss_vars.yml
 use_multiple_vmss = False
 # Azure image reference defined as a pipe-delimited string in the format offer|publisher|sku|version|
-# Please refer 'Launching an Azure cluster' section of the README before making changes 
+# Please refer 'Launching an Azure cluster' section of the README before making changes
 azure_image_reference = CentOS|OpenLogic|7.5|latest|
 # Size of the cluster to provision.
 # A virtual machine scale set (VMSS) with these many VMs will be created.
@@ -135,7 +135,7 @@ azure_disk_device_pattern = lun*
 # azure_disk_device_path = /dev
 # azure_disk_device_pattern = nvme*n1
 # Type of the data disk attached to the VMSS. 'Standard_LRS' for HDD, 'Premium_LRS' for SSD, 'StandardSSD_LRS' for Standard SSD
-managed_disk_type = Standard_LRS
+data_disk_sku = Standard_LRS
 # Number of managed disks provisioned on each VM
 data_disk_count = 3
 # The size of each managed disk provisioned
@@ -146,6 +146,9 @@ mount_root = /var/data
 metrics_drive_root = var-data
 # Optional proxy VM. If not set, the first node of the cluster will be selected as the proxy.
 azure_proxy_host =
+# Azure VM SKU to use when creating the proxy host - defaults to a 8-vCore general-purpose VM
+azure_proxy_host_vm_sku = Standard_D8s_v3
+# The Azure datacenter location to use for creating Muchos resources
 location = westus2
 # Enable ADLS Gen2 storage configuration. Muchos parameters instance_volumes_input, instance_volumes_adls & adls_storage_type is not required if use_adlsg2 is false.
 use_adlsg2 = False

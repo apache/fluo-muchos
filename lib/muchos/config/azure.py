@@ -297,15 +297,15 @@ class AzureDeployConfig(BaseConfig):
         return self.get("azure", "azure_proxy_host")
 
     @ansible_host_var
-    @default(None)
+    @default("Standard_D8s_v3")
     def azure_proxy_host_vm_sku(self):
         return self.get("azure", "azure_proxy_host_vm_sku")
 
     @ansible_host_var
     @default("Standard_LRS")
     @is_valid(is_in(["Standard_LRS", "Premium_LRS", "StandardSSD_LRS"]))
-    def managed_disk_type(self):
-        return self.get("azure", "managed_disk_type")
+    def data_disk_sku(self):
+        return self.get("azure", "data_disk_sku")
 
     @ansible_host_var
     def accnet_capable_skus(self):
