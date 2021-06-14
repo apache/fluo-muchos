@@ -45,7 +45,13 @@ add_jar_prefix_to_classpath() {
     CLASSPATH="${CLASSPATH}:${JAR}"
   done
 }
-CLASSPATH="${conf}:${lib}/*:${HADOOP_CONF_DIR}:${ZOOKEEPER_HOME}/*"
+## Build using existing CLASSPATH, conf/ directory, dependencies in lib/, and external Hadoop & Zookeeper dependencies
+if [[ -n "$CLASSPATH" ]]; then
+  CLASSPATH="${CLASSPATH}:${conf}"
+else
+  CLASSPATH="${conf}"
+fi
+CLASSPATH="${CLASSPATH}:${lib}/*:${HADOOP_CONF_DIR}:${ZOOKEEPER_HOME}/*"
 add_jar_prefix_to_classpath "${ZOOKEEPER_HOME}/lib/zookeeper-"
 CLASSPATH="${CLASSPATH}:${HADOOP_HOME}/share/hadoop/client/*"
 {% if cluster_type == 'azure' and use_adlsg2 %}
