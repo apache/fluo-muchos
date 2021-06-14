@@ -140,6 +140,8 @@ data_disk_sku = Standard_LRS
 data_disk_count = 3
 # The size of each managed disk provisioned
 disk_size_gb = 128
+# Indicates the host caching that should be used for data disks. Valid values are ReadOnly, ReadWrite, or None
+data_disk_caching = ReadOnly
 # Location to mount managed disks in each VM
 mount_root = /var/data
 # Location where the metrics data will be written

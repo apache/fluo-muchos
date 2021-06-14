@@ -7,6 +7,7 @@ vars_list:
     data_disk_count: 4
     data_disk_sku: Premium_LRS
     data_disk_size_gb: 512
+    data_disk_caching: ReadOnly
     capacity: 4
     roles:
       namenode: 1
@@ -22,6 +23,7 @@ vars_list:
     data_disk_count: 4
     data_disk_sku: Standard_LRS
     data_disk_size_gb: 512
+    data_disk_caching: ReadOnly
     capacity: 4
     roles:
       zookeeper: 2
@@ -37,6 +39,7 @@ vars_list:
     data_disk_count: 8
     data_disk_sku: Standard_LRS
     data_disk_size_gb: 1024
+    data_disk_caching: ReadOnly
     capacity: 4
     roles:
       worker: 4
@@ -48,6 +51,7 @@ vars_list:
     data_disk_count: 4
     data_disk_sku: Premium_LRS
     data_disk_size_gb: 512
+    data_disk_caching: ReadOnly
     capacity: 3
     roles:
       namenode: 1
@@ -61,6 +65,7 @@ vars_list:
     data_disk_count: 4
     data_disk_sku: Premium_LRS
     data_disk_size_gb: 512
+    data_disk_caching: ReadOnly
     capacity: 1
     roles:
       metrics: 1
@@ -71,6 +76,7 @@ vars_list:
     data_disk_count: 8
     data_disk_sku: Standard_LRS
     data_disk_size_gb: 1024
+    data_disk_caching: ReadOnly
     capacity: 3
     roles:
       worker: 3
@@ -88,6 +94,9 @@ vars_list:
     data_disk_count: 0
     data_disk_sku: Standard_LRS
     data_disk_size_gb: 1024
+    # This is just an example to show that caching can be set to different
+    # values for each VMSS.
+    data_disk_caching: None
     capacity: 4
     roles:
       worker: 4
