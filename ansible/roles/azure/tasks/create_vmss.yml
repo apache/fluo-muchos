@@ -31,7 +31,7 @@
 
 - name: Create luns dictionary
   set_fact:
-    luns_dict: "{{ luns_dict | default ([]) + [{ 'lun': item, 'disk_size_gb': disk_size_gb, 'managed_disk_type': data_disk_sku, 'caching': None } ] }}"
+    luns_dict: "{{ luns_dict | default ([]) + [{ 'lun': item, 'disk_size_gb': disk_size_gb, 'managed_disk_type': data_disk_sku, 'caching': data_disk_caching } ] }}"
   with_sequence: start=0 end={{ data_disk_count-1 if data_disk_count > 0 else 0 }}
 
 - name: Set single placement group to correct value

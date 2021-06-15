@@ -149,6 +149,12 @@ class AzureDeployConfig(BaseConfig):
         return self.getint("azure", "disk_size_gb")
 
     @ansible_host_var
+    @default("ReadOnly")
+    @is_valid(is_in(["ReadOnly", "ReadWrite", "None"]))
+    def data_disk_caching(self):
+        return self.getint("azure", "data_disk_caching")
+
+    @ansible_host_var
     @default("/dev/disk/azure/scsi1")
     def azure_disk_device_path(self):
         return self.get("azure", "azure_disk_device_path")
