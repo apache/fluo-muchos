@@ -45,6 +45,7 @@
     location: "{{ location }}"
     name: "{{ vmss_name }}"
     vm_size: "{{ vm_sku }}"
+    priority: "{{ vmss_priority | default('Regular') }}"
     admin_username: "{{ cluster_user }}"
     ssh_password_enabled: false
     ssh_public_keys:

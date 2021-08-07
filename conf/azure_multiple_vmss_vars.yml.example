@@ -70,8 +70,11 @@ vars_list:
     roles:
       metrics: 1
       client: 1
+
+  # As an example, the below is also configured as an Azure Spot (Low-Priority) VMSS
   - name_suffix: vmss6
     sku: Standard_D8s_v3
+    vmss_priority: Low
     perf_profile: azd8s
     data_disk_count: 8
     data_disk_sku: Standard_LRS

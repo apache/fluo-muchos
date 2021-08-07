@@ -116,6 +116,12 @@ subnet = subnet1
 subnet_cidr = 10.1.0.0/16
 #Optional. If set to True, will create multiple VMSS based on multiple_vmss_vars.yml
 use_multiple_vmss = False
+# The below "vmss_priority" controls whether Azure Spot is used (or not).
+# When vmss_priority is set to Low, the cluster uses Azure Spot VM Scale Sets.
+# When vmss_priority is set to Regular (which is the default), Azure Spot is NOT used.
+# Note that for multiple-VMSS deployments, this setting can be overridden at a 
+# per-VMSS level by specifying vmss_priority in the conf/azure_multiple_vmss_vars.yml file.
+vmss_priority = Regular
 # Azure image reference defined as a pipe-delimited string in the format offer|publisher|sku|version|
 # Please refer 'Launching an Azure cluster' section of the README before making changes
 azure_image_reference = CentOS|OpenLogic|7.5|latest|
