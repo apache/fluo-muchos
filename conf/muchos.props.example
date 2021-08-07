@@ -33,7 +33,7 @@ proxy_hostname = leader1
 #proxy_socks_port = 38585
 # Accumulo Instance name
 accumulo_instance = muchos
-# Accumluo Password
+# Accumulo Password
 accumulo_password = secret
 # Software versions (make sure you have a corresponding entry for the checksum in conf/checksums)
 hadoop_version = 3.2.2
