@@ -84,7 +84,8 @@ class VmssCluster(ExistingCluster):
                 [
                     "ansible-playbook",
                     path.join(
-                        config.deploy_path, "ansible/azure_terminate.yml",
+                        config.deploy_path,
+                        "ansible/azure_terminate.yml",
                     ),
                     "--extra-vars",
                     json.dumps(azure_config),
@@ -108,7 +109,10 @@ class VmssCluster(ExistingCluster):
         retcode = subprocess.call(
             [
                 "ansible-playbook",
-                path.join(config.deploy_path, "ansible/azure_wipe.yml",),
+                path.join(
+                    config.deploy_path,
+                    "ansible/azure_wipe.yml",
+                ),
                 "--extra-vars",
                 json.dumps(azure_config),
             ]
@@ -198,7 +202,8 @@ class VmssCluster(ExistingCluster):
 
                     print(
                         "{0}: {1}".format(
-                            "worker_data_dirs", curr_worker_dirs,
+                            "worker_data_dirs",
+                            curr_worker_dirs,
                         ),
                         file=vmss_file,
                     )
@@ -213,7 +218,8 @@ class VmssCluster(ExistingCluster):
 
                     print(
                         "{0}: {1}".format(
-                            "default_data_dirs", curr_default_dirs,
+                            "default_data_dirs",
+                            curr_default_dirs,
                         ),
                         file=vmss_file,
                     )

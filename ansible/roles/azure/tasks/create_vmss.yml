@@ -40,7 +40,7 @@
   when: numnodes > 100
 
 - name: Create Scale Set
-  azure_rm_virtualmachinescaleset:
+  community.azure.azure_rm_virtualmachinescaleset:
     resource_group: "{{ resource_group }}"
     location: "{{ location }}"
     name: "{{ vmss_name }}"
@@ -133,13 +133,13 @@
     mode: 0644
 
 - name: Clear section
-  ini_file:
+  community.general.ini_file:
     path: "{{ deploy_path }}/conf/muchos.props"
     section: "nodes"
     state: absent
 
 - name: Recreate section
-  ini_file:
+  community.general.ini_file:
     path: "{{ deploy_path }}/conf/muchos.props"
     section: "nodes"
     option: "#host0"
