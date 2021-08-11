@@ -4,7 +4,7 @@ echo "Running nose tests..."
 nosetests -w lib/
 echo "SUCCESS: All Nose tests completed."
 echo "Running Ansible-lint..."
-ansible-lint -x 204,301
+ansible-lint -x no-changed-when,risky-file-permissions,unnamed-task,var-naming
 echo "SUCCESS: Ansible-lint completed."
 echo "Running flake8 to check Python code..."
 flake8

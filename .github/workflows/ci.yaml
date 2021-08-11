@@ -46,5 +46,7 @@ jobs:
         python-version: '3.6'
     - name: Install required packages
       run: pip install -r ./lib/requirements.txt
+    - name: Install Azure specific Ansible collections
+      run: ./scripts/install-ansible-for-azure
     - name: Run Fluo-Muchos CI script
       run: ./scripts/cibuild

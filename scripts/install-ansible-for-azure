@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+ansible-galaxy collection install community.general:3.4.0
+ansible-galaxy collection install azure.azcollection:1.8.0
+pip install -r ~/.ansible/collections/ansible_collections/azure/azcollection/requirements-azure.txt
+ansible-galaxy collection install community.azure:1.0.0
