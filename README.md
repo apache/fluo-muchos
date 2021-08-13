@@ -19,7 +19,7 @@ Muchos is structured into two high level components:
  * Python scripts that push the Ansible scripts from a local development machine to a cluster and
    run them. These Python scripts can also optionally launch a cluster in EC2 using [boto] or in Azure using Azure CLI.
 
-Checkout [Uno] for setting up Accumulo or Fluo on a single machine.
+Check out [Uno] for setting up Accumulo or Fluo on a single machine.
 
 ## Requirements
 
@@ -27,7 +27,7 @@ Checkout [Uno] for setting up Accumulo or Fluo on a single machine.
 
 Muchos requires the following common components for installation and setup:
 
-* Python 3 with a virtual environment setup
+* Python 3 with a virtual environment setup.
 Create a Python 3 environment and switch to it. (We tested using Python 3.6.8,
 but this should work in later versions as well. If you encounter problems,
 please file an issue.)
