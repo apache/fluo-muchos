@@ -36,6 +36,7 @@
     location: "{{ location }}"
     name: "{{ vmss_name }}-{{ item.name_suffix }}"
     vm_size: "{{ item.sku }}"
+    priority: "{{ item.vmss_priority | default('Regular') }}"
     admin_username: "{{ cluster_user }}"
     ssh_password_enabled: false
     ssh_public_keys:

@@ -93,6 +93,32 @@ AZURE_VALIDATIONS = {
             "when use_multiple_vmss == True, any VMSS with sku "
             "must be a valid VM SKU for the selected location",
         ),
+        # Cannot specify Spot (Low Priority) if VMSS SKU is / are not capable
+        ConfigValidator(
+            lambda config, client: config.getboolean(
+                "azure", "use_multiple_vmss"
+            )
+            or not config.vmss_priority() == "Low"
+            or config.vm_sku() in config.spot_capable_skus(),
+            "azure.vm_sku must be an Azure Spot (low priority) capable VM SKU",
+        ),
+        ConfigValidator(
+            lambda config, client: not config.getboolean(
+                "azure", "use_multiple_vmss"
+            )
+            or all(
+                [
+                    vmss.get("sku") in config.spot_capable_skus()
+                    if vmss.get("vmss_priority") == "Low"
+                    else True
+                    for vmss in config.azure_multiple_vmss_vars.get(
+                        "vars_list", []
+                    )
+                ]
+            ),
+            "when use_multiple_vmss == True, any VMSS set to use Azure Spot "
+            "(low priority) must use an Azure Spot-capable VM SKU",
+        ),
         # data_disk_sku in
         # ['Standard_LRS', 'StandardSSD_LRS', Premium_LRS']
         ConfigValidator(

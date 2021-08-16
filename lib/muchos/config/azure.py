@@ -308,6 +308,11 @@ class AzureDeployConfig(BaseConfig):
         return self.get("azure", "azure_proxy_host_vm_sku")
 
     @ansible_host_var
+    @is_valid(is_in(["Regular", "Low"]))
+    def vmss_priority(self):
+        return self.get("azure", "vmss_priority")
+
+    @ansible_host_var
     @default("Standard_LRS")
     @is_valid(is_in(["Standard_LRS", "Premium_LRS", "StandardSSD_LRS"]))
     def data_disk_sku(self):
@@ -345,6 +350,26 @@ class AzureDeployConfig(BaseConfig):
                         list(
                             filter(
                                 lambda c: c.name == "PremiumIO"
+                                and c.value == "True",
+                                s.capabilities,
+                            )
+                        )
+                    )
+                    > 0,
+                    self.vm_skus_for_location,
+                ),
+            )
+        )
+
+    def spot_capable_skus(self):
+        return list(
+            map(
+                lambda r: r.name,
+                filter(
+                    lambda s: len(
+                        list(
+                            filter(
+                                lambda c: c.name == "LowPriorityCapable"
                                 and c.value == "True",
                                 s.capabilities,
                             )
