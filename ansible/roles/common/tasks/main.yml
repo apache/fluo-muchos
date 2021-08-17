@@ -87,6 +87,11 @@
 - name: "chown hub home"
   file: path={{ hub_home }} recurse=yes owner={{ cluster_user }} group={{ cluster_group }}
   when: install_hub
+- name: "update centos"
+  yum:
+    name: "*"
+    update_only: yes
+    state: latest
 - name: "configure collectd"
   template: src=etc/collectd.conf.j2 dest=/etc/collectd.conf
   when: ('metrics' in groups) or (cluster_type == 'azure')
