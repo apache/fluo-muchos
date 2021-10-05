@@ -21,6 +21,13 @@
   retries: 10
   delay: 15
   until: epelresult is not failed
+# Update ca-certificates to ensure that CA certificates are new enough
+# to support SSL verification against websites used to download software
+- name: "update ca-certificates package to latest version"
+  yum:
+    name: 'ca-certificates*'
+    state: latest
+    update_only: yes
 - name: "install packages"
   yum:
     name:
