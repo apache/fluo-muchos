@@ -174,7 +174,7 @@ Under the `azure` section, edit following values as per your configuration:
   CentOS 8.x, please follow [these steps](docs/azure-image-reference.md).
   ```bash
   offer|publisher|sku|version|
-  Ex: CentOS|OpenLogic|7.5|latest|
+  Ex: CentOS|OpenLogic|7_9|latest|
   ```
 * `numnodes` to change the cluster size in terms of number of nodes deployed
 * `data_disk_count` to specify how many persistent data disks are attached to each node and will be used by HDFS.

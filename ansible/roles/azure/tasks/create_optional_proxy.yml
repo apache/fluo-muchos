@@ -76,7 +76,7 @@
     image:
       offer: CentOS
       publisher: OpenLogic
-      sku: 7.5
+      sku: 7_9
       version: latest
     managed_disk_type: "{{ osdisk_sku }}"
     data_disks:

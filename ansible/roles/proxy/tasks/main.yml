@@ -25,10 +25,3 @@
   file: path={{ tarballs_dir }} state=directory
 - name: "copy /etc/hosts to proxy"
   template: src=roles/proxy/templates/etc_hosts dest=/etc/etc_hosts owner=root group=root mode=0644
-# Update ca-certificates to ensure that CA certificates are new enough
-# to support SSL verification against websites used to download software
-- name: "update ca-certificates package to latest version"
-  yum:
-    name: 'ca-certificates*'
-    state: latest
-    update_only: yes
