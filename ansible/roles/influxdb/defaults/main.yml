@@ -15,5 +15,5 @@
 # limitations under the License.
 #
 
-influxdb_rpm: influxdb-1.8.3.x86_64.rpm
+influxdb_rpm_url: https://repos.influxdata.com/centos/7/x86_64/stable/influxdb-1.8.3.x86_64.rpm
 influxdb_checksum: "sha512:60abf31c70beb8a391ded82569532a255384516da0b3c287d20065fe7047be343c50b37bbe31d5dd8df4bcb31144ef696b90e21d6739ce375b7e4fc33bae4f03"

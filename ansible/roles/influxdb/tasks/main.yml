@@ -18,8 +18,8 @@
 - name: "download influxdb rpm"
   get_url:
   args:
-    url: https://repos.influxdata.com/centos/7/x86_64/stable/{{ influxdb_rpm }}
-    dest: /tmp/{{ influxdb_rpm }}
+    url: "{{ influxdb_rpm_url }}"
+    dest: /tmp/influxdb.rpm
     checksum: "{{ influxdb_checksum }}"
     force: no
 - name: "Import GPG key for CentOS 8.0 and later"
@@ -29,7 +29,7 @@
     state: present
   when: ansible_facts['distribution_version'] is version('8.0', '>=')
 - name: "ensure influxdb is installed"
-  yum: name=/tmp/{{ influxdb_rpm }} state=present
+  yum: name=/tmp/influxdb.rpm state=present
 - name: "configure influxdb"
   template: src=influxdb-1.8.3.conf dest=/etc/influxdb/influxdb.conf
   notify:
