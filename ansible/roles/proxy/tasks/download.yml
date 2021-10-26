@@ -61,3 +61,4 @@
     retries: 3
     when: az_use_app_insights and not appinsights.stat.exists
   when: cluster_type == 'azure'
+
