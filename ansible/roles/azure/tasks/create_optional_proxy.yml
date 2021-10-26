@@ -74,15 +74,19 @@
         key_data: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
     os_disk_caching: ReadWrite
     image:
-      offer: CentOS
-      publisher: OpenLogic
-      sku: 7_9
-      version: latest
+      offer: "{{ image_offer if image_offer else omit }}"
+      publisher: "{{ image_publisher if image_publisher else omit }}"
+      sku: "{{ image_sku if image_sku else omit }}"
+      version: "{{ image_version if image_version else omit }}"
     managed_disk_type: "{{ osdisk_sku }}"
     data_disks:
      - lun: 0
        disk_size_gb: 64
        managed_disk_type: "{{ data_disk_sku }}"
   vars:
+  - image_offer: "{{ azure_proxy_image_reference.split('|')[0] }}"
+  - image_publisher: "{{ azure_proxy_image_reference.split('|')[1] }}"
+  - image_sku: "{{ azure_proxy_image_reference.split('|')[2] }}"
+  - image_version: "{{ azure_proxy_image_reference.split('|')[3] }}"
   - osdisk_sku: "{{ 'Premium_LRS' if azure_proxy_host_vm_sku in premiumio_capable_skus else 'Standard_LRS' }}"
   when: azure_proxy_host is defined and azure_proxy_host and azure_proxy_host != None
