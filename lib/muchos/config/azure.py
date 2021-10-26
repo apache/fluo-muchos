@@ -189,6 +189,13 @@ class AzureDeployConfig(BaseConfig):
     def azure_image_reference(self):
         return self.get("azure", "azure_image_reference")
 
+    @ansible_host_var
+    def azure_proxy_image_reference(self):
+        apir = self.get("azure", "azure_proxy_image_reference", fallback=None)
+        if apir is None or apir == "":
+            apir = self.get("azure", "azure_image_reference")
+        return apir
+
     @ansible_host_var(name="az_oms_integration_needed")
     @default(False)
     @is_valid(is_in([True, False]))

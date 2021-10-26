@@ -125,6 +125,11 @@ vmss_priority = Regular
 # Azure image reference defined as a pipe-delimited string in the format offer|publisher|sku|version|
 # Please refer 'Launching an Azure cluster' section of the README before making changes
 azure_image_reference = CentOS|OpenLogic|7_9|latest|
+# Azure image reference defined as a pipe-delimited string in the format offer|publisher|sku|version|
+# This is the image that will be used for the proxy machine (if specified by azure_proxy_host). If
+# this is not set, then the value of azure_image_reference will be used on the proxy.
+# Please refer 'Launching an Azure cluster' section of the README before making changes
+#azure_proxy_image_reference = CentOS|OpenLogic|7_9|latest|
 # Size of the cluster to provision.
 # A virtual machine scale set (VMSS) with these many VMs will be created.
 # The minimum allowed size for this is 3 nodes for non-HA & 4 nodes for HA setup

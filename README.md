@@ -176,6 +176,8 @@ Under the `azure` section, edit following values as per your configuration:
   offer|publisher|sku|version|
   Ex: CentOS|OpenLogic|7_9|latest|
   ```
+* `azure_proxy_image_reference` allows you to specify the CentOS image SKU that will be used for the optional proxy machine.
+  If this property is not specified, then the value of `azure_image_reference` will be used instead.
 * `numnodes` to change the cluster size in terms of number of nodes deployed
 * `data_disk_count` to specify how many persistent data disks are attached to each node and will be used by HDFS.
    If you would prefer to use ephemeral / storage for Azure clusters, please follow [these steps](docs/azure-ephemeral-disks.md).
