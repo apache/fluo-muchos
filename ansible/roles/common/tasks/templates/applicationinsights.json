@@ -1,0 +1,14 @@
+{
+    "connectionString": "{{ az_appinsights_connection_string }}",
+    "role": {
+        "name": "{{ 'manager' if (inventory_hostname in groups.accumulomaster) else 'tserver' }}"
+    },
+    "instrumentation": {
+        "micrometer": {
+            "enabled": true
+        }
+    },
+    "preview": { 
+        "metricIntervalSeconds": 10
+   }
+}

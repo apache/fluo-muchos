@@ -23,6 +23,7 @@
   shell: set -o pipefail && echo -n {{ resource_group + vmss_name + location }} | md5sum | tr -cd "[:alnum:]" | cut -c 1-48
   args:
     executable: bash
+  changed_when: false
   register: monitor_name
 
 - name: Set name for log analytics workspace
@@ -33,9 +34,9 @@
   set_fact:
      dashboard_name: "{{ monitor_name.stdout + '-db' }}"
 
-- name: Set name for workbook
+- name: Set display name for workbook
   set_fact:
-    workbook_name: "{{ monitor_name.stdout + '-wb' }}"
+    workbook_title: "{{ monitor_name.stdout + '-wb' }}"
 
 - name: Query all the resources in the resource group
   azure_rm_resource_info:
@@ -43,7 +44,8 @@
     resource_type: resources
   register: rgfacts
 
-- name: Retrieve workbook name
+- name: Retrieve workbook and dashboard info (name, existance)
   set_fact:
-     workbook_exists: "{{ rgfacts.response|selectattr('type', 'equalto', 'microsoft.insights/workbooks')|map(attribute='name')|list }}"
-  when: workbook_name in rgfacts.response|map(attribute='tags')|selectattr('hidden-title','defined')|map(attribute='hidden-title')|list
+    workbook_name: "{{ rgfacts.response|selectattr('type', 'equalto', 'microsoft.insights/workbooks')|selectattr('tags.hidden-title', 'equalto', workbook_title)|map(attribute='name')|join('') }}"
+    workbook_exists: "{{ rgfacts.response|selectattr('type', 'equalto', 'microsoft.insights/workbooks')|map(attribute='tags')|selectattr('hidden-title','equalto', workbook_title)|length > 0 }}"
+    dashboard_exists: "{{ rgfacts.response|selectattr('type', 'equalto', 'Microsoft.Portal/dashboards')|selectattr('name', 'equalto', dashboard_name)|length > 0 }}"

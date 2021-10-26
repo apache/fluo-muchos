@@ -190,6 +190,10 @@ Under the `azure` section, edit following values as per your configuration:
   [Create Log Analytics workspace](https://docs.microsoft.com/en-us/azure/azure-monitor/learn/quick-create-workspace).
   [Create and Share dashboards](https://docs.microsoft.com/en-us/azure/azure-portal/azure-portal-dashboards).
   [Azure Monitor Workbooks](https://docs.microsoft.com/en-us/azure/azure-monitor/platform/workbooks-overview).
+* `az_use_app_insights` to configure an Azure Application Insights with your setup, and activate the application insights
+  [Java agent](https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-in-process-agent) with the manager and tablet
+  servers. Customize [applicationinsights.json](./ansible/roles/common/tasks/templates/applicationinsights.json) to meet
+  your needs before executing muchos setup.
 
 Please refer to the [muchos.props] example for the full list of Azure-specific configurations - some of which have supplementary comments.
 

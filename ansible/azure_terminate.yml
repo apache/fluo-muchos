@@ -20,16 +20,26 @@
   tasks:
     - block:
       - import_tasks: roles/azure/tasks/log_analytics_ws_common.yml
+      - import_tasks: roles/azure/tasks/application_insights_common.yml
+
+      - name: Delete application insights
+        azure_rm_resource:
+           resource_group: "{{ resource_group }}"
+           provider: insights
+           resource_type: components
+           resource_name: "{{ app_insights_name }}"
+           api_version: '2020-02-02'
+           state: absent
 
       - name: Delete workbook
         azure_rm_resource:
            resource_group: "{{ resource_group }}"
            provider: insights
            resource_type: workbooks
-           resource_name: "{{ workbook_exists|join('') }}"
+           resource_name: "{{ workbook_name }}"
            api_version: '2020-02-12'
            state: absent
-        when: workbook_exists is defined
+        when: workbook_exists
 
       - name: Delete dashboard
         azure_rm_resource:
