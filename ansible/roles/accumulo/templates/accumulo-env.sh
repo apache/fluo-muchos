@@ -38,6 +38,7 @@ export MALLOC_ARENA_MAX=${MALLOC_ARENA_MAX:-1}
 # Activate the Application Insights agent
 export ACCUMULO_TSERVER_OPTS="$ACCUMULO_TSERVER_OPTS -javaagent:{{ az_app_insights_home }}/appinsights-agent.jar"
 export ACCUMULO_MASTER_OPTS="$ACCUMULO_MASTER_OPTS -javaagent:{{ az_app_insights_home }}/appinsights-agent.jar"
+export ACCUMULO_GC_OPTS="$ACCUMULO_GC_OPTS -javaagent:{{ az_app_insights_home }}/appinsights-agent.jar"
 {% endif %}
 
 {% else %}
@@ -128,9 +129,9 @@ case "$cmd" in
 esac
 {% if cluster_type == 'azure' and az_use_app_insights %}
 
-# Enable the application insights agent for tablet servers
+# Enable the application insights agent for tablet servers, manager, and gc processes
 case "$cmd" in
-  tserver|master|manager)
+  tserver|master|manager|gc)
     JAVA_OPTS=("${JAVA_OPTS[@]}" '-javaagent:{{ az_app_insights_home }}/appinsights-agent.jar')
     ;;
   *)

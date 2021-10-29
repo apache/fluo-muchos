@@ -47,6 +47,6 @@
 - name: Update az_appinsights_connection_string in muchos.props
   lineinfile:
     path: "{{ deploy_path }}/conf/muchos.props"
-    regexp: '^az_appinsights_connection_string\s*=\s*|^[#]\s*az_appinsights_connection_string\s*=\s*'
+    regexp: '^\s*[#]?\s*az_appinsights_connection_string\s*='
     line: "az_appinsights_connection_string = {{ app_insights.response.properties.ConnectionString }}"
-    insertafter: '\[azure\]'
+    insertafter: '\[azure\]|az_app_insights_version\s*='
