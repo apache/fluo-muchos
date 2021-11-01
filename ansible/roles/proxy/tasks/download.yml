@@ -39,12 +39,26 @@
    mode: 0644
   when: hadoop_major_version == '3' and java_product_version == 11
 
-- name: "download omsagent installer to proxy"
-  shell: set -o pipefail && eval $(curl -s https://raw.githubusercontent.com/Microsoft/OMS-Agent-for-Linux/master/installer/scripts/onboard_agent.sh | grep -e 'GITHUB_RELEASE_X64=' -e 'BUNDLE_X64=') && wget ${GITHUB_RELEASE_X64}${BUNDLE_X64} -O {{ tarballs_dir }}/omsagent.x64.sh
-  args:
-    executable: bash
-  register: result
-  until: result is not failed
-  retries: 3
-  delay: 2
-  when: cluster_type == 'azure' and az_oms_integration_needed
+- block:
+  - name: "download omsagent installer to proxy"
+    shell: set -o pipefail && eval $(curl -s https://raw.githubusercontent.com/Microsoft/OMS-Agent-for-Linux/master/installer/scripts/onboard_agent.sh | grep -e 'GITHUB_RELEASE_X64=' -e 'BUNDLE_X64=') && wget ${GITHUB_RELEASE_X64}${BUNDLE_X64} -O {{ tarballs_dir }}/omsagent.x64.sh
+    args:
+      executable: bash
+    register: result
+    until: result is not failed
+    retries: 3
+    delay: 2
+    when: az_oms_integration_needed
+
+  - name: "check if Application Insights Agent jar was uploaded to proxy"
+    stat: path={{ tarballs_dir }}/appinsights-agent.jar
+    register: appinsights
+    when: az_use_app_insights
+  - name: "download Application Insights Agent jar to proxy"
+    get_url: url=https://github.com/microsoft/ApplicationInsights-Java/releases/download/{{ az_app_insights_version }}/applicationinsights-agent-{{ az_app_insights_version }}.jar dest={{ tarballs_dir }}/appinsights-agent.jar force=no
+    register: gresult
+    until: "'OK' in gresult.msg or 'file already exists' in gresult.msg"
+    retries: 3
+    when: az_use_app_insights and not appinsights.stat.exists
+  when: cluster_type == 'azure'
+

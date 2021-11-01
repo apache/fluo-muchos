@@ -2,11 +2,10 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "deployment-prefix": {
+        "la-workspace-name": {
             "type": "string",
-	    "defaultValue": "[parameters('deployment-prefix')]",
             "metadata": {
-                "description": "Deployment prefix. E.g. Organization-DeploymentType"
+                "description": "Log analytics workspace name"
             }
         },
         "service-tier": {
@@ -31,7 +30,6 @@
         }
     },
     "variables": {
-        "la-workspace-name": "[concat(parameters('deployment-prefix'), '-la')]",
         "log-analytics-search-version": 1
     },
     "resources": [
@@ -39,7 +37,7 @@
             "apiVersion": "2017-03-15-preview",
             "type": "Microsoft.OperationalInsights/workspaces",
             "location": "[parameters('location')]",
-            "name": "[variables('la-workspace-name')]",
+            "name": "[parameters('la-workspace-name')]",
             "properties": {
                 "features": {
                     "searchVersion": "[variables('log-analytics-search-version')]"
@@ -54,7 +52,7 @@
                     "type": "datasources",
                     "name": "sampleSyslog1",
                     "dependsOn": [
-                        "[concat('Microsoft.OperationalInsights/workspaces/', variables('la-workspace-name'))]"
+                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('la-workspace-name'))]"
                     ],
                     "kind": "LinuxSyslog",
                     "properties": {
@@ -81,9 +79,9 @@
                 {
                     "apiVersion": "2015-11-01-preview",
                     "type": "datasources",
-		    "name": "sampleSyslog2",
+                    "name": "sampleSyslog2",
                     "dependsOn": [
-                        "[concat('Microsoft.OperationalInsights/workspaces/', variables('la-workspace-name'))]"
+                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('la-workspace-name'))]"
                     ],
                     "kind": "LinuxSyslog",
                     "properties": {
@@ -101,7 +99,7 @@
                     "type": "datasources",
                     "name": "sampleSyslogCollection1",
                     "dependsOn": [
-                        "[concat('Microsoft.OperationalInsights/workspaces/', variables('la-workspace-name'))]"
+                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('la-workspace-name'))]"
                     ],
                     "kind": "LinuxSyslogCollection",
                     "properties": {
@@ -113,7 +111,7 @@
                     "type": "datasources",
                     "name": "sampleLinuxPerf1",
                     "dependsOn": [
-                        "[concat('Microsoft.OperationalInsights/workspaces/', variables('la-workspace-name'))]"
+                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('la-workspace-name'))]"
                     ],
                     "kind": "LinuxPerformanceObject",
                     "properties": {
@@ -137,7 +135,7 @@
                                 "counterName": "Disk Writes/sec"
                             }
                         ],
-		        "objectName": "Logical Disk",
+                        "objectName": "Logical Disk",
                         "instanceName": "*",
                         "intervalSeconds": 60
                     }
@@ -147,7 +145,7 @@
                     "type": "datasources",
                     "name": "sampleLinuxPerf2",
                     "dependsOn": [
-                        "[concat('Microsoft.OperationalInsights/workspaces/', variables('la-workspace-name'))]"
+                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('la-workspace-name'))]"
                     ],
                     "kind": "LinuxPerformanceObject",
                     "properties": {
@@ -172,7 +170,7 @@
                     "type": "datasources",
                     "name": "sampleLinuxPerf3",
                     "dependsOn": [
-                        "[concat('Microsoft.OperationalInsights/workspaces/', variables('la-workspace-name'))]"
+                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('la-workspace-name'))]"
                     ],
                     "kind": "LinuxPerformanceObject",
                     "properties": {
@@ -200,7 +198,7 @@
                     "type": "datasources",
                     "name": "sampleLinuxPerf4",
                     "dependsOn": [
-                        "[concat('Microsoft.OperationalInsights/workspaces/', variables('la-workspace-name'))]"
+                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('la-workspace-name'))]"
                     ],
                     "kind": "LinuxPerformanceObject",
                     "properties": {
@@ -231,7 +229,7 @@
                     "type": "datasources",
                     "name": "sampleLinuxPerfCollection1",
                     "dependsOn": [
-                        "[concat('Microsoft.OperationalInsights/workspaces/', variables('la-workspace-name'))]"
+                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('la-workspace-name'))]"
                     ],
                     "kind": "LinuxPerformanceCollection",
                     "properties": {
@@ -244,7 +242,7 @@
     "outputs": {
         "la-resourceId": {
             "type": "string",
-            "value": "[resourceId('Microsoft.OperationalInsights/workspaces', variables('la-workspace-name'))]"
+            "value": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('la-workspace-name'))]"
         },
         "la-workspace-resourceGroup": {
             "type": "string",
@@ -252,15 +250,15 @@
         },
         "la-workspace-name": {
             "type": "string",
-            "value": "[variables('la-workspace-name')]"
+            "value": "[parameters('la-workspace-name')]"
         },
         "la-workspace-id": {
             "type": "string",
-            "value": "[reference(resourceId('Microsoft.OperationalInsights/workspaces', variables('la-workspace-name')), '2015-03-20').customerId]"
+            "value": "[reference(resourceId('Microsoft.OperationalInsights/workspaces', parameters('la-workspace-name')), '2015-03-20').customerId]"
         },
         "la-primary-shared-key": {
             "type": "string",
-            "value": "[listKeys(resourceId('Microsoft.OperationalInsights/workspaces', variables('la-workspace-name')), '2015-03-20').primarySharedKey]"
+            "value": "[listKeys(resourceId('Microsoft.OperationalInsights/workspaces', parameters('la-workspace-name')), '2015-03-20').primarySharedKey]"
         }
     }
 }

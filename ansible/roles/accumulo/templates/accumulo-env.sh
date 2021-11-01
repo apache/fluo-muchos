@@ -34,6 +34,12 @@ export ACCUMULO_OTHER_OPTS="-Xmx256m -Xms64m"
 export ACCUMULO_KILL_CMD='kill -9 %p'
 export NUM_TSERVERS=1
 export MALLOC_ARENA_MAX=${MALLOC_ARENA_MAX:-1}
+{% if cluster_type == 'azure' and az_use_app_insights %}
+# Activate the Application Insights agent
+export ACCUMULO_TSERVER_OPTS="$ACCUMULO_TSERVER_OPTS -javaagent:{{ az_app_insights_home }}/appinsights-agent.jar"
+export ACCUMULO_MASTER_OPTS="$ACCUMULO_MASTER_OPTS -javaagent:{{ az_app_insights_home }}/appinsights-agent.jar"
+export ACCUMULO_GC_OPTS="$ACCUMULO_GC_OPTS -javaagent:{{ az_app_insights_home }}/appinsights-agent.jar"
+{% endif %}
 
 {% else %}
 
@@ -121,6 +127,18 @@ case "$cmd" in
     true
     ;;
 esac
+{% if cluster_type == 'azure' and az_use_app_insights %}
+
+# Enable the application insights agent for tablet servers, manager, and gc processes
+case "$cmd" in
+  tserver|master|manager|gc)
+    JAVA_OPTS=("${JAVA_OPTS[@]}" '-javaagent:{{ az_app_insights_home }}/appinsights-agent.jar')
+    ;;
+  *)
+    true
+    ;;
+esac
+{% endif %}
 export JAVA_OPTS
 
 export MALLOC_ARENA_MAX=${MALLOC_ARENA_MAX:-1}

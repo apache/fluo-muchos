@@ -195,12 +195,24 @@ principal_id =
 #azure_fileshare_username = fs_username
 #azure_fileshare_password = fs_password
 # Optional integration with Azure Log Analytics
-# Workspace ID and key must be updated to enable this.
+# A workspace will be created and az_logs_resource_id, az_logs_id, az_logs_key
+# will be updated here by the launch command. If you wish to use an existing
+# workspace in another resource group, then fill in all 3 of these values before
+# running launch. 
 # For details on how to get a workspace ID and key, see the link below
 # https://docs.microsoft.com/en-us/azure/azure-monitor/learn/quick-collect-linux-computer#obtain-workspace-id-and-key
 az_oms_integration_needed = False
+#az_logs_resource_id =
 #az_logs_id =
 #az_logs_key =
+# Set to true to enable Azure Application Insights integration
+# An Application Insights instance will be created by the launch command and its
+# connection string will be updated here. If you wish to use a different
+# Application Insights instance, then set az_appinsights_connection_string to
+# its connection string before invoking launch.
+az_use_app_insights = False
+az_app_insights_version = 3.2.1
+#az_appinsights_connection_string = 
 
 [existing]
 # Root of data dirs

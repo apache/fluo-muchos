@@ -22,9 +22,9 @@
     quiet: yes
     that: ansible_version.full is version('2.9.0', '>=')
     fail_msg: "Ansible 2.9 or above is required for using Azure ADLS Gen2 in Muchos.
-    Please use the requirements.txt file to install the currently supported
-    version of Ansible, and also execute the ./scripts/install-ansible-for-azure
-    script to install the Ansible collection for Azure and other pre-requisites."
+      Please use the requirements.txt file to install the currently supported
+      version of Ansible, and also execute the ./scripts/install-ansible-for-azure
+      script to install the Ansible collection for Azure and other pre-requisites."
   when: use_adlsg2
 
 - import_tasks: create_common_resources.yml
@@ -40,4 +40,6 @@
 - import_tasks: assign_msi_multiple_vmss.yml
   when: use_multiple_vmss and use_adlsg2
 - import_tasks: create_log_analytics_ws.yml
-  when: az_oms_integration_needed and (az_logs_id is not defined or (not az_logs_id) or az_logs_id == None)
+  when: (az_oms_integration_needed or az_use_app_insights) and (az_logs_id is not defined or (not az_logs_id) or az_logs_id == None)
+- import_tasks: create_application_insights.yml
+  when: az_use_app_insights

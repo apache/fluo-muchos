@@ -41,6 +41,8 @@
         when: az_oms_integration_needed
       - import_tasks: roles/common/tasks/azure_oms_selinux.yml
         when: az_oms_integration_needed
+      - import_tasks: roles/common/tasks/azure_application_insights.yml
+        when: az_use_app_insights
       when: cluster_type == 'azure'
 
     - import_tasks: roles/common/tasks/ec2.yml

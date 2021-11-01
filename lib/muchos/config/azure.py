@@ -202,6 +202,11 @@ class AzureDeployConfig(BaseConfig):
     def omsIntegrationNeeded(self):
         return self.getboolean("azure", "az_oms_integration_needed")
 
+    @ansible_host_var(name="az_logs_resource_id")
+    @default(None)
+    def logs_resource_id(self):
+        return self.get("azure", "az_logs_resource_id")
+
     @ansible_host_var(name="az_logs_id")
     @default(None)
     def logs_id(self):
@@ -211,6 +216,27 @@ class AzureDeployConfig(BaseConfig):
     @default(None)
     def logs_key(self):
         return self.get("azure", "az_logs_key")
+
+    @ansible_host_var(name="az_use_app_insights")
+    @default(False)
+    @is_valid(is_in([True, False]))
+    def az_use_app_insights(self):
+        return self.getboolean("azure", "az_use_app_insights")
+
+    @ansible_host_var(name="az_appinsights_connection_string")
+    @default(None)
+    def az_appinsights_connection_string(self):
+        return self.get("azure", "az_appinsights_connection_string")
+
+    @ansible_host_var(name="az_app_insights_version")
+    @default("3.2.1")
+    def az_app_insights_version(self):
+        return self.getboolean("azure", "az_app_insights_version")
+
+    @ansible_host_var(name="az_app_insights_home")
+    @default("{{ install_dir }}/appinsights-{{ az_app_insights_version }}")
+    def az_app_insights_home(self):
+        return self.getboolean("azure", "az_app_insights_home")
 
     @ansible_host_var(name="use_adlsg2")
     @is_valid(is_in([True, False]))
