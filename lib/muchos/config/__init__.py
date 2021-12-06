@@ -15,10 +15,6 @@
 # limitations under the License.
 #
 
-from .existing import ExistingDeployConfig
-from .ec2 import Ec2DeployConfig
-from .azure import AzureDeployConfig
-
 from configparser import ConfigParser
 
 
@@ -35,6 +31,8 @@ def DeployConfig(
     cluster_type = c.get("general", "cluster_type")
 
     if cluster_type == "existing":
+        from .existing import ExistingDeployConfig
+
         return ExistingDeployConfig(
             deploy_path,
             config_path,
@@ -45,6 +43,8 @@ def DeployConfig(
         )
 
     if cluster_type == "ec2":
+        from .ec2 import Ec2DeployConfig
+
         return Ec2DeployConfig(
             deploy_path,
             config_path,
@@ -55,6 +55,8 @@ def DeployConfig(
         )
 
     if cluster_type == "azure":
+        from .azure import AzureDeployConfig
+
         return AzureDeployConfig(
             deploy_path,
             config_path,

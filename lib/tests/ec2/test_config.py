@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-from muchos.config import Ec2DeployConfig
+from muchos.config.ec2 import Ec2DeployConfig
 
 
 def test_ec2_cluster():

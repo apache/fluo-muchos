@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-from muchos.config import AzureDeployConfig
+from muchos.config.azure import AzureDeployConfig
 
 
 def test_azure_cluster():

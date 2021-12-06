@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-from muchos.config import ExistingDeployConfig
+from muchos.config.existing import ExistingDeployConfig
 
 
 def test_existing_cluster():
