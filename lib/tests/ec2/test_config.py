@@ -27,9 +27,9 @@ def test_ec2_cluster():
         "../conf/templates",
         "mycluster",
     )
-    assert c.checksum_ver("accumulo", "1.9.0") == (
+    assert c.checksum_ver("fluo", "1.2.0") == (
         "sha256:"
-        "f68a6145029a9ea843b0305c90a7f5f0334d8a8ceeea94734267ec36421fe7fe"
+        "037f89cd2bfdaf76a1368256c52de46d6b9a85c9c1bfc776ec4447d02c813fb2"
     )
     assert c.checksum("accumulo") == (
         "sha512:"
