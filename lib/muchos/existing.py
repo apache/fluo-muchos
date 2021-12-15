@@ -21,7 +21,6 @@ import subprocess
 import time
 from os import path
 from sys import exit
-from os import listdir
 
 
 class ExistingCluster:
@@ -219,12 +218,14 @@ class ExistingCluster:
 
         self.sync()
 
-        conf_upload = path.join(config.deploy_path, "conf/upload")
         cluster_tarballs = "{0}/tarballs".format(config.user_home())
         self.exec_on_proxy_verified("mkdir -p {0}".format(cluster_tarballs))
-        for f in listdir(conf_upload):
-            tarball_path = path.join(conf_upload, f)
-            if path.isfile(tarball_path) and tarball_path.endswith("gz"):
+
+        # only upload tarballs (including SNAPSHOT tarballs) if a matching file
+        # for the configured software version is present locally in conf/upload
+        for software in config.get_software_package_names():
+            tarball_path = config.get_local_tarball_path(software)
+            if tarball_path is not None and path.exists(tarball_path):
                 self.send_to_proxy(tarball_path, cluster_tarballs)
 
         self.execute_playbook("site.yml")

@@ -16,10 +16,13 @@
 #
 
 from abc import ABCMeta, abstractmethod
+from ansible.parsing.dataloader import DataLoader
+from ansible.template import Templar
 from collections import ChainMap
 from configparser import ConfigParser
 from distutils.version import StrictVersion
-from os.path import isfile
+from hashlib import sha512
+from os.path import isfile, exists, join
 from sys import exit
 from traceback import format_exc
 from .decorators import (
@@ -60,6 +63,19 @@ OPTIONAL_SERVICES = [
     "journalnode",
     "zkfc",
     "elkserver",
+]
+
+_SOFTWARE_PACKAGES = [
+    "accumulo",
+    "fluo",
+    "fluo_yarn",
+    "hadoop",
+    "spark",
+    "zookeeper",
+    "elasticsearch",
+    "logstash",
+    "kibana",
+    "filebeat",
 ]
 
 _HOST_VAR_DEFAULTS = {
@@ -213,21 +229,21 @@ class BaseConfig(ConfigParser, metaclass=ABCMeta):
             )
         )
 
+    def get_expanded_host_var(self, host_var_name):
+        host_vars = self.ansible_host_vars()
+        for k, v in host_vars.items():
+            host_vars[k] = self.resolve_value(k, default=v)
+
+        templar = Templar(
+            loader=DataLoader(),
+            variables=host_vars,
+        )
+        return templar.template(host_vars[host_var_name])
+
     def ansible_play_vars(self):
         software_checksums = {
             "{}_checksum".format(k): self.checksum(k)
-            for k in [
-                "accumulo",
-                "fluo",
-                "fluo_yarn",
-                "hadoop",
-                "spark",
-                "zookeeper",
-                "elasticsearch",
-                "logstash",
-                "kibana",
-                "filebeat",
-            ]
+            for k in _SOFTWARE_PACKAGES
         }
         return dict(
             ChainMap(
@@ -427,6 +443,18 @@ class BaseConfig(ConfigParser, metaclass=ABCMeta):
         else:
             return None
 
+    def get_local_tarball_path(self, software):
+        tarball_key = software + "_tarball"
+        return (
+            join(
+                self.deploy_path,
+                "conf/upload",
+                self.get_expanded_host_var(tarball_key),
+            )
+            if tarball_key in _HOST_VAR_DEFAULTS
+            else None
+        )
+
     def checksum_ver(self, software, version):
         if not isfile(self.checksums_path):
             exit(
@@ -434,9 +462,6 @@ class BaseConfig(ConfigParser, metaclass=ABCMeta):
                     self.hosts_path
                 )
             )
-
-        if "SNAPSHOT" in version:
-            return ""
 
         if not self.checksums_d:
             self.checksums_d = {}
@@ -480,12 +505,26 @@ class BaseConfig(ConfigParser, metaclass=ABCMeta):
                         )
 
         key = "{0}:{1}".format(software, version)
+
         if key not in self.checksums_d:
-            exit(
-                "ERROR - Failed to find checksums for {} {} in {}".format(
-                    software, version, self.checksums_path
+            local_tarball_path = self.get_local_tarball_path(software)
+            if local_tarball_path is None or not exists(local_tarball_path):
+                exit(
+                    "ERROR - Failed to find either a valid checksum in {}, "
+                    "or a local tarball to upload for {} {}.".format(
+                        self.checksums_path, software, version
+                    )
                 )
-            )
+            else:
+                # compute and use the checksum for local tarball
+                local_tarball_sha512 = sha512()
+                with open(local_tarball_path, "rb") as tarball_contents:
+                    file_buffer = tarball_contents.read(65536)
+                    while len(file_buffer) > 0:
+                        local_tarball_sha512.update(file_buffer)
+                        file_buffer = tarball_contents.read(65536)
+                return f"sha512:{local_tarball_sha512.hexdigest()}"
+
         return self.checksums_d[key]
 
     def nodes(self):
@@ -499,6 +538,9 @@ class BaseConfig(ConfigParser, metaclass=ABCMeta):
             if service in service_list:
                 return True
         return False
+
+    def get_software_package_names(self):
+        return _SOFTWARE_PACKAGES
 
     # test method, might want to make private or just move to test module
     def get_host_services(self):

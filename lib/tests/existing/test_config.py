@@ -35,3 +35,11 @@ def test_existing_cluster():
     assert c.default_data_dirs() == ["/var/data1", "/var/data2", "/var/data3"]
     assert c.metrics_drive_ids() == ["var-data1", "var-data2", "var-data3"]
     assert c.shutdown_delay_minutes() == "0"
+    assert (
+        c.get_local_tarball_path("accumulo")
+        == "muchos/conf/upload/accumulo-2.0.1-bin.tar.gz"
+    )
+    assert (
+        c.get_local_tarball_path("zookeeper")
+        == "muchos/conf/upload/apache-zookeeper-3.6.3-bin.tar.gz"
+    )
