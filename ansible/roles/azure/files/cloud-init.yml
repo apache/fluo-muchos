@@ -1,8 +1,4 @@
 #cloud-config
-# This file is an Azure-specific cloud-init configuration file.
-# Upgrade the instance on first boot:
-package_upgrade: true
-
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -20,4 +16,8 @@ package_upgrade: true
 # limitations under the License.
 #
 #
+# NOTE: do not modify the first line in this file - it is a mandatory
+# header to designate the contents as a cloud-init configuration
 #
+# Upgrade the instance on first boot:
+package_upgrade: true
