@@ -66,6 +66,7 @@
       sku: "{{ image_sku if image_sku else omit }}"
       version: "{{ image_version if image_version else omit }}"
     data_disks: "{{ luns_dict if data_disk_count > 0 else omit }}"
+    custom_data: "{{ lookup('file', 'cloud-init.yml') }}"
   vars:
   - image_offer: "{{ azure_image_reference.split('|')[0] }}"
   - image_publisher: "{{ azure_image_reference.split('|')[1] }}"
