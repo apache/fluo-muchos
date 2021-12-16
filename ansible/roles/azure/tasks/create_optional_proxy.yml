@@ -83,6 +83,7 @@
      - lun: 0
        disk_size_gb: 64
        managed_disk_type: "{{ data_disk_sku }}"
+    custom_data: "{{ lookup('file', 'cloud-init.yml') }}"
   vars:
   - image_offer: "{{ azure_proxy_image_reference.split('|')[0] }}"
   - image_publisher: "{{ azure_proxy_image_reference.split('|')[1] }}"
