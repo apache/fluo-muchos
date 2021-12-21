@@ -17,7 +17,7 @@
 # under the License.
 #
 
-# This GitHub Actions workflow will prepare a environment with Python 3.6
+# This GitHub Actions workflow will prepare a environment with Python 3.9
 # and the required Python packages, to run the CI tests
 # (Ansible-lint, Flake8 etc.) for Fluo-Muchos.
 # See also:
@@ -43,7 +43,7 @@ jobs:
     - uses: actions/checkout@v1
     - uses: actions/setup-python@v2
       with:
-        python-version: '3.6'
+        python-version: '3.9'
     - name: Install required packages
       run: pip install -r ./lib/requirements.txt
     - name: Install Azure specific Ansible collections
