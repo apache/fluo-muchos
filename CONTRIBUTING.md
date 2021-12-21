@@ -27,7 +27,7 @@ Muchos has unit tests. To run them, first install required packages:
 ```
 The following command runs the unit tests:
 ```
-    nosetests -w lib/
+    nose2 -v -B
 ```
 
 ## Before you submit a PR

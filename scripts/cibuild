@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 set -e
-echo "Running nose tests..."
-nosetests -w lib/
-echo "SUCCESS: All Nose tests completed."
+echo "Running nose2 tests..."
+cd lib
+nose2 -v -B
+echo "SUCCESS: All nose2 tests completed."
 echo "Running Ansible-lint..."
+cd ..
 ansible-lint -x no-changed-when,risky-file-permissions,unnamed-task,var-naming
 echo "SUCCESS: Ansible-lint completed."
 echo "Running flake8 to check Python code..."
