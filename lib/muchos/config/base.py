@@ -119,6 +119,20 @@ _HOST_VAR_DEFAULTS = {
     "zookeeper_home": "{{ install_dir }}/{{ zookeeper_basename }}",
     "zookeeper_tarball": "{{ zookeeper_basename }}.tar.gz",
     "zookeeper_version": None,
+    "elasticsearch_version": None,
+    "elasticsearch_rpm": (
+        "elasticsearch-oss-" "{{elasticsearch_version}}-x86_64.rpm"
+    ),
+    "kibana_version": None,
+    "kibana_rpm": "kibana-oss-{{kibana_version}}-x86_64.rpm",
+    "filebeat_version": None,
+    "filebeat_rpm": "filebeat-oss-{{filebeat_version}}-x86_64.rpm",
+    "logstash_version": None,
+    "logstash_rpm": (
+        "{% if logstash_version is version('7.10.0', '>=') %}"
+        "logstash-oss-{{logstash_version}}-x86_64.rpm{% else %}"
+        "logstash-oss-{{logstash_version}}.rpm{% endif %}"
+    ),
 }
 
 _PLAY_VAR_DEFAULTS = {
@@ -209,6 +223,10 @@ class BaseConfig(ConfigParser, metaclass=ABCMeta):
                 "hadoop",
                 "spark",
                 "zookeeper",
+                "elasticsearch",
+                "logstash",
+                "kibana",
+                "filebeat",
             ]
         }
         return dict(
