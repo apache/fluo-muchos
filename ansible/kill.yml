@@ -44,3 +44,21 @@
     when: "'swarmmanager' in groups"
   - name: "ensure all processes started by Muchos are killed"
     script: roles/common/files/kill.sh
+
+- hosts: all:!{{ azure_proxy_host }}
+  become: yes
+  tasks:
+  - block:
+    - name: stop kibana
+      service:
+        name: kibana
+        state: stopped
+    - name: stop elasticsearch
+      service:
+        name: elasticsearch
+        state: stopped
+    - name: stop logstash
+      service:
+        name: logstash
+        state: stopped
+    when: "'elkserver' in groups"

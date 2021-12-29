@@ -109,3 +109,83 @@
     retries: 10
     delay: 3
     until: delete_task is success
+
+- hosts: all:!{{ azure_proxy_host }}
+  become: yes
+  tasks:
+  - block:
+    - name: remove kibana
+      yum:
+        name: kibana*
+        state: absent
+    - name: delete kibana rpm
+      file:
+        path: /tmp/{{ kibana_rpm }}
+        state: absent
+        force: yes
+    - name: remove /etc/kibana directory
+      file:
+        path: /etc/kibana
+        state: absent
+        force: yes
+    - name: remove /var/log/kibana directory
+      file:
+        path: /var/log/kibana/
+        state: absent
+        force: yes
+    - name: remove /var/run/kibana directory
+      file:
+        path: /var/run/kibana/
+        state: absent
+        force: yes
+    - name: disable logstash beat
+      command: filebeat modules disable logstash
+      ignore_errors: yes
+    - name: remove filebeat
+      yum:
+        name: filebeat*
+        state: absent
+    - name: delete filebeat rpm
+      file:
+        path: /tmp/{{ filebeat_rpm }}
+        state: absent
+        force: yes
+    - name: delete /etc/filebeat directory
+      file:
+        path: /etc/filebeat/
+        state: absent
+        force: yes
+    - name: remove logstash
+      yum:
+        name: logstash*
+        state: absent
+    - name: delete logstash rpm
+      file:
+        path: /tmp/{{ logstash_rpm }}
+        state: absent
+        force: yes
+    - name: remove etc/logstash directory
+      file:
+        path: /etc/logstash
+        state: absent
+        force: yes
+    - name: remove elasticsearch
+      yum:
+        name: elasticsearch*
+        state: absent
+    - name: delete /etc/elasticsearch directory
+      file:
+        path: /etc/elasticsearch
+        state: absent
+        force: yes
+    - name: delete /var/lib/elasticsearch directory
+      file:
+        path: /var/lib/elasticsearch
+        state: absent
+        force: yes
+    - name: delete elasticsearch rpm
+      file:
+        path: /tmp/{{ elasticsearch_rpm }}
+        state: absent
+        force: yes
+    when: "'elkserver' in groups"

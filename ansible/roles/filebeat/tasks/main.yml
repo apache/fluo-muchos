@@ -57,5 +57,5 @@
 
 #Run Filebeat
 - name: Run Filebeat in the background
-  command: screen -d -m ./filebeat -e -c filebeat.yml -d "publish"
+  command: screen -d -m filebeat -e -c filebeat.yml -d "publish"
   become: true
