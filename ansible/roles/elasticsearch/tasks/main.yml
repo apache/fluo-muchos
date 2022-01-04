@@ -82,6 +82,10 @@
     enabled: yes
   become: true
 
+- name: remove jndi plugin from log4j jar to mitigate log4shell
+  shell: zip -q -d /usr/share/elasticsearch/lib/log4j-core-*.jar org/apache/logging/log4j/core/lookup/JndiLookup.class
+  become: true
+
 # Restart Elasticsearch
 - name: Start Elasticsearch
   service:

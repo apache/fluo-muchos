@@ -37,6 +37,10 @@
     name: /tmp/{{ logstash_rpm }}
     state: present
 
+- name: remove jndi plugin from log4j jar to mitigate log4shell
+  shell: zip -q -d /usr/share/logstash/logstash-core/lib/jars/log4j-core-*.jar org/apache/logging/log4j/core/lookup/JndiLookup.class
+  become: true
+
 # Update startup.option file with the new home location.
 - name: Update the startup.option file
   lineinfile:
