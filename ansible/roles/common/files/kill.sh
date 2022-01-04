@@ -26,5 +26,10 @@ pkill -9 -f JobHistoryServer
 pkill -9 -f org.apache.spark.deploy.history.HistoryServer
 sudo pkill -9 -f influxdb
 sudo pkill -9 -f grafana-server
+sudo pkill -9 -f kibana
+sudo pkill -9 -f elasticsearch
+sudo pkill -9 -f logstash
+sudo pkill -9 -f filebeat
+sudo screen -wipe
 
 exit 0
