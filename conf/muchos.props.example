@@ -59,6 +59,11 @@ nameservice_id = muchoshacluster
 num_tservers = 1
 # If accumulo services are to be run under systemd, set this to 'True'
 use_systemd = False
+# ELK stack
+elasticsearch_version = 7.10.2
+kibana_version = 7.10.2
+filebeat_version = 7.10.2
+logstash_version = 7.10.2
 
 [ec2]
 # AWS machine image to use. The default below is for a CentOS 7 image (in us-east-1).
