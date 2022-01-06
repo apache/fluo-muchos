@@ -72,8 +72,12 @@
         - import_tasks: roles/accumulo/tasks/start-master.yml
         - import_tasks: roles/accumulo/tasks/start-gc.yml
         - import_tasks: roles/accumulo/tasks/start-monitor.yml
-        - import_tasks: roles/accumulo/tasks/start-tracer.yml
       when: use_systemd
+      become: yes
+    - name: "install and start all the accumulo tracer service using systemd"
+      block:
+        - import_tasks: roles/accumulo/tasks/start-tracer.yml
+      when: use_systemd and accumulo_version is version('2.1.0','<')
       become: yes
 
 - hosts: workers
