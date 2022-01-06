@@ -18,7 +18,7 @@
 cluster_type = ec2
 # Cluster user name (install command will SSH to cluster using this user)
 # Leave default below if launching cluster in AWS
-cluster_user = centos
+cluster_user = fedora
 # Cluster user group
 cluster_group = %(cluster_user)s
 # Cluster user home directory
@@ -30,7 +30,7 @@ install_dir = %(user_home)s/install
 # from your machine. Hostname can be chosen from "nodes" section below.
 proxy_hostname = leader1
 # If set, a SOCKS proxy will be created on the specified port when connecting to proxy using 'muchos ssh <cluster>'
-#proxy_socks_port = 38585
+proxy_socks_port = 38585
 # Accumulo Instance name
 accumulo_instance = muchos
 # Accumulo Password
@@ -66,11 +66,9 @@ filebeat_version = 7.10.2
 logstash_version = 7.10.2
 
 [ec2]
-# AWS machine image to use. The default below is for a CentOS 7 image (in us-east-1).
+# AWS machine image to use. The default below is for a Fedora image (in us-east-1).
 # You may need to change this value if a new image has been released or you are running in a different region.
-# Before using this AMI, subscribe to it on the CentOS product page below or launching will fail:
-#   https://aws.amazon.com/marketplace/pp/B00O7WM7QW
-aws_ami = ami-0affd4508a5d2481b
+aws_ami = ami-08b4ee602f76bff79
 # Type of AWS instance launched by default
 default_instance_type = m5d.large
 # Type of AWS instance launched for any node running 'worker' service
@@ -91,7 +89,7 @@ worker_instance_type = %(default_instance_type)s
 # Name below should be your 'Key pair name' in EC2 and not name of your public key file.
 key_name = my_aws_key
 # Type of filesystem to format instance storage as.
-fstype = ext3
+fstype = ext4
 # Force formatting of instance devices, even when it has an existing filesystem.
 force_format = no
 # Tags to add instances
