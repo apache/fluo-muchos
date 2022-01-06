@@ -44,7 +44,7 @@ def test_azure_cluster():
     )
     assert c.get("azure", "vm_sku") == "Standard_D8s_v3"
     assert c.get("azure", "data_disk_sku") == "Standard_LRS"
-    assert c.user_home() == "/home/centos"
+    assert c.user_home() == "/home/" + c.get("general", "cluster_user")
     assert c.mount_root() == "/var/data"
     assert c.use_multiple_vmss() is False
     assert c.worker_data_dirs() == ["/var/data1", "/var/data2", "/var/data3"]
@@ -106,8 +106,9 @@ def test_azure_cluster():
     assert c.get("general", "proxy_hostname") == "leader1"
     assert c.proxy_public_ip() == "23.0.0.0"
     assert c.proxy_private_ip() == "10.0.0.0"
-    assert c.get("general", "cluster_user") == "centos"
-    assert c.get("general", "cluster_group") == "centos"
+    assert c.get("general", "cluster_user") == (
+            c.get("general", "cluster_group")
+    )
     assert c.get_non_proxy() == [
         ("10.0.0.1", "leader2"),
         ("10.0.0.2", "worker1"),
