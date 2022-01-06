@@ -53,7 +53,7 @@
       when: accumulo_major_version == '2' and not use_systemd
 - hosts: accumulomaster
   tasks:
-    - name: "start accumulo 2.0 master, monitor, & gc"
+    - name: "start accumulo 2.x master, monitor, and gc"
       command: "nohup {{ accumulo_home }}/bin/accumulo-service {{ item }} start"
       register: start_result
       changed_when: "'Starting' in start_result.stdout"
