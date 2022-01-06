@@ -22,7 +22,8 @@ from collections import ChainMap
 from configparser import ConfigParser
 from distutils.version import StrictVersion
 from hashlib import sha512
-from os.path import isfile, exists, join
+from os.path import isfile, exists, join, basename
+import re
 from sys import exit
 from traceback import format_exc
 from .decorators import (
@@ -505,18 +506,11 @@ class BaseConfig(ConfigParser, metaclass=ABCMeta):
                         )
 
         key = "{0}:{1}".format(software, version)
-
-        if key not in self.checksums_d:
-            local_tarball_path = self.get_local_tarball_path(software)
-            if local_tarball_path is None or not exists(local_tarball_path):
-                exit(
-                    "ERROR - Failed to find either a valid checksum in {}, "
-                    "or a local tarball to upload for {} {}.".format(
-                        self.checksums_path, software, version
-                    )
-                )
-            else:
-                # compute and use the checksum for local tarball
+        # we first check if there is a tarball in conf/upload for this software
+        local_tarball_path = self.get_local_tarball_path(software)
+        if local_tarball_path is not None and exists(local_tarball_path):
+            if "-SNAPSHOT" in local_tarball_path:
+                # compute checksum for SNAPSHOT tarballs and use that
                 local_tarball_sha512 = sha512()
                 with open(local_tarball_path, "rb") as tarball_contents:
                     file_buffer = tarball_contents.read(65536)
@@ -525,7 +519,38 @@ class BaseConfig(ConfigParser, metaclass=ABCMeta):
                         file_buffer = tarball_contents.read(65536)
                 return f"sha512:{local_tarball_sha512.hexdigest()}"
 
-        return self.checksums_d[key]
+            # if a local tarball exists, we need either an entry in
+            # conf/checksums, or a .sha512 file
+            if key not in self.checksums_d:
+                # if a local tarball exists but no checksum in conf/checksums
+                # see if we have a .sha512 file to use
+                sha512_path = local_tarball_path + ".sha512"
+                if exists(sha512_path):
+                    with open(sha512_path, "r") as sha512_file:
+                        # replace all whitespace in the sha512 file
+                        sha512_contents = re.sub(
+                            r"\s+", "", sha512_file.read()
+                        )
+
+                        # since the sha512 files have varied structures
+                        # we first check that the exact tarball file name is
+                        # found, and if so, we will extract the sha512 hash
+                        if basename(local_tarball_path) in sha512_contents:
+                            match_result = re.search(
+                                "(?P<hash>[a-fA-F0-9]{128})", sha512_contents
+                            )
+                            if match_result is not None:
+                                return "sha512:" + match_result.group("hash")
+
+        if key in self.checksums_d:
+            return self.checksums_d[key]
+
+        exit(
+            "ERROR - Failed to find either a valid checksum in {}, "
+            "or a local tarball and .sha512 file for {} {}.".format(
+                self.checksums_path, software, version
+            )
+        )
 
     def nodes(self):
         return self.node_d

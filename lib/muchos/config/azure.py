@@ -351,6 +351,8 @@ class AzureDeployConfig(BaseConfig):
     def data_disk_sku(self):
         return self.get("azure", "data_disk_sku")
 
+    vm_skus_for_location = []
+
     @ansible_host_var
     def accnet_capable_skus(self):
         return list(
