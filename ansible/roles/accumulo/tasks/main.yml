@@ -43,10 +43,12 @@
     - accumulo.properties
     - accumulo-client.properties
     - gc
-    - tracers
     - masters
     - monitor
   when: accumulo_major_version == '2'
+- name: "configure accumulo 2.0 tracer"
+  template: src=tracers dest={{ accumulo_home }}/conf/tracers
+  when: accumulo_version is version('2.0.0','>=') and accumulo_version is version('2.1.0','<')
 - name: "Rename 'masters' file to 'managers' when using Accumulo 2.1 or above"
   shell: |
     [[ -e {{ accumulo_home }}/conf/masters ]] && mv {{ accumulo_home }}/conf/masters {{ accumulo_home }}/conf/managers || echo "Nothing to do"
