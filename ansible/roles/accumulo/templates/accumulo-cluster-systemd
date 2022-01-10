@@ -315,12 +315,9 @@ function stop_here() {
   hosts_to_check=("$(hostname -a 2> /dev/null | head -1)" "$(hostname -f)")
 
   for host in "${hosts_to_check[@]}"; do
-    for svc in  tserver gc master monitor; do
+    for svc in  tserver gc master monitor{{ ' tracer' if accumulo_version is version('2.1.0','<') }}; do
       stop_service "$host" "$svc"
     done
-{% if accumulo_version is version('2.1.0','<') %}
-    stop_service "$host" "tracer"
-{% endif %}
   done
 }
 
