@@ -74,8 +74,8 @@ function verify_config {
       echo "$master1" > "${conf}/monitor"
     fi
   fi
-
 {% if accumulo_version is version('2.1.0','<') %}
+
   if [[ ! -f "${conf}/tracers" ]]; then
     if [[ -z "${master1}" ]] ; then
       echo "Could not find a master node to use as a default for the tracer role."
@@ -218,8 +218,8 @@ function start_here() {
       break
     fi
   done
-
 {% if accumulo_version is version('2.1.0','<') %}
+
   for host in $local_hosts; do
     if grep -q "^${host}\$" "${conf}/tracers"; then
       start_service "$host" tracer
@@ -291,8 +291,8 @@ function stop_all() {
     stop_service "$monitor" monitor &
   done
   wait
-
 {% if accumulo_version is version('2.1.0','<') %}
+
   for tracer in $(grep -E -v '(^#|^\s*$)' "${conf}/tracers"); do
     stop_service "$tracer" tracer &
   done
@@ -315,7 +315,7 @@ function stop_here() {
   hosts_to_check=("$(hostname -a 2> /dev/null | head -1)" "$(hostname -f)")
 
   for host in "${hosts_to_check[@]}"; do
-    for svc in  tserver gc master monitor{{ ' tracer' if accumulo_version is version('2.1.0','<') }}; do
+    for svc in  tserver gc master monitor{{ ' tracer' if accumulo_version is version('2.1.0','<') else '' }}; do
       stop_service "$host" "$svc"
     done
   done
