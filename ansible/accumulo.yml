@@ -64,6 +64,8 @@
       when: accumulo_major_version == '2' and not use_systemd
     - name: "start accumulo 2.0 tracer"
       command: "nohup {{ accumulo_home }}/bin/accumulo-service tracer start"
+      register: start_tracer_result
+      changed_when: "'Starting' in start_tracer_result.stdout"
       when: accumulo_version is version('2.0.0','>=') and accumulo_version is version('2.1.0','<') and not use_systemd
 - hosts: accumulomaster
   tasks:
