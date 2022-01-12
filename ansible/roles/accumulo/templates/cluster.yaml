@@ -1,0 +1,19 @@
+manager:
+{% for host in groups['accumulomaster'] %}
+  - {{ host }}
+{% endfor %}
+
+monitor:
+{% for host in groups['accumulomaster'] %}
+  - {{ host }}
+{% endfor %}
+
+gc:
+{% for host in groups['accumulomaster'] %}
+  - {{ host }}
+{% endfor %}
+
+tserver:
+{% for host in groups['workers'] %}
+  - {{ host }}
+{% endfor %}
