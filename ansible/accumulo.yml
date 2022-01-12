@@ -79,7 +79,7 @@
     - name: "install and start all the accumulo tracer service using systemd"
       block:
         - import_tasks: roles/accumulo/tasks/start-tracer.yml
-      when: use_systemd and accumulo_version is version('2.1.0','<')
+      when: accumulo_version is version('2.0.0','>=') and use_systemd and accumulo_version is version('2.1.0','<')
       become: yes
 
 - hosts: workers
