@@ -53,7 +53,7 @@
       when: accumulo_major_version == '2' and not use_systemd
 - hosts: accumulomaster
   tasks:
-    - name: "start accumulo 2.0 master, monitor, gc & tracer"
+    - name: "start accumulo 2.x master, monitor, and gc"
       command: "nohup {{ accumulo_home }}/bin/accumulo-service {{ item }} start"
       register: start_result
       changed_when: "'Starting' in start_result.stdout"
@@ -61,8 +61,12 @@
         - master
         - monitor
         - gc
-        - tracer
       when: accumulo_major_version == '2' and not use_systemd
+    - name: "start accumulo 2.0 tracer"
+      command: "nohup {{ accumulo_home }}/bin/accumulo-service tracer start"
+      register: start_tracer_result
+      changed_when: "'Starting' in start_tracer_result.stdout"
+      when: accumulo_version is version('2.0.0','>=') and accumulo_version is version('2.1.0','<') and not use_systemd
 - hosts: accumulomaster
   tasks:
     - name: "install and start all the accumulo services using systemd"
@@ -70,8 +74,12 @@
         - import_tasks: roles/accumulo/tasks/start-master.yml
         - import_tasks: roles/accumulo/tasks/start-gc.yml
         - import_tasks: roles/accumulo/tasks/start-monitor.yml
-        - import_tasks: roles/accumulo/tasks/start-tracer.yml
       when: use_systemd
+      become: yes
+    - name: "install and start all the accumulo tracer service using systemd"
+      block:
+        - import_tasks: roles/accumulo/tasks/start-tracer.yml
+      when: accumulo_version is version('2.0.0','>=') and use_systemd and accumulo_version is version('2.1.0','<')
       become: yes
 
 - hosts: workers

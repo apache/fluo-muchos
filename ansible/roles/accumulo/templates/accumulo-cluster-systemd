@@ -74,6 +74,7 @@ function verify_config {
       echo "$master1" > "${conf}/monitor"
     fi
   fi
+{% if accumulo_version is version('2.1.0','<') %}
 
   if [[ ! -f "${conf}/tracers" ]]; then
     if [[ -z "${master1}" ]] ; then
@@ -84,6 +85,7 @@ function verify_config {
       echo "$master1" > "${conf}/tracers"
     fi
   fi
+{% endif %}
 
   if [[ ! -f "${conf}/gc" ]]; then
     if [[ -z "${master1}" ]] ; then
@@ -178,11 +180,12 @@ function start_all() {
     start_service "$host" gc &
   done
   wait
-
+{% if accumulo_version is version('2.1.0','<') %}
   for host in $(grep -E -v '(^#|^\s*$)' "${conf}/tracers"); do
     start_service "$host" tracer &
   done
   wait
+{% endif %}
 }
 
 function start_here() {
@@ -215,6 +218,7 @@ function start_here() {
       break
     fi
   done
+{% if accumulo_version is version('2.1.0','<') %}
 
   for host in $local_hosts; do
     if grep -q "^${host}\$" "${conf}/tracers"; then
@@ -222,6 +226,7 @@ function start_here() {
       break
     fi
   done
+{% endif %}
 }
 
 function stop_service() {
@@ -286,17 +291,23 @@ function stop_all() {
     stop_service "$monitor" monitor &
   done
   wait
+{% if accumulo_version is version('2.1.0','<') %}
 
   for tracer in $(grep -E -v '(^#|^\s*$)' "${conf}/tracers"); do
     stop_service "$tracer" tracer &
   done
   wait
+{% endif %}
 
   # stop tserver still running
   stop_tservers
 
   echo "Cleaning all server entries in ZooKeeper"
+{% if accumulo_version is version('2.1.0','<') %}
   ${accumulo_cmd} org.apache.accumulo.server.util.ZooZap -master -tservers -tracers
+{% else %}
+  ${accumulo_cmd} org.apache.accumulo.server.util.ZooZap -manager -tservers
+{% endif %}
 }
 
 function stop_here() {
@@ -304,7 +315,7 @@ function stop_here() {
   hosts_to_check=("$(hostname -a 2> /dev/null | head -1)" "$(hostname -f)")
 
   for host in "${hosts_to_check[@]}"; do
-    for svc in  tserver gc master monitor tracer; do
+    for svc in  tserver gc master monitor{{ ' tracer' if accumulo_version is version('2.1.0','<') else '' }}; do
       stop_service "$host" "$svc"
     done
   done
@@ -335,7 +346,9 @@ function main() {
       echo "localhost" > "$conf/gc"
       echo "localhost" > "$conf/masters"
       echo "localhost" > "$conf/monitor"
+{% if accumulo_version is version('2.1.0','<') %}
       echo "localhost" > "$conf/tracers"
+{% endif %}
       echo "localhost" > "$conf/tservers"
       ;;
     restart)
