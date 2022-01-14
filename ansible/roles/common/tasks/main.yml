@@ -21,10 +21,12 @@
   retries: 10
   delay: 15
   until: epelresult is not failed
+  when: ansible_facts['distribution'] == "CentOS"
 - name: "install packages"
   yum:
     name:
       - vim
+      - bash-completion
       - git
       - wget
       - gcc-c++
@@ -47,7 +49,7 @@
   retries: 10
   delay: 15
   until: yumresult_centos7 is not failed
-  when: ansible_facts['distribution_major_version'] == "7"
+  when: (ansible_facts['distribution'] == "CentOS") and (ansible_facts['distribution_major_version'] == "7")
 - name: "Install packages specific to CentOS 8"
   yum:
     name:
@@ -60,7 +62,20 @@
   retries: 10
   delay: 15
   until: yumresult_centos8 is not failed
-  when: ansible_facts['distribution_major_version'] == "8"
+  when: (ansible_facts['distribution'] == "CentOS") and (ansible_facts['distribution_major_version'] == "8")
+- name: "Install packages specific to Fedora"
+  yum:
+    name:
+      - python3-policycoreutils
+      - collectd-disk
+      - collectd-write_http
+      - make
+    state: present
+  register: yumresult_fedora
+  retries: 10
+  delay: 15
+  until: yumresult_fedora is not failed
+  when: ansible_facts['distribution'] == "Fedora"
 - name: "get exact jdk folder path"
   find:
     file_type: directory

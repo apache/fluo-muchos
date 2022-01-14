@@ -38,11 +38,11 @@ def test_ec2_cluster():
     )
     assert c.get("ec2", "default_instance_type") == "m5d.large"
     assert c.get("ec2", "worker_instance_type") == "m5d.large"
-    assert c.get("ec2", "aws_ami") == "ami-0affd4508a5d2481b"
-    assert c.user_home() == "/home/centos"
+    assert c.get("ec2", "aws_ami").startswith("ami-")
+    assert c.user_home() == "/home/" + c.get("general", "cluster_user")
     assert c.max_ephemeral() == 1
     assert c.mount_root() == "/media/ephemeral"
-    assert c.fstype() == "ext3"
+    assert c.fstype() == "ext4"
     assert c.force_format() == "no"
     assert c.worker_data_dirs() == ["/media/ephemeral0"]
     assert c.default_data_dirs() == ["/media/ephemeral0"]
@@ -110,8 +110,9 @@ def test_ec2_cluster():
     assert c.get("general", "proxy_hostname") == "leader1"
     assert c.proxy_public_ip() == "23.0.0.0"
     assert c.proxy_private_ip() == "10.0.0.0"
-    assert c.get("general", "cluster_user") == "centos"
-    assert c.get("general", "cluster_group") == "centos"
+    assert c.get("general", "cluster_user") == (
+            c.get("general", "cluster_group")
+    )
     assert c.get_non_proxy() == [
         ("10.0.0.1", "leader2"),
         ("10.0.0.2", "worker1"),

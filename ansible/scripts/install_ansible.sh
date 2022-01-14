@@ -23,9 +23,12 @@ base_dir=$( cd "$( dirname "$bin" )" && pwd )
 set -e
 
 # enable yum epel repo
-is_installed_epel_release="rpm -q --quiet epel-release"
-install_epel_release="sudo yum install -q -y epel-release"
-for i in {1..10}; do ($is_installed_epel_release || $install_epel_release) && break || sleep 15; done
+os_id=$(grep '^ID=' /etc/os-release | cut -d'=' -f2 | tr -d '"')
+if [[ $os_id = "centos" ]]; then
+  is_installed_epel_release="rpm -q --quiet epel-release"
+  install_epel_release="sudo yum install -q -y epel-release"
+  for i in {1..10}; do ($is_installed_epel_release || $install_epel_release) && break || sleep 15; done
+fi
 
 # install ansible
 is_installed_ansible="rpm -q --quiet ansible"
@@ -33,25 +36,29 @@ install_ansible="sudo yum install -q -y ansible"
 for i in {1..10}; do ($is_installed_ansible || $install_ansible) && break || sleep 15; done
 
 # setup user-specific ansible configuration
-if [ ! -h ~/.ansible.cfg ]; then
+if [[ ! -h ~/.ansible.cfg ]]; then
   cd ~/
   rm -f .ansible.cfg
   ln -s $base_dir/conf/ansible.cfg .ansible.cfg
 fi
 
 # setup ansible hosts
-if [ ! -h /etc/ansible/hosts ]; then
+if [[ ! -h /etc/ansible/hosts ]]; then
   cd /etc/ansible
   sudo rm -f hosts
   sudo ln -s $base_dir/conf/hosts hosts
 fi
 
 # install lxml as it is a dependency for the maven_artifact Ansible module
-centos_version=`cat /etc/os-release | grep '^VERSION_ID' | cut -d'"' -f2`
-if [ $centos_version -eq 7 ]; then
-   sudo yum install -q -y python-lxml
-elif [ $centos_version -eq 8 ]; then
-   sudo yum install -q -y python3-lxml
+centos_version=$(grep '^VERSION_ID=' /etc/os-release | cut -d'=' -f2 | tr -d '"')
+if [[ $os_id = "centos" ]]; then
+  if [[ $centos_version -eq 7 ]]; then
+     sudo yum install -q -y python-lxml
+  elif [[ $centos_version -eq 8 ]]; then
+     sudo yum install -q -y python3-lxml
+  fi
+elif [[ $os_id = "fedora" ]]; then
+  sudo yum install -q -y python3-lxml
 fi
 
 # install jq to ease JSON parsing on the proxy
