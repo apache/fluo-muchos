@@ -20,9 +20,9 @@
     name: "{{ packages }}"
   vars:
     packages:
-    - yum-utils
-    - device-mapper-persistent-data
-    - lvm2
+      - yum-utils
+      - device-mapper-persistent-data
+      - lvm2
 - name: add docker repo
   yum_repository:
     name: docker-ce-stable
@@ -37,13 +37,13 @@
   file:
     path: "{{ default_data_dirs[0] }}/docker"
     state: directory
-    mode: 0755
+    mode: "0755"
 - name: link /var/lib/docker
   file:
     src: "{{ default_data_dirs[0] }}/docker"
     dest: /var/lib/docker
     state: link
-- name: "add {{ cluster_user }} to docker group"
+- name: "add cluster_user to docker group"
   user:
     name: "{{ cluster_user }}"
     groups: docker

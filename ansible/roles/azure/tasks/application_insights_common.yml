@@ -28,4 +28,4 @@
 
 - name: Set fact for Application Insights name
   set_fact:
-     app_insights_name: "{{ monitor_name.stdout + '-insights' }}"
+    app_insights_name: "{{ monitor_name.stdout + '-insights' }}"

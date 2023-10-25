@@ -17,26 +17,24 @@
 
 - hosts: localhost
   tasks:
-  - name: Delete container/Filesystem on ADLS Gen2
-    azure_rm_storageblob:
-      resource_group: "{{ resource_group }}"
-      storage_account_name:  "{{ item.split('@')[1].split('.')[0] }}"
-      container: "{{ item.split('@')[0].split('://')[1] }}"
-      state: absent
-      force: yes
-    loop:
-        "{{ instance_volumes_adls.split(',') }}"
-    when: cluster_type == 'azure' and use_adlsg2
+    - name: Delete container/Filesystem on ADLS Gen2
+      azure_rm_storageblob:
+        resource_group: "{{ resource_group }}"
+        storage_account_name: "{{ item.split('@')[1].split('.')[0] }}"
+        container: "{{ item.split('@')[0].split('://')[1] }}"
+        state: absent
+        force: yes
+      loop: "{{ instance_volumes_adls.split(',') }}"
+      when: cluster_type == 'azure' and use_adlsg2
 
-  - name: Create container/Filesystem on ADLS Gen2
-    azure_rm_storageblob:
-      resource_group: "{{ resource_group }}"
-      storage_account_name:  "{{ item.split('@')[1].split('.')[0] }}"
-      container: "{{ item.split('@')[0].split('://')[1] }}"
-    retries: 20
-    delay: 30
-    register: result
-    until: result is succeeded and (not result.changed or (result.changed and result.container|length > 0))
-    loop:
-      "{{ instance_volumes_adls.split(',')  }}"
-    when: cluster_type == 'azure' and use_adlsg2
+    - name: Create container/Filesystem on ADLS Gen2
+      azure_rm_storageblob:
+        resource_group: "{{ resource_group }}"
+        storage_account_name: "{{ item.split('@')[1].split('.')[0] }}"
+        container: "{{ item.split('@')[0].split('://')[1] }}"
+      retries: 20
+      delay: 30
+      register: result
+      until: result is succeeded and (not result.changed or (result.changed and result.container|length > 0))
+      loop: "{{ instance_volumes_adls.split(',')  }}"
+      when: cluster_type == 'azure' and use_adlsg2

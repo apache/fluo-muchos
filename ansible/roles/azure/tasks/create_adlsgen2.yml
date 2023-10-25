@@ -33,7 +33,7 @@
 
 - name: Generate random names for storage account names
   set_fact:
-   StorageAccountName: "{{ StorageAccountMD5.stdout + 99|random(seed=resource_group)|string + 99|random(seed=vmss_name)|string + 9|random(seed=location)|string }}"
+    StorageAccountName: "{{ StorageAccountMD5.stdout + 99|random(seed=resource_group)|string + 99|random(seed=vmss_name)|string + 9|random(seed=location)|string }}"
 
 - name: Initialize instance variables
   set_fact:
@@ -50,25 +50,24 @@
 
 - name: Retrieve sequence end number to get the number of storage accounts
   set_fact:
-     InstanceVolumesEndSequence: "{{ '1' if  instance_volumes_input.split('|')[0].split(',') == ['']  else InstanceVolumesTemp[0]|int }}"
+    InstanceVolumesEndSequence: "{{ '1' if  instance_volumes_input.split('|')[0].split(',') == ['']  else InstanceVolumesTemp[0]|int }}"
 
 - name: Generate names for Storage Accounts
   set_fact:
-     InstanceVolumesAuto: "{{ InstanceVolumesAuto + ['abfss://'+'accumulodata'+'@'+StorageAccountName+item+'.'+InstanceVolumesTemp[1]+'/accumulo'] }}"
+    InstanceVolumesAuto: "{{ InstanceVolumesAuto + ['abfss://'+'accumulodata'+'@'+StorageAccountName+item+'.'+InstanceVolumesTemp[1]+'/accumulo'] }}"
   with_sequence: start=1 end={{ InstanceVolumesEndSequence|int }}
   when: InstanceVolumesTemp[0]|int != 0
 
 - name: Retrieve ABFSS values when specified manually
   set_fact:
-     InstanceVolumesManual: "{{ InstanceVolumesManual +  [ item ] }}"
-  loop:
-    "{{ InstanceVolumesTemp }}"
+    InstanceVolumesManual: "{{ InstanceVolumesManual +  [ item ] }}"
+  loop: "{{ InstanceVolumesTemp }}"
   when: item.split('://')[0] == 'abfss' and  instance_volumes_input.split('|')[0].split(',') ==  ['']
 
 # This is final list of instance volumes
 - name: Assign variables for auto-generation or manual for storage account creation
   set_fact:
-     InstanceVolumes: "{{ InstanceVolumesManual if  instance_volumes_input.split('|')[0].split(',') ==  [''] else InstanceVolumesAuto }}"
+    InstanceVolumes: "{{ InstanceVolumesManual if  instance_volumes_input.split('|')[0].split(',') ==  [''] else InstanceVolumesAuto }}"
 
 - name: Update instance_volumes_adls  in muchos.props
   lineinfile:
@@ -83,18 +82,17 @@
     provider: Storage
     resource_type: storageAccounts
     resource_name: "{{ item.split('@')[1].split('.')[0] }}"
-    api_version: '2019-04-01'
+    api_version: "2019-04-01"
     idempotency: yes
     state: present
     body:
       sku:
-         name: "{{ adls_storage_type }}"
+        name: "{{ adls_storage_type }}"
       kind: StorageV2
       properties:
-         isHnsEnabled: yes
-      location:  "{{ location }}"
-  loop:
-      "{{ InstanceVolumes }}"
+        isHnsEnabled: yes
+      location: "{{ location }}"
+  loop: "{{ InstanceVolumes }}"
 
 # Creating User Assigned identity with vmss_name suffixed by ua-msi if not specified in muchos.props
 # Not registering variable because user identity values are not visible immediately
@@ -104,7 +102,7 @@
     provider: ManagedIdentity
     resource_type: userAssignedIdentities
     resource_name: "{{ user_assigned_identity if user_assigned_identity else vmss_name + '-ua-msi' }}"
-    api_version: '2018-11-30'
+    api_version: "2018-11-30"
     idempotency: yes
     state: present
     body:
@@ -117,11 +115,11 @@
     provider: ManagedIdentity
     resource_type: userAssignedIdentities
     resource_name: "{{ user_assigned_identity if user_assigned_identity else vmss_name + '-ua-msi' }}"
-    api_version: '2018-11-30'
+    api_version: "2018-11-30"
   register: UserAssignedIdentityInfo
   retries: 20
   delay: 15
-  until:  UserAssignedIdentityInfo.response|map(attribute='properties')|map(attribute='principalId')|join('') is defined
+  until: UserAssignedIdentityInfo.response|map(attribute='properties')|map(attribute='principalId')|join('') is defined
 
 - name: Update principal_id in muchos.props
   lineinfile:
@@ -132,29 +130,28 @@
 # This will be used to assign the MSI for VMSS
 - name: Format User Assigned Identity for API
   set_fact:
-    UserAssignedIdentityArr: "{{ UserAssignedIdentityInfo.response|default({})|map(attribute='id')|map('regex_replace','^(.*)$','{\"\\1\":{}}')|list }}" # noqa 206
+    UserAssignedIdentityArr: "{{ UserAssignedIdentityInfo.response|default({})|map(attribute='id')|map('regex_replace','^(.*)$','{\"\\1\":{}}')|list }}"
 
 # Retrieve facts about role assignment
 - name: Get role definition id for "Storage Blob Data Owner"
   azure_rm_resource_info:
     resource_group: "{{ resource_group }}"
     provider: Authorization
-    resource_type:  roleDefinitions
-    resource_name:  b7e6dc6d-f1e8-4753-8033-0f276bb0955b
-    api_version: '2015-07-01'
+    resource_type: roleDefinitions
+    resource_name: b7e6dc6d-f1e8-4753-8033-0f276bb0955b
+    api_version: "2015-07-01"
   register: RoleDefinitionInfo
 
 # Retrieve storage account information
 - name: Check if the storage accounts are visible
   azure_rm_storageaccount_info:
-        resource_group: "{{ resource_group }}"
-        name:   "{{ item.split('@')[1].split('.')[0] }}"
+    resource_group: "{{ resource_group }}"
+    name: "{{ item.split('@')[1].split('.')[0] }}"
   register: StorageAccountsInfo
   retries: 20
   delay: 15
   until: StorageAccountsInfo.storageaccounts | map(attribute='id') | join('') | length > 0
-  loop:
-     "{{ InstanceVolumes }}"
+  loop: "{{ InstanceVolumes }}"
 
 # Retrieve storage accounts id  created; these are used for account assignments
 - name: Get the id of storage accounts created
@@ -162,52 +159,48 @@
     StorageAccountsId: "{{ StorageAccountsInfo.results | sum(attribute='storageaccounts', start=[]) | map(attribute='id') | list | unique }}"
 
 # Adding this module since role assignment fails if it already exists
-- name:  Get facts about role assignment
+- name: Get facts about role assignment
   azure_rm_roleassignment_info:
-     scope: "{{ item }}"
-     assignee: "{{ UserAssignedIdentityInfo.response|map(attribute='properties')|map(attribute='principalId')|list|join('') }}"
-     role_definition_id: "{{ RoleDefinitionInfo.response|map(attribute='id')|list|join('') }}"
+    scope: "{{ item }}"
+    assignee: "{{ UserAssignedIdentityInfo.response|map(attribute='properties')|map(attribute='principalId')|list|join('') }}"
+    role_definition_id: "{{ RoleDefinitionInfo.response|map(attribute='id')|list|join('') }}"
   register: RoleAssignmentResults
   retries: 20
   delay: 15
-  until:  UserAssignedIdentityInfo.response|map(attribute='properties')|map(attribute='principalId')|join('') is  defined and  RoleDefinitionInfo.response|map(attribute='id')|join('') is defined
-  loop:
-    "{{ StorageAccountsId }}"
+  until: UserAssignedIdentityInfo.response|map(attribute='properties')|map(attribute='principalId')|join('') is  defined and  RoleDefinitionInfo.response|map(attribute='id')|join('') is defined
+  loop: "{{ StorageAccountsId }}"
 
 - name: Set fact for getting storage accounts that have assigned roles
   set_fact:
     StorageAccountRoles: "{{ item|map(attribute='scope')|list|unique }}"
   no_log: True
-  loop:
-      "{{ RoleAssignmentResults.results|map(attribute='roleassignments')|list }}"
+  loop: "{{ RoleAssignmentResults.results|map(attribute='roleassignments')|list }}"
 
 # This retry logic is needed due to race condition between storage account create complete and role assignment
 - name: Create a role assignment
   azure_rm_roleassignment:
-     scope: "{{ item }}"
-     assignee_object_id: "{{ UserAssignedIdentityInfo.response|map(attribute='properties')|map(attribute='principalId')|list|join('') }}"
-     role_definition_id: "{{ RoleDefinitionInfo.response|map(attribute='id')|list|join('') }}"
-     state: present
+    scope: "{{ item }}"
+    assignee_object_id: "{{ UserAssignedIdentityInfo.response|map(attribute='properties')|map(attribute='principalId')|list|join('') }}"
+    role_definition_id: "{{ RoleDefinitionInfo.response|map(attribute='id')|list|join('') }}"
+    state: present
   retries: 30
   delay: 15
   register: roleassignresult
   until: roleassignresult is succeeded
-  loop:
-     "{{ StorageAccountsId }}"
+  loop: "{{ StorageAccountsId }}"
   when: item  not in StorageAccountRoles
 
 # This retry logic is needed due to race condition between storage account creation and creating filesystem
 - name: Create container/Filesystem on ADLS Gen2
   azure_rm_storageblob:
     resource_group: "{{ resource_group }}"
-    storage_account_name:  "{{ item.split('@')[1].split('.')[0] }}"
+    storage_account_name: "{{ item.split('@')[1].split('.')[0] }}"
     container: "{{ item.split('@')[0].split('://')[1] }}"
   retries: 20
   delay: 30
   register: createfsresult
   until: createfsresult is succeeded and ((not createfsresult.changed) or (createfsresult.changed and createfsresult.container|length > 0))
-  loop:
-    "{{ InstanceVolumes }}"
+  loop: "{{ InstanceVolumes }}"
 
 # Retrieve tenantId  for core-site.xml
 - name: Update tenantId in muchos.props
@@ -222,4 +215,3 @@
     path: "{{ deploy_path }}/conf/muchos.props"
     regexp: '^azure_client_id\s*=\s*|^[#]azure_client_id\s*=\s*'
     line: "azure_client_id = {{ UserAssignedIdentityInfo.response|map(attribute='properties')|map(attribute='clientId')|list|join('') }}"
-

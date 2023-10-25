@@ -69,6 +69,6 @@
     fstype: cifs
     src: "{{ azure_fileshare }}"
     path: "{{ azure_fileshare_mount }}"
-    opts: vers=3.0,username={{ azure_fileshare_username }},password={{ azure_fileshare_password }},dir_mode=0777,file_mode=0777,serverino
+    opts: vers=3.0,username={{ azure_fileshare_username }},password={{ azure_fileshare_password }},dir_mode="0777",file_mode="0777",serverino
     state: mounted
   when: azure_fileshare_mount is defined and azure_fileshare_mount and azure_fileshare_mount != None

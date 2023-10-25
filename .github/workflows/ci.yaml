@@ -40,12 +40,14 @@ jobs:
         os: [ubuntu-latest, macOS-latest]
     timeout-minutes: 10
     steps:
-    - uses: actions/checkout@v1
-    - uses: actions/setup-python@v2
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v4
       with:
         python-version: '3.9'
     - name: Install required packages
       run: pip install -r ./lib/requirements.txt
+    - name: Install common Ansible collections
+      run: ./scripts/install-ansible-collections
     - name: Install Azure specific Ansible collections
       run: ./scripts/install-ansible-for-azure
     - name: Run Fluo-Muchos CI script

@@ -18,47 +18,48 @@
 - hosts: mesosmaster
   become: yes
   tasks:
-  - name: "stop mesos-master & marathon"
-    service:
-      name: item
-      state: stopped
-    when: "'mesosmaster' in groups"
-    with_items:
-      - mesos-master
-      - marathon
+    - name: "stop mesos-master & marathon"
+      service:
+        name: item
+        state: stopped
+      when: "'mesosmaster' in groups"
+      with_items:
+        - mesos-master
+        - marathon
 - hosts: workers
   become: yes
   tasks:
-  - name: "stop mesos slaves"
-    service:
-      name: mesos-slave
-      state: stopped
-    when: "'mesosmaster' in groups"
-- hosts: all:!{{ azure_proxy_host }}
+    - name: "stop mesos slaves"
+      service:
+        name: mesos-slave
+        state: stopped
+      when: "'mesosmaster' in groups"
+- hosts: all:!{{ azure_proxy_host|default("") }}
   become: yes
   tasks:
-  - name: "stop docker"
-    service:
-      name: docker
-      state: stopped
-    when: "'swarmmanager' in groups"
-  - name: "ensure all processes started by Muchos are killed"
-    script: roles/common/files/kill.sh
+    - name: "stop docker"
+      service:
+        name: docker
+        state: stopped
+      when: "'swarmmanager' in groups"
+    - name: "ensure all processes started by Muchos are killed"
+      script: roles/common/files/kill.sh
 
-- hosts: all:!{{ azure_proxy_host }}
+- hosts: all:!{{ azure_proxy_host|default("") }}
   become: yes
   tasks:
-  - block:
-    - name: stop kibana
-      service:
-        name: kibana
-        state: stopped
-    - name: stop elasticsearch
-      service:
-        name: elasticsearch
-        state: stopped
-    - name: stop logstash
-      service:
-        name: logstash
-        state: stopped
-    when: "'elkserver' in groups"
+    - name: "stop ELK stack services"
+      when: "'elkserver' in groups"
+      block:
+        - name: stop kibana
+          service:
+            name: kibana
+            state: stopped
+        - name: stop elasticsearch
+          service:
+            name: elasticsearch
+            state: stopped
+        - name: stop logstash
+          service:
+            name: logstash
+            state: stopped

@@ -15,8 +15,8 @@
 # limitations under the License.
 
 - name: "create application insights dir"
-  file: state=directory mode=0755 path={{ az_app_insights_home }} 
+  file: state=directory mode="0755" path={{ az_app_insights_home }}
 - name: "copy application insights agent jar"
-  copy: src={{ tarballs_dir }}/appinsights-agent.jar dest={{ az_app_insights_home }}/appinsights-agent.jar mode=0644
+  copy: src={{ tarballs_dir }}/appinsights-agent.jar dest={{ az_app_insights_home }}/appinsights-agent.jar mode="0644"
 - name: "copy application insights configuration"
-  template: src=applicationinsights.json dest={{ az_app_insights_home }}/applicationinsights.json mode=0644
+  template: src=applicationinsights.json dest={{ az_app_insights_home }}/applicationinsights.json mode="0644"

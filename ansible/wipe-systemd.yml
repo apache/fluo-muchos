@@ -18,64 +18,64 @@
   gather_facts: false
   become: yes
   tasks:
-  - name: "disable all accumulo systemd services on master"
-    systemd:
-      name: "{{ item }}"
-      state: stopped
-      enabled: no
-    with_items:
-      - "accumulo-master.service"
-      - "accumulo-monitor.service"
-      - "accumulo-gc.service"
-      - "accumulo-tracer.service"
-    register: stop_disable_service
-    failed_when: "stop_disable_service is failed and 'Could not find the requested service' not in stop_disable_service.msg"
+    - name: "disable all accumulo systemd services on master"
+      systemd:
+        name: "{{ item }}"
+        state: stopped
+        enabled: no
+      with_items:
+        - "accumulo-master.service"
+        - "accumulo-monitor.service"
+        - "accumulo-gc.service"
+        - "accumulo-tracer.service"
+      register: stop_disable_service
+      failed_when: "stop_disable_service is failed and 'Could not find the requested service' not in stop_disable_service.msg"
 
-  - name: "find accumulo systemd units to remove in masters"
-    find:
-      paths: /etc/systemd/system
-      patterns: 'accumulo-*.service'
-    register: find_accumulo_services
+    - name: "find accumulo systemd units to remove in masters"
+      find:
+        paths: /etc/systemd/system
+        patterns: "accumulo-*.service"
+      register: find_accumulo_services
 
-  - name: "remove accumulo systemd units in masters"
-    file: path="{{ item.path }}" state=absent
-    with_items:
-      - "{{ find_accumulo_services.files }}"
-    register: delete_task
-    retries: 10
-    delay: 3
-    until: delete_task is success
+    - name: "remove accumulo systemd units in masters"
+      file: path="{{ item.path }}" state=absent
+      with_items:
+        - "{{ find_accumulo_services.files }}"
+      register: delete_task
+      retries: 10
+      delay: 3
+      until: delete_task is success
 
 - hosts: workers
   gather_facts: false
   become: yes
   tasks:
-  - name: "disable accumulo tserver systemd services"
-    systemd:
-      name: "accumulo-tserver@{{ item }}.service"
-      state: stopped
-      enabled: no
-    with_sequence: "start=1 end={{ num_tservers }}"
-    register: stop_disable_service
-    failed_when: "stop_disable_service is failed and 'Could not find the requested service' not in stop_disable_service.msg"
+    - name: "disable accumulo tserver systemd services"
+      systemd:
+        name: "accumulo-tserver@{{ item }}.service"
+        state: stopped
+        enabled: no
+      with_sequence: "start=1 end={{ num_tservers }}"
+      register: stop_disable_service
+      failed_when: "stop_disable_service is failed and 'Could not find the requested service' not in stop_disable_service.msg"
 
-  - name: "find accumulo tserver systemd units to remove in workers"
-    find:
-      paths: /etc/systemd/system
-      patterns: 'accumulo-*.service'
-    register: find_accumulo_tserver
+    - name: "find accumulo tserver systemd units to remove in workers"
+      find:
+        paths: /etc/systemd/system
+        patterns: "accumulo-*.service"
+      register: find_accumulo_tserver
 
-  - name: "remove accumulo tserver systemd units in workers"
-    file: path="{{ item.path }}" state=absent
-    with_items:
-      - "{{ find_accumulo_tserver.files }}"
-    register: delete_task
-    retries: 10
-    delay: 3
-    until: delete_task is success
+    - name: "remove accumulo tserver systemd units in workers"
+      file: path="{{ item.path }}" state=absent
+      with_items:
+        - "{{ find_accumulo_tserver.files }}"
+      register: delete_task
+      retries: 10
+      delay: 3
+      until: delete_task is success
 
-  - name: "reload config changes"
-    systemd: daemon_reload=yes
+    - name: "reload config changes"
+      systemd: daemon_reload=yes
 
-  - name: "reset failed on every node" # noqa 303
-    command: systemctl reset-failed
+    - name: "reset failed on every node" # noqa command-instead-of-module
+      command: systemctl reset-failed

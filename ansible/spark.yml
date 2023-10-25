@@ -19,7 +19,7 @@
   tasks:
     - import_tasks: roles/spark/tasks/download.yml
       when: download_software
-- hosts: all:!{{ azure_proxy_host }}
+- hosts: all:!{{ azure_proxy_host|default("") }}
   roles:
     - spark
 - hosts: spark

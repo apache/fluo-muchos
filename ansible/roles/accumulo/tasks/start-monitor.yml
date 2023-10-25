@@ -19,7 +19,7 @@
   template:
     src: roles/accumulo/templates/monitor.j2
     dest: "/etc/systemd/system/accumulo-monitor.service"
-    mode: 0644
+    mode: "0644"
 
 - name: start accumulo-monitor using systemd
   systemd:

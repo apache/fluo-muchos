@@ -35,15 +35,16 @@
     - import_tasks: roles/common/tasks/ssh.yml
     - import_tasks: roles/common/tasks/os.yml
 
-    - block:
-      - import_tasks: roles/common/tasks/azure.yml
-      - import_tasks: roles/common/tasks/azure_oms.yml
-        when: az_oms_integration_needed
-      - import_tasks: roles/common/tasks/azure_oms_selinux.yml
-        when: az_oms_integration_needed
-      - import_tasks: roles/common/tasks/azure_application_insights.yml
-        when: az_use_app_insights
+    - name: "Run Azure specific tasks"
       when: cluster_type == 'azure'
+      block:
+        - import_tasks: roles/common/tasks/azure.yml
+        - import_tasks: roles/common/tasks/azure_oms.yml
+          when: az_oms_integration_needed
+        - import_tasks: roles/common/tasks/azure_oms_selinux.yml
+          when: az_oms_integration_needed
+        - import_tasks: roles/common/tasks/azure_application_insights.yml
+          when: az_use_app_insights
 
     - import_tasks: roles/common/tasks/ec2.yml
       when: cluster_type == 'ec2'

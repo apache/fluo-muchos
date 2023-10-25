@@ -28,7 +28,7 @@
   sysctl: name=vm.zone_reclaim_mode value=1
   when: cluster_type == 'azure' or cluster_type == 'ec2'
 
-# The TCP/IP setting below has been added based on performance testing done 
+# The TCP/IP setting below has been added based on performance testing done
 # with Microsoft Azure based clusters. For more details refer to
 # https://access.redhat.com/solutions/30453
 - name: "set net.core.somaxconn=2048"
@@ -40,10 +40,10 @@
 - name: "copy new limits.conf"
   copy: src=roles/common/files/limits.conf dest=/etc/security/limits.conf
 - name: "configure user shell"
-  template: src=roles/common/templates/{{ item }} dest=/home/{{ cluster_user }}/.{{ item }} owner={{ cluster_user }} group={{ cluster_group }} mode=0644
+  template: src=roles/common/templates/{{ item }} dest=/home/{{ cluster_user }}/.{{ item }} owner={{ cluster_user }} group={{ cluster_group }} mode="0644"
   with_items:
     - bashrc
     - bash_profile
     - vimrc
 - name: "configure root shell"
-  template: src=roles/common/templates/root_bashrc dest=/root/.bashrc mode=0644
+  template: src=roles/common/templates/root_bashrc dest=/root/.bashrc mode="0644"

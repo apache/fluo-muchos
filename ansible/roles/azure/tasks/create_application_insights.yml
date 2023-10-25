@@ -34,14 +34,14 @@
     idempotency: yes
     state: present
     body:
-      location:  "{{ location }}"
+      location: "{{ location }}"
       kind: java
       properties:
-         ApplicationId: "{{ app_insights_name }}"
-         Application_Type: other
-         Flow_Type: Bluefield
-         Request_Source: rest
-         WorkspaceResourceId: "{{ az_logs_resource_id if az_logs_resource_id else az_logs_ws_resource_id }}"
+        ApplicationId: "{{ app_insights_name }}"
+        Application_Type: other
+        Flow_Type: Bluefield
+        Request_Source: rest
+        WorkspaceResourceId: "{{ az_logs_resource_id if az_logs_resource_id else az_logs_ws_resource_id }}"
   register: app_insights
 
 - name: Update az_appinsights_connection_string in muchos.props

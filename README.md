@@ -42,7 +42,9 @@ also require the creation of SSH public-private [key pair](https://help.github.c
 eval $(ssh-agent -s)
 ssh-add ~/.ssh/id_rsa
 ```
-* Git (current version)
+* Git (current version).
+* Install required Python libraries by executing `pip install -r lib/requirements.txt` command.
+* Install common Ansible collections by executing the [install-ansible-collections](scripts/install-ansible-collections) script.
 
 ### EC2
 

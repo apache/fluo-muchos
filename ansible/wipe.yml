@@ -18,23 +18,23 @@
 - hosts: metrics
   become: yes
   tasks:
-  - name: "stop influxdb and grafana"
-    service: name={{ item }} state=stopped
-    with_items:
-      - influxdb
-      - grafana-server
-  - name: "wipe influxdb data"
-    file: path={{ default_data_dirs[0] }}/influxdb state=absent
-    register: delete_task
-    retries: 10
-    delay: 3
-    until: delete_task is success
-  - name: "wipe grafana db"
-    file: path=/var/lib/grafana/grafana.db state=absent
-    register: delete_task
-    retries: 10
-    delay: 3
-    until: delete_task is success
+    - name: "stop influxdb and grafana"
+      service: name={{ item }} state=stopped
+      with_items:
+        - influxdb
+        - grafana-server
+    - name: "wipe influxdb data"
+      file: path={{ default_data_dirs[0] }}/influxdb state=absent
+      register: delete_task
+      retries: 10
+      delay: 3
+      until: delete_task is success
+    - name: "wipe grafana db"
+      file: path=/var/lib/grafana/grafana.db state=absent
+      register: delete_task
+      retries: 10
+      delay: 3
+      until: delete_task is success
 
 - import_playbook: wipe-systemd.yml
   when: use_systemd
@@ -43,149 +43,150 @@
 
 - hosts: all
   tasks:
-  - name: "wipe software installation dirs"
-    file: path={{ item }} state=absent
-    with_items:
-      - "{{ hadoop_home }}"
-      - "{{ zookeeper_home }}"
-      - "{{ accumulo_home }}"
-      - "{{ fluo_home }}"
-      - "{{ spark_home }}"
-      - "{{ maven_home }}"
-      - "{{ hub_home }}"
-      - "{{ fluo_yarn_home }}"
-    register: delete_task
-    retries: 10
-    delay: 3
-    until: delete_task is success
+    - name: "wipe software installation dirs"
+      file: path={{ item }} state=absent
+      with_items:
+        - "{{ hadoop_home }}"
+        - "{{ zookeeper_home }}"
+        - "{{ accumulo_home }}"
+        - "{{ fluo_home }}"
+        - "{{ spark_home }}"
+        - "{{ maven_home }}"
+        - "{{ hub_home }}"
+        - "{{ fluo_yarn_home }}"
+      register: delete_task
+      retries: 10
+      delay: 3
+      until: delete_task is success
 
 - hosts: hadoop
   tasks:
-  - name: "wipe hadoop data"
-    file: path={{ item }}/hadoop state=absent
-    with_items: "{{ worker_data_dirs }}"
-    register: delete_task
-    retries: 10
-    delay: 3
-    until: delete_task is success
-  - name: "remove logs folder"
-    file: path={{ item }}/logs state=absent
-    with_items: "{{ worker_data_dirs }}"
-    register: delete_task
-    retries: 10
-    delay: 3
-    until: delete_task is success
+    - name: "wipe hadoop data"
+      file: path={{ item }}/hadoop state=absent
+      with_items: "{{ worker_data_dirs }}"
+      register: delete_task
+      retries: 10
+      delay: 3
+      until: delete_task is success
+    - name: "remove logs folder"
+      file: path={{ item }}/logs state=absent
+      with_items: "{{ worker_data_dirs }}"
+      register: delete_task
+      retries: 10
+      delay: 3
+      until: delete_task is success
 
 - hosts: zookeepers
   tasks:
-  - name: "wipe zookeeper data"
-    file: path={{ item }}/zookeeper state=absent
-    with_items: "{{ default_data_dirs }}"
-    register: delete_task
-    retries: 10
-    delay: 3
-    until: delete_task is success
-  - name: "remove logs folder"
-    file: path={{ item }}/logs state=absent
-    with_items: "{{ default_data_dirs }}"
-    register: delete_task
-    retries: 10
-    delay: 3
-    until: delete_task is success
+    - name: "wipe zookeeper data"
+      file: path={{ item }}/zookeeper state=absent
+      with_items: "{{ default_data_dirs }}"
+      register: delete_task
+      retries: 10
+      delay: 3
+      until: delete_task is success
+    - name: "remove logs folder"
+      file: path={{ item }}/logs state=absent
+      with_items: "{{ default_data_dirs }}"
+      register: delete_task
+      retries: 10
+      delay: 3
+      until: delete_task is success
 
 - hosts: accumulo
   tasks:
-  - name: "remove accumulo folder"
-    file: path={{ item }}/accumulo state=absent
-    with_items: "{{ worker_data_dirs }}"
-    register: delete_task
-    retries: 10
-    delay: 3
-    until: delete_task is success
-  - name: "remove logs folder"
-    file: path={{ item }}/logs state=absent
-    with_items: "{{ worker_data_dirs }}"
-    register: delete_task
-    retries: 10
-    delay: 3
-    until: delete_task is success
+    - name: "remove accumulo folder"
+      file: path={{ item }}/accumulo state=absent
+      with_items: "{{ worker_data_dirs }}"
+      register: delete_task
+      retries: 10
+      delay: 3
+      until: delete_task is success
+    - name: "remove logs folder"
+      file: path={{ item }}/logs state=absent
+      with_items: "{{ worker_data_dirs }}"
+      register: delete_task
+      retries: 10
+      delay: 3
+      until: delete_task is success
 
-- hosts: all:!{{ azure_proxy_host }}
+- hosts: all:!{{ azure_proxy_host|default("") }}
   become: yes
   tasks:
-  - block:
-    - name: remove kibana
-      yum:
-        name: kibana*
-        state: absent
-    - name: delete kibana rpm
-      file:
-        path: /tmp/{{ kibana_rpm }}
-        state: absent
-        force: yes
-    - name: remove /etc/kibana directory
-      file:
-        path: /etc/kibana
-        state: absent
-        force: yes
-    - name: remove /var/log/kibana directory
-      file:
-        path: /var/log/kibana/
-        state: absent
-        force: yes
-    - name: remove /var/run/kibana directory
-      file:
-        path: /var/run/kibana/
-        state: absent
-        force: yes
-    - name: disable logstash beat
-      command: filebeat modules disable logstash
-      ignore_errors: yes
-    - name: remove filebeat
-      yum:
-        name: filebeat*
-        state: absent
-    - name: delete filebeat rpm
-      file:
-        path: /tmp/{{ filebeat_rpm }}
-        state: absent
-        force: yes
-    - name: delete /etc/filebeat directory
-      file:
-        path: /etc/filebeat/
-        state: absent
-        force: yes
-    - name: remove logstash
-      yum:
-        name: logstash*
-        state: absent
-    - name: delete logstash rpm
-      file:
-        path: /tmp/{{ logstash_rpm }}
-        state: absent
-        force: yes
-    - name: remove etc/logstash directory
-      file:
-        path: /etc/logstash
-        state: absent
-        force: yes
-    - name: remove elasticsearch
-      yum:
-        name: elasticsearch*
-        state: absent
-    - name: delete /etc/elasticsearch directory
-      file:
-        path: /etc/elasticsearch
-        state: absent
-        force: yes
-    - name: delete /var/lib/elasticsearch directory
-      file:
-        path: /var/lib/elasticsearch
-        state: absent
-        force: yes
-    - name: delete elasticsearch rpm
-      file:
-        path: /tmp/{{ elasticsearch_rpm }}
-        state: absent
-        force: yes
-    when: "'elkserver' in groups"
+    - name: "Tasks to remove ELK stack"
+      when: "'elkserver' in groups"
+      block:
+        - name: remove kibana
+          yum:
+            name: kibana*
+            state: absent
+        - name: delete kibana rpm
+          file:
+            path: /tmp/{{ kibana_rpm }}
+            state: absent
+            force: yes
+        - name: remove /etc/kibana directory
+          file:
+            path: /etc/kibana
+            state: absent
+            force: yes
+        - name: remove /var/log/kibana directory
+          file:
+            path: /var/log/kibana/
+            state: absent
+            force: yes
+        - name: remove /var/run/kibana directory
+          file:
+            path: /var/run/kibana/
+            state: absent
+            force: yes
+        - name: disable logstash beat # noqa ignore-errors
+          command: filebeat modules disable logstash
+          ignore_errors: yes
+        - name: remove filebeat
+          yum:
+            name: filebeat*
+            state: absent
+        - name: delete filebeat rpm
+          file:
+            path: /tmp/{{ filebeat_rpm }}
+            state: absent
+            force: yes
+        - name: delete /etc/filebeat directory
+          file:
+            path: /etc/filebeat/
+            state: absent
+            force: yes
+        - name: remove logstash
+          yum:
+            name: logstash*
+            state: absent
+        - name: delete logstash rpm
+          file:
+            path: /tmp/{{ logstash_rpm }}
+            state: absent
+            force: yes
+        - name: remove etc/logstash directory
+          file:
+            path: /etc/logstash
+            state: absent
+            force: yes
+        - name: remove elasticsearch
+          yum:
+            name: elasticsearch*
+            state: absent
+        - name: delete /etc/elasticsearch directory
+          file:
+            path: /etc/elasticsearch
+            state: absent
+            force: yes
+        - name: delete /var/lib/elasticsearch directory
+          file:
+            path: /var/lib/elasticsearch
+            state: absent
+            force: yes
+        - name: delete elasticsearch rpm
+          file:
+            path: /tmp/{{ elasticsearch_rpm }}
+            state: absent
+            force: yes

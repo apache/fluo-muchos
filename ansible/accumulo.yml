@@ -19,7 +19,7 @@
   tasks:
     - import_tasks: roles/accumulo/tasks/download.yml
       when: download_software
-- hosts: all:!{{ azure_proxy_host }}
+- hosts: all:!{{ azure_proxy_host|default("") }}
   roles:
     - accumulo
 - hosts: accumulomaster[0]
@@ -27,7 +27,7 @@
     - import_tasks: roles/accumulo/tasks/init-accumulo.yml
   handlers:
     - import_tasks: roles/accumulo/handlers/init-accumulo.yml
-- hosts: all:!{{ azure_proxy_host }}
+- hosts: all:!{{ azure_proxy_host|default("") }}
   tasks:
     - import_tasks: roles/accumulo/tasks/add-adlsgen2.yml
       when: cluster_type == 'azure' and accumulo_version is version('2.0.0','>=') and accumulo_version is version('2.1.0','<') and use_adlsg2
@@ -70,17 +70,17 @@
 - hosts: accumulomaster
   tasks:
     - name: "install and start all the accumulo services using systemd"
+      when: use_systemd
+      become: yes
       block:
         - import_tasks: roles/accumulo/tasks/start-master.yml
         - import_tasks: roles/accumulo/tasks/start-gc.yml
         - import_tasks: roles/accumulo/tasks/start-monitor.yml
-      when: use_systemd
-      become: yes
     - name: "install and start all the accumulo tracer service using systemd"
-      block:
-        - import_tasks: roles/accumulo/tasks/start-tracer.yml
       when: accumulo_version is version('2.0.0','>=') and use_systemd and accumulo_version is version('2.1.0','<')
       become: yes
+      block:
+        - import_tasks: roles/accumulo/tasks/start-tracer.yml
 
 - hosts: workers
   gather_facts: false
