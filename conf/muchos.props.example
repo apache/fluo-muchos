@@ -36,12 +36,12 @@ accumulo_instance = muchos
 # Accumulo Password
 accumulo_password = secret
 # Software versions (make sure you have a corresponding entry for the checksum in conf/checksums)
-hadoop_version = 3.2.2
-zookeeper_version = 3.6.3
+hadoop_version = 3.3.6
+zookeeper_version = 3.8.3
 spark_version = 2.4.8
 fluo_version = 1.2.0
 fluo_yarn_version = 1.0.0
-accumulo_version = 2.0.1
+accumulo_version = 2.1.2
 # Specifies if software should be downloaded. If 'False', tarballs of the software above should be in conf/upload/
 download_software = True
 # Install Hub (for GitHub)
