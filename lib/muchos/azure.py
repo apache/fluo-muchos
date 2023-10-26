@@ -19,7 +19,7 @@
 import json
 import subprocess
 from os import path
-from azure.common.client_factory import get_client_from_cli_profile
+from azure.identity import DefaultAzureCredential
 from azure.mgmt.compute import ComputeManagementClient
 from .existing import ExistingCluster
 
@@ -53,7 +53,10 @@ class VmssCluster(ExistingCluster):
     def status(self):
         config = self.config
         azure_vars_dict = dict(config.items("azure"))
-        compute_client = get_client_from_cli_profile(ComputeManagementClient)
+        credential = DefaultAzureCredential()
+        compute_client = ComputeManagementClient(
+            credential, azure_vars_dict["azure_subscription_id"]
+        )
         vmss_status = compute_client.virtual_machine_scale_sets.get(
             azure_vars_dict["resource_group"], self.config.cluster_name
         )
@@ -177,7 +180,7 @@ class VmssCluster(ExistingCluster):
                     ),
                     "w",
                 ) as vmss_file:
-                    for (name, value) in self.config.items(profile):
+                    for name, value in self.config.items(profile):
                         print("{0}: {1}".format(name, value), file=vmss_file)
 
                     # use VMSS-specific mount root if one is defined or

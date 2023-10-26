@@ -111,7 +111,7 @@ def test_ec2_cluster():
     assert c.proxy_public_ip() == "23.0.0.0"
     assert c.proxy_private_ip() == "10.0.0.0"
     assert c.get("general", "cluster_user") == (
-            c.get("general", "cluster_group")
+        c.get("general", "cluster_group")
     )
     assert c.get_non_proxy() == [
         ("10.0.0.1", "leader2"),

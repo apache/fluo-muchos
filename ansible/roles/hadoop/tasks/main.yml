@@ -38,7 +38,7 @@
 
 # This is currently needed to run hadoop with Java 11 (see https://github.com/apache/fluo-muchos/issues/266)
 - name: "Copy javax.activation-api (when Hadoop 3 and Java 11 are used)"
-  ansible.posix.synchronize: src={{ user_home }}/mvn_dep/ dest={{ hadoop_home }}/share/hadoop/common/lib/
+  synchronize: src={{ user_home }}/mvn_dep/ dest={{ hadoop_home }}/share/hadoop/common/lib/
   when: hadoop_major_version == '3' and java_product_version == 11
 
 - name: "setup hadoop short circuit socket dir"

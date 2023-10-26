@@ -61,7 +61,7 @@ class Ec2DeployConfig(BaseConfig):
 
     def init_nodes(self):
         self.node_d = {}
-        for (hostname, value) in self.items("nodes"):
+        for hostname, value in self.items("nodes"):
             if hostname in self.node_d:
                 exit(
                     "Hostname {0} already exists twice in nodes".format(
@@ -105,7 +105,7 @@ class Ec2DeployConfig(BaseConfig):
             ("worker", self.worker_ephemeral_devices()),
         ]
 
-        for (ntype, devices) in node_list:
+        for ntype, devices in node_list:
             node_types[ntype] = {
                 "mounts": self.mounts(len(devices)),
                 "devices": devices,

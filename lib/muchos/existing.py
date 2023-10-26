@@ -133,7 +133,7 @@ class ExistingCluster:
                 )
 
             print("\n[zookeepers]", file=hosts_file)
-            for (index, zk_host) in enumerate(
+            for index, zk_host in enumerate(
                 config.get_service_hostnames("zookeeper"), start=1
             ):
                 print("{0} id={1}".format(zk_host, index), file=hosts_file)
@@ -163,7 +163,7 @@ class ExistingCluster:
             )
 
             print("\n[nodes]", file=hosts_file)
-            for (private_ip, hostname) in config.get_private_ip_hostnames():
+            for private_ip, hostname in config.get_private_ip_hostnames():
                 print(
                     "{0} ansible_ssh_host={1} node_type={2}".format(
                         hostname, private_ip, config.node_type(hostname)
@@ -177,13 +177,13 @@ class ExistingCluster:
                 self.add_specialized_configs(hosts_file)
 
             print("\n[all:vars]", file=hosts_file)
-            for (name, value) in sorted(host_vars.items()):
+            for name, value in sorted(host_vars.items()):
                 print("{0} = {1}".format(name, value), file=hosts_file)
 
         with open(
             path.join(config.deploy_path, "ansible/group_vars/all"), "w"
         ) as play_vars_file:
-            for (name, value) in sorted(play_vars.items()):
+            for name, value in sorted(play_vars.items()):
                 print("{0}: {1}".format(name, value), file=play_vars_file)
 
         # copy keys file to ansible/conf (if it exists)

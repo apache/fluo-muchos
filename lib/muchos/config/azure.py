@@ -302,6 +302,11 @@ class AzureDeployConfig(BaseConfig):
 
     @ansible_host_var
     @default(None)
+    def azure_subscription_id(self):
+        return self.get("azure", "azure_subscription_id")
+
+    @ansible_host_var
+    @default(None)
     def resource_group(self):
         return self.get("azure", "resource_group")
 
@@ -341,7 +346,7 @@ class AzureDeployConfig(BaseConfig):
         return self.get("azure", "azure_proxy_host_vm_sku")
 
     @ansible_host_var
-    @is_valid(is_in(["Regular", "Low"]))
+    @is_valid(is_in(["None", "Spot"]))
     def vmss_priority(self):
         return self.get("azure", "vmss_priority")
 
