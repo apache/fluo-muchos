@@ -96,7 +96,7 @@ _HOST_VAR_DEFAULTS = {
     ),
     "maven_home": "{{ install_dir }}/apache-maven-{{ maven_version }}",
     "maven_tarball": "apache-maven-{{ maven_version }}-bin.tar.gz",
-    "maven_version": "3.6.3",
+    "maven_version": "3.9.5",
     "spark_home": (
         "'{{ install_dir }}/spark-{{ spark_version }}" "-bin-without-hadoop'"
     ),
@@ -156,7 +156,7 @@ _PLAY_VAR_DEFAULTS = {
     ),
     "maven_checksum": (
         "sha512:"
-        "c35a1803a6e70a126e80b2b3ae33eed961f83ed74d18fcd16909b2d44d7dada3203f1ffe726c17ef8dcca2dcaa9fca676987befeadc9b9f759967a8cb77181c0"  # noqa
+        "4810523ba025104106567d8a15a8aa19db35068c8c8be19e30b219a1d7e83bcab96124bf86dc424b1cd3c5edba25d69ec0b31751c136f88975d15406cab3842b"  # noqa
     ),
     "metrics_drive_ids": None,
     "mount_root": None,
