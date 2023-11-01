@@ -22,43 +22,39 @@
   until: "'OK' in gresult.msg or 'file already exists' in gresult.msg"
   retries: 3
   with_items:
-    - { urlp: "{{ apache_mirror.stdout }}/zookeeper/zookeeper-{{ zookeeper_version }}", fn: "{{ zookeeper_tarball }}", sum: "{{ zookeeper_checksum }}" }
-    - { urlp: "{{ apache_mirror.stdout }}/hadoop/common/hadoop-{{ hadoop_version }}", fn: "{{ hadoop_tarball }}", sum: "{{ hadoop_checksum }}" }
-    - { urlp: "{{ apache_mirror.stdout }}/maven/maven-3/{{ maven_version }}/binaries", fn: "{{ maven_tarball }}", sum: "{{ maven_checksum }}" }
-    - { urlp: "https://github.com/github/hub/releases/download/v{{ hub_version }}", fn: "{{ hub_tarball }}", sum: "{{ hub_checksum }}" }
+    - urlp: "{{ apache_mirror.stdout }}/zookeeper/zookeeper-{{ zookeeper_version }}"
+      fn: "{{ zookeeper_tarball }}"
+      sum: "{{ zookeeper_checksum }}"
+    - urlp: "{{ apache_mirror.stdout }}/hadoop/common/hadoop-{{ hadoop_version }}"
+      fn: "{{ hadoop_tarball }}"
+      sum: "{{ hadoop_checksum }}"
+    - urlp: "{{ apache_mirror.stdout }}/maven/maven-3/{{ maven_version }}/binaries"
+      fn: "{{ maven_tarball }}"
+      sum: "{{ maven_checksum }}"
+    - urlp: "https://github.com/github/hub/releases/download/v{{ hub_version }}"
+      fn: "{{ hub_tarball }}"
+      sum: "{{ hub_checksum }}"
   when: "'snapshot' not in item.fn.lower()"
 
-# This is currently needed to run hadoop with Java 11 (see https://github.com/apache/fluo-muchos/issues/266)
-- name: "Download javax.activation-api for Hadoop 3 when Java 11 is used"
-  maven_artifact:
-   group_id: javax.activation
-   artifact_id: javax.activation-api
-   repository_url: 'https://repo.maven.apache.org/maven2/'
-   version: 1.2.0
-   dest: "{{ user_home }}/mvn_dep/"
-   mode: 0644
-  when: hadoop_major_version == '3' and java_product_version == 11
-
-- block:
-  - name: "download omsagent installer to proxy"
-    shell: set -o pipefail && eval $(curl -s https://raw.githubusercontent.com/Microsoft/OMS-Agent-for-Linux/master/installer/scripts/onboard_agent.sh | grep -e 'GITHUB_RELEASE_X64=' -e 'BUNDLE_X64=') && wget ${GITHUB_RELEASE_X64}${BUNDLE_X64} -O {{ tarballs_dir }}/omsagent.x64.sh
-    args:
-      executable: bash
-    register: result
-    until: result is not failed
-    retries: 3
-    delay: 2
-    when: az_oms_integration_needed
-
-  - name: "check if Application Insights Agent jar was uploaded to proxy"
-    stat: path={{ tarballs_dir }}/appinsights-agent.jar
-    register: appinsights
-    when: az_use_app_insights
-  - name: "download Application Insights Agent jar to proxy"
-    get_url: url=https://github.com/microsoft/ApplicationInsights-Java/releases/download/{{ az_app_insights_version }}/applicationinsights-agent-{{ az_app_insights_version }}.jar dest={{ tarballs_dir }}/appinsights-agent.jar force=no
-    register: gresult
-    until: "'OK' in gresult.msg or 'file already exists' in gresult.msg"
-    retries: 3
-    when: az_use_app_insights and not appinsights.stat.exists
+- name: "Tasks for Azure specific downloads"
   when: cluster_type == 'azure'
-
+  block:
+    - name: "download omsagent installer to proxy"
+      shell: set -o pipefail && eval $(curl -s https://raw.githubusercontent.com/Microsoft/OMS-Agent-for-Linux/master/installer/scripts/onboard_agent.sh | grep -e 'GITHUB_RELEASE_X64=' -e 'BUNDLE_X64=') && wget ${GITHUB_RELEASE_X64}${BUNDLE_X64} -O {{ tarballs_dir }}/omsagent.x64.sh
+      args:
+        executable: bash
+      register: result
+      until: result is not failed
+      retries: 3
+      delay: 2
+      when: az_oms_integration_needed
+    - name: "check if Application Insights Agent jar was uploaded to proxy"
+      stat: path={{ tarballs_dir }}/appinsights-agent.jar
+      register: appinsights
+      when: az_use_app_insights
+    - name: "download Application Insights Agent jar to proxy"
+      get_url: url=https://github.com/microsoft/ApplicationInsights-Java/releases/download/{{ az_app_insights_version }}/applicationinsights-agent-{{ az_app_insights_version }}.jar dest={{ tarballs_dir }}/appinsights-agent.jar force=no
+      register: gresult
+      until: "'OK' in gresult.msg or 'file already exists' in gresult.msg"
+      retries: 3
+      when: az_use_app_insights and not appinsights.stat.exists
