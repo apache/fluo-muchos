@@ -19,7 +19,7 @@
 
 # Playbook to install the ELK stack + Beats
 #
-- hosts: all:!{{ azure_proxy_host }}
+- hosts: all:!{{ azure_proxy_host|default("") }}
   roles:
     - { role: elasticsearch }
     - { role: filebeat }

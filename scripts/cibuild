@@ -6,7 +6,7 @@ nose2 -v -B
 echo "SUCCESS: All nose2 tests completed."
 echo "Running Ansible-lint..."
 cd ..
-ansible-lint -x no-changed-when,risky-file-permissions,unnamed-task,var-naming
+ANSIBLE_LIBRARY=./ansible/library ansible-lint -x no-changed-when,risky-file-permissions,unnamed-task,var-naming,fqcn[action],fqcn[action-core],name[missing],name[casing],name[play],yaml[line-length],no-free-form,jinja[spacing],yaml[truthy]  ansible/ --exclude ansible/roles/azure/files/cloud-init.yml
 echo "SUCCESS: Ansible-lint completed."
 echo "Running flake8 to check Python code..."
 flake8

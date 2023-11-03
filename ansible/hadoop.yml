@@ -17,12 +17,12 @@
 
 - hosts: proxy
   tasks:
-  # This is currently needed to run hadoop with Java 11 (see https://github.com/apache/fluo-muchos/issues/266)
-  - name: "Download javax.activation-api for Hadoop 3 when Java 11 is used"
-    command: "{{ maven_home }}/bin/mvn dependency:copy -Dartifact=javax.activation:javax.activation-api:1.2.0 -DoutputDirectory={{ user_home }}/mvn_dep/"
-    when: hadoop_major_version == '3' and java_product_version == 11
+    # This is currently needed to run hadoop with Java 11 (see https://github.com/apache/fluo-muchos/issues/266)
+    - name: "Download javax.activation-api for Hadoop 3 when Java 11 is used"
+      command: "{{ maven_home }}/bin/mvn dependency:copy -Dartifact=javax.activation:javax.activation-api:1.2.0 -DoutputDirectory={{ user_home }}/mvn_dep/"
+      when: hadoop_major_version == '3' and java_product_version == 11
 
-- hosts: all:!{{ azure_proxy_host }}
+- hosts: all:!{{ azure_proxy_host|default("") }}
   roles:
     - hadoop
 - hosts: journalnode

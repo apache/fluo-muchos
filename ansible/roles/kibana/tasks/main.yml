@@ -16,12 +16,7 @@
 # limitations under the License.
 #
 
-
-# Installing Kibana
-#
-
 # Add the Kibana yum repo.
-
 - name: "download kibana rpm"
   get_url:
   args:
@@ -30,8 +25,7 @@
     checksum: "{{ kibana_checksum }}"
     force: no
 
-    #Install kibana
-
+# Install kibana
 - name: "ensure kibana is installed"
   become: true
   yum:
@@ -39,7 +33,6 @@
     state: present
 
 # Configurations
-
 - name: Updating the config file to allow outside access
   lineinfile:
     destfile: /etc/kibana/kibana.yml
@@ -103,7 +96,7 @@
     path: /var/run/kibana/
     state: directory
     recurse: yes
-    mode: 0777
+    mode: "0777"
     owner: kibana
 
 # Make kibana folder pid
@@ -112,11 +105,10 @@
   file:
     path: /var/run/kibana/kibana.pid
     state: touch
-    mode: 0777
+    mode: "0777"
     owner: kibana
 
 # Starting Kibana
-
 - name: Starting Kibana
   service:
     name: kibana

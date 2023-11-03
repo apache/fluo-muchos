@@ -28,11 +28,11 @@
 
 - name: Set name for log analytics workspace
   set_fact:
-     log_workspace_name: "{{ monitor_name.stdout + '-la' }}"
+    log_workspace_name: "{{ monitor_name.stdout + '-la' }}"
 
 - name: Set name for dashboard
   set_fact:
-     dashboard_name: "{{ monitor_name.stdout + '-db' }}"
+    dashboard_name: "{{ monitor_name.stdout + '-db' }}"
 
 - name: Set display name for workbook
   set_fact:

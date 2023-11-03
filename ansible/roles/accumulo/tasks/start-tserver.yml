@@ -19,7 +19,7 @@
   template:
     src: roles/accumulo/templates/tserver.j2
     dest: "/etc/systemd/system/accumulo-tserver@.service"
-    mode: 0644
+    mode: "0644"
 
 - name: start accumulo-tserver(s) using systemd
   systemd:

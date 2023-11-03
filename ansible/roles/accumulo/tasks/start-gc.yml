@@ -19,7 +19,7 @@
   template:
     src: roles/accumulo/templates/gc.j2
     dest: "/etc/systemd/system/accumulo-gc.service"
-    mode: 0644
+    mode: "0644"
 
 - name: start accumulo-gc using systemd
   systemd:

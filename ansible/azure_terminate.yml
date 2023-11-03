@@ -18,66 +18,66 @@
 ---
 - hosts: localhost
   tasks:
-    - block:
-      - import_tasks: roles/azure/tasks/log_analytics_ws_common.yml
-      - import_tasks: roles/azure/tasks/application_insights_common.yml
-
-      - name: Delete application insights
-        azure_rm_resource:
-           resource_group: "{{ resource_group }}"
-           provider: insights
-           resource_type: components
-           resource_name: "{{ app_insights_name }}"
-           api_version: '2020-02-02'
-           state: absent
-
-      - name: Delete workbook
-        azure_rm_resource:
-           resource_group: "{{ resource_group }}"
-           provider: insights
-           resource_type: workbooks
-           resource_name: "{{ workbook_name }}"
-           api_version: '2020-02-12'
-           state: absent
-        when: workbook_exists
-
-      - name: Delete dashboard
-        azure_rm_resource:
-           resource_group: "{{ resource_group }}"
-           provider: Portal
-           resource_type: dashboards
-           resource_name:  "{{ dashboard_name }}"
-           api_version: '2019-01-01-preview'
-           state: absent
-
-      - name: Delete log analytics workspace
-        azure_rm_resource:
-           resource_group: "{{ resource_group }}"
-           provider: OperationalInsights
-           resource_type: workspaces
-           resource_name: "{{ log_workspace_name }}"
-           api_version: '2015-03-20'
-           state: absent
+    - name: "Tasks for removing Azure specific components"
       when: az_oms_integration_needed
+      block:
+        - import_tasks: roles/azure/tasks/log_analytics_ws_common.yml
+        - import_tasks: roles/azure/tasks/application_insights_common.yml
+
+        - name: Delete application insights
+          azure_rm_resource:
+            resource_group: "{{ resource_group }}"
+            provider: insights
+            resource_type: components
+            resource_name: "{{ app_insights_name }}"
+            api_version: "2020-02-02"
+            state: absent
+
+        - name: Delete workbook
+          azure_rm_resource:
+            resource_group: "{{ resource_group }}"
+            provider: insights
+            resource_type: workbooks
+            resource_name: "{{ workbook_name }}"
+            api_version: "2020-02-12"
+            state: absent
+          when: workbook_exists
+
+        - name: Delete dashboard
+          azure_rm_resource:
+            resource_group: "{{ resource_group }}"
+            provider: Portal
+            resource_type: dashboards
+            resource_name: "{{ dashboard_name }}"
+            api_version: "2019-01-01-preview"
+            state: absent
+
+        - name: Delete log analytics workspace
+          azure_rm_resource:
+            resource_group: "{{ resource_group }}"
+            provider: OperationalInsights
+            resource_type: workspaces
+            resource_name: "{{ log_workspace_name }}"
+            api_version: "2015-03-20"
+            state: absent
 
     - name: Delete User Assigned Identity
       azure_rm_resource:
-         resource_group: "{{ resource_group }}"
-         provider: ManagedIdentity
-         resource_type: userAssignedIdentities
-         resource_name:  "{{ user_assigned_identity if user_assigned_identity else vmss_name + '-ua-msi' }}"
-         api_version: '2018-11-30'
-         state: absent
+        resource_group: "{{ resource_group }}"
+        provider: ManagedIdentity
+        resource_type: userAssignedIdentities
+        resource_name: "{{ user_assigned_identity if user_assigned_identity else vmss_name + '-ua-msi' }}"
+        api_version: "2018-11-30"
+        state: absent
       when: use_adlsg2
 
     - name: Delete ADLS Gen2 storage Account
       azure_rm_storageaccount:
-         resource_group: "{{ resource_group }}"
-         name:  "{{ item.split('@')[1].split('.')[0] }}"
-         force_delete_nonempty: yes
-         state: absent
-      loop:
-         "{{ instance_volumes_adls.split(',') }}"
+        resource_group: "{{ resource_group }}"
+        name: "{{ item.split('@')[1].split('.')[0] }}"
+        force_delete_nonempty: yes
+        state: absent
+      loop: "{{ instance_volumes_adls.split(',') }}"
       when: use_adlsg2
 
     - name: Delete VM Scale Set
@@ -135,7 +135,7 @@
         vnet_facts.virtualnetworks|map(attribute='tags')|map(attribute='deployment_type')|join('') == 'muchos'
 
     - name: Delete the resource group if it is empty
-      azure_rm_resourcegroup:
+      azure.azcollection.azure_rm_resourcegroup:
         name: "{{ resource_group }}"
         state: absent
       retries: 30

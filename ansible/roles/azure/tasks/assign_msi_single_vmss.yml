@@ -22,9 +22,9 @@
     provider: Compute
     resource_type: virtualMachineScaleSets
     resource_name: "{{ vmss_name }}"
-    api_version: '2019-03-01'
+    api_version: "2019-03-01"
     body:
-     location: "{{ location }}"
-     identity:
-       type: UserAssigned
-       userAssignedIdentities: "{{ UserAssignedIdentityArr|join('') }}"
+      location: "{{ location }}"
+      identity:
+        type: UserAssigned
+        userAssignedIdentities: "{{ UserAssignedIdentityArr|join('') }}"

@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-- hosts: all:!{{ azure_proxy_host }}
+- hosts: all:!{{ azure_proxy_host|default("") }}
   become: yes
   roles:
     - docker

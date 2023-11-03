@@ -26,15 +26,15 @@
 # SECTION 1: Create Azure RG, network and subnet
 #
 - name: Create a resource group
-  azure_rm_resourcegroup:
+  azure.azcollection.azure_rm_resourcegroup:
     name: "{{ resource_group }}"
     location: "{{ location }}"
     tags:
-        deployment_type: muchos
-        application: accumulo
+      deployment_type: muchos
+      application: accumulo
 
 - name: Ensure that the resource group is available
-  azure_rm_resourcegroup_info:
+  azure.azcollection.azure_rm_resourcegroup_info:
     name: "{{ resource_group }}"
   retries: 5
   delay: 3
@@ -42,20 +42,20 @@
   until: resource_group_facts.resourcegroups is defined and resource_group_facts.resourcegroups|map(attribute='name')|join('') is defined and resource_group_facts.resourcegroups|map(attribute='properties')|map(attribute='provisioningState')|join('') == "Succeeded"
 
 - debug:
-   msg: "Name of resource group created: {{ resource_group_facts.resourcegroups|map(attribute='name')|join('') }}"
+    msg: "Name of resource group created: {{ resource_group_facts.resourcegroups|map(attribute='name')|join('') }}"
 
 - debug:
-   msg: "Provisioning state of {{ resource_group }} is {{ resource_group_facts.resourcegroups|map(attribute='properties')|map(attribute='provisioningState')|join('') }}"
+    msg: "Provisioning state of {{ resource_group }} is {{ resource_group_facts.resourcegroups|map(attribute='properties')|map(attribute='provisioningState')|join('') }}"
 
 - name: Create a virtual network
   azure_rm_virtualnetwork:
     resource_group: "{{ resource_group }}"
     name: "{{ vnet }}"
     address_prefixes_cidr:
-        - "{{ vnet_cidr }}"
+      - "{{ vnet_cidr }}"
     tags:
-        deployment_type: muchos
-        application: accumulo
+      deployment_type: muchos
+      application: accumulo
 
 - name: Create a subnet
   azure_rm_subnet:

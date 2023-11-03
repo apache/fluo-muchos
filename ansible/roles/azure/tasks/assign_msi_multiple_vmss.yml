@@ -30,11 +30,10 @@
     provider: Compute
     resource_type: virtualMachineScaleSets
     resource_name: "{{ vmss_name }}-{{ item.name_suffix }}"
-    api_version: '2019-03-01'
+    api_version: "2019-03-01"
     body:
-     location: "{{ location }}"
-     identity:
-       type: UserAssigned
-       userAssignedIdentities: "{{ UserAssignedIdentityArr|join('') }}"
-  loop:
-     "{{ azure_multiple_vmss_vars.vars_list }}"
+      location: "{{ location }}"
+      identity:
+        type: UserAssigned
+        userAssignedIdentities: "{{ UserAssignedIdentityArr|join('') }}"
+  loop: "{{ azure_multiple_vmss_vars.vars_list }}"
