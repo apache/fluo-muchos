@@ -33,7 +33,6 @@ class Ec2Cluster(ExistingCluster):
         ExistingCluster.__init__(self, config)
 
     def launch_node(self, hostname, services, sg_id):
-
         request = self.init_request(hostname, services, sg_id)
 
         request["MinCount"] = 1
@@ -116,7 +115,6 @@ class Ec2Cluster(ExistingCluster):
         return group_id
 
     def delete_security_group(self):
-
         sg_id = None
         ec2 = boto3.client("ec2")
         try:
@@ -229,7 +227,7 @@ class Ec2Cluster(ExistingCluster):
             sg_id = self.create_security_group()
 
         instance_d = {}
-        for (hostname, services) in list(self.config.nodes().items()):
+        for hostname, services in list(self.config.nodes().items()):
             instance = self.launch_node(hostname, services, sg_id)
             instance_d[instance["InstanceId"]] = hostname
 

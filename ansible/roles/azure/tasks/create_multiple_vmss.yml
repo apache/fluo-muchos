@@ -31,12 +31,12 @@
     name: azure_multiple_vmss_vars
 
 - name: Create Scale Set
-  community.azure.azure_rm_virtualmachinescaleset:
+  azure.azcollection.azure_rm_virtualmachinescaleset:
     resource_group: "{{ resource_group }}"
     location: "{{ location }}"
     name: "{{ vmss_name }}-{{ item.name_suffix }}"
     vm_size: "{{ item.sku }}"
-    priority: "{{ item.vmss_priority | default('Regular') }}"
+    priority: "{{ item.vmss_priority | default('None') }}"
     admin_username: "{{ cluster_user }}"
     ssh_password_enabled: false
     ssh_public_keys:
@@ -99,7 +99,7 @@
   poll: 0
 
 - name: "Get VMSS nic list"
-  azure_rm_virtualmachinescaleset_nic_list_facts:
+  azure.azcollection.azure_rm_vmssnetworkinterface_info:
     resource_group: "{{ resource_group }}"
     vmss_name: "{{ vmss_name }}-{{ item.name_suffix }}"
   register: _vmss_nic_list
@@ -126,6 +126,9 @@
   retries: 300
   with_items: "{{ _vmss_nic_list.results }}"
 
+# Construct a dictionary of desired host names to their IP addresses
+# When doing this, replace any underscore characters in the Azure-generated VM instance name
+# with a dash and use the first 12 "portions" of the NIC resource ID to get the VM resource ID
 - name: Get VM hostname to IP mapping
   set_fact:
     hostname_ip_pairs: |
@@ -141,9 +144,10 @@
       {%- endfor -%}
       {%- set vmid_ips = {} -%}
       {%- for vmss in vmss_nic_list.results -%}
-      {%- for interface in vmss.networkinterfaces -%}
-      {%- if interface.virtualMachine is defined -%}
-      {%- set _ = vmid_ips.__setitem__(interface.virtualMachine.id, interface.ipConfigurations[0].privateIPAddress) -%}
+      {%- for interface in vmss.vmss_networkinterfaces -%}
+      {%- if interface.id is defined -%}
+      {%- set vmid = "/".join(interface.id.split("/")[0:11]) -%}
+      {%- set _ = vmid_ips.__setitem__(vmid, interface.ip_configurations[0].private_ip_address) -%}
       {%- endif -%}
       {%- endfor -%}
       {%- endfor -%}

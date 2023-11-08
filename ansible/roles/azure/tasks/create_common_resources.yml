@@ -39,13 +39,13 @@
   retries: 5
   delay: 3
   register: resource_group_facts
-  until: resource_group_facts.resourcegroups is defined and resource_group_facts.resourcegroups|map(attribute='name')|join('') is defined and resource_group_facts.resourcegroups|map(attribute='properties')|map(attribute='provisioningState')|join('') == "Succeeded"
+  until: resource_group_facts.resourcegroups is defined and resource_group_facts.resourcegroups|map(attribute='name')|join('') is defined and resource_group_facts.resourcegroups|map(attribute='properties')|map(attribute='provisioning_state')|join('') == "Succeeded"
 
 - debug:
     msg: "Name of resource group created: {{ resource_group_facts.resourcegroups|map(attribute='name')|join('') }}"
 
 - debug:
-    msg: "Provisioning state of {{ resource_group }} is {{ resource_group_facts.resourcegroups|map(attribute='properties')|map(attribute='provisioningState')|join('') }}"
+    msg: "Provisioning state of {{ resource_group }} is {{ resource_group_facts.resourcegroups|map(attribute='properties')|map(attribute='provisioning_state')|join('') }}"
 
 - name: Create a virtual network
   azure_rm_virtualnetwork:

@@ -61,15 +61,7 @@ Muchos requires the following for EC2 installations:
 Muchos requires the following for Azure installations:
 
 * [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest) must be installed,
-  configured and authenticated to an Azure subscription. Please note - you should install
-  [Azure CLI 2.0.69](https://packages.microsoft.com/yumrepos/azure-cli/azure-cli-2.0.69-1.el7.x86_64.rpm) on CentOS.
-  Higher versions of Azure CLI are unsupported for Muchos on CentOS at this time until
-  [this issue](https://github.com/Azure/azure-cli/issues/10128) in the Azure CLI 2.0.70 is fixed.
-  Example command to install Azure CLI 2.0.69 on CentOS is below:
-```bash
-wget https://packages.microsoft.com/yumrepos/azure-cli/azure-cli-2.0.69-1.el7.x86_64.rpm
-sudo yum install azure-cli-2.0.69-1.el7.x86_64.rpm
-```
+  configured and authenticated to an Azure subscription. It is recommended to use Azure CLI 2.50 or later.
 * An Azure account with permissions to either use an existing or create new Resource Groups, Virtual Networks and Subnets
 * A machine which can connect to securely deploy the cluster in Azure.
 * Install the [Ansible collection for Azure](https://github.com/ansible-collections/azure), and associated pre-requisites within
@@ -165,6 +157,7 @@ Under the `general` section, edit following values as per your configuration
 * `proxy_hostname` (optional) is the name of the machine which has access to the cluster VNET
 
 Under the `azure` section, edit following values as per your configuration:
+* `azure_subscription_id` to provide the Azure subscription GUID
 * `resource_group` to provide the resource-group name for the cluster deployment. A new resource group with
   this name will be created if it doesn't already exist
 * `vnet` to provide the name of the VNET that your cluster nodes should use. A new VNET with this name will be

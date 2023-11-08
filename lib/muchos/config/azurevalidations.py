@@ -22,18 +22,23 @@ from .azurevalidationhelpers import (
     vmss_exists,
 )
 from azure.mgmt.compute import ComputeManagementClient
-from azure.common.client_factory import get_client_from_cli_profile
+from azure.identity import DefaultAzureCredential
 
 
 def validate_azure_configs(config, action):
+    credential = DefaultAzureCredential()
+
     # get VM SKU resources for this location. we have to use
     # a specific API version to do this as this resource_skus
     # list operation is not allowed in any other API versions
     # which are available with the version of Azure SDK
     # that ships with Ansible for Azure
-    config.client = get_client_from_cli_profile(
-        ComputeManagementClient, api_version="2017-09-01"
+    config.client = ComputeManagementClient(
+        credential,
+        subscription_id=config.azure_subscription_id(),
+        api_version="2017-09-01",
     )
+
     config.vm_skus_for_location = list(
         filter(
             lambda s: s.resource_type == "virtualMachines"
@@ -44,8 +49,10 @@ def validate_azure_configs(config, action):
 
     # switch to 2018-06-01 API which has support for other operations
     # including VMSS checks
-    config.client = get_client_from_cli_profile(
-        ComputeManagementClient, api_version="2018-06-01"
+    config.client = ComputeManagementClient(
+        credential,
+        subscription_id=config.azure_subscription_id(),
+        api_version="2018-06-01",
     )
 
     validations = (
@@ -98,7 +105,7 @@ AZURE_VALIDATIONS = {
             lambda config, client: config.getboolean(
                 "azure", "use_multiple_vmss"
             )
-            or not config.vmss_priority() == "Low"
+            or not config.vmss_priority() == "Spot"
             or config.vm_sku() in config.spot_capable_skus(),
             "azure.vm_sku must be an Azure Spot (low priority) capable VM SKU",
         ),

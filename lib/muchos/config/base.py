@@ -308,7 +308,7 @@ class BaseConfig(ConfigParser, metaclass=ABCMeta):
 
     def _init_nodes(self):
         self.node_d = {}
-        for (hostname, value) in self.items("nodes"):
+        for hostname, value in self.items("nodes"):
             if hostname in self.node_d:
                 exit(
                     "Hostname {0} already exists twice in nodes".format(
@@ -495,7 +495,7 @@ class BaseConfig(ConfigParser, metaclass=ABCMeta):
         return self.node_d[hostname]
 
     def has_service(self, service):
-        for (hostname, service_list) in list(self.node_d.items()):
+        for hostname, service_list in list(self.node_d.items()):
             if service in service_list:
                 return True
         return False
@@ -503,7 +503,7 @@ class BaseConfig(ConfigParser, metaclass=ABCMeta):
     # test method, might want to make private or just move to test module
     def get_host_services(self):
         retval = []
-        for (hostname, service_list) in list(self.node_d.items()):
+        for hostname, service_list in list(self.node_d.items()):
             retval.append((hostname, " ".join(service_list)))
         retval.sort()
         return retval
@@ -511,7 +511,7 @@ class BaseConfig(ConfigParser, metaclass=ABCMeta):
     # test method, might want to make private or just move to test module
     def get_service_private_ips(self, service):
         retval = []
-        for (hostname, service_list) in list(self.node_d.items()):
+        for hostname, service_list in list(self.node_d.items()):
             if service in service_list:
                 retval.append(self.get_private_ip(hostname))
         retval.sort()
@@ -519,7 +519,7 @@ class BaseConfig(ConfigParser, metaclass=ABCMeta):
 
     def get_service_hostnames(self, service):
         retval = []
-        for (hostname, service_list) in list(self.node_d.items()):
+        for hostname, service_list in list(self.node_d.items()):
             if service in service_list:
                 retval.append(hostname)
         retval.sort()
@@ -529,7 +529,7 @@ class BaseConfig(ConfigParser, metaclass=ABCMeta):
     def get_non_proxy(self):
         retval = []
         proxy_ip = self.get_private_ip(self.get("general", "proxy_hostname"))
-        for (hostname, (private_ip, public_ip)) in list(
+        for hostname, (private_ip, public_ip) in list(
             self.get_hosts().items()
         ):
             if private_ip != proxy_ip:
@@ -539,7 +539,7 @@ class BaseConfig(ConfigParser, metaclass=ABCMeta):
 
     def get_private_ip_hostnames(self):
         retval = []
-        for (hostname, (private_ip, public_ip)) in list(
+        for hostname, (private_ip, public_ip) in list(
             self.get_hosts().items()
         ):
             retval.append((private_ip, hostname))
@@ -617,13 +617,13 @@ class BaseConfig(ConfigParser, metaclass=ABCMeta):
 
     def print_all(self):
         print("proxy_public_ip = ", self.proxy_public_ip())
-        for (name, val) in self.items("general"):
+        for name, val in self.items("general"):
             print(name, "=", val)
 
-        for (name, val) in self.items("ec2"):
+        for name, val in self.items("ec2"):
             print(name, "=", val)
 
-        for (name, val) in self.items("azure"):
+        for name, val in self.items("azure"):
             print(name, "=", val)
 
     def print_property(self, key):
