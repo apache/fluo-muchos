@@ -102,20 +102,32 @@ class AzureDeployConfig(BaseConfig):
             data_dirs.append(mount_root_actual)
             return data_dirs
 
-        # Check if using Lsv2 NVME temp storage for HDFS
-        lsv2_vm_disk_map = {
+        # Check if using Lsv2 or Lsv3 NVME temp storage for HDFS
+        nvme_vm_disk_map = {
             "Standard_L8s_v2": 1,
             "Standard_L16s_v2": 2,
             "Standard_L32s_v2": 4,
             "Standard_L48s_v2": 6,
             "Standard_L64s_v2": 8,
             "Standard_L80s_v2": 10,
+            "Standard_L8s_v3": 1,
+            "Standard_L16s_v3": 2,
+            "Standard_L32s_v3": 4,
+            "Standard_L48s_v3": 6,
+            "Standard_L64s_v3": 8,
+            "Standard_L80s_v3": 10,
+            "Standard_L8as_v3": 1,
+            "Standard_L16as_v3": 2,
+            "Standard_L32as_v3": 4,
+            "Standard_L48as_v3": 6,
+            "Standard_L64as_v3": 8,
+            "Standard_L80as_v3": 10,
         }
 
-        if num_disks == 0 and curr_vm_sku in lsv2_vm_disk_map.keys():
+        if num_disks == 0 and curr_vm_sku in nvme_vm_disk_map.keys():
             # pretend that we have N data disks
             # in this case those are NVME temp disks
-            num_disks = lsv2_vm_disk_map[curr_vm_sku]
+            num_disks = nvme_vm_disk_map[curr_vm_sku]
 
         # Persistent data disks attached to VMs
         range_var = num_disks + 1
