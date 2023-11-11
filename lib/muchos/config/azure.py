@@ -145,6 +145,11 @@ class AzureDeployConfig(BaseConfig):
 
     @ansible_host_var
     @is_valid(is_type(int))
+    def os_disk_size_gb(self):
+        return self.getint("azure", "os_disk_size_gb", fallback=None)
+
+    @ansible_host_var
+    @is_valid(is_type(int))
     def disk_size_gb(self):
         return self.getint("azure", "disk_size_gb")
 
@@ -190,10 +195,39 @@ class AzureDeployConfig(BaseConfig):
         return self.get("azure", "azure_image_reference")
 
     @ansible_host_var
+    @default("|||")
+    def azure_image_plan(self):
+        return self.get("azure", "azure_image_plan")
+
+    @ansible_host_var
+    @default("")
+    def azure_image_cloud_init_file(self):
+        return self.get("azure", "azure_image_cloud_init_file", fallback=None)
+
+    @ansible_host_var
     def azure_proxy_image_reference(self):
         apir = self.get("azure", "azure_proxy_image_reference", fallback=None)
         if apir is None or apir == "":
             apir = self.get("azure", "azure_image_reference")
+        return apir
+
+    @ansible_host_var
+    @default("|||")
+    def azure_proxy_image_plan(self):
+        apip = self.get("azure", "azure_proxy_image_plan", fallback=None)
+        if apip is None or apip == "":
+            apip = self.get("azure", "azure_image_plan")
+        return apip
+
+    @ansible_host_var
+    def azure_proxy_image_cloud_init_file(self):
+        apir = self.get(
+            "azure", "azure_proxy_image_cloud_init_file", fallback=None
+        )
+        if apir is None or apir == "":
+            apir = self.get(
+                "azure", "azure_image_cloud_init_file", fallback=None
+            )
         return apir
 
     @ansible_host_var(name="az_oms_integration_needed")

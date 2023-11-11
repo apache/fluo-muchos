@@ -1,7 +1,7 @@
 Tips for running Muchos for Azure under Ubuntu 18.04
 ----------------------------------------------------
 
-Muchos sets up a Centos cluster, but it does not have to run in Centos.  If you
+Muchos sets up a Centos cluster by default, but it does not have to run in Centos.  If you
 wish to run Muchos under Ubuntu 18.04 and have it set up an Azure cluster, then
 the following steps can get you on your way.
 

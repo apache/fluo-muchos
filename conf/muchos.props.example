@@ -127,14 +127,30 @@ use_multiple_vmss = False
 # Note that for multiple-VMSS deployments, this setting can be overridden at a 
 # per-VMSS level by specifying vmss_priority in the conf/azure_multiple_vmss_vars.yml file.
 vmss_priority = None
-# Azure image reference defined as a pipe-delimited string in the format offer|publisher|sku|version|
+# Azure image reference defined as a pipe-delimited string in the format offer|publisher|sku|version|image_id|
 # Please refer 'Launching an Azure cluster' section of the README before making changes
-azure_image_reference = CentOS|OpenLogic|7_9|latest|
-# Azure image reference defined as a pipe-delimited string in the format offer|publisher|sku|version|
+azure_image_reference = CentOS|OpenLogic|7_9|latest||
+# Image payment plan information - values required only if the image requires payment plan info.
+# The format of this configuration line is plan_name|product|publisher|
+azure_image_plan = |||
+# Cloud init file to use when creating VMs with the above image reference.
+# Currently, a CentOS 7.9 specific cloud-init file is used. In the future, different files can be used
+# as needed for different images like Alma / Rocky / Fedora.
+azure_image_cloud_init_file = cloud-init-centos79.yml
+# Azure image reference defined as a pipe-delimited string in the format offer|publisher|sku|version|image_id|
 # This is the image that will be used for the proxy machine (if specified by azure_proxy_host). If
 # this is not set, then the value of azure_image_reference will be used on the proxy.
 # Please refer 'Launching an Azure cluster' section of the README before making changes
-#azure_proxy_image_reference = CentOS|OpenLogic|7_9|latest|
+#azure_proxy_image_reference = CentOS|OpenLogic|7_9|latest||
+# Proxy image payment plan information - required only if the proxy image requires payment plan info.
+# If this is not set, the value of azure_image_plan will be used on the proxy.
+# The format of this configuration line is plan_name|product|publisher|
+# azure_proxy_image_plan = |||
+# Optional cloud init file to use when creating VMs with the above proxy image reference. If this is not set,
+# the value of azure_image_cloud_init_file will be used.
+# azure_proxy_image_cloud_init_file =
+# Optional OS disk size in GB. If not specified, the size of the OS disk will be as defined in the VM image
+# os_disk_size_gb = 48
 # Size of the cluster to provision.
 # A virtual machine scale set (VMSS) with these many VMs will be created.
 # The minimum allowed size for this is 3 nodes for non-HA & 4 nodes for HA setup

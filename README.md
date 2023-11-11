@@ -165,13 +165,13 @@ Under the `azure` section, edit following values as per your configuration:
 * `subnet` to provide a name for the subnet within which the cluster resources will be deployed
 * `use_multiple_vmss` allows you to configure VMs with different CPU, memory, disk configurations for leaders and workers. To
   know more about this feature, please follow the [doc](docs/azure-multiple-vmss.md).
-* `azure_image_reference` allows you to specify the CentOS image SKU in the format as shown below. To configure
-  CentOS 8.x, please follow [these steps](docs/azure-image-reference.md).
+* `azure_image_reference` allows you to specify the Azure image SKU in the format as shown below.
   ```bash
-  offer|publisher|sku|version|
-  Ex: CentOS|OpenLogic|7_9|latest|
+  offer|publisher|sku|version|image_id|
+  Ex: CentOS|OpenLogic|7_9|latest||
   ```
-* `azure_proxy_image_reference` allows you to specify the CentOS image SKU that will be used for the optional proxy machine.
+  For more information on using other images, refer to [Azure images](docs/azure-image-reference.md).
+* `azure_proxy_image_reference` allows you to specify the Azure image SKU that will be used for the optional proxy machine.
   If this property is not specified, then the value of `azure_image_reference` will be used instead.
 * `numnodes` to change the cluster size in terms of number of nodes deployed
 * `data_disk_count` to specify how many persistent data disks are attached to each node and will be used by HDFS.

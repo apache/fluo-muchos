@@ -33,12 +33,28 @@
     luns_dict: "{{ luns_dict | default ([]) + [{ 'lun': item, 'disk_size_gb': disk_size_gb, 'managed_disk_type': data_disk_sku, 'caching': data_disk_caching } ] }}"
   with_sequence: start=0 end={{ data_disk_count-1 if data_disk_count > 0 else 0 }}
 
+- name: "Create image plan related facts"
+  set_fact:
+    azure_image_plan_name: "{{ azure_image_plan.split('|')[0] }}"
+    azure_image_plan_dict:
+      name: "{{ azure_image_plan.split('|')[0] }}"
+      product: "{{ azure_image_plan.split('|')[1] }}"
+      publisher: "{{ azure_image_plan.split('|')[2] }}"
+
 - name: Set single placement group to correct value
   set_fact:
     single_placement_group: False
   when: numnodes > 100
 
 - name: Create Scale Set
+  vars:
+    image_offer: "{{ azure_image_reference.split('|')[0] }}"
+    image_publisher: "{{ azure_image_reference.split('|')[1] }}"
+    image_sku: "{{ azure_image_reference.split('|')[2] }}"
+    image_version: "{{ azure_image_reference.split('|')[3] }}"
+    image_id: "{{ azure_image_reference.split('|')[4] }}"
+    accnet_capable: "{{ True if vm_sku in accnet_capable_skus else False }}"
+    osdisk_sku: "{{ 'Premium_LRS' if vm_sku in premiumio_capable_skus else 'Standard_LRS' }}"
   azure.azcollection.azure_rm_virtualmachinescaleset:
     resource_group: "{{ resource_group }}"
     location: "{{ location }}"
@@ -56,6 +72,7 @@
     upgrade_policy: Manual
     tier: Standard
     managed_disk_type: "{{ osdisk_sku }}"
+    os_disk_size_gb: "{{ os_disk_size_gb if os_disk_size_gb else omit }}"
     os_disk_caching: ReadWrite
     enable_accelerated_networking: "{{ accnet_capable }}"
     single_placement_group: "{{ single_placement_group | default(omit) }}"
@@ -64,15 +81,10 @@
       publisher: "{{ image_publisher if image_publisher else omit }}"
       sku: "{{ image_sku if image_sku else omit }}"
       version: "{{ image_version if image_version else omit }}"
+      id: "{{ image_id if image_id else omit }}"
+    plan: "{{ azure_image_plan_dict if azure_image_plan_name else omit }}"
     data_disks: "{{ luns_dict if data_disk_count > 0 else omit }}"
-    custom_data: "{{ lookup('file', 'cloud-init.yml') }}"
-  vars:
-    image_offer: "{{ azure_image_reference.split('|')[0] }}"
-    image_publisher: "{{ azure_image_reference.split('|')[1] }}"
-    image_sku: "{{ azure_image_reference.split('|')[2] }}"
-    image_version: "{{ azure_image_reference.split('|')[3] }}"
-    accnet_capable: "{{ True if vm_sku in accnet_capable_skus else False }}"
-    osdisk_sku: "{{ 'Premium_LRS' if vm_sku in premiumio_capable_skus else 'Standard_LRS' }}"
+    custom_data: "{{ lookup('file', azure_image_cloud_init_file) if azure_image_cloud_init_file }}"
   tags: create_vmss
 
 # SECTION 4: Automatically populate entries in the hosts file and in the muchos.props file, based on the VMSS node details
