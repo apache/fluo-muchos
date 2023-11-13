@@ -7,7 +7,7 @@ The sections below describe the various image related configurations in `muchos.
 ## azure_image_reference
 `azure_image_reference` is a pipe-delimited string in the format `offer|publisher|sku|version|image_id|`. The trailing pipe character is intentional.
 
-* For Azure Marketplace images, the values for the fields `offer|publisher|sku|version` can be obtained from the Azure portal, or by using the Azure CLI commands as shown later. For exmaple, the CentOS 7.9 image currently used as the default in Muchos is specified as:
+* For Azure Marketplace images, the values for the fields `offer|publisher|sku|version` can be obtained from the Azure portal, or by using the Azure CLI commands as shown later. For example, the CentOS 7.9 image currently used as the default in Muchos is specified as:
 
     `CentOS|OpenLogic|7_9|latest||`
 
