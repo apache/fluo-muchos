@@ -69,7 +69,7 @@
   set_fact:
     InstanceVolumes: "{{ InstanceVolumesManual if  instance_volumes_input.split('|')[0].split(',') ==  [''] else InstanceVolumesAuto }}"
 
-- name: Update instance_volumes_adls  in muchos.props
+- name: Update instance_volumes_adls in muchos.props
   lineinfile:
     path: "{{ deploy_path }}/conf/muchos.props"
     regexp: '^instance_volumes_adls\s*=\s*|^[#]instance_volumes_adls\s*=\s*'
@@ -77,21 +77,14 @@
 
 # Not registering variable because storage values are not visible immediately
 - name: Create ADLS Gen2 storage account using REST API
-  azure_rm_resource:
-    resource_group: "{{ resource_group }}"
-    provider: Storage
-    resource_type: storageAccounts
-    resource_name: "{{ item.split('@')[1].split('.')[0] }}"
-    api_version: "2019-04-01"
-    idempotency: yes
+  azure.azcollection.azure_rm_storageaccount:
     state: present
-    body:
-      sku:
-        name: "{{ adls_storage_type }}"
-      kind: StorageV2
-      properties:
-        isHnsEnabled: yes
-      location: "{{ location }}"
+    resource_group: "{{ resource_group }}"
+    name: "{{ item.split('@')[1].split('.')[0] }}"
+    type: "{{ adls_storage_type }}"
+    kind: "StorageV2"
+    is_hns_enabled: True
+    location: "{{ location }}"
   loop: "{{ InstanceVolumes }}"
 
 # Creating User Assigned identity with vmss_name suffixed by ua-msi if not specified in muchos.props

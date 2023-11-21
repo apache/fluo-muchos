@@ -24,6 +24,7 @@
   filesystem:
     fstype: xfs
     dev: "{{ item.path }}"
+    resizefs: yes
   with_items: "{{ files_matched.files }}"
 - name: Get UUID
   command: "blkid {{ item.path }} -s UUID -o value"
