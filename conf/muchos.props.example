@@ -46,10 +46,10 @@ accumulo_version = 2.1.2
 download_software = True
 # Install Hub (for GitHub)
 install_hub = True
-# The java package to install
-java_package=java-1.8.0-openjdk-devel
-# The package to use for java 11
-# java_package=java-11-openjdk-devel
+# The java package to install - by default OpenJDK 11. If you need to use 1.8, please change this.
+java_package=java-11-openjdk-devel
+# The package to use for java 1.8
+# java_package=java-1.8.0-openjdk-devel
 # Please read the High-Availability section of the README before switching to 'True'
 hdfs_ha = False
 # Give a logical name for the cluster, all one word no special characters. Required to support HDFS HA.
