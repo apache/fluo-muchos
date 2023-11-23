@@ -32,15 +32,14 @@ class EC2Type:
         self.has_nvme = has_nvme
 
 
-AMI_HELP_MSG = """PLEASE NOTE - If you have accepted the software terms for CentOS 7 and still get an error,
-this could be due to CentOS releasing new images of CentOS 7.  When this occurs, the old images
-are no longer available to new users.  If you think this is the case, go to the CentOS 7 product
-page on AWS Marketplace at the URL below to find the latest AMI:
+AMI_HELP_MSG = """PLEASE NOTE - If you have accepted the software terms for the selected AMI and still get an error,
+this could be due to the publisher releasing new images of that OS. When this occurs, the old images
+are no longer available to new users. You will then need to visit the publisher's page and find the latest AMI ID
+for your EC2 region. This should be used to set the 'aws_ami' property in your muchos.props.
+After setting the 'aws_ami' property, run the launch command again.
 
-    https://aws.amazon.com/marketplace/pp/B00O7WM7QW
-
-On the product page, find the latest AMI ID for your EC2 region. This should be used to set the 'aws_ami'
-property in your muchos.props.  After setting the 'aws_ami' property, run the launch command again.
+The Fedora Project also makes available AMIs for their Fedora Cloud releases. The list of Fedora Cloud AMIs
+can be viewed at https://fedoraproject.org/cloud/download and clicking on the AWS link."
 """  # noqa
 
 instance_types = {

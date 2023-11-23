@@ -202,7 +202,7 @@ class AzureDeployConfig(BaseConfig):
         return self.get("azure", "azure_fileshare_password")
 
     @ansible_host_var
-    @default("CentOS|OpenLogic|7_9|latest|")
+    @default("almalinux-x86_64|almalinux|9-gen2|latest||")
     def azure_image_reference(self):
         return self.get("azure", "azure_image_reference")
 

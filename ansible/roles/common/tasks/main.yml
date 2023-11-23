@@ -21,7 +21,7 @@
   retries: 10
   delay: 15
   until: epelresult is not failed
-  when: ansible_facts['distribution'] == "CentOS"
+  when: ansible_facts['distribution'] in ["CentOS", "AlmaLinux", "Rocky"]
 - name: "install packages"
   yum:
     name:
@@ -50,7 +50,7 @@
   delay: 15
   until: yumresult_centos7 is not failed
   when: (ansible_facts['distribution'] == "CentOS") and (ansible_facts['distribution_major_version'] == "7")
-- name: "Install packages specific to CentOS 8"
+- name: "Install packages specific to AlmaLinux 8 / 9, Rocky Linux 8 / 9"
   yum:
     name:
       - python3-policycoreutils
@@ -58,11 +58,11 @@
       - collectd-write_http
       - make
     state: present
-  register: yumresult_centos8
+  register: yumresult_os89
   retries: 10
   delay: 15
-  until: yumresult_centos8 is not failed
-  when: (ansible_facts['distribution'] == "CentOS") and (ansible_facts['distribution_major_version'] == "8")
+  until: yumresult_os89 is not failed
+  when: (ansible_facts['distribution'] in ["AlmaLinux", "Rocky"]) and (ansible_facts['distribution_major_version'] in ["8", "9"])
 - name: "Install packages specific to Fedora"
   yum:
     name:
@@ -76,6 +76,13 @@
   delay: 15
   until: yumresult_fedora is not failed
   when: ansible_facts['distribution'] == "Fedora"
+# Disable firewalld on AlmaLinux 9
+- name: "Stop and disable firewalld on AlmaLinux 9"
+  service:
+    name: "firewalld"
+    state: stopped
+    enabled: false
+  when: (ansible_facts['distribution'] == "AlmaLinux") and (ansible_facts['distribution_major_version'] == "9")
 - name: "get exact jdk folder path"
   find:
     file_type: directory

@@ -1,9 +1,9 @@
 Tips for running Muchos for Azure under Ubuntu 18.04
 ----------------------------------------------------
 
-Muchos sets up a Centos cluster by default, but it does not have to run in Centos.  If you
-wish to run Muchos under Ubuntu 18.04 and have it set up an Azure cluster, then
-the following steps can get you on your way.
+For Azure, Muchos sets up an AlmaLinux 9 based cluster by default, but Muchos itself can
+be run on other flavors of Linux. If you wish to run Muchos under Ubuntu 18.04 and have it
+set up an Azure cluster, then the following steps can get you on your way.
 
 ```bash
 # Install Azure CLI.  See the Azure documentation.
@@ -17,10 +17,10 @@ sudo apt install python3-pip
 sudo pip3 install -r lib/requirements.txt
 # Current versions of Ansible separate out the Azure-specific modules into a
 # separate "collection". To install that, and associated pre-requisites, a helper
-# script has been provided. Please be sure to execute this script:
+# script has been provided. Please be sure to execute these scripts:
 ./scripts/install-ansible-for-azure
+./scripts/install-ansible-collections
 ```
 
-A virtual python environment is not needed in Ubuntu.  The instructions that
-mention that are targeted for Centos 7.  The version of Python 3 and pip3 that
-ship with Ubuntu 18.04 suffice.
+A virtual python environment is not needed in Ubuntu, but can be useful considering
+the variety of dependencies installed locally for Azure.

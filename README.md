@@ -110,13 +110,7 @@ set by the `cluster.username` property.
 
 ### Configuring the AMI
 
-You might also need to configure the `aws_ami` property in [muchos.props]. Muchos by default uses a free
-CentOS 7 image that is hosted in the AWS marketplace but managed by the
-CentOS organization. If you have never used this image in EC2 before, you will need to go to the
-[CentOS 7 product page][centos7] to accept the software terms. If this is not done, you will get an
-error when you try to launch your cluster. By default, the `aws_ami` property is set to an AMI in `us-east-1`.
-You will need to changes this value if a newer image has been released or if you are running in different region
-than `us-east-1`.
+You might also need to configure the `aws_ami` property in [muchos.props]. Muchos by default uses a Fedora 35 image for EC2. By default, the `aws_ami` property is set to this Fedora 35 AMI in `us-east-1`. You will need to change this value if a newer image has been released or if you are running in different region than `us-east-1`.
 
 ### Launching the cluster
 
@@ -144,11 +138,8 @@ this file will be appended on each node to the `~/.ssh/authorized_keys` file for
 `cluster.username` property.  You will also need to ensure you have authenticated to Azure and set the target
 subscription using the [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/manage-azure-subscriptions-azure-cli?view=azure-cli-latest).
 
-Muchos by default uses a CentOS 7 image that is hosted in the Azure marketplace. The Azure Linux Agent is already
+Muchos by default uses an AlmaLinux 9 image that is hosted in the Azure marketplace. The Azure Linux Agent is already
 pre-installed on the Azure Marketplace images and is typically available from the distribution's package repository.
-Azure requires that the publishers of the endorsed Linux distributions regularly update their images in the Azure
-Marketplace with the latest patches and security fixes, at a quarterly or faster cadence. Updated images in the Azure
-Marketplace are available automatically to customers as new versions of an image SKU.
 
 Edit the values in the sections within [muchos.props] as below
 Under the `general` section, edit following values as per your configuration
@@ -168,7 +159,7 @@ Under the `azure` section, edit following values as per your configuration:
 * `azure_image_reference` allows you to specify the Azure image SKU in the format as shown below.
   ```bash
   offer|publisher|sku|version|image_id|
-  Ex: CentOS|OpenLogic|7_9|latest||
+  Ex: almalinux-x86_64|almalinux|9-gen2|latest||
   ```
   For more information on using other images, refer to [Azure images](docs/azure-image-reference.md).
 * `azure_proxy_image_reference` allows you to specify the Azure image SKU that will be used for the optional proxy machine.
@@ -373,7 +364,6 @@ Muchos is powered by the following projects:
  * [azure-cli] - The Azure CLI is a command-line tool for managing Azure resources.
  * [ansible-azure] - Ansible includes a suite of modules for interacting with Azure Resource Manager.
 
-[centos7]: https://aws.amazon.com/marketplace/pp/B00O7WM7QW
 [aws-config]: http://docs.aws.amazon.com/cli/latest/userguide/cli-config-files.html
 [awscli]: https://docs.aws.amazon.com/cli/latest/userguide/installing.html
 [awscli-config]: http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-quick-configuration
