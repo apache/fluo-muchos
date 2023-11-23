@@ -76,12 +76,12 @@
     line: "instance_volumes_adls = {{ InstanceVolumes|join(',') }}"
 
 # Not registering variable because storage values are not visible immediately
-- name: Create ADLS Gen2 storage account using REST API
+- name: Create ADLS Gen2 storage account
   azure.azcollection.azure_rm_storageaccount:
     state: present
     resource_group: "{{ resource_group }}"
     name: "{{ item.split('@')[1].split('.')[0] }}"
-    type: "{{ adls_storage_type }}"
+    account_type: "{{ adls_storage_type }}"
     kind: "StorageV2"
     is_hns_enabled: True
     location: "{{ location }}"
