@@ -60,16 +60,13 @@
     enable_accelerated_networking: "{{ True if azure_proxy_host_vm_sku in accnet_capable_skus else False }}"
   when: azure_proxy_host is defined and azure_proxy_host and azure_proxy_host != None
 
-- name: "Create image plan related facts"
-  set_fact:
+- name: Create azure proxy virtual machine
+  vars:
     azure_proxy_image_plan_name: "{{ azure_proxy_image_plan.split('|')[0] }}"
     azure_proxy_image_plan_dict:
       name: "{{ azure_proxy_image_plan.split('|')[0] }}"
       product: "{{ azure_proxy_image_plan.split('|')[1] }}"
       publisher: "{{ azure_proxy_image_plan.split('|')[2] }}"
-
-- name: Create azure proxy virtual machine
-  vars:
     image_offer: "{{ azure_proxy_image_reference.split('|')[0] }}"
     image_publisher: "{{ azure_proxy_image_reference.split('|')[1] }}"
     image_sku: "{{ azure_proxy_image_reference.split('|')[2] }}"
