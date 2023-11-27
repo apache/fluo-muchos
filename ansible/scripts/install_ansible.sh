@@ -16,7 +16,6 @@
 # limitations under the License.
 #
 
-
 bin=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 base_dir=$( cd "$( dirname "$bin" )" && pwd )
 
@@ -24,16 +23,23 @@ set -e
 
 # enable yum epel repo
 os_id=$(grep '^ID=' /etc/os-release | cut -d'=' -f2 | tr -d '"')
-if [[ $os_id = "centos" ]]; then
+if [[ $os_id = "centos" || $os_id = "almalinux" || $os_id = "rocky" ]]; then
   is_installed_epel_release="rpm -q --quiet epel-release"
   install_epel_release="sudo yum install -q -y epel-release"
   for i in {1..10}; do ($is_installed_epel_release || $install_epel_release) && break || sleep 15; done
 fi
 
 # install ansible
-is_installed_ansible="rpm -q --quiet ansible"
-install_ansible="sudo yum install -q -y ansible"
-for i in {1..10}; do ($is_installed_ansible || $install_ansible) && break || sleep 15; done
+if [[ $os_id = "centos" ]]; then
+  is_installed_ansible="rpm -q --quiet ansible"
+  install_ansible="sudo yum install -q -y ansible"
+  for i in {1..10}; do ($is_installed_ansible || $install_ansible) && break || sleep 15; done
+fi
+
+if [[ $os_id = "fedora" || $os_id = "almalinux" || $os_id = "rocky" ]]; then
+  python3 -m ensurepip
+  pip3 install --quiet --user ansible
+fi
 
 # setup user-specific ansible configuration
 if [[ ! -h ~/.ansible.cfg ]]; then
@@ -44,6 +50,8 @@ fi
 
 # setup ansible hosts
 if [[ ! -h /etc/ansible/hosts ]]; then
+  # If Ansible was installed using Python, the /etc/ansible folder needs to be created manually
+  sudo mkdir -p /etc/ansible
   cd /etc/ansible
   sudo rm -f hosts
   sudo ln -s $base_dir/conf/hosts hosts
