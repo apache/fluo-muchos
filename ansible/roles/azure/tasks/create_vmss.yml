@@ -33,14 +33,6 @@
     luns_dict: "{{ luns_dict | default ([]) + [{ 'lun': item, 'disk_size_gb': disk_size_gb, 'managed_disk_type': data_disk_sku, 'caching': data_disk_caching } ] }}"
   with_sequence: start=0 end={{ data_disk_count-1 if data_disk_count > 0 else 0 }}
 
-- name: "Create image plan related facts"
-  set_fact:
-    azure_image_plan_name: "{{ azure_image_plan.split('|')[0] }}"
-    azure_image_plan_dict:
-      name: "{{ azure_image_plan.split('|')[0] }}"
-      product: "{{ azure_image_plan.split('|')[1] }}"
-      publisher: "{{ azure_image_plan.split('|')[2] }}"
-
 - name: Set single placement group to correct value
   set_fact:
     single_placement_group: False
@@ -48,6 +40,11 @@
 
 - name: Create Scale Set
   vars:
+    azure_image_plan_name: "{{ azure_image_plan.split('|')[0] }}"
+    azure_image_plan_dict:
+      name: "{{ azure_image_plan.split('|')[0] }}"
+      product: "{{ azure_image_plan.split('|')[1] }}"
+      publisher: "{{ azure_image_plan.split('|')[2] }}"
     image_offer: "{{ azure_image_reference.split('|')[0] }}"
     image_publisher: "{{ azure_image_reference.split('|')[1] }}"
     image_sku: "{{ azure_image_reference.split('|')[2] }}"
