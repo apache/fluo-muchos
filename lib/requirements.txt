@@ -1,4 +1,4 @@
 flake8==6.1.0
-ansible-core==2.15.5
+ansible-core==2.15.9
 ansible-lint==6.21.1
 nose2==0.14.0
