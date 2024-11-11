@@ -33,8 +33,8 @@ def test_ec2_cluster():
     )
     assert c.checksum("accumulo") == (
         "sha512:"
-        "27778c1c3f1d88ab128649fd0671d3be97ba052216ab43f1169395960e8c7d16"
-        "375a51f940c2262437b836ea31f83f73f08f7a3d8cadda443e5e8bb31d9b23c5"
+        "1a27a144dc31f55ccc8e081b6c1bc6cc0362a8391838c53c166cb45291ff8f35"
+        "867fd8e4729aa7b2c540f8b721f8c6953281bf589fc7fe320e4dc4d20b87abc4"
     )
     assert c.get("ec2", "default_instance_type") == "m5d.large"
     assert c.get("ec2", "worker_instance_type") == "m5d.large"

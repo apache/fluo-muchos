@@ -115,9 +115,11 @@ AZURE_VALIDATIONS = {
             )
             or all(
                 [
-                    vmss.get("sku") in config.spot_capable_skus()
-                    if vmss.get("vmss_priority") == "Low"
-                    else True
+                    (
+                        vmss.get("sku") in config.spot_capable_skus()
+                        if vmss.get("vmss_priority") == "Low"
+                        else True
+                    )
                     for vmss in config.azure_multiple_vmss_vars.get(
                         "vars_list", []
                     )
@@ -161,9 +163,11 @@ AZURE_VALIDATIONS = {
             lambda config, client: not config.use_multiple_vmss()
             or all(
                 [
-                    vmss.get("sku") in config.premiumio_capable_skus()
-                    if vmss.get("data_disk_sku") == "Premium_LRS"
-                    else True
+                    (
+                        vmss.get("sku") in config.premiumio_capable_skus()
+                        if vmss.get("data_disk_sku") == "Premium_LRS"
+                        else True
+                    )
                     for vmss in config.azure_multiple_vmss_vars.get(
                         "vars_list", []
                     )
