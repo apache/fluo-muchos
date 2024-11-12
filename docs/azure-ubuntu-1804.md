@@ -10,7 +10,7 @@ set up an Azure cluster, then the following steps can get you on your way.
 # https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-apt?view=azure-cli-latest
 
 # Install Ansible Azure for Python 3.  The main reason these tips were written
-# was to save you time on the following steps.  Muchos is tested with Python 3.9 and above.
+# was to save you time on the following steps.  Muchos is tested with Python 3.11 and above.
 # If python-pip and pip were installed and used, those would go against Python 2
 # and would not work.
 sudo apt install python3-pip

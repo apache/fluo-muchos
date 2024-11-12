@@ -17,8 +17,8 @@ The sections below describe the various image related configurations in `muchos.
 
   The Rocky Linux images in Azure require plan information to be supplied. Currently, the Rocky Linux 8 image has been verified to work correctly. For using Rocky Linux 8 instead of Alma Linux, here is what you can use in `muchos.props`. The image plan information is mandatory for this image:
 
-    * `azure_image_reference = rockylinux|erockyenterprisesoftwarefoundationinc1653071250513|free|latest||`
-    * `azure_image_plan = free|rockylinux|erockyenterprisesoftwarefoundationinc1653071250513|`
+    * `azure_image_reference = rockylinux-x86_64|resf|8-base|latest||`
+    * `azure_image_plan = 8-base|rockylinux-x86_64|resf|`
 
   In addition, you might need to manually view and accept the terms of use for the Rocky Linux image, before being able to use it within Muchos. See the `azure_image_plan` section below for details.
 
@@ -39,11 +39,11 @@ The sections below describe the various image related configurations in `muchos.
 ## azure_image_plan
 `azure_image_plan` is only needed when working with images which require payment plan information to be supplied when a VM or VMSS is being created using that image. The format of this configuration is `plan_name|product|publisher|`. Plan information for the images published by a given publisher can easily be queried by using the Azure CLI. For example, to query the plan information for a Rocky Linux image in Azure:
 
-   `az vm image show --urn "erockyenterprisesoftwarefoundationinc1653071250513:rockylinux:free:latest" --query "plan"`
+   `az vm image show --urn "resf:rockylinux-x86_64:8-base:latest" --query "plan"`
 
 Then using that information, `azure_image_plan` can be configured as below in muchos.props:
 
-   `azure_image_plan = free|rockylinux|erockyenterprisesoftwarefoundationinc1653071250513|`
+   `azure_image_plan = 8-base|rockylinux-x86_64|resf|`
 
 More information about purchase plans, and accepting terms, etc. is available [here](https://learn.microsoft.com/en-us/azure/virtual-machines/linux/cli-ps-findimage#check-the-purchase-plan-information).
 

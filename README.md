@@ -28,12 +28,12 @@ Check out [Uno] for setting up Accumulo or Fluo on a single machine.
 Muchos requires the following common components for installation and setup:
 
 * Python 3 with a virtual environment setup.
-Create a Python 3 environment and switch to it. (The CI tests using Python 3.9,
+Create a Python 3 environment and switch to it. (The CI tests using Python 3.11,
 but this should work in later versions as well. If you encounter problems,
 please file an issue).
 ```bash
 cd ~
-python3.9 -m venv env
+python3.11 -m venv env
 source env/bin/activate
 ```
 * `ssh-agent` installed and running and ssh-agent forwarding.  Note that this may

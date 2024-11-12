@@ -51,6 +51,7 @@
     resource_group: "{{ resource_group }}"
     location: "{{ location }}"
     name: "{{ vmss_name }}-{{ item.name_suffix }}"
+    orchestration_mode: "Uniform"
     vm_size: "{{ item.sku }}"
     priority: "{{ item.vmss_priority | default('None') }}"
     admin_username: "{{ cluster_user }}"

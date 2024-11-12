@@ -261,14 +261,16 @@ class VmssCluster(ExistingCluster):
                                     "{0}dir_ordinal{1}".format(
                                         dirtype, ordinal
                                     ),
-                                    0
-                                    if len(
-                                        curr_default_dirs
-                                        if dirtype == "default"
-                                        else curr_worker_dirs
-                                    )
-                                    < ordinal + 1
-                                    else ordinal,
+                                    (
+                                        0
+                                        if len(
+                                            curr_default_dirs
+                                            if dirtype == "default"
+                                            else curr_worker_dirs
+                                        )
+                                        < ordinal + 1
+                                        else ordinal
+                                    ),
                                 ),
                                 file=vmss_file,
                             )
