@@ -75,6 +75,9 @@
     regexp: '^instance_volumes_adls\s*=\s*|^[#]instance_volumes_adls\s*=\s*'
     line: "instance_volumes_adls = {{ InstanceVolumes|join(',') }}"
 
+# Create (or set) the storage account. Public network access is allowed at this
+# stage so that storage container / ADLS Gen2 filesystem can be created later.
+# Public network access is disabled in a later step.
 # Not registering variable because storage values are not visible immediately
 - name: Create ADLS Gen2 storage account
   azure.azcollection.azure_rm_storageaccount:
@@ -85,6 +88,12 @@
     kind: "StorageV2"
     is_hns_enabled: True
     location: "{{ location }}"
+    allow_shared_key_access: False
+    allow_blob_public_access: False
+    default_to_o_auth_authentication: True
+    public_network_access: "Enabled"
+    network_acls:
+      default_action: "Allow"
   loop: "{{ InstanceVolumes }}"
 
 # Creating User Assigned identity with vmss_name suffixed by ua-msi if not specified in muchos.props
@@ -189,10 +198,24 @@
     resource_group: "{{ resource_group }}"
     storage_account_name: "{{ item.split('@')[1].split('.')[0] }}"
     container: "{{ item.split('@')[0].split('://')[1] }}"
+    auth_mode: "login"
   retries: 20
   delay: 30
   register: createfsresult
   until: createfsresult is succeeded and ((not createfsresult.changed) or (createfsresult.changed and createfsresult.container|length > 0))
+  loop: "{{ InstanceVolumes }}"
+
+- name: Only allow VNET to access the storage account
+  azure.azcollection.azure_rm_storageaccount:
+    resource_group: "{{ resource_group }}"
+    name: "{{ item.split('@')[1].split('.')[0] }}"
+    public_network_access: "Enabled"
+    network_acls:
+      default_action: "Deny"
+      bypass: "None"
+      virtual_network_rules:
+        - id: "/subscriptions/{{ azure_subscription_id }}/resourceGroups/{{ resource_group }}/providers/Microsoft.Network/virtualNetworks/{{ vnet }}/subnets/{{ subnet }}"
+          action: "Allow"
   loop: "{{ InstanceVolumes }}"
 
 # Retrieve tenantId  for core-site.xml

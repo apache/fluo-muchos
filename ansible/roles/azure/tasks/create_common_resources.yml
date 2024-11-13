@@ -63,3 +63,7 @@
     virtual_network_name: "{{ vnet }}"
     name: "{{ subnet }}"
     address_prefix_cidr: "{{ subnet_cidr }}"
+    service_endpoints:
+      - service: "Microsoft.Storage"
+        locations:
+          - "{{ location }}"
