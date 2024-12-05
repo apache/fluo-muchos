@@ -76,13 +76,6 @@
   delay: 15
   until: yumresult_fedora is not failed
   when: ansible_facts['distribution'] == "Fedora"
-# Disable firewalld on AlmaLinux 9
-- name: "Stop and disable firewalld on AlmaLinux 9"
-  service:
-    name: "firewalld"
-    state: stopped
-    enabled: false
-  when: (ansible_facts['distribution'] == "AlmaLinux") and (ansible_facts['distribution_major_version'] == "9")
 - name: "get exact jdk folder path"
   find:
     file_type: directory

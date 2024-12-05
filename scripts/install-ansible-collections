@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-ansible-galaxy collection install ansible.posix==1.5.4
+ansible-galaxy collection install ansible.posix==2.0.0
